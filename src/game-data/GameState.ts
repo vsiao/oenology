@@ -2,8 +2,10 @@ export default interface GameState {
     players: Record<string, PlayerState>;
 }
 
+export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
 export interface PlayerState {
     id: string;
+    color: PlayerColor;
     availableWorkers: {
         grandeWorker?: true;
         worker1?: true;

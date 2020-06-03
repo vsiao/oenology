@@ -7,7 +7,7 @@ interface Props {
 }
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
-    return <div className="SidebarPlayer">
+    return <div className={`SidebarPlayer SidebarPlayer--${props.player.color}`}>
         <div className="SidebarPlayer-header">
             <span className="SidebarPlayer-playerName">{props.player.id}</span>
             <ul className="SidebarPlayer-cards">

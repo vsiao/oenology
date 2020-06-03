@@ -1,10 +1,11 @@
 import { createStore } from "redux";
-import GameState, { PlayerState } from "./GameState";
+import GameState, { PlayerState, PlayerColor } from "./GameState";
 import { GameAction } from "./actionCreators";
 
-const initPlayer = (id: string): PlayerState => {
+const initPlayer = (id: string, color: PlayerColor): PlayerState => {
     return {
         id,
+        color,
         availableWorkers: {},
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],
@@ -21,8 +22,12 @@ const initPlayer = (id: string): PlayerState => {
 const initGame = (): GameState => {
     return {
         players: {
-            stfy: initPlayer("stfy"),
-            viny: initPlayer("viny"),
+            stfy: initPlayer("stfy", "purple"),
+            viny: initPlayer("viny", "orange"),
+            linz: initPlayer("linz", "yellow"),
+            poofytoo: initPlayer("poofytoo", "green"),
+            srir: initPlayer("srir", "blue"),
+            thedrick: initPlayer("thedrick", "red"),
         }
     };
 };
