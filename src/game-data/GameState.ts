@@ -2,7 +2,8 @@ export default interface GameState {
     players: Record<string, PlayerState>;
 }
 
-interface PlayerState {
+export interface PlayerState {
+    id: string;
     availableWorkers: {
         grandeWorker?: true;
         worker1?: true;

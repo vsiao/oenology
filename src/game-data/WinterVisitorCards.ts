@@ -10,7 +10,7 @@ import {
     payCoins,
     trainWorker,
     promptToMakeWine,
-} from "./Actions";
+} from "./actionCreators";
 import { ThunkDispatch } from "redux-thunk";
 
 type GameDispatch = ThunkDispatch<GameState, undefined, GameAction>;
