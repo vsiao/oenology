@@ -61,10 +61,11 @@
 .SidebarPlayer-recurringRevenue,
 .SidebarPlayer-coins,
 .SidebarPlayer-victoryPoints {
-    align-items: center;;
+    align-items: center;
     border-radius: 12px;
     box-sizing: border-box;
     display: inline-flex;
+    font-weight: 600;
     height: 24px;
     justify-content: center;
     margin-left: 4px;
@@ -76,11 +77,11 @@
 }
 .SidebarPlayer-coins {
     background: gold;
+    border: 2px solid goldenrod;
 }
 .SidebarPlayer-victoryPoints {
     background: white;
     border: 2px solid blueviolet;
-    font-weight: 600;
 }
 
 .SidebarPlayer-structures {

@@ -1,8 +1,12 @@
+import { WinterVisitorId } from "./winterVisitorCards";
+
 export default interface GameState {
     players: Record<string, PlayerState>;
 }
 
 export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
+export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+
 export interface PlayerState {
     id: string;
     color: PlayerColor;
@@ -14,14 +18,12 @@ export interface PlayerState {
         worker4?: true;
         worker5?: true;
     };
-    crushPad: {
-        red: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-        white: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-    };
-    cellar: {
-        red: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-        white: [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
-        rose: [boolean, boolean, boolean, boolean, boolean, boolean];
-        sparkling: [boolean, boolean, boolean];
-    };
+    cardsInHand: {
+        vine: unknown[];
+        summerVisitor: unknown[];
+        order: unknown[];
+        winterVisitor: WinterVisitorId[];
+    },
+    crushPad: Record<"red" | "white", TokenMap>;
+    cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
 }

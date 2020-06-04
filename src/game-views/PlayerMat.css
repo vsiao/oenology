@@ -1,0 +1,79 @@
+.PlayerMat {
+    background: #282c34;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 0 0 12px;
+    grid-area: bottom;
+}
+
+.PlayerMat-header {
+    align-items: center;
+    display: flex;
+}
+
+.PlayerMat-recurringRevenue,
+.PlayerMat-coins,
+.PlayerMat-victoryPoints {
+    align-items: center;
+    border-radius: 16px;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-weight: 600;
+    height: 32px;
+    margin-right: 8px;
+    justify-content: center;
+    width: 32px;
+}
+
+.PlayerMat-recurringRevenue {
+    border: 2px dashed #ccc;
+    color: #ccc;
+}
+.PlayerMat-coins {
+    background: gold;
+    border: 2px solid goldenrod;
+}
+.PlayerMat-victoryPoints {
+    background: white;
+    border: 2px solid blueviolet;
+}
+
+.PlayerMat-workers {
+    margin-left: 12px;
+}
+.PlayerMat-worker {
+    display: inline-block;
+    margin-right: 8px;
+}
+.PlayerMat--blue .PlayerMat-worker {
+    fill: royalblue;
+}
+.PlayerMat--green .PlayerMat-worker {
+    fill: seagreen;
+}
+.PlayerMat--orange .PlayerMat-worker {
+    fill: darkorange;
+}
+.PlayerMat--purple .PlayerMat-worker {
+    fill: purple;
+}
+.PlayerMat--red .PlayerMat-worker {
+    fill: firebrick;
+}
+.PlayerMat--yellow .PlayerMat-worker {
+    fill: gold;
+}
+.PlayerMat-workerIcon {
+    height: 32px;
+    width: 32px;
+}
+
+.PlayerMat-cards {
+    display: flex;
+    flex: 1 1 auto;
+    margin-top: 12px;
+    min-height: 1px;
+}
+.PlayerMat-card + .PlayerMat-card {
+    margin-left: 16px;
+}

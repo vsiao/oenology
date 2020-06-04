@@ -7,6 +7,12 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         id,
         color,
         availableWorkers: {},
+        cardsInHand: {
+            vine: [],
+            summerVisitor: [],
+            order: [],
+            winterVisitor: ["judge", "professor", "taster"],
+        },
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],
             white: [false, false, false, false, false, false, false, false, false],
@@ -14,8 +20,8 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         cellar: {
             red: [false, false, false, false, false, false, false, false, false],
             white: [false, false, false, false, false, false, false, false, false],
-            rose: [false, false, false, false, false, false],
-            sparkling: [false, false, false],
+            rose: [false, false, false, false, false, false, false, false, false],
+            sparkling: [false, false, false, false, false, false, false, false, false],
         },
     };
 };
