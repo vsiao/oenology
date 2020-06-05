@@ -5,6 +5,7 @@ import VisitorCard from "./VisitorCard";
 import winterVisitorCards from "../game-data/winterVisitorCards";
 import "./PlayerMat.css";
 import MeepleIcon from "./MeepleIcon";
+import { summerVisitorCards } from "../game-data/summerVisitorCards";
 
 interface Props {
     playerState: PlayerState;
@@ -32,6 +33,11 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             {props.playerState.cardsInHand.winterVisitor.map(id => {
                 return <li key={id} className="PlayerMat-card">
                     <VisitorCard type={"winter"} cardData={winterVisitorCards[id]} />
+                </li>;
+            })}
+            {props.playerState.cardsInHand.summerVisitor.map(id => {
+                return <li key={id} className="PlayerMat-card">
+                    <VisitorCard type={"summer"} cardData={summerVisitorCards[id]} />
                 </li>;
             })}
         </ul>

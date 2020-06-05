@@ -1,6 +1,5 @@
 import GameState from "./GameState";
 import {
-    GameAction,
     cancelVisitor,
     gainCoins,
     gainVP,
@@ -11,9 +10,7 @@ import {
     trainWorker,
     promptToMakeWine,
 } from "./actionCreators";
-import { ThunkDispatch } from "redux-thunk"; 
-
-type GameDispatch = ThunkDispatch<GameState, undefined, GameAction>;
+import { visitorCard } from "./visitorCard";
 
 const canTrainWorker = (gameState: GameState, cost = 4) => {
     return true;
@@ -26,20 +23,6 @@ const numTrainedWorkers = (gameState: GameState) => {
 };
 const numGrapes = (gameState: GameState) => {
     return 2;
-};
-
-export interface VisitorCardData {
-    name: string;
-    description: string;
-    action: (dispatch: GameDispatch, getState: () => GameState) => void;
-}
-
-const visitorCard = (
-    name: string,
-    description: string,
-    action: (dispatch: GameDispatch, getState: () => GameState) => void
-): VisitorCardData => {
-    return { name, description, action };
 };
 
 export type WinterVisitorId = keyof typeof winterVisitorCards;

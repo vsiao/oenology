@@ -1,5 +1,5 @@
 import * as React from "react";
-import { VisitorCardData } from "../game-data/winterVisitorCards";
+import { VisitorCardData } from "../game-data/visitorCard";
 import "./VisitorCard.css";
 
 interface Props {

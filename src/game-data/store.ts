@@ -9,7 +9,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         availableWorkers: {},
         cardsInHand: {
             vine: [],
-            summerVisitor: [],
+            summerVisitor: ["handyman", "planner", "tourGuide"],
             order: [],
             winterVisitor: ["judge", "professor", "taster"],
         },

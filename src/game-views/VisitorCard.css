@@ -1,13 +1,23 @@
 .VisitorCard {
-    border: 8px solid white;
+    border: 1px solid black;
     border-radius: 4px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 240px;
     max-height: 240px;
-    padding: 8px;
+    padding: 4px;
     width: 160px;
+}
+.VisitorCard:hover {
+    border-color: white;
+    bottom: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: 200ms border-color, 200ms bottom;
+}
+.VisitorCard--summer {
+    background: goldenrod;
 }
 .VisitorCard--winter {
     background: midnightblue;
@@ -15,6 +25,7 @@
 
 .VisitorCard-name {
     font-weight: 600;
+    padding: 4px 4px 8px;
     text-transform: uppercase;
 }
 .VisitorCard--winter .VisitorCard-name {
@@ -27,8 +38,7 @@
     border-radius: 2px;
     display: flex;
     flex: 1 1 auto;
-    font-size: 12px;
-    margin: 8px 0 0 0;
-    padding: 4px 4px;
+    margin: 0;
+    padding: 8px;
     text-align: center;
 }

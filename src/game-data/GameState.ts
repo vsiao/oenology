@@ -1,4 +1,5 @@
 import { WinterVisitorId } from "./winterVisitorCards";
+import { SummerVisitorId } from "./summerVisitorCards";
 
 export default interface GameState {
     players: Record<string, PlayerState>;
@@ -20,7 +21,7 @@ export interface PlayerState {
     };
     cardsInHand: {
         vine: unknown[];
-        summerVisitor: unknown[];
+        summerVisitor: SummerVisitorId[];
         order: unknown[];
         winterVisitor: WinterVisitorId[];
     },
