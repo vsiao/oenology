@@ -18,19 +18,6 @@
     margin-right: 8px;
 }
 
-.PlayerMat-residualPayments {
-    align-items: center;
-    border: 2px dashed #666;
-    border-radius: 16px;
-    color: #666;
-    box-sizing: border-box;
-    display: inline-flex;
-    font-weight: 600;
-    height: 32px;
-    justify-content: center;
-    width: 32px;
-}
-
 .PlayerMat-workers {
     margin-left: 12px;
 }

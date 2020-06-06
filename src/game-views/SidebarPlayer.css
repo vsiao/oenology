@@ -51,19 +51,6 @@
     margin-left: 4px;
 }
 
-.SidebarPlayer-residualPayments {
-    align-items: center;
-    border: 1px dashed #666;
-    border-radius: 12px;
-    color: #666;
-    box-sizing: border-box;
-    display: inline-flex;
-    font-weight: 600;
-    height: 24px;
-    justify-content: center;
-    width: 24px;
-}
-
 .SidebarPlayer-structures {
     vertical-align: top;
     display: inline-block;

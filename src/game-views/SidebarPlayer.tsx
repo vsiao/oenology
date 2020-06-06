@@ -2,6 +2,7 @@ import * as React from "react";
 import { PlayerState } from "../game-data/GameState";
 import "./SidebarPlayer.css";
 import VictoryPoints from "./icons/VictoryPoints";
+import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
 import { Vine, SummerVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
@@ -25,7 +26,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     <SummerVisitor />
                 </li>
             </ul>
-            <span className="SidebarPlayer-residualPayments">0</span>
+            <Residuals className="SidebarPlayer-residualPayments">0</Residuals>
             <Coins className="SidebarPlayer-coins">0</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">0</VictoryPoints>
         </div>

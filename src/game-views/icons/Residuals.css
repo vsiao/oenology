@@ -1,0 +1,22 @@
+.Residuals {
+    align-items: center;
+    border: .2em solid #ad6b2a;
+    border-radius: 1em;
+    box-sizing: border-box;
+    display: inline-flex;
+    height: 2em;
+    justify-content: center;
+    position: relative;
+    width: 2em;
+}
+.Residuals-amount {
+    align-items: center;
+    background: #cd7f32;
+    border-radius: 1em;
+    display: inline-flex;
+    font-weight: 600;
+    height: 1.4em;
+    justify-content: center;
+    position: relative;
+    width: 1.4em;
+}

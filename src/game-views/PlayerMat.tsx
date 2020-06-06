@@ -7,6 +7,7 @@ import "./PlayerMat.css";
 import MeepleIcon from "./icons/Worker";
 import { summerVisitorCards } from "../game-data/summerVisitorCards";
 import VictoryPoints from "./icons/VictoryPoints";
+import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 const PlayerMat: React.FunctionComponent<Props> = props => {
     return <div className={`PlayerMat PlayerMat--${props.playerState.color}`}>
         <div className="PlayerMat-header">
-            <span className="PlayerMat-residualPayments">0</span>
+            <Residuals className="PlayerMat-residualPayments">0</Residuals>
             <Coins className="PlayerMat-coins">0</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
