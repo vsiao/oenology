@@ -1,7 +1,6 @@
 .SidebarPlayer {
     border-bottom: 1px solid #aaa;
     font-size: 12px;
-    width: 331px;
 }
 
 .SidebarPlayer-header {
@@ -73,7 +72,8 @@
 }
 
 .SidebarPlayer-recurringRevenue {
-    border: 1px dashed black;
+    border: 1px dashed #666;
+    color: #666;
 }
 .SidebarPlayer-coins {
     background: gold;
@@ -104,10 +104,12 @@
 }
 .SidebarPlayer-field {
     background: greenyellow;
-    border-top: 1px solid white;
     box-sizing: border-box;
     height: 48px;
-    width: 64px;
+    width: 48px;
+}
+.SidebarPlayer-field + .SidebarPlayer-field {
+    box-shadow: inset 0 1px 0 0 white;
 }
 
 .SidebarPlayer-grapesAndWine {

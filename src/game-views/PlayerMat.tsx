@@ -4,7 +4,7 @@ import GameState, { PlayerState } from "../game-data/GameState";
 import VisitorCard from "./VisitorCard";
 import winterVisitorCards from "../game-data/winterVisitorCards";
 import "./PlayerMat.css";
-import MeepleIcon from "./MeepleIcon";
+import MeepleIcon from "./icons/MeepleIcon";
 import { summerVisitorCards } from "../game-data/summerVisitorCards";
 
 interface Props {

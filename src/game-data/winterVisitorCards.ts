@@ -18,6 +18,9 @@ const canTrainWorker = (gameState: GameState, cost = 4) => {
 const mostValuableWine = (gameState: GameState) => {
     return 8;
 };
+const numCoins = (gameState: GameState) => {
+    return 0;
+};
 const numTrainedWorkers = (gameState: GameState) => {
     return 3;
 };
@@ -56,6 +59,19 @@ export const winterVisitorCards = {
                 ])
             )
         },
+    ),
+    politician: visitorCard(
+        "Politician",
+        "If you have less than 0VP, gain 6 coins. Otherwise, draw 1 vine, 1 summer visitor, and 1 order.",
+        (dispatch, getState) => {
+            if (numCoins(getState()) < 0) {
+                dispatch(gainCoins(6));
+            } else {
+                dispatch(drawCards("vine", 1));
+                dispatch(drawCards("summerVisitor", 1));
+                dispatch(drawCards("order", 1));
+            }
+        }
     ),
     professor: visitorCard(
         "Professor",
