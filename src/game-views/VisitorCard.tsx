@@ -11,7 +11,9 @@ const VisitorCard: React.FunctionComponent<Props> = props => {
     const { name, description } = props.cardData;
     return <div className={`VisitorCard VisitorCard--${props.type}`}>
         <div className="VisitorCard-name">{name}</div>
-        <p className="VisitorCard-description">{description}</p>
+        <div className="VisitorCard-description">
+            <p className="VisitorCard-descriptionText">{description}</p>
+        </div>
     </div>;
 };
 

@@ -1,6 +1,10 @@
 import * as React from "react";
 import { PlayerState } from "../game-data/GameState";
 import "./SidebarPlayer.css";
+import VictoryPoints from "./icons/VictoryPoints";
+import Coins from "./icons/Coins";
+import { Vine, SummerVisitor } from "./icons/Card";
+import Worker from "./icons/Worker";
 
 interface Props {
     player: PlayerState;
@@ -11,13 +15,19 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         <div className="SidebarPlayer-header">
             <span className="SidebarPlayer-playerName">{props.player.id}</span>
             <ul className="SidebarPlayer-cards">
-                <li className="SidebarPlayer-card SidebarPlayer-card--vine"></li>
-                <li className="SidebarPlayer-card SidebarPlayer-card--vine"></li>
-                <li className="SidebarPlayer-card SidebarPlayer-card--summerVisitor"></li>
+                <li className="SidebarPlayer-card">
+                    <Vine />
+                </li>
+                <li className="SidebarPlayer-card">
+                    <Vine />
+                </li>
+                <li className="SidebarPlayer-card">
+                    <SummerVisitor />
+                </li>
             </ul>
-            <span className="SidebarPlayer-recurringRevenue">0</span>
-            <span className="SidebarPlayer-coins">0</span>
-            <span className="SidebarPlayer-victoryPoints">0</span>
+            <span className="SidebarPlayer-residualPayments">0</span>
+            <Coins className="SidebarPlayer-coins">0</Coins>
+            <VictoryPoints className="SidebarPlayer-victoryPoints">0</VictoryPoints>
         </div>
         <ul className="SidebarPlayer-structures">
             <li className="SidebarPlayer-structure">Tr</li>
@@ -69,12 +79,12 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             </div>
         </div>
         <ul className="SidebarPlayer-workers">
-            <li className="SidebarPlayer-worker">G</li>
-            <li className="SidebarPlayer-worker"></li>
-            <li className="SidebarPlayer-worker"></li>
-            <li className="SidebarPlayer-worker"></li>
-            <li className="SidebarPlayer-worker"></li>
-            <li className="SidebarPlayer-worker"></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
+            <li className="SidebarPlayer-worker"><Worker /></li>
         </ul>
     </div>;
 };

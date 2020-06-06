@@ -5,6 +5,7 @@ export default interface GameState {
     players: Record<string, PlayerState>;
 }
 
+export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
 export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
 

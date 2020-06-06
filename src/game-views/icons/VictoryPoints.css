@@ -1,0 +1,12 @@
+.VictoryPoints {
+    align-items: center;
+    background: white;
+    border: .2em solid blueviolet;
+    border-radius: 1em;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-weight: 600;
+    height: 2em;
+    justify-content: center;
+    width: 2em;
+}

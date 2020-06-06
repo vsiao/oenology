@@ -41,47 +41,27 @@
     margin-right: auto;
 }
 .SidebarPlayer-card {
-    background: #ddd;
-    border: 2px solid white;
-    border-radius: 2px;
-    box-sizing: border-box;
-    display: inline-block;
-    height: 24px;
     margin-left: -8px;
     width: 16px;
 }
-.SidebarPlayer-card--vine {
-    background: green;
-}
-.SidebarPlayer-card--summerVisitor {
-    background: gold;
-}
 
-.SidebarPlayer-recurringRevenue,
+.SidebarPlayer-residualPayments,
 .SidebarPlayer-coins,
 .SidebarPlayer-victoryPoints {
+    margin-left: 4px;
+}
+
+.SidebarPlayer-residualPayments {
     align-items: center;
+    border: 1px dashed #666;
     border-radius: 12px;
+    color: #666;
     box-sizing: border-box;
     display: inline-flex;
     font-weight: 600;
     height: 24px;
     justify-content: center;
-    margin-left: 4px;
     width: 24px;
-}
-
-.SidebarPlayer-recurringRevenue {
-    border: 1px dashed #666;
-    color: #666;
-}
-.SidebarPlayer-coins {
-    background: gold;
-    border: 2px solid goldenrod;
-}
-.SidebarPlayer-victoryPoints {
-    background: white;
-    border: 2px solid blueviolet;
 }
 
 .SidebarPlayer-structures {
@@ -94,7 +74,7 @@
     color: #aaa;
     display: flex;
     height: 24px;
-    justify-content: center;;
+    justify-content: center;
     width: 24px;
 }
 
@@ -140,30 +120,27 @@
 }
 .SidebarPlayer-worker {
     align-items: center;
-    border-radius: 8px;
-    box-shadow: inset 0 0 0 4px white;
-    color: white;
     display: flex;
     font-weight: 600;
     height: 24px;
-    justify-content: center;;
+    justify-content: center;
     width: 24px;
 }
 .SidebarPlayer--blue .SidebarPlayer-worker {
-    background: royalblue;
+    fill: royalblue;
 }
 .SidebarPlayer--green .SidebarPlayer-worker {
-    background: seagreen;
+    fill: seagreen;
 }
 .SidebarPlayer--orange .SidebarPlayer-worker {
-    background: darkorange;
+    fill: darkorange;
 }
 .SidebarPlayer--purple .SidebarPlayer-worker {
-    background: purple;
+    fill: purple;
 }
 .SidebarPlayer--red .SidebarPlayer-worker {
-    background: firebrick;
+    fill: firebrick;
 }
 .SidebarPlayer--yellow .SidebarPlayer-worker {
-    background: gold;
+    fill: gold;
 }

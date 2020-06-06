@@ -2,10 +2,12 @@ import * as React from "react";
 import { connect } from "react-redux";
 import GameState, { PlayerState } from "../game-data/GameState";
 import VisitorCard from "./VisitorCard";
-import winterVisitorCards from "../game-data/winterVisitorCards";
+import { winterVisitorCards } from "../game-data/winterVisitorCards";
 import "./PlayerMat.css";
-import MeepleIcon from "./icons/MeepleIcon";
+import MeepleIcon from "./icons/Worker";
 import { summerVisitorCards } from "../game-data/summerVisitorCards";
+import VictoryPoints from "./icons/VictoryPoints";
+import Coins from "./icons/Coins";
 
 interface Props {
     playerState: PlayerState;
@@ -14,9 +16,9 @@ interface Props {
 const PlayerMat: React.FunctionComponent<Props> = props => {
     return <div className={`PlayerMat PlayerMat--${props.playerState.color}`}>
         <div className="PlayerMat-header">
-            <span className="PlayerMat-recurringRevenue">0</span>
-            <span className="PlayerMat-coins">0</span>
-            <span className="PlayerMat-victoryPoints">0</span>
+            <span className="PlayerMat-residualPayments">0</span>
+            <Coins className="PlayerMat-coins">0</Coins>
+            <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
                 <li className="PlayerMat-worker PlayerMat-worker--grande">
                     <MeepleIcon className="PlayerMat-workerIcon" />

@@ -37,7 +37,11 @@
     border-radius: 2px;
     display: flex;
     flex: 1 1 auto;
+    line-height: 1.6em;
     margin: 0;
     padding: 8px;
     text-align: center;
+}
+.VisitorCard-descriptionText {
+    margin: 0;
 }

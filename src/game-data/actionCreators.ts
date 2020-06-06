@@ -1,6 +1,6 @@
 import { Action } from "redux";
 import { ThunkAction } from "redux-thunk";
-import GameState from "./GameState";
+import GameState, { CardType } from "./GameState";
 
 export type GameAction =
     | CancelVisitorAction
@@ -15,7 +15,6 @@ export const cancelVisitor = (): CancelVisitorAction => {
     return { type: "CANCEL_VISITOR" };
 };
 
-type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 interface DrawCardsAction extends Action<"DRAW_CARDS"> {
     cardType: CardType;
     n: number;

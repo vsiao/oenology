@@ -12,31 +12,23 @@
     padding: 12px 16px 8px;
 }
 
-.PlayerMat-recurringRevenue,
+.PlayerMat-residualPayments,
 .PlayerMat-coins,
 .PlayerMat-victoryPoints {
+    margin-right: 8px;
+}
+
+.PlayerMat-residualPayments {
     align-items: center;
+    border: 2px dashed #666;
     border-radius: 16px;
+    color: #666;
     box-sizing: border-box;
     display: inline-flex;
     font-weight: 600;
     height: 32px;
-    margin-right: 8px;
     justify-content: center;
     width: 32px;
-}
-
-.PlayerMat-recurringRevenue {
-    border: 2px dashed #666;
-    color: #666;
-}
-.PlayerMat-coins {
-    background: gold;
-    border: 2px solid goldenrod;
-}
-.PlayerMat-victoryPoints {
-    background: white;
-    border: 2px solid blueviolet;
 }
 
 .PlayerMat-workers {

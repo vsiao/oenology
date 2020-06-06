@@ -1,0 +1,24 @@
+.Card {
+    background: #ddd;
+    border: .1em solid white;
+    border-color: black;
+    border-radius: .2em;
+    box-sizing: border-box;
+    display: inline-block;
+    height: 1.6em;
+    transform: rotate(-4deg);
+    vertical-align: bottom;
+    width: 1.2em;
+}
+.Card--vine {
+    background: green;
+}
+.Card--summerVisitor {
+    background: gold;
+}
+.Card--order {
+    background: darkmagenta;
+}
+.Card--winterVisitor {
+    background: midnightblue;
+}
