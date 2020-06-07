@@ -11,9 +11,9 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         availableWorkers: {},
         cardsInHand: {
             vine: [],
-            summerVisitor: <SummerVisitorId[]>Object.keys(summerVisitorCards),
+            summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
             order: [],
-            winterVisitor: <WinterVisitorId[]>Object.keys(winterVisitorCards),
+            winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
         },
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],
@@ -29,6 +29,13 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
 };
 const initGame = (): GameState => {
     return {
+        currentTurn: {
+            type: "workerPlacement",
+            playerId: "viny",
+            pendingAction: {
+                type: "playSummerVisitor"
+            },
+        },
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
@@ -46,7 +53,13 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
     }
     switch (action.type) {
         case "CANCEL_VISITOR":
-            return state;
+            return {
+                ...state,
+                currentTurn: {
+                    ...state.currentTurn,
+                    pendingAction: null
+                },
+            };
         case "DRAW_CARDS":
             return state;
         case "GAIN_COINS":

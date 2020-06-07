@@ -1,45 +1,69 @@
 import * as React from "react";
 import { connect } from "react-redux";
-import GameState, { PlayerState } from "../game-data/GameState";
-import VisitorCard from "./VisitorCard";
-import { winterVisitorCards } from "../game-data/winterVisitorCards";
-import "./PlayerMat.css";
-import MeepleIcon from "./icons/Worker";
+import GameState, { CurrentTurn, PlayerState } from "../game-data/GameState";
 import { summerVisitorCards } from "../game-data/summerVisitorCards";
-import VictoryPoints from "./icons/VictoryPoints";
+import { VisitorCardData } from "../game-data/visitorCard";
+import { winterVisitorCards } from "../game-data/winterVisitorCards";
 import Coins from "./icons/Coins";
+import VictoryPoints from "./icons/VictoryPoints";
+import Worker from "./icons/Worker";
+import VisitorCard from "./VisitorCard";
+import "./PlayerMat.css";
 
 interface Props {
+    currentTurn: CurrentTurn;
     playerState: PlayerState;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    return <div className={`PlayerMat PlayerMat--${props.playerState.color}`}>
+    const { currentTurn, playerState } = props;
+    const handleVisitor = (data: VisitorCardData) => {
+
+    };
+    return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <div className="PlayerMat-header">
             <span className="PlayerMat-residualPayments">0</span>
             <Coins className="PlayerMat-coins">0</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
                 <li className="PlayerMat-worker PlayerMat-worker--grande">
-                    <MeepleIcon className="PlayerMat-workerIcon" />
+                    <Worker className="PlayerMat-workerIcon" />
                 </li>
                 <li className="PlayerMat-worker">
-                    <MeepleIcon className="PlayerMat-workerIcon" />
+                    <Worker className="PlayerMat-workerIcon" />
                 </li>
                 <li className="PlayerMat-worker">
-                    <MeepleIcon className="PlayerMat-workerIcon" />
+                    <Worker className="PlayerMat-workerIcon" />
                 </li>
             </ul>
         </div>
         <ul className="PlayerMat-cards">
-            {props.playerState.cardsInHand.winterVisitor.map(id => {
+            {playerState.cardsInHand.summerVisitor.map(id => {
+                const cardData = summerVisitorCards[id];
+                const canPlaySummerVisitor = currentTurn.type === "workerPlacement" &&
+                    currentTurn.pendingAction !== null &&
+                    currentTurn.pendingAction.type === "playSummerVisitor"
                 return <li key={id} className="PlayerMat-card">
-                    <VisitorCard type={"winter"} cardData={winterVisitorCards[id]} />
+                    <VisitorCard
+                        interactive={canPlaySummerVisitor}
+                        type={"summer"}
+                        cardData={cardData}
+                        onClick={canPlaySummerVisitor ? () => handleVisitor(cardData) : undefined}
+                    />
                 </li>;
             })}
-            {props.playerState.cardsInHand.summerVisitor.map(id => {
+            {playerState.cardsInHand.winterVisitor.map(id => {
+                const cardData = winterVisitorCards[id];
+                const canPlayWinterVisitor = currentTurn.type === "workerPlacement" &&
+                    currentTurn.pendingAction !== null &&
+                    currentTurn.pendingAction.type === "playWinterVisitor"
                 return <li key={id} className="PlayerMat-card">
-                    <VisitorCard type={"summer"} cardData={summerVisitorCards[id]} />
+                    <VisitorCard
+                        interactive={canPlayWinterVisitor}
+                        type={"winter"}
+                        cardData={cardData}
+                        onClick={canPlayWinterVisitor ? () => handleVisitor(cardData) : undefined}
+                    />
                 </li>;
             })}
         </ul>
@@ -47,7 +71,10 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
 };
 
 const mapStateToProps = (gameState: GameState, ownProps: { playerId: string }) => {
-    return { playerState: gameState.players[ownProps.playerId] }
+    return {
+        currentTurn: gameState.currentTurn,
+        playerState: gameState.players[ownProps.playerId]
+    };
 };
 
 export default connect(mapStateToProps)(PlayerMat);

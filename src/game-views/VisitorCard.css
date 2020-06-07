@@ -9,7 +9,7 @@
     padding: 4px;
     width: 160px;
 }
-.VisitorCard:hover {
+.VisitorCard--interactive:hover {
     bottom: 4px;
     cursor: pointer;
     position: relative;

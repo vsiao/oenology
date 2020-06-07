@@ -8,7 +8,7 @@ function App() {
       <header className="App-header">
         oenology
       </header>
-      <OenologyGame />
+      <OenologyGame currentPlayerId={"viny"} />
     </div>
   );
 }
