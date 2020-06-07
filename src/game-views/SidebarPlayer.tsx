@@ -2,9 +2,11 @@ import * as React from "react";
 import { PlayerState } from "../game-data/GameState";
 import "./SidebarPlayer.css";
 import VictoryPoints from "./icons/VictoryPoints";
+import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
 import { Vine, SummerVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
+import Grape from "./icons/Grape";
 
 interface Props {
     player: PlayerState;
@@ -25,7 +27,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     <SummerVisitor />
                 </li>
             </ul>
-            <span className="SidebarPlayer-residualPayments">0</span>
+            <Residuals className="SidebarPlayer-residualPayments">0</Residuals>
             <Coins className="SidebarPlayer-coins">0</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">0</VictoryPoints>
         </div>
@@ -38,7 +40,9 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <li className="SidebarPlayer-structure">Ta</li>
         </ul>
         <ul className="SidebarPlayer-fields">
-            <li className="SidebarPlayer-field"></li>
+            <li className="SidebarPlayer-field">
+                <Grape>1</Grape>
+            </li>
             <li className="SidebarPlayer-field"></li>
             <li className="SidebarPlayer-field"></li>
         </ul>
@@ -46,34 +50,34 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <div className="SidebarPlayer-crushPad">
                 <div className="SidebarPlayer-redGrapes">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-grape" key={i}>{i+1}</div>
+                        <div className="SidebarPlayer-grape" key={i}>{i + 1}</div>
                     )}
                 </div>
                 <div className="SidebarPlayer-redGrapes">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-grape" key={i}>{i+1}</div>
+                        <div className="SidebarPlayer-grape" key={i}>{i + 1}</div>
                     )}
                 </div>
             </div>
             <div className="SidebarPlayer-cellar">
                 <div className="SidebarPlayer-redWines">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i+1}</div>
+                        <div className="SidebarPlayer-wine" key={i}>{i + 1}</div>
                     )}
                 </div>
                 <div className="SidebarPlayer-whiteWines">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i+1}</div>
+                        <div className="SidebarPlayer-wine" key={i}>{i + 1}</div>
                     )}
                 </div>
                 <div className="SidebarPlayer-roseWines">
                     {new Array(6).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i+4}</div>
+                        <div className="SidebarPlayer-wine" key={i}>{i + 4}</div>
                     )}
                 </div>
                 <div className="SidebarPlayer-sparklingWines">
                     {new Array(3).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i+7}</div>
+                        <div className="SidebarPlayer-wine" key={i}>{i + 7}</div>
                     )}
                 </div>
             </div>

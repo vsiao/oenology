@@ -8,9 +8,10 @@ export type GameAction =
     | GainCoinsAction
     | GainVPAction
     | PayCoinsAction
-    | TrainWorkerAction;
+    | TrainWorkerAction
+    | PlantVineAction;
 
-interface CancelVisitorAction extends Action<"CANCEL_VISITOR"> {}
+interface CancelVisitorAction extends Action<"CANCEL_VISITOR"> { }
 export const cancelVisitor = (): CancelVisitorAction => {
     return { type: "CANCEL_VISITOR" };
 };
@@ -21,7 +22,7 @@ interface DrawCardsAction extends Action<"DRAW_CARDS"> {
 }
 export const drawCards = (cardType: CardType, n: number): DrawCardsAction => {
     return { type: "DRAW_CARDS", cardType, n };
-}
+};
 
 interface GainCoinsAction extends Action<"GAIN_COINS"> {
     n: number;
@@ -49,28 +50,35 @@ interface Choice {
     isValid: boolean;
     action: () => void;
 }
-interface PromptForNChoicesAction extends ThunkAction<Promise<void>, GameState, undefined, Action<string>> {}
+interface PromptForNChoicesAction extends ThunkAction<Promise<void>, GameState, undefined, Action<string>> { }
 export const promptForNChoices = (n: number, choices: Choice[]): PromptForNChoicesAction => {
     return (dispatch) => {
         return Promise.resolve();
     };
 };
 
-interface PromptToDiscardWineAction extends ThunkAction<Promise<number | null>, GameState, undefined, Action<string>> {}
+interface PromptToDiscardWineAction extends ThunkAction<Promise<number | null>, GameState, undefined, Action<string>> { }
 export const promptToDiscardWine = (): PromptToDiscardWineAction => {
     return (dispatch) => {
         return Promise.resolve(9);
     };
 };
 
-interface PromptToMakeWineAction extends ThunkAction<Promise<void>, GameState, undefined, Action<string>> {}
+interface PromptToMakeWineAction extends ThunkAction<Promise<void>, GameState, undefined, Action<string>> { }
 export const promptToMakeWine = (upToN: number): PromptToMakeWineAction => {
     return (dispatch) => {
         return Promise.resolve();
-    }
+    };
 };
 
-interface TrainWorkerAction extends Action<"TRAIN_WORKER"> {}
+interface TrainWorkerAction extends Action<"TRAIN_WORKER"> { }
 export const trainWorker = (): TrainWorkerAction => {
     return { type: "TRAIN_WORKER" };
+};
+
+interface PlantVineAction extends Action<"PLANT_VINE"> {
+    vine: string;
+}
+export const plantVine = (vine: string): PlantVineAction => {
+    return { type: "PLANT_VINE", vine };
 };

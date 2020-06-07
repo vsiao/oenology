@@ -2,11 +2,14 @@ import * as React from "react";
 import { connect } from "react-redux";
 import GameState, { CurrentTurn, PlayerState } from "../game-data/GameState";
 import { summerVisitorCards } from "../game-data/summerVisitorCards";
+import { vineCards } from "../game-data/vineCards";
 import { VisitorCardData } from "../game-data/visitorCard";
 import { winterVisitorCards } from "../game-data/winterVisitorCards";
 import Coins from "./icons/Coins";
+import Residuals from "./icons/Residuals";
 import VictoryPoints from "./icons/VictoryPoints";
 import Worker from "./icons/Worker";
+import VineCard from "./VineCard";
 import VisitorCard from "./VisitorCard";
 import "./PlayerMat.css";
 
@@ -22,7 +25,7 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
     };
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <div className="PlayerMat-header">
-            <span className="PlayerMat-residualPayments">0</span>
+            <Residuals className="PlayerMat-residualPayments">0</Residuals>
             <Coins className="PlayerMat-coins">0</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
@@ -66,14 +69,19 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                     />
                 </li>;
             })}
+            {props.playerState.cardsInHand.vine.map(id => {
+                return <li key={id} className="PlayerMat-card">
+                    <VineCard cardData={vineCards[id]} />
+                </li>;
+            })}
         </ul>
     </div>;
 };
 
-const mapStateToProps = (gameState: GameState, ownProps: { playerId: string }) => {
+const mapStateToProps = (gameState: GameState, ownProps: { playerId: string; }) => {
     return {
         currentTurn: gameState.currentTurn,
-        playerState: gameState.players[ownProps.playerId]
+        playerState: gameState.players[ownProps.playerId],
     };
 };
 
