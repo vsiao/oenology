@@ -8,7 +8,9 @@ interface Props {
 }
 
 const Card: React.FunctionComponent<Props> = props => {
-   return <span className={`Card Card--${props.type}`}>{props.children}</span>;
+   return <span className={`Card Card--${props.type}`}>
+       {props.children || <>&nbsp;</>}
+    </span>;
 };
 
 export default Card;

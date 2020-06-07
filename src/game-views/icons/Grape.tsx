@@ -11,7 +11,7 @@ const Grape: React.FunctionComponent<Props> = props => {
     return <span className={cx("Grape", {
         [`Grape--${props.color}`]: props.color
     })}>
-        {props.children}
+        {props.children || <>&nbsp;</>}
     </span>;
 };
 

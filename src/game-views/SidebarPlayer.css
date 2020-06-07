@@ -70,11 +70,12 @@
     vertical-align: top;
 }
 .SidebarPlayer-field {
+    align-items: center;
     background: #40a746;
     box-sizing: border-box;
-    font-size: 10px;
+    display: flex;
     height: 48px;
-    padding: 2px;
+    justify-content: center;
     width: 48px;
 }
 .SidebarPlayer-field + .SidebarPlayer-field {

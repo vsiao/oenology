@@ -4,6 +4,8 @@ import { default as VP } from "../game-views/icons/VictoryPoints";
 import Coins from "../game-views/icons/Coins";
 import { Vine } from "../game-views/icons/Card";
 import Worker from "../game-views/icons/Worker";
+import Grape from "../game-views/icons/Grape";
+import Residuals from "../game-views/icons/Residuals";
 
 export type SummerVisitorId = keyof typeof summerVisitorCards;
 
@@ -20,7 +22,7 @@ export const summerVisitorCards = {
     ),
     negotiator: visitorCard(
         "Negotiator",
-        "Discard 1 grape to gain 1 residual payment OR discard 1 wine to gain 2 residual payments.",
+        <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
         () => {}
     ),
     planner: visitorCard(

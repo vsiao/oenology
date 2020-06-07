@@ -41,7 +41,8 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         </ul>
         <ul className="SidebarPlayer-fields">
             <li className="SidebarPlayer-field">
-                <Grape>1</Grape>
+                <Grape color="red">1</Grape>
+                <Grape color="white">1</Grape>
             </li>
             <li className="SidebarPlayer-field"></li>
             <li className="SidebarPlayer-field"></li>
