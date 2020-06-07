@@ -1,7 +1,8 @@
 import { WinterVisitorId } from "./visitors/winter/winterVisitorCards";
 import { SummerVisitorId } from "./visitors/summer/summerVisitorCards";
-import { VineId } from "./vineCards";
 import { PromptState } from "./prompts/PromptState";
+import { VineId } from "./vineCards";
+import { OrderId } from "./orderCards";
 
 export default interface GameState {
     currentTurn: CurrentTurn;
@@ -24,15 +25,15 @@ export interface WorkerPlacementTurn {
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
     pendingAction:
-        | null
-        | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; } // choose sv card, then ...
-        | { type: "buySell" } // sell grape OR sell field OR buy field, then choose grape or choose field
-        | { type: "plant" } // choose vine card
-        | { type: "build" } // choose structure
-        | PlayWinterVisitor
-        | { type: "harvest" } // choose field
-        | { type: "makeWine" } // choose grape
-        | { type: "fillOrder" }; // choose order card
+    | null
+    | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; } // choose sv card, then ...
+    | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
+    | { type: "plant"; } // choose vine card
+    | { type: "build"; } // choose structure
+    | PlayWinterVisitor
+    | { type: "harvest"; } // choose field
+    | { type: "makeWine"; } // choose grape
+    | { type: "fillOrder"; }; // choose order card
 }
 
 export interface PlayWinterVisitor {
@@ -45,6 +46,7 @@ export type GrapeColor = "red" | "white";
 export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
 export type Structure = "trellis" | "irrigation" | "yoke" | "windmill" | "cottage" | "tastingRoom";
 export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
+export type WineColor = "red" | "white" | "blush" | "sparkling";
 
 export interface PlayerState {
     id: string;
@@ -62,7 +64,7 @@ export interface PlayerState {
     cardsInHand: {
         vine: VineId[];
         summerVisitor: SummerVisitorId[];
-        order: unknown[];
+        order: OrderId[];
         winterVisitor: WinterVisitorId[];
     },
     crushPad: Record<"red" | "white", TokenMap>;

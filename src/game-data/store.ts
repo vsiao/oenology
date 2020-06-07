@@ -2,9 +2,10 @@ import { createStore } from "redux";
 import GameState, { PlayerState, PlayerColor } from "./GameState";
 import { GameAction } from "./actionCreators";
 import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
+import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
 import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
 import { vineCards, VineId } from "./vineCards";
-import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
+import { orderCards, OrderId } from "./orderCards";
 
 const initPlayer = (id: string, color: PlayerColor): PlayerState => {
     return {
@@ -16,7 +17,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         cardsInHand: {
             vine: Object.keys(vineCards) as VineId[],
             summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
-            order: [],
+            order: Object.keys(orderCards) as OrderId[],
             winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
         },
         crushPad: {

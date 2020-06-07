@@ -7,6 +7,7 @@ import Coins from "./icons/Coins";
 import { Vine, SummerVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
+import WineGlass from "./icons/WineGlass";
 
 interface Props {
     player: PlayerState;
@@ -63,7 +64,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <div className="SidebarPlayer-cellar">
                 <div className="SidebarPlayer-redWines">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i + 1}</div>
+                        <div className="SidebarPlayer-wine" key={i}><WineGlass color="red">{i + 1}</WineGlass></div>
                     )}
                 </div>
                 <div className="SidebarPlayer-whiteWines">
