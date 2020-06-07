@@ -1,0 +1,5 @@
+.ActionPrompt {
+    bottom: 100%;
+    grid-area: main;
+    position: absolute;
+}

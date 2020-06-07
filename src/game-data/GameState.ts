@@ -1,10 +1,12 @@
-import { WinterVisitorId } from "./winterVisitorCards";
-import { SummerVisitorId } from "./summerVisitorCards";
+import { WinterVisitorId } from "./visitors/winter/winterVisitorCards";
+import { SummerVisitorId } from "./visitors/summer/summerVisitorCards";
 import { VineId } from "./vineCards";
+import { PromptState } from "./prompts/PromptState";
 
 export default interface GameState {
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
+    actionPrompt: PromptState;
 }
 
 export type CurrentTurn =
@@ -14,7 +16,7 @@ export type CurrentTurn =
     | { type: "fallVisitor"; playerId: string; };
 
 
-interface WorkerPlacementTurn {
+export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
 
@@ -23,14 +25,19 @@ interface WorkerPlacementTurn {
     // (eg. needs to pick a visitor card to play).
     pendingAction:
         | null
-        | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; }
-        | { type: "buySell" }
-        | { type: "plant" }
-        | { type: "build" }
-        | { type: "playWinterVisitor"; visitorId?: WinterVisitorId; }
-        | { type: "harvest" }
-        | { type: "makeWine" }
-        | { type: "fillOrder" };
+        | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; } // choose sv card, then ...
+        | { type: "buySell" } // sell grape OR sell field OR buy field, then choose grape or choose field
+        | { type: "plant" } // choose vine card
+        | { type: "build" } // choose structure
+        | PlayWinterVisitor
+        | { type: "harvest" } // choose field
+        | { type: "makeWine" } // choose grape
+        | { type: "fillOrder" }; // choose order card
+}
+
+export interface PlayWinterVisitor {
+    type: "playWinterVisitor";
+    visitorId?: WinterVisitorId;
 }
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
@@ -42,6 +49,8 @@ export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, bo
 export interface PlayerState {
     id: string;
     color: PlayerColor;
+    coins: number;
+    victoryPoints: number;
     availableWorkers: {
         grandeWorker?: true;
         worker1?: true;

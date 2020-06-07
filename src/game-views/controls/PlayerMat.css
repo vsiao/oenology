@@ -2,8 +2,7 @@
     background: #ddd;
     display: flex;
     flex-direction: column;
-    grid-area: bottom;
-    overflow-x: auto;
+    position: relative;
 }
 
 .PlayerMat-header {
@@ -51,6 +50,7 @@
 .PlayerMat-cards {
     display: flex;
     min-height: 1px;
+    overflow-x: auto;
     padding: 8px 16px 12px;
 }
 .PlayerMat-cards::after {

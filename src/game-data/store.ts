@@ -1,14 +1,17 @@
 import { createStore } from "redux";
 import GameState, { PlayerState, PlayerColor } from "./GameState";
 import { GameAction } from "./actionCreators";
-import { winterVisitorCards, WinterVisitorId } from "./winterVisitorCards";
-import { summerVisitorCards, SummerVisitorId } from "./summerVisitorCards";
+import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
+import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
 import { vineCards, VineId } from "./vineCards";
+import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
 
 const initPlayer = (id: string, color: PlayerColor): PlayerState => {
     return {
         id,
         color,
+        coins: 0,
+        victoryPoints: 0,
         availableWorkers: {},
         cardsInHand: {
             vine: Object.keys(vineCards) as VineId[],
@@ -34,7 +37,7 @@ const initGame = (): GameState => {
             type: "workerPlacement",
             playerId: "viny",
             pendingAction: {
-                type: "playSummerVisitor"
+                type: "playWinterVisitor"
             },
         },
         players: {
@@ -44,7 +47,8 @@ const initGame = (): GameState => {
             poofytoo: initPlayer("poofytoo", "green"),
             srir: initPlayer("srir", "blue"),
             thedrick: initPlayer("thedrick", "red"),
-        }
+        },
+        actionPrompt: null,
     };
 };
 
@@ -52,26 +56,13 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
     if (state === undefined) {
         return initGame();
     }
+    state = winterVisitor(state, action);
     switch (action.type) {
-        case "CANCEL_VISITOR":
-            return {
-                ...state,
-                currentTurn: {
-                    ...state.currentTurn,
-                    pendingAction: null
-                },
-            };
-        case "DRAW_CARDS":
-            return state;
-        case "GAIN_COINS":
-            return state;
-        case "GAIN_VP":
-            return state;
-        case "PAY_COINS":
-            return state;
         case "TRAIN_WORKER":
             return state;
         case "PLANT_VINE":
+            return state;
+        default:
             return state;
     }
 };
