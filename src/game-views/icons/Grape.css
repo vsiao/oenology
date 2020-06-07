@@ -1,0 +1,21 @@
+.Grape {
+    align-items: center;
+    background: linear-gradient(-45deg, #f8eac0 50%, #d80000 50%);
+    border-radius: 1em;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-weight: 600;
+    height: 2em;
+    justify-content: center;
+    width: 2em;
+}
+.Grape + .Grape {
+    margin-left: 0.5em;
+}
+.Grape--red {
+    background: #d80000;
+    color: white;
+}
+.Grape--white {
+    background: #f8eac0;
+}

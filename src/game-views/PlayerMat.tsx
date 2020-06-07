@@ -9,6 +9,8 @@ import { summerVisitorCards } from "../game-data/summerVisitorCards";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
+import { vineCards } from "../game-data/vineCards";
+import VineCard from "./VineCard";
 
 interface Props {
     playerState: PlayerState;
@@ -43,12 +45,17 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                     <VisitorCard type={"summer"} cardData={summerVisitorCards[id]} />
                 </li>;
             })}
+            {props.playerState.cardsInHand.vine.map(id => {
+                return <li key={id} className="PlayerMat-card">
+                    <VineCard cardData={vineCards[id]} />
+                </li>;
+            })}
         </ul>
     </div>;
 };
 
-const mapStateToProps = (gameState: GameState, ownProps: { playerId: string }) => {
-    return { playerState: gameState.players[ownProps.playerId] }
+const mapStateToProps = (gameState: GameState, ownProps: { playerId: string; }) => {
+    return { playerState: gameState.players[ownProps.playerId] };
 };
 
 export default connect(mapStateToProps)(PlayerMat);

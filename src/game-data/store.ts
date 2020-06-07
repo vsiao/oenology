@@ -3,6 +3,7 @@ import GameState, { PlayerState, PlayerColor } from "./GameState";
 import { GameAction } from "./actionCreators";
 import { winterVisitorCards, WinterVisitorId } from "./winterVisitorCards";
 import { summerVisitorCards, SummerVisitorId } from "./summerVisitorCards";
+import { vineCards, VineId } from "./vineCards";
 
 const initPlayer = (id: string, color: PlayerColor): PlayerState => {
     return {
@@ -10,7 +11,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         color,
         availableWorkers: {},
         cardsInHand: {
-            vine: [],
+            vine: <VineId[]>Object.keys(vineCards),
             summerVisitor: <SummerVisitorId[]>Object.keys(summerVisitorCards),
             order: [],
             winterVisitor: <WinterVisitorId[]>Object.keys(winterVisitorCards),
@@ -56,6 +57,8 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
         case "PAY_COINS":
             return state;
         case "TRAIN_WORKER":
+            return state;
+        case "PLANT_VINE":
             return state;
     }
 };

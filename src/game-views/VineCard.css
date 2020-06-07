@@ -1,0 +1,45 @@
+.VineCard {
+    background: green;
+    border-radius: 4px;
+    bottom: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 240px;
+    max-height: 240px;
+    padding: 4px;
+    width: 160px;
+}
+.VineCard:hover {
+    bottom: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: 100ms bottom ease-out;
+}
+.VineCard-name {
+    font-weight: 600;
+    padding: 4px 4px 8px;
+    text-transform: uppercase;
+}
+.VineCard-description {
+    background: #40a746;
+    border-radius: 2px;
+    flex: 1 1 auto;
+    line-height: 1.6em;
+    margin: 0;
+    padding: 8px;
+}
+.VineCard-structures {
+    height: 40%;
+    height: calc(50% - 1em);
+}
+.VineCard-structure {
+    background: #ccc;
+    border-radius: 0.2em;
+    display: inline-block;
+    margin-right: 0.5em;
+    padding: 0.1em 0.4em;
+}
+.VineCard-yield {
+    text-align: center;
+}
