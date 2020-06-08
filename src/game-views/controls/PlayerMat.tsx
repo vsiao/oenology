@@ -1,9 +1,8 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import GameState, { CurrentTurn, PlayerState } from "../../game-data/GameState";
-import { summerVisitorCards } from "../../game-data/visitors/summer/summerVisitorCards";
+import { summerVisitorCards, SummerVisitorId } from "../../game-data/visitors/summer/summerVisitorCards";
 import { vineCards } from "../../game-data/vineCards";
-import { VisitorCardData } from "../../game-data/visitors/visitorCard";
 import { winterVisitorCards, WinterVisitorId } from "../../game-data/visitors/winter/winterVisitorCards";
 import Coins from "../icons/Coins";
 import Residuals from "../icons/Residuals";
@@ -16,24 +15,23 @@ import ActionPrompt from "./ActionPrompt";
 import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/actionCreators";
 import { pickWinterVisitor } from "../../game-data/visitors/winter/winterVisitorActionCreators";
+import { pickSummerVisitor } from "../../game-data/visitors/summer/summerVisitorActionCreators";
 
 interface Props {
     currentTurn: CurrentTurn;
     currentPlayerId: string;
     playerState: PlayerState;
+    onSelectSummerVisitor: (id: SummerVisitorId) => void;
     onSelectWinterVisitor: (id: WinterVisitorId) => void;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
     const { currentTurn, playerState } = props;
-    const handleVisitor = (data: VisitorCardData) => {
-
-    };
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt currentPlayerId={props.currentPlayerId} />
         <div className="PlayerMat-header">
             <Residuals className="PlayerMat-residualPayments">0</Residuals>
-            <Coins className="PlayerMat-coins">0</Coins>
+            <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
                 <li className="PlayerMat-worker PlayerMat-worker--grande">
@@ -58,7 +56,9 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                         interactive={canPlaySummerVisitor}
                         type={"summer"}
                         cardData={cardData}
-                        onClick={canPlaySummerVisitor ? () => handleVisitor(cardData) : undefined}
+                        onClick={canPlaySummerVisitor
+                            ? () => props.onSelectSummerVisitor(id)
+                            : undefined}
                     />
                 </li>;
             })}
@@ -95,6 +95,7 @@ const mapStateToProps = (gameState: GameState, ownProps: { currentPlayerId: stri
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
+        onSelectSummerVisitor: (id: SummerVisitorId) => dispatch(pickSummerVisitor(id)),
         onSelectWinterVisitor: (id: WinterVisitorId) => dispatch(pickWinterVisitor(id)),
     };
 };

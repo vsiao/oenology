@@ -4,6 +4,7 @@ import { GameAction } from "./actionCreators";
 import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
 import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
 import { vineCards, VineId } from "./vineCards";
+import { summerVisitor } from "./visitors/summer/summerVisitorReducers";
 import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
 
 const initPlayer = (id: string, color: PlayerColor): PlayerState => {
@@ -37,7 +38,7 @@ const initGame = (): GameState => {
             type: "workerPlacement",
             playerId: "viny",
             pendingAction: {
-                type: "playWinterVisitor"
+                type: "playSummerVisitor"
             },
         },
         players: {
@@ -56,7 +57,7 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
     if (state === undefined) {
         return initGame();
     }
-    state = winterVisitor(state, action);
+    state = summerVisitor(winterVisitor(state, action), action);
     switch (action.type) {
         case "TRAIN_WORKER":
             return state;

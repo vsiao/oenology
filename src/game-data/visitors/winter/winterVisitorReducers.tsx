@@ -16,39 +16,6 @@ const mostValuableWine = (gameState: GameState) => {
     return 8;
 };
 
-export const winterVisitor = (state: GameState, action: GameAction) => {
-    if (
-        state.currentTurn.type !== "workerPlacement" ||
-        state.currentTurn.pendingAction === null ||
-        state.currentTurn.pendingAction.type !== "playWinterVisitor"
-    ) {
-        // Not currently playing a winter visitor; short-circuit
-        return state;
-    }
-    switch (action.type) {
-        case "PICK_WINTER_VISITOR": {
-            const visitorId = action.visitorId;
-            state = {
-                ...state,
-                currentTurn: {
-                    ...state.currentTurn,
-                    pendingAction: {
-                        ...state.currentTurn.pendingAction,
-                        visitorId,
-                    }
-                },
-            };
-            return winterVisitorReducers[visitorId](state, action);
-        }
-        default:
-            const visitorId = state.currentTurn.pendingAction.visitorId;
-            if (visitorId === undefined) {
-                return state;
-            }
-            return winterVisitorReducers[visitorId](state, action);
-    }
-};
-
 const winterVisitorReducers: Record<
     WinterVisitorId,
     (state: GameState, action: GameAction) => GameState
@@ -156,3 +123,36 @@ const winterVisitorReducers: Record<
         }
     },
 }
+
+export const winterVisitor = (state: GameState, action: GameAction) => {
+    if (
+        state.currentTurn.type !== "workerPlacement" ||
+        state.currentTurn.pendingAction === null ||
+        state.currentTurn.pendingAction.type !== "playWinterVisitor"
+    ) {
+        // Not currently playing a winter visitor; short-circuit
+        return state;
+    }
+    switch (action.type) {
+        case "PICK_WINTER_VISITOR": {
+            const visitorId = action.visitorId;
+            state = {
+                ...state,
+                currentTurn: {
+                    ...state.currentTurn,
+                    pendingAction: {
+                        ...state.currentTurn.pendingAction,
+                        visitorId,
+                    }
+                },
+            };
+            return winterVisitorReducers[visitorId](state, action);
+        }
+        default:
+            const visitorId = state.currentTurn.pendingAction.visitorId;
+            if (visitorId === undefined) {
+                return state;
+            }
+            return winterVisitorReducers[visitorId](state, action);
+    }
+};

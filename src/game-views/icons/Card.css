@@ -1,11 +1,13 @@
 .Card {
+    align-items: center;
     background: #ddd;
     border: .08em solid white;
     border-color: black;
     border-radius: .2em;
     box-sizing: border-box;
-    display: inline-block;
+    display: inline-flex;
     height: 1.6em;
+    justify-content: center;
     transform: rotate(-4deg);
     width: 1.2em;
 }

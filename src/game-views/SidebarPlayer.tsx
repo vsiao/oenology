@@ -28,7 +28,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 </li>
             </ul>
             <Residuals className="SidebarPlayer-residualPayments">0</Residuals>
-            <Coins className="SidebarPlayer-coins">0</Coins>
+            <Coins className="SidebarPlayer-coins">{props.player.coins}</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">0</VictoryPoints>
         </div>
         <ul className="SidebarPlayer-structures">
