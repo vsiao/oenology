@@ -12,5 +12,5 @@ export type GameAction = (
     // Every action should first be pushed to firebase to be
     // applied on other clients. Then, only on success do we
     // apply to our own store.
-    published?: true
+    published?: true;
 };

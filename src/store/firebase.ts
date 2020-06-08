@@ -25,7 +25,7 @@ export function* publishToFirebase() {
 
         console.log("action", action);
 
-        if (!action.published) {
+        if (!action.localOnly && !action.published) {
             gameLogsRef.push(action);
         }
     }

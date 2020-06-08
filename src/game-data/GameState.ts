@@ -5,8 +5,12 @@ import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 
 export default interface GameState {
+    // shared state
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
+
+    // local state
+    playerId: string | null;
     actionPrompt: PromptState;
 }
 

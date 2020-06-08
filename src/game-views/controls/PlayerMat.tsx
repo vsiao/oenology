@@ -22,7 +22,6 @@ import "./PlayerMat.css";
 
 interface Props {
     currentTurn: CurrentTurn;
-    currentPlayerId: string;
     playerState: PlayerState;
     onSelectSummerVisitor: (id: SummerVisitorId) => void;
     onSelectWinterVisitor: (id: WinterVisitorId) => void;
@@ -51,7 +50,8 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
         <ul className="PlayerMat-cards">
             {playerState.cardsInHand.summerVisitor.map(id => {
                 const cardData = summerVisitorCards[id];
-                const canPlaySummerVisitor = currentTurn.type === "workerPlacement" &&
+                const canPlaySummerVisitor = currentTurn.playerId === playerState.id &&
+                    currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
                     currentTurn.pendingAction.type === "playSummerVisitor" &&
                     currentTurn.pendingAction.visitorId === undefined;
@@ -68,7 +68,8 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             })}
             {playerState.cardsInHand.winterVisitor.map(id => {
                 const cardData = winterVisitorCards[id];
-                const canPlayWinterVisitor = currentTurn.type === "workerPlacement" &&
+                const canPlayWinterVisitor = currentTurn.playerId === playerState.id &&
+                    currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
                     currentTurn.pendingAction.type === "playWinterVisitor" &&
                     currentTurn.pendingAction.visitorId === undefined;
@@ -97,10 +98,10 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const mapStateToProps = (gameState: GameState, ownProps: { currentPlayerId: string; }) => {
+const mapStateToProps = (gameState: GameState, ownProps: { playerId: string }) => {
     return {
         currentTurn: gameState.currentTurn,
-        playerState: gameState.players[ownProps.currentPlayerId],
+        playerState: gameState.players[ownProps.playerId],
     };
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
