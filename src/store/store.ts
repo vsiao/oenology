@@ -1,13 +1,15 @@
-import { createStore } from "redux";
-import GameState, { PlayerState, PlayerColor } from "./GameState";
-import { GameAction } from "./actionTypes";
-import { board } from "./board/boardReducer";
-import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
-import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
-import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
-import { summerVisitor } from "./visitors/summer/summerVisitorReducers";
-import { vineCards, VineId } from "./vineCards";
-import { orderCards, OrderId } from "./orderCards";
+import { createStore, applyMiddleware } from "redux";
+import GameState, { PlayerState, PlayerColor } from "../game-data/GameState";
+import { GameAction } from "../game-data/actionTypes";
+import { board } from "../game-data/board/boardReducer";
+import { winterVisitorCards, WinterVisitorId } from "../game-data/visitors/winter/winterVisitorCards";
+import { winterVisitor } from "../game-data/visitors/winter/winterVisitorReducers";
+import { summerVisitorCards, SummerVisitorId } from "../game-data/visitors/summer/summerVisitorCards";
+import { summerVisitor } from "../game-data/visitors/summer/summerVisitorReducers";
+import { vineCards, VineId } from "../game-data/vineCards";
+import { orderCards, OrderId } from "../game-data/orderCards";
+import createSagaMiddleWare from "redux-saga";
+import { publishToFirebase, subscribeToFirebase } from "./firebase";
 
 const initPlayer = (id: string, color: PlayerColor): PlayerState => {
     return {
@@ -62,8 +64,17 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
     if (state === undefined) {
         return initGame();
     }
+    if (!action.published) {
+        // Wait for action to be published to firebase before applying
+        return state;
+    }
     return board(summerVisitor(winterVisitor(state, action), action), action);
 };
 
-const store = createStore(oenologyGame);
+const sagaMiddleware = createSagaMiddleWare();
+const store = createStore(oenologyGame, applyMiddleware(sagaMiddleware));
+
+sagaMiddleware.run(publishToFirebase);
+subscribeToFirebase(action => store.dispatch(action));
+
 export default store;
