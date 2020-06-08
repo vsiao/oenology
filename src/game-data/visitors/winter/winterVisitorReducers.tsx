@@ -7,7 +7,7 @@ import * as React from "react";
 import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../../reducers";
 import GameState from "../../GameState";
 import { promptForAction, clearPrompt, promptToPickWine, promptToMakeWine } from "../../prompts/promptReducers";
-import { GameAction } from "../../actionCreators";
+import { GameAction } from "../../actionTypes";
 
 const numCoins = (gameState: GameState) => {
     return 0;

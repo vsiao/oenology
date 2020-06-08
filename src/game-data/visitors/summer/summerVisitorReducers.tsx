@@ -3,7 +3,7 @@ import * as React from "react";
 import { endTurn, gainCoins,} from "../../reducers";
 import GameState from "../../GameState";
 import { promptForAction, clearPrompt } from "../../prompts/promptReducers";
-import { GameAction } from "../../actionCreators";
+import { GameAction } from "../../actionTypes";
 import { SummerVisitorId } from "./summerVisitorCards";
 
 const summerVisitorReducers: Record<

@@ -1,6 +1,7 @@
 import { createStore } from "redux";
 import GameState, { PlayerState, PlayerColor } from "./GameState";
-import { GameAction } from "./actionCreators";
+import { GameAction } from "./actionTypes";
+import { board } from "./board/boardReducer";
 import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
 import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
 import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
@@ -14,7 +15,10 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         color,
         coins: 0,
         victoryPoints: 0,
-        availableWorkers: {},
+        availableWorkers: {
+            grande: true,
+            other: 2,
+        },
         cardsInHand: {
             vine: Object.keys(vineCards) as VineId[],
             summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
@@ -58,15 +62,7 @@ const oenologyGame = (state: GameState | undefined, action: GameAction) => {
     if (state === undefined) {
         return initGame();
     }
-    state = summerVisitor(winterVisitor(state, action), action);
-    switch (action.type) {
-        case "TRAIN_WORKER":
-            return state;
-        case "PLANT_VINE":
-            return state;
-        default:
-            return state;
-    }
+    return board(summerVisitor(winterVisitor(state, action), action), action);
 };
 
 const store = createStore(oenologyGame);
