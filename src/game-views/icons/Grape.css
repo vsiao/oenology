@@ -1,6 +1,6 @@
 .Grape {
     align-items: center;
-    background: linear-gradient(-45deg, khaki 50%, #d80000 50%);
+    background: linear-gradient(-45deg, #feff9d 50%, #d80000 50%);
     border: .04em solid black;
     border-radius: .8em;
     box-sizing: border-box;
@@ -18,5 +18,5 @@
     color: white;
 }
 .Grape--white {
-    background: khaki;
+    background: #feff9d;
 }
