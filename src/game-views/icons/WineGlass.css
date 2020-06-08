@@ -1,5 +1,6 @@
 .WineGlass {
     color: black;
+    display: flex;
     fill: #ddd;
     flex-shrink: 0;
     height: 1.6em;
@@ -19,9 +20,14 @@
 .WineGlass--sparkling {
     fill: #f8eac0;
 }
+
+.WineGlass-svg {
+    flex: 1 1 auto;
+}
 .WineGlass--sparkling .WineGlass-svg {
     transform: scale(0.8, 1.1);
 }
+
 .WineGlass-value {
     font-weight: 600;
     left: 50%;

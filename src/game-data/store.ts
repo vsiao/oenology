@@ -39,7 +39,7 @@ const initGame = (): GameState => {
             type: "workerPlacement",
             playerId: "viny",
             pendingAction: {
-                type: "playSummerVisitor"
+                type: "playWinterVisitor"
             },
         },
         players: {

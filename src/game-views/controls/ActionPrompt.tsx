@@ -3,14 +3,10 @@ import "./ActionPrompt.css";
 import GameState from "../../game-data/GameState";
 import { connect } from "react-redux";
 import { PromptState } from "../../game-data/prompts/PromptState";
-import { GameAction } from "../../game-data/actionCreators";
-import { Dispatch } from "redux";
-import { chooseAction } from "../../game-data/prompts/promptActionCreators";
+import ChooseActionPrompt from "./ChooseActionPrompt";
 
 interface Props {
-    currentPlayerId: string;
     actionPrompt: PromptState;
-    onSelectChoice: (choice: number) => void;
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
@@ -25,18 +21,7 @@ const ActionPrompt: React.FunctionComponent<Props> = props => {
 const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
     switch (prompt.type) {
         case "chooseAction":
-            return <ul>
-                {prompt.choices.map((choice, i) => {
-                    return <li className="ActionPrompt-choice" key={i}>
-                        <button
-                            className="ActionPrompt-choiceButton"
-                            onClick={() => props.onSelectChoice(i)}
-                        >
-                            {choice}
-                        </button>
-                    </li>;
-                })}
-            </ul>;
+            return <ChooseActionPrompt prompt={prompt} />;
         default:
             return JSON.stringify(prompt);
     }
@@ -46,10 +31,4 @@ const mapStateToProps = (state: GameState) => {
     return { actionPrompt: state.actionPrompt, };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
-    return {
-        onSelectChoice: (choice: number) => dispatch(chooseAction(choice))
-    };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(ActionPrompt);
+export default connect(mapStateToProps)(ActionPrompt);

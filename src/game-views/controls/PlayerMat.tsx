@@ -31,7 +31,7 @@ interface Props {
 const PlayerMat: React.FunctionComponent<Props> = props => {
     const { currentTurn, playerState } = props;
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
-        <ActionPrompt currentPlayerId={props.currentPlayerId} />
+        <ActionPrompt />
         <div className="PlayerMat-header">
             <Residuals className="PlayerMat-residualPayments">0</Residuals>
             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
@@ -53,7 +53,8 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                 const cardData = summerVisitorCards[id];
                 const canPlaySummerVisitor = currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
-                    currentTurn.pendingAction.type === "playSummerVisitor";
+                    currentTurn.pendingAction.type === "playSummerVisitor" &&
+                    currentTurn.pendingAction.visitorId === undefined;
                 return <li key={id} className="PlayerMat-card">
                     <VisitorCard
                         interactive={canPlaySummerVisitor}
@@ -69,7 +70,8 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                 const cardData = winterVisitorCards[id];
                 const canPlayWinterVisitor = currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
-                    currentTurn.pendingAction.type === "playWinterVisitor";
+                    currentTurn.pendingAction.type === "playWinterVisitor" &&
+                    currentTurn.pendingAction.visitorId === undefined;
                 return <li key={id} className="PlayerMat-card">
                     <VisitorCard
                         interactive={canPlayWinterVisitor}

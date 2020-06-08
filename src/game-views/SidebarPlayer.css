@@ -84,7 +84,6 @@
 .SidebarPlayer-grapesAndWine {
     border-right: 1px solid #aaa;
     display: inline-block;
-    text-align: right;
     vertical-align: top;
 }
 
@@ -96,6 +95,11 @@
     height: 24px;
     justify-content: center;
     width: 24px;
+}
+
+.SidebarPlayer-wines {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .SidebarPlayer-cellar {

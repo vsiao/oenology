@@ -1,21 +1,21 @@
 
 export type PromptState =
     | null
-    | ChooseActionPrompt
-    | MakeWinePrompt
-    | PickWinePrompt;
+    | ChooseActionPromptState
+    | MakeWinePromptState
+    | PickWinePromptState;
 
-export interface ChooseActionPrompt {
+export interface ChooseActionPromptState {
     type: "chooseAction";
     choices: React.ReactNode[];
 }
 
-export interface MakeWinePrompt {
+export interface MakeWinePromptState {
     type: "makeWine";
     upToN: number;
 }
 
-export interface PickWinePrompt {
+export interface PickWinePromptState {
     type: "pickWine";
     minValue: number;
 }

@@ -25,15 +25,15 @@ export interface WorkerPlacementTurn {
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
     pendingAction:
-    | null
-    | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; } // choose sv card, then ...
-    | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
-    | { type: "plant"; } // choose vine card
-    | { type: "build"; } // choose structure
-    | PlayWinterVisitor
-    | { type: "harvest"; } // choose field
-    | { type: "makeWine"; } // choose grape
-    | { type: "fillOrder"; }; // choose order card
+        | null
+        | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; } // choose sv card, then ...
+        | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
+        | { type: "plant"; } // choose vine card
+        | { type: "build"; } // choose structure
+        | PlayWinterVisitor
+        | { type: "harvest"; } // choose field
+        | { type: "makeWine"; } // choose grape
+        | { type: "fillOrder"; }; // choose order card
 }
 
 export interface PlayWinterVisitor {

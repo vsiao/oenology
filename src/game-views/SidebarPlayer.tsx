@@ -62,24 +62,32 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 </div>
             </div>
             <div className="SidebarPlayer-cellar">
-                <div className="SidebarPlayer-redWines">
+                <div className="SidebarPlayer-wines">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}><WineGlass color="red">{i + 1}</WineGlass></div>
+                        <div className="SidebarPlayer-wine" key={i}>
+                            <WineGlass color="red">{i + 1}</WineGlass>
+                        </div>
                     )}
                 </div>
-                <div className="SidebarPlayer-whiteWines">
+                <div className="SidebarPlayer-wines">
                     {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i + 1}</div>
+                        <div className="SidebarPlayer-wine" key={i}>
+                            <WineGlass color="white">{i + 1}</WineGlass>
+                        </div>
                     )}
                 </div>
-                <div className="SidebarPlayer-roseWines">
+                <div className="SidebarPlayer-wines">
                     {new Array(6).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i + 4}</div>
+                        <div className="SidebarPlayer-wine" key={i}>
+                            <WineGlass color="blush">{i + 4}</WineGlass>
+                        </div>
                     )}
                 </div>
-                <div className="SidebarPlayer-sparklingWines">
+                <div className="SidebarPlayer-wines">
                     {new Array(3).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>{i + 7}</div>
+                        <div className="SidebarPlayer-wine" key={i}>
+                            <WineGlass color="sparkling">{i + 7}</WineGlass>
+                        </div>
                     )}
                 </div>
             </div>
