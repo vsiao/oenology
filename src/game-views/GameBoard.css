@@ -1,2 +1,17 @@
 .GameBoard {
+    background: #9dc091;
+    display: flex;
+    overflow: auto;
+}
+.GameBoard-order {
+    margin: 16px 12px 12px 16px;
+}
+.GameBoard-actions {
+    display: flex;
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    margin: 16px 4px 8px;
+}
+.GameBoard-actions:last-child {
+    margin-right: 8px;
 }
