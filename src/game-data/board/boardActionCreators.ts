@@ -1,6 +1,6 @@
 import { Action } from "redux";
 
-type WorkerPlacement =
+export type WorkerPlacement =
     | "drawVine"
     | "giveTour"
     | "buildStructure"
@@ -19,6 +19,6 @@ type WorkerPlacement =
 export interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
     placement: WorkerPlacement;
 }
-export const placeWorker = (placement: WorkerPlacement) => {
+export const placeWorker = (placement: WorkerPlacement): PlaceWorkerAction => {
     return { type: "PLACE_WORKER", placement };
 };
