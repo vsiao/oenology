@@ -13,9 +13,9 @@ import Coins from "../icons/Coins";
 import Residuals from "../icons/Residuals";
 import VictoryPoints from "../icons/VictoryPoints";
 import Worker from "../icons/Worker";
-import OrderCard from "../OrderCard";
-import VineCard from "../VineCard";
-import VisitorCard from "../VisitorCard";
+import OrderCard from "../cards/OrderCard";
+import VineCard from "../cards/VineCard";
+import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 
 import "./PlayerMat.css";

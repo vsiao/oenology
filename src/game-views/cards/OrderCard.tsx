@@ -1,8 +1,8 @@
 import * as React from "react";
-import { OrderCardData } from "../game-data/orderCards";
-import WineGlass from "./icons/WineGlass";
-import VictoryPoints from "./icons/VictoryPoints";
-import Residuals from "./icons/Residuals";
+import { OrderCardData } from "../../game-data/orderCards";
+import WineGlass from "../icons/WineGlass";
+import VictoryPoints from "../icons/VictoryPoints";
+import Residuals from "../icons/Residuals";
 import "./OrderCard.css";
 
 interface Props {

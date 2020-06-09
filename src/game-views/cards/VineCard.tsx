@@ -1,7 +1,7 @@
 import * as React from "react";
-import { VineCardData } from "../game-data/vineCards";
-import Grape from "./icons/Grape";
-import { GrapeColor } from "../game-data/GameState";
+import { VineCardData } from "../../game-data/vineCards";
+import Grape from "../icons/Grape";
+import { GrapeColor } from "../../game-data/GameState";
 import "./VineCard.css";
 
 interface Props {
