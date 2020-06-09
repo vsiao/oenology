@@ -4,10 +4,10 @@ import Coins from "../../../game-views/icons/Coins";
 import Worker from "../../../game-views/icons/Worker";
 import { SummerVisitor } from "../../../game-views/icons/Card";
 import * as React from "react";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../../reducers";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../../shared/sharedReducers";
 import GameState from "../../GameState";
 import { promptForAction, clearPrompt, promptToPickWine, promptToMakeWine } from "../../prompts/promptReducers";
-import { GameAction } from "../../actionTypes";
+import { GameAction } from "../../gameActions";
 
 const numCoins = (gameState: GameState) => {
     return 0;

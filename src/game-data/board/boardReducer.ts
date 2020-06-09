@@ -1,6 +1,6 @@
-import { GameAction } from "../actionTypes";
+import { GameAction } from "../gameActions";
 import GameState from "../GameState";
-import { gainCoins, endTurn } from "../reducers";
+import { endTurn, gainCoins } from "../shared/sharedReducers";
 
 export const board = (state: GameState, action: GameAction) => {
     switch (action.type) {

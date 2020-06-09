@@ -1,9 +1,9 @@
-import * as React from "react";
 import "./ActionPrompt.css";
-import GameState from "../../game-data/GameState";
+import * as React from "react";
 import { connect } from "react-redux";
 import { PromptState } from "../../game-data/prompts/PromptState";
 import ChooseActionPrompt from "./ChooseActionPrompt";
+import { AppState } from "../../store/AppState";
 
 interface Props {
     actionPrompt: PromptState;
@@ -27,8 +27,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
     }
 };
 
-const mapStateToProps = (state: GameState) => {
-    return { actionPrompt: state.actionPrompt, };
+const mapStateToProps = (state: AppState) => {
+    return { actionPrompt: state.game.actionPrompt, };
 };
 
 export default connect(mapStateToProps)(ActionPrompt);

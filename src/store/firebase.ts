@@ -1,6 +1,6 @@
 import * as firebase from "firebase/app";
 import { take } from "redux-saga/effects";
-import { GameAction } from "../game-data/actionTypes";
+import { GameAction } from "../game-data/gameActions";
 import { firebaseConfig } from "./config";
 
 import "firebase/database";

@@ -1,4 +1,4 @@
-import GameState, { CardType } from "./GameState";
+import GameState, { CardType } from "../GameState";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;

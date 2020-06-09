@@ -8,6 +8,7 @@ export default interface GameState {
     // shared state
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
+    decks: CardDecks;
 
     // local state
     playerId: string | null;
@@ -20,6 +21,16 @@ export type CurrentTurn =
     | WorkerPlacementTurn
     | { type: "fallVisitor"; playerId: string; };
 
+export interface CardDecks {
+    vine: CardDeck<VineId>;
+    summerVisitor: CardDeck<SummerVisitorId>;
+    order: CardDeck<OrderId>;
+    winterVisitor: CardDeck<WinterVisitorId>;
+}
+interface CardDeck<CardIdT> {
+    discardPile: CardIdT[];
+    drawPile: CardIdT[];
+}
 
 interface WorkerPlacementTurn {
     type: "workerPlacement";

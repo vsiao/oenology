@@ -2,7 +2,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { ChooseActionPromptState } from "../../game-data/prompts/PromptState";
-import { GameAction } from "../../game-data/actionTypes";
+import { GameAction } from "../../game-data/gameActions";
 import { Dispatch } from "redux";
 import { chooseAction } from "../../game-data/prompts/promptActionCreators";
 

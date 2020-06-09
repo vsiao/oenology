@@ -1,8 +1,8 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../../game-data/actionTypes";
-import GameState, { CurrentTurn, PlayerState } from "../../game-data/GameState";
+import { GameAction } from "../../game-data/gameActions";
+import { CurrentTurn, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { pickSummerVisitor } from "../../game-data/visitors/summer/summerVisitorActionCreators";
@@ -19,6 +19,7 @@ import VisitorCard from "../VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 
 import "./PlayerMat.css";
+import { AppState } from "../../store/AppState";
 
 interface Props {
     currentTurn: CurrentTurn;
@@ -98,10 +99,10 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const mapStateToProps = (gameState: GameState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
     return {
-        currentTurn: gameState.currentTurn,
-        playerState: gameState.players[ownProps.playerId],
+        currentTurn: state.game.currentTurn,
+        playerState: state.game.players[ownProps.playerId],
     };
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {

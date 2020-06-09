@@ -1,7 +1,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../game-data/actionTypes";
+import { GameAction } from "../game-data/gameActions";
 import { WorkerPlacement, placeWorker } from "../game-data/board/boardActionCreators";
 import { SummerActions, WinterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
