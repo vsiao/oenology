@@ -8,12 +8,26 @@ export default interface GameState {
     // shared state
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
+    wakeUpOrder: [
+        PlayerWakeUpOrder, // -
+        PlayerWakeUpOrder, // vine
+        PlayerWakeUpOrder, // order
+        PlayerWakeUpOrder, // coin
+        PlayerWakeUpOrder, // visitor
+        PlayerWakeUpOrder, // victory point
+        PlayerWakeUpOrder, // temp worker
+    ];
     decks: CardDecks;
 
     // local state
     playerId: string | null;
     actionPrompt: PromptState;
 }
+
+type PlayerWakeUpOrder = null | {
+    playerId: string;
+    passed?: true;
+};
 
 export type CurrentTurn =
     | { type: "papaSetUp"; playerId: string; }
@@ -32,7 +46,7 @@ interface CardDeck<CardIdT> {
     drawPile: CardIdT[];
 }
 
-interface WorkerPlacementTurn {
+export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
 

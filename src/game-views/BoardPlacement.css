@@ -7,7 +7,7 @@
     justify-content: flex-end;
     padding: 0 1em;
 }
-.BoardPlacement:hover {
+.BoardPlacement--interactive:hover {
     background: #eee;
     cursor: pointer;
 }

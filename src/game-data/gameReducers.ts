@@ -23,9 +23,7 @@ export const initGame = (
         currentTurn: {
             type: "workerPlacement",
             playerId: "viny",
-            pendingAction: {
-                type: "playSummerVisitor"
-            },
+            pendingAction: null,
         },
         decks: {
             vine: { drawPile: shuffledCards.vine, discardPile: [] },
@@ -41,6 +39,7 @@ export const initGame = (
             // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
         },
+        wakeUpOrder: [null, { playerId: "stfy" }, null, null, null, null, { playerId: "viny" }],
         playerId,
         actionPrompt: null,
     };

@@ -47,7 +47,7 @@ const renderStatus = (currentTurn: CurrentTurn) => {
                         return <span>{playerName} is playing a <WinterVisitor />.</span>;
                 }
             }
-            return `It's ${playerName}'s turn.`
+            return <>It's&nbsp;{playerName}'s turn.</>
         default:
             return JSON.stringify(currentTurn);
     }
