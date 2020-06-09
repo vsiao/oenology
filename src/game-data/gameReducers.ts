@@ -10,16 +10,15 @@ import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
 
 export const game = (state: GameState | undefined, action: GameAction): GameState => {
     if (state === undefined) {
-        return initGame({ vine: [], summerVisitor: [], order: [], winterVisitor: [] });
-    }
-    switch (action.type) {
-        case "START_GAME":
-            return initGame(action.shuffledCards);
+        return initGame();
     }
     return board(summerVisitor(winterVisitor(state, action), action), action);
 };
 
-const initGame = (shuffledCards: ShuffledCards): GameState => {
+export const initGame = (
+    playerId: string | null = null,
+    shuffledCards: ShuffledCards = { vine: [], summerVisitor: [], order: [], winterVisitor: [] }
+): GameState => {
     return {
         currentTurn: {
             type: "workerPlacement",
@@ -42,7 +41,7 @@ const initGame = (shuffledCards: ShuffledCards): GameState => {
             // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
         },
-        playerId: null,
+        playerId,
         actionPrompt: null,
     };
 };

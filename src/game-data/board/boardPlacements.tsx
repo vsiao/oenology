@@ -19,7 +19,7 @@ export const SummerActions: BoardAction[] = [
     },
     {
         type: "buySell",
-        title: "Sell at least one grape or buy/sell one field"
+        title: "Sell grape(s) or buy/sell one field"
     },
     {
         type: "giveTour",

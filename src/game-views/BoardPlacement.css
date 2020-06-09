@@ -1,52 +1,40 @@
 .BoardPlacement {
-    box-sizing: border-box;
-    height: 33%;
-    padding-bottom: 8px;
-    width: 50%;
-}
-.BoardPlacement:nth-child(odd) {
-    padding-right: 4px;
-}
-.BoardPlacement:nth-child(even) {
-    padding-left: 4px;
-}
-
-.BoardPlacement-inner {
     align-items: center;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 8px;
     box-sizing: border-box;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-    padding: 20px;
-    width: 100%;
+    flex: 1 1 auto;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    padding: 0 1em;
+}
+.BoardPlacement:hover {
+    background: #eee;
+    cursor: pointer;
+}
+.BoardPlacement + .BoardPlacement {
+    border-top: 1px solid #ccc;
 }
 
 .BoardPlacement-title {
     font-weight: 600;
-    margin-bottom: 1em;
-    text-align: center;
+    margin-left: 1em;
     text-transform: uppercase;
 }
 
 .BoardPlacement-spots {
     display: flex;
     justify-content: space-between;
-    width: 100%;
+    max-width: 150px;
+    padding: 4px 0;
+    width: 30%;
 }
 
 .BoardPlacement-spot {
-    border: 2px dashed #999;
+    border: 2px dashed #ccc;
     border-radius: 50%;
-    cursor: pointer;
     display: flex;
     justify-content: center;
     min-width: 2em;
     padding: 4px 0;
     width: 25%;
-}
-.BoardPlacement-spot:hover {
-    border-color: #555;
 }

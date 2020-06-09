@@ -18,7 +18,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
         <div className="GameBoard-order">
             Order
         </div>
-        <div className="GameBoard-actions">
+        <div className="GameBoard-summerActions">
             {SummerActions.map(action =>
                 <BoardPlacement
                     key={action.type}
@@ -27,7 +27,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                     season="summer"
                 />)}
         </div>
-        <div className="GameBoard-actions">
+        <div className="GameBoard-winterActions">
             {WinterActions.map(action =>
                 <BoardPlacement
                     key={action.type}

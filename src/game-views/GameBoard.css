@@ -1,17 +1,31 @@
 .GameBoard {
-    background: #9dc091;
-    display: flex;
+    display: grid;
+    grid-gap: 8px;
+    grid-template-areas:
+        "nothing decks"
+        "order summer-actions"
+        "order winter-actions";
+    grid-template-columns: 1fr 8fr;
+    grid-template-rows: 1fr auto auto;
     overflow: auto;
+    padding: 16px;
 }
+
 .GameBoard-order {
-    margin: 16px 12px 12px 16px;
+    grid-area: order;
 }
-.GameBoard-actions {
+
+.GameBoard-summerActions,
+.GameBoard-winterActions {
     display: flex;
-    flex: 1 1 0;
-    flex-wrap: wrap;
-    margin: 16px 4px 8px;
+    flex-direction: column;
+    margin-bottom: 32px;
 }
-.GameBoard-actions:last-child {
-    margin-right: 8px;
+
+.GameBoard-summerActions {
+    grid-area: summer-actions;
+}
+
+.GameBoard-winterActions {
+    grid-area: winter-actions;
 }
