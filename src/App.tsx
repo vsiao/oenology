@@ -1,5 +1,5 @@
 import './App.css';
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { startGame } from './game-data/gameActions';
@@ -20,16 +20,20 @@ const App: React.FunctionComponent<Props> = props => {
         <div className="App">
             <header className="App-header">
                 oenology
-                {props.currentPlayerId
-                    ? null
-                    : props.playerIds.map(playerId =>
-                        <button key={playerId} onClick={() => props.onSelectPlayerId(playerId)}>
-                            {playerId}
-                        </button>
-                    )}
                 <button onClick={props.startGame}>New Game</button>
             </header>
             <OenologyGame currentPlayerId={props.currentPlayerId} />
+            {props.currentPlayerId === null
+                ? <div className="App-modal">
+                      <div className="App-dialog">
+                          Who are you? {props.playerIds.map(playerId =>
+                              <button key={playerId} onClick={() => props.onSelectPlayerId(playerId)}>
+                                  {playerId}
+                              </button>
+                          )}
+                      </div>
+                  </div>
+                : null}
         </div>
     );
 };
