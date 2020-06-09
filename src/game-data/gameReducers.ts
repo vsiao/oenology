@@ -1,9 +1,5 @@
-import GameState, { PlayerColor, PlayerState } from "./GameState";
-import { GameAction, ShuffledCards } from "./gameActions";
-import { vineCards, VineId } from "./vineCards";
-import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
-import { orderCards, OrderId } from "./orderCards";
-import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
+import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
+import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { summerVisitor } from "./visitors/summer/summerVisitorReducers";
 import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
@@ -15,9 +11,15 @@ export const game = (state: GameState | undefined, action: GameAction): GameStat
     return board(summerVisitor(winterVisitor(state, action), action), action);
 };
 
+const EMPTY_CARD_PILES: CardsByType = {
+    vine: [],
+    summerVisitor: [],
+    order: [],
+    winterVisitor: [],
+};
 export const initGame = (
     playerId: string | null = null,
-    shuffledCards: ShuffledCards = { vine: [], summerVisitor: [], order: [], winterVisitor: [] }
+    shuffledCards: CardsByType = EMPTY_CARD_PILES
 ): GameState => {
     return {
         currentTurn: {
@@ -25,12 +27,8 @@ export const initGame = (
             playerId: "viny",
             pendingAction: null,
         },
-        decks: {
-            vine: { drawPile: shuffledCards.vine, discardPile: [] },
-            summerVisitor: { drawPile: shuffledCards.summerVisitor, discardPile: [] },
-            order: { drawPile: shuffledCards.order, discardPile: [] },
-            winterVisitor: { drawPile: shuffledCards.winterVisitor, discardPile: [] },
-        },
+        drawPiles: shuffledCards,
+        discardPiles: EMPTY_CARD_PILES,
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
@@ -56,10 +54,10 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             other: 2,
         },
         cardsInHand: {
-            vine: Object.keys(vineCards) as VineId[],
-            summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
-            order: Object.keys(orderCards) as OrderId[],
-            winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
+            vine: [],
+            summerVisitor: ["tourGuide"],
+            order: [],
+            winterVisitor: ["judge", "politician"],
         },
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],

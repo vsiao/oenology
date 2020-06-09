@@ -17,7 +17,8 @@ export default interface GameState {
         PlayerWakeUpOrder, // victory point
         PlayerWakeUpOrder, // temp worker
     ];
-    decks: CardDecks;
+    drawPiles: CardsByType;
+    discardPiles: CardsByType;
 
     // local state
     playerId: string | null;
@@ -34,17 +35,6 @@ export type CurrentTurn =
     | { type: "wakeUpOrder"; playerId: string; }
     | WorkerPlacementTurn
     | { type: "fallVisitor"; playerId: string; };
-
-export interface CardDecks {
-    vine: CardDeck<VineId>;
-    summerVisitor: CardDeck<SummerVisitorId>;
-    order: CardDeck<OrderId>;
-    winterVisitor: CardDeck<WinterVisitorId>;
-}
-interface CardDeck<CardIdT> {
-    discardPile: CardIdT[];
-    drawPile: CardIdT[];
-}
 
 export interface WorkerPlacementTurn {
     type: "workerPlacement";
@@ -81,12 +71,14 @@ export interface PlayerState {
         grande: boolean;
         other: number;
     };
-    cardsInHand: {
-        vine: VineId[];
-        summerVisitor: SummerVisitorId[];
-        order: OrderId[];
-        winterVisitor: WinterVisitorId[];
-    },
+    cardsInHand: CardsByType;
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
+}
+
+export interface CardsByType {
+    vine: VineId[];
+    summerVisitor: SummerVisitorId[];
+    order: OrderId[];
+    winterVisitor: WinterVisitorId[];
 }

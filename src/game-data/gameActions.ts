@@ -7,6 +7,7 @@ import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVis
 import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
+import { CardsByType } from "./GameState";
 
 export type GameAction = (
     | StartGameAction
@@ -21,14 +22,8 @@ export type GameAction = (
     published?: true;
 };
 
-export interface ShuffledCards {
-    vine: VineId[];
-    summerVisitor: SummerVisitorId[];
-    order: OrderId[];
-    winterVisitor: WinterVisitorId[];
-}
 interface StartGameAction extends Action<"START_GAME"> {
-    shuffledCards: ShuffledCards;
+    shuffledCards: CardsByType;
 }
 export const startGame = (): StartGameAction => {
     const vineIds: VineId[] = [];
