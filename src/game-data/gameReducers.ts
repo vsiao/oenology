@@ -2,23 +2,27 @@ import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
 import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { visitor } from "./visitors/visitorReducer";
+import { prompt } from "./prompts/promptReducers";
+import { vineCards, VineId } from "./vineCards";
+import { summerVisitorCards, SummerVisitorId, winterVisitorCards, WinterVisitorId } from "./visitors/visitorCards";
+import { orderCards, OrderId } from "./orderCards";
 
 export const game = (state: GameState | undefined, action: GameAction): GameState => {
     if (state === undefined) {
         return initGame();
     }
-    return board(visitor(state, action), action);
+    return board(visitor(prompt(state, action), action), action);
 };
 
-const EMPTY_CARD_PILES: CardsByType = {
-    vine: [],
-    summerVisitor: [],
-    order: [],
-    winterVisitor: [],
+const UNSHUFFLED_CARDS: CardsByType = {
+    vine: Object.keys(vineCards) as VineId[],
+    summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
+    order: Object.keys(orderCards) as OrderId[],
+    winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
 };
 export const initGame = (
     playerId: string | null = null,
-    shuffledCards: CardsByType = EMPTY_CARD_PILES
+    shuffledCards: CardsByType = UNSHUFFLED_CARDS
 ): GameState => {
     return {
         currentTurn: {
@@ -27,7 +31,12 @@ export const initGame = (
             pendingAction: null,
         },
         drawPiles: shuffledCards,
-        discardPiles: EMPTY_CARD_PILES,
+        discardPiles: {
+            vine: [],
+            summerVisitor: [],
+            order: [],
+            winterVisitor: [],
+        },
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),

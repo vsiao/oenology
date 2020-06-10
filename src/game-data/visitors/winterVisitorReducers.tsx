@@ -5,7 +5,7 @@ import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
 import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../shared/sharedReducers";
 import GameState from "../GameState";
-import { promptForAction, clearPrompt, promptToPickWine, promptToMakeWine } from "../prompts/promptReducers";
+import { promptForAction, promptToPickWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
 
@@ -28,14 +28,10 @@ export const winterVisitorReducers: Record<
                 switch (action.choice) {
                     case 0:
                         return endTurn(
-                            drawCards(
-                                clearPrompt(state),
-                                state.currentTurn.playerId,
-                                { summerVisitor: 2 }
-                            )
+                            drawCards(state, state.currentTurn.playerId, { summerVisitor: 2 })
                         );
                     case 1:
-                        return promptToPickWine(clearPrompt(state), /* minValue */ 4);
+                        return promptToPickWine(state, /* minValue */ 4);
                     default:
                         return state;
                 }

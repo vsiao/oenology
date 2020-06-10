@@ -1,4 +1,16 @@
 import GameState from "../GameState";
+import { GameAction } from "../gameActions";
+
+export const prompt = (state: GameState, action: GameAction) => {
+    switch (action.type) {
+        case "CHOOSE_ACTION":
+        case "MAKE_WINE":
+        case "PICK_WINE":
+            return { ...state, actionPrompt: null };
+        default:
+            return state;
+    }
+};
 
 export const promptForAction = (state: GameState, choices: React.ReactNode[]): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
@@ -28,8 +40,4 @@ export const promptToPickWine = (state: GameState, minValue = 1): GameState => {
         ...state,
         actionPrompt: { type: "pickWine", minValue }
     };
-};
-
-export const clearPrompt = (state: GameState): GameState => {
-    return { ...state, actionPrompt: null };
 };

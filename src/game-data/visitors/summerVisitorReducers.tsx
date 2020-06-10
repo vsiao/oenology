@@ -1,7 +1,7 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState from "../GameState";
-import { promptForAction, clearPrompt } from "../prompts/promptReducers";
+import { promptForAction } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import { endTurn, gainCoins } from "../shared/sharedReducers";
@@ -25,7 +25,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case 0:
-                        return endTurn(gainCoins(clearPrompt(state), state.currentTurn.playerId, 4));
+                        return endTurn(gainCoins(state, state.currentTurn.playerId, 4));
                     case 1:
                         return state; // TODO
                     default:
