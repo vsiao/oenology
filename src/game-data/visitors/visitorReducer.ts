@@ -12,8 +12,7 @@ export const visitor = (state: GameState, action: GameAction) => {
     if (
         state.currentTurn.type !== "workerPlacement" ||
         state.currentTurn.pendingAction === null ||
-        (state.currentTurn.pendingAction.type !== "playSummerVisitor" &&
-            state.currentTurn.pendingAction.type !== "playWinterVisitor")
+        state.currentTurn.pendingAction.type !== "playVisitor"
     ) {
         // Not currently playing a visitor; short-circuit
         return state;

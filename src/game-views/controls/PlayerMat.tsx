@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
-import { CurrentTurn, PlayerState } from "../../game-data/GameState";
+import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { currentTurn, playerState } = props;
+    const { playerState } = props;
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />
         <div className="PlayerMat-header">
@@ -45,54 +45,45 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             </ul>
         </div>
         <ul className="PlayerMat-cards">
-            {playerState.cardsInHand.summerVisitor.map(id => {
-                const cardData = visitorCards[id];
-                const canPlaySummerVisitor = currentTurn.playerId === playerState.id &&
-                    currentTurn.type === "workerPlacement" &&
-                    currentTurn.pendingAction !== null &&
-                    currentTurn.pendingAction.type === "playSummerVisitor" &&
-                    currentTurn.pendingAction.visitorId === undefined;
-                return <li key={id} className="PlayerMat-card">
-                    <VisitorCard
-                        interactive={canPlaySummerVisitor}
-                        type={"summer"}
-                        cardData={cardData}
-                        onClick={canPlaySummerVisitor
-                            ? () => props.onSelectVisitor(id)
-                            : undefined}
-                    />
-                </li>;
-            })}
-            {playerState.cardsInHand.winterVisitor.map(id => {
-                const cardData = visitorCards[id];
-                const canPlayWinterVisitor = currentTurn.playerId === playerState.id &&
-                    currentTurn.type === "workerPlacement" &&
-                    currentTurn.pendingAction !== null &&
-                    currentTurn.pendingAction.type === "playWinterVisitor" &&
-                    currentTurn.pendingAction.visitorId === undefined;
-                return <li key={id} className="PlayerMat-card">
-                    <VisitorCard
-                        interactive={canPlayWinterVisitor}
-                        type={"winter"}
-                        cardData={cardData}
-                        onClick={canPlayWinterVisitor
-                            ? () => props.onSelectVisitor(id)
-                            : undefined}
-                    />
-                </li>;
-            })}
-            {props.playerState.cardsInHand.vine.map(id => {
-                return <li key={id} className="PlayerMat-card">
-                    <VineCard cardData={vineCards[id]} />
-                </li>;
-            })}
-            {props.playerState.cardsInHand.order.map(id => {
-                return <li key={id} className="PlayerMat-card">
-                    <OrderCard cardData={orderCards[id]} />
-                </li>;
-            })}
+            {playerState.cardsInHand.map(card => renderCard(card, props))}
         </ul>
     </div>;
+};
+const renderCard = (card: CardId, props: Props) => {
+    const { currentTurn, playerState } = props;
+    switch (card.type) {
+        case "vine":
+            return <li key={card.id} className="PlayerMat-card">
+                <VineCard cardData={vineCards[card.id]} />
+            </li>;
+
+        case "order":
+            return <li key={card.id} className="PlayerMat-card">
+                <OrderCard cardData={orderCards[card.id]} />
+            </li>;
+
+        case "summerVisitor":
+        case "winterVisitor":
+            const cardData = visitorCards[card.id];
+            const canPlayVisitor = currentTurn.playerId === playerState.id &&
+                currentTurn.type === "workerPlacement" &&
+                currentTurn.pendingAction !== null &&
+                currentTurn.pendingAction.type === "playVisitor" &&
+                currentTurn.pendingAction.visitorId === undefined && (
+                    (currentTurn.season === "summer" && card.type === "summerVisitor") ||
+                    (currentTurn.season === "winter" && card.type === "winterVisitor")
+                );
+            return <li key={card.id} className="PlayerMat-card">
+                <VisitorCard
+                    interactive={canPlayVisitor}
+                    type={card.type === "summerVisitor" ? "summer" : "winter"}
+                    cardData={cardData}
+                    onClick={canPlayVisitor
+                        ? () => props.onSelectVisitor(card.id)
+                        : undefined}
+                />
+            </li>;
+    }
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {

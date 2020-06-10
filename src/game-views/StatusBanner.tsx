@@ -32,18 +32,13 @@ const renderStatus = (currentTurn: CurrentTurn) => {
                         return <span>{playerName} is harvesting a field.</span>;
                     case "makeWine":
                         return <span>{playerName} is making some wine.</span>
-                    case "playSummerVisitor":
+                    case "playVisitor":
+                        const card = currentTurn.season === "summer" ? <SummerVisitor /> : <WinterVisitor />;
                         if  (currentTurn.pendingAction.visitorId) {
                             const { name } = visitorCards[currentTurn.pendingAction.visitorId];
-                            return <span>{playerName} is playing the <strong>{name}</strong> <SummerVisitor />.</span>
+                            return <span>{playerName} is playing the <strong>{name}</strong> {card}.</span>
                         }
-                        return <span>{playerName} is playing a <SummerVisitor />.</span>;
-                    case "playWinterVisitor":
-                        if  (currentTurn.pendingAction.visitorId) {
-                            const { name } = visitorCards[currentTurn.pendingAction.visitorId];
-                            return <span>{playerName} is playing the <strong>{name}</strong> <WinterVisitor />.</span>
-                        }
-                        return <span>{playerName} is playing a <WinterVisitor />.</span>;
+                        return <span>{playerName} is playing a {card}.</span>;
                 }
             }
             return <>It's&nbsp;{playerName}'s turn.</>

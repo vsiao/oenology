@@ -1,4 +1,5 @@
 import GameState, { CardType } from "../GameState";
+import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -18,7 +19,6 @@ export const drawCards = (
     const [drawnOrders, order] = splitDeck(drawPiles.order, numCards.order);
     const [drawnWinterVisitors, winterVisitor] = splitDeck(drawPiles.winterVisitor, numCards.winterVisitor);
 
-    const hand = state.players[playerId].cardsInHand;
     return {
         ...state,
         drawPiles: { vine, summerVisitor, order, winterVisitor },
@@ -26,12 +26,13 @@ export const drawCards = (
             ...state.players,
             [playerId]: {
                 ...state.players[playerId],
-                cardsInHand: {
-                    vine: [...hand.vine, ...drawnVines],
-                    summerVisitor: [...hand.summerVisitor, ...drawnSummerVisitors],
-                    order: [...hand.order, ...drawnOrders],
-                    winterVisitor: [...hand.winterVisitor, ...drawnWinterVisitors],
-                },
+                cardsInHand: [
+                    ...state.players[playerId].cardsInHand,
+                    ...drawnVines.map(id => ({ type: "vine" as const, id })),
+                    ...drawnSummerVisitors.map(id => ({ type: "summerVisitor" as const, id })),
+                    ...drawnOrders.map(id => ({ type: "order" as const, id })),
+                    ...drawnWinterVisitors.map(id => ({ type: "winterVisitor" as const, id })),
+                ],
             }
         }
     };
@@ -39,23 +40,58 @@ export const drawCards = (
 
 export const endTurn = (state: GameState): GameState => {
     const { currentTurn, wakeUpOrder } = state;
-    if (wakeUpOrder.every(p => p == null || p.passed)) {
-        throw new Error("Unexpected state: no valid players for current season");
-    }
-    let i = wakeUpOrder.findIndex(player => player && player.playerId === currentTurn.playerId);
-    while (true) {
-        i = (i + 1) % wakeUpOrder.length;
-        const maybeNextPlayer = wakeUpOrder[i];
-        if (maybeNextPlayer !== null && !maybeNextPlayer.passed) {
-            return {
-                ...state,
-                currentTurn: {
-                    type: "workerPlacement",
-                    playerId: maybeNextPlayer.playerId,
-                    pendingAction: null,
+    switch (currentTurn.type) {
+        case "papaSetUp":
+            return state;
+        case "wakeUpOrder":
+            return state;
+        case "workerPlacement": {
+            if (wakeUpOrder.every(p => p == null || p.passed)) {
+                throw new Error("Unexpected state: no valid players for current season");
+            }
+            let i = wakeUpOrder.findIndex(player => player && player.playerId === currentTurn.playerId);
+            while (true) {
+                i = (i + 1) % wakeUpOrder.length;
+                const maybeNextPlayer = wakeUpOrder[i];
+                if (maybeNextPlayer !== null && !maybeNextPlayer.passed) {
+                    let { discardPiles, players } = state;
+                    if (
+                        currentTurn.pendingAction !== null &&
+                        currentTurn.pendingAction.type === "playVisitor"
+                    ) {
+                        const visitorId = currentTurn.pendingAction.visitorId;
+                        // Filter out visitor card from current player's hand
+                        players = {
+                            ...players,
+                            [currentTurn.playerId]: {
+                                ...players[currentTurn.playerId],
+                                cardsInHand: players[currentTurn.playerId].cardsInHand.filter(({ id }) => id !== visitorId),
+                            },
+                        };
+                        // And add it to the front of the appropriate discard pile
+                        discardPiles = {
+                            ...discardPiles,
+                            ...(currentTurn.season === "summer"
+                                ? { summerVisitor: [visitorId as SummerVisitorId, ...discardPiles.summerVisitor] }
+                                : { winterVisitor: [visitorId as WinterVisitorId, ...discardPiles.winterVisitor] })
+                        };
+                    }
+                    return {
+                        ...state,
+                        players,
+                        discardPiles,
+                        currentTurn: {
+                            type: "workerPlacement",
+                            playerId: maybeNextPlayer.playerId,
+                            pendingAction: null,
+                            season: currentTurn.season,
+                        },
+                    };
                 }
-            };
+            }
         }
+        case "fallVisitor":
+            return state;
     }
 };
 

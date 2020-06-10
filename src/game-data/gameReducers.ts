@@ -29,6 +29,7 @@ export const initGame = (
             type: "workerPlacement",
             playerId: "viny",
             pendingAction: null,
+            season: "summer",
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -64,12 +65,11 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             grande: true,
             other: 2,
         },
-        cardsInHand: {
-            vine: [],
-            summerVisitor: ["tourGuide"],
-            order: [],
-            winterVisitor: ["judge", "politician"],
-        },
+        cardsInHand: [
+            { type: "summerVisitor", id: "tourGuide" },
+            { type: "winterVisitor", id: "judge" },
+            { type: "winterVisitor", id: "politician" },
+        ],
         fields: [
             { value: 5, vines: [], sold: false },
             { value: 6, vines: [], sold: false },

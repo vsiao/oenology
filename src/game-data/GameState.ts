@@ -40,17 +40,17 @@ export type CurrentTurn =
 export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
+    season: "summer" | "winter";
 
     // Non-null if the player has chosen to play a worker in a position
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
     pendingAction:
         | null
-        | { type: "playSummerVisitor"; visitorId?: VisitorId; }
+        | { type: "playVisitor"; visitorId?: VisitorId; }
         | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
         | { type: "plant"; } // choose vine card
         | { type: "build"; } // choose structure
-        | { type: "playWinterVisitor"; visitorId?: VisitorId; }
         | { type: "harvest"; } // choose field
         | { type: "makeWine"; } // choose grape
         | { type: "fillOrder"; }; // choose order card
@@ -73,11 +73,17 @@ export interface PlayerState {
         grande: boolean;
         other: number;
     };
-    cardsInHand: CardsByType;
+    cardsInHand: CardId[];
     fields: Field[];
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
 }
+
+export type CardId =
+    | { type: "vine"; id: VineId }
+    | { type: "summerVisitor"; id: SummerVisitorId }
+    | { type: "order"; id: OrderId }
+    | { type: "winterVisitor"; id: WinterVisitorId };
 
 export interface CardsByType {
     vine: VineId[];

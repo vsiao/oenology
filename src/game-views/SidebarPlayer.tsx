@@ -1,6 +1,6 @@
-import * as React from "react";
-import { PlayerState, CardType } from "../game-data/GameState";
 import "./SidebarPlayer.css";
+import * as React from "react";
+import { PlayerState, CardId } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -19,14 +19,10 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         <div className="SidebarPlayer-header">
             <span className="SidebarPlayer-playerName">{player.id}</span>
             <ul className="SidebarPlayer-cards">
-                {Object.entries(player.cardsInHand).map(([type, cards]) =>
-                    <React.Fragment key={type}>
-                        {(cards as unknown[]).map((_, i) =>
-                            <li key={i} className="SidebarPlayer-card">
-                                {renderCard(type as CardType)}
-                            </li>
-                        )}
-                    </React.Fragment>
+                {player.cardsInHand.map(card =>
+                    <li key={card.id} className="SidebarPlayer-card">
+                        {renderCard(card)}
+                    </li>
                 )}
             </ul>
             <Residuals className="SidebarPlayer-residualPayments">{player.residuals}</Residuals>
@@ -104,7 +100,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const renderCard = (type: CardType) => {
+const renderCard = ({ type }: CardId): React.ReactNode => {
     switch (type) {
         case "order":
             return <Order />;
@@ -115,7 +111,7 @@ const renderCard = (type: CardType) => {
         case "winterVisitor":
             return <WinterVisitor />;
     }
-}
+};
 
 export default SidebarPlayer;
 

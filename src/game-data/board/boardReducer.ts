@@ -26,7 +26,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         currentTurn: {
                             ...currentTurn,
                             pendingAction: {
-                                type: action.placement,
+                                type: "playVisitor",
                             },
                         },
                     };
