@@ -7,6 +7,8 @@ export default interface GameState {
     // shared state
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
+    tableOrder: string[];
+    grapeIndex: number; // index into tableOrder. picks wakeUpOrder first this year.
     wakeUpOrder: [
         PlayerWakeUpOrder, // -
         PlayerWakeUpOrder, // vine
@@ -65,12 +67,14 @@ export interface PlayerState {
     id: string;
     color: PlayerColor;
     coins: number;
+    residuals: number;
     victoryPoints: number;
     availableWorkers: {
         grande: boolean;
         other: number;
     };
     cardsInHand: CardsByType;
+    fields: Field[];
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
 }
@@ -80,4 +84,10 @@ export interface CardsByType {
     summerVisitor: SummerVisitorId[];
     order: OrderId[];
     winterVisitor: WinterVisitorId[];
+}
+
+interface Field {
+    value: number;
+    vines: VineId[];
+    sold: boolean;
 }

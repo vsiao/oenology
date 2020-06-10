@@ -1,10 +1,10 @@
 import * as React from "react";
-import { PlayerState } from "../game-data/GameState";
+import { PlayerState, CardType } from "../game-data/GameState";
 import "./SidebarPlayer.css";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
-import { Vine, SummerVisitor } from "./icons/Card";
+import { Vine, SummerVisitor, Order, WinterVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
@@ -14,23 +14,24 @@ interface Props {
 }
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
-    return <div className={`SidebarPlayer SidebarPlayer--${props.player.color}`}>
+    const { player } = props;
+    return <div className={`SidebarPlayer SidebarPlayer--${player.color}`}>
         <div className="SidebarPlayer-header">
-            <span className="SidebarPlayer-playerName">{props.player.id}</span>
+            <span className="SidebarPlayer-playerName">{player.id}</span>
             <ul className="SidebarPlayer-cards">
-                <li className="SidebarPlayer-card">
-                    <Vine />
-                </li>
-                <li className="SidebarPlayer-card">
-                    <Vine />
-                </li>
-                <li className="SidebarPlayer-card">
-                    <SummerVisitor />
-                </li>
+                {Object.entries(player.cardsInHand).map(([type, cards]) =>
+                    <React.Fragment key={type}>
+                        {(cards as unknown[]).map((_, i) =>
+                            <li key={i} className="SidebarPlayer-card">
+                                {renderCard(type as CardType)}
+                            </li>
+                        )}
+                    </React.Fragment>
+                )}
             </ul>
-            <Residuals className="SidebarPlayer-residualPayments">0</Residuals>
-            <Coins className="SidebarPlayer-coins">{props.player.coins}</Coins>
-            <VictoryPoints className="SidebarPlayer-victoryPoints">0</VictoryPoints>
+            <Residuals className="SidebarPlayer-residualPayments">{player.residuals}</Residuals>
+            <Coins className="SidebarPlayer-coins">{player.coins}</Coins>
+            <VictoryPoints className="SidebarPlayer-victoryPoints">{player.victoryPoints}</VictoryPoints>
         </div>
         <ul className="SidebarPlayer-structures">
             <li className="SidebarPlayer-structure">Tr</li>
@@ -102,6 +103,19 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         </ul>
     </div>;
 };
+
+const renderCard = (type: CardType) => {
+    switch (type) {
+        case "order":
+            return <Order />;
+        case "summerVisitor":
+            return <SummerVisitor />;
+        case "vine":
+            return <Vine />;
+        case "winterVisitor":
+            return <WinterVisitor />;
+    }
+}
 
 export default SidebarPlayer;
 

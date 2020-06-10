@@ -36,6 +36,8 @@ export const initGame = (
             // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
         },
+        tableOrder: ["stfy", "viny"],
+        grapeIndex: 1,
         wakeUpOrder: [null, { playerId: "stfy" }, null, null, null, null, { playerId: "viny" }],
         playerId,
         actionPrompt: null,
@@ -47,6 +49,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         id,
         color,
         coins: 0,
+        residuals: 0,
         victoryPoints: 0,
         availableWorkers: {
             grande: true,
@@ -58,6 +61,11 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             order: [],
             winterVisitor: ["judge", "politician"],
         },
+        fields: [
+            { value: 5, vines: [], sold: false },
+            { value: 6, vines: [], sold: false },
+            { value: 7, vines: [], sold: false },
+        ],
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],
             white: [false, false, false, false, false, false, false, false, false],

@@ -28,10 +28,7 @@ interface StartGameAction extends Action<"START_GAME"> {
     shuffledCards: CardsByType;
 }
 export const startGame = (): StartGameAction => {
-    const vineIds: VineId[] = [];
-    for (const [vineId, { count }] of Object.entries(vineCards)) {
-        vineIds.push(...new Array<VineId>(count).fill(vineId as VineId));
-    }
+    const vineIds = Object.keys(vineCards) as VineId[];
     const summerIds = Object.keys(summerVisitorCards) as SummerVisitorId[];
     const orderIds = Object.keys(orderCards) as OrderId[];
     const winterIds = Object.keys(winterVisitorCards) as WinterVisitorId[];

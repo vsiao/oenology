@@ -8,14 +8,13 @@ export interface VineCardData {
     yields: { [K in GrapeColor]?: number; };
 }
 
-export const vineCards = {
+const vineData = {
     cabernetSauvignon: {
         name: "Cabernet Sauvignon",
         structures: ["trellis", "irrigation"],
         yields: {
             red: 4
         },
-        count: 4,
     },
     merlot: {
         name: "Merlot",
@@ -23,7 +22,6 @@ export const vineCards = {
         yields: {
             red: 3
         },
-        count: 5,
     },
     syrah: {
         name: "Syrah",
@@ -31,7 +29,6 @@ export const vineCards = {
         yields: {
             red: 2
         },
-        count: 5,
     },
     sangiovese: {
         name: "Sangiovese",
@@ -39,7 +36,6 @@ export const vineCards = {
         yields: {
             red: 1
         },
-        count: 4,
     },
     pinot: {
         name: "Pinot",
@@ -48,7 +44,6 @@ export const vineCards = {
             red: 1,
             white: 1
         },
-        count: 6,
     },
     malvasia: {
         name: "Malvasia",
@@ -56,7 +51,6 @@ export const vineCards = {
         yields: {
             white: 1
         },
-        count: 4,
     },
     trebbiano: {
         name: "Trebbiano",
@@ -64,7 +58,6 @@ export const vineCards = {
         yields: {
             white: 2
         },
-        count: 5,
     },
     sauvignonBlanc: {
         name: "Sauvignon Blanc",
@@ -72,7 +65,6 @@ export const vineCards = {
         yields: {
             white: 3
         },
-        count: 5,
     },
     chardonnay: {
         name: "Chardonnay",
@@ -80,6 +72,50 @@ export const vineCards = {
         yields: {
             white: 4
         },
-        count: 4,
     },
+};
+
+export const vineCards = {
+    cab1: vineData.cabernetSauvignon,
+    cab2: vineData.cabernetSauvignon,
+    cab3: vineData.cabernetSauvignon,
+    cab4: vineData.cabernetSauvignon,
+    mer1: vineData.merlot,
+    mer2: vineData.merlot,
+    mer3: vineData.merlot,
+    mer4: vineData.merlot,
+    mer5: vineData.merlot,
+    syr1: vineData.syrah,
+    syr2: vineData.syrah,
+    syr3: vineData.syrah,
+    syr4: vineData.syrah,
+    syr5: vineData.syrah,
+    san1: vineData.sangiovese,
+    san2: vineData.sangiovese,
+    san3: vineData.sangiovese,
+    san4: vineData.sangiovese,
+    pin1: vineData.pinot,
+    pin2: vineData.pinot,
+    pin3: vineData.pinot,
+    pin4: vineData.pinot,
+    pin5: vineData.pinot,
+    pin6: vineData.pinot,
+    mal1: vineData.malvasia,
+    mal2: vineData.malvasia,
+    mal3: vineData.malvasia,
+    mal4: vineData.malvasia,
+    tre1: vineData.trebbiano,
+    tre2: vineData.trebbiano,
+    tre3: vineData.trebbiano,
+    tre4: vineData.trebbiano,
+    tre5: vineData.trebbiano,
+    sau1: vineData.sauvignonBlanc,
+    sau2: vineData.sauvignonBlanc,
+    sau3: vineData.sauvignonBlanc,
+    sau4: vineData.sauvignonBlanc,
+    sau5: vineData.sauvignonBlanc,
+    cha1: vineData.chardonnay,
+    cha2: vineData.chardonnay,
+    cha3: vineData.chardonnay,
+    cha4: vineData.chardonnay,
 };
