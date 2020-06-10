@@ -1,19 +1,21 @@
 import { PromptAction } from "./prompts/promptActionTypes";
-import { PickWinterVisitorAction } from "./visitors/winter/winterVisitorActionCreators";
-import { PickSummerVisitorAction } from "./visitors/summer/summerVisitorActionCreators";
 import { PlaceWorkerAction } from "./board/boardActionCreators";
 import { Action } from "redux";
-import { summerVisitorCards, SummerVisitorId } from "./visitors/summer/summerVisitorCards";
-import { winterVisitorCards, WinterVisitorId } from "./visitors/winter/winterVisitorCards";
+import {
+    SummerVisitorId,
+    WinterVisitorId,
+    summerVisitorCards,
+    winterVisitorCards,
+} from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
 import { CardsByType } from "./GameState";
+import { PickVisitorAction } from "./visitors/visitorActions";
 
 export type GameAction = (
     | StartGameAction
     | PromptAction
-    | PickSummerVisitorAction
-    | PickWinterVisitorAction
+    | PickVisitorAction
     | PlaceWorkerAction
 ) & {
     // Every action should first be pushed to firebase to be

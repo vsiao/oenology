@@ -1,5 +1,4 @@
-import { WinterVisitorId } from "./visitors/winter/winterVisitorCards";
-import { SummerVisitorId } from "./visitors/summer/summerVisitorCards";
+import { SummerVisitorId, VisitorId, WinterVisitorId } from "./visitors/visitorCards";
 import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
@@ -45,11 +44,11 @@ export interface WorkerPlacementTurn {
     // (eg. needs to pick a visitor card to play).
     pendingAction:
         | null
-        | { type: "playSummerVisitor"; visitorId?: SummerVisitorId; }
+        | { type: "playSummerVisitor"; visitorId?: VisitorId; }
         | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
         | { type: "plant"; } // choose vine card
         | { type: "build"; } // choose structure
-        | { type: "playWinterVisitor"; visitorId?: WinterVisitorId; }
+        | { type: "playWinterVisitor"; visitorId?: VisitorId; }
         | { type: "harvest"; } // choose field
         | { type: "makeWine"; } // choose grape
         | { type: "fillOrder"; }; // choose order card

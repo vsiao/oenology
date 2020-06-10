@@ -1,3 +1,4 @@
+import "./PlayerMat.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
@@ -5,10 +6,9 @@ import { GameAction } from "../../game-data/gameActions";
 import { CurrentTurn, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
-import { pickSummerVisitor } from "../../game-data/visitors/summer/summerVisitorActionCreators";
-import { pickWinterVisitor } from "../../game-data/visitors/winter/winterVisitorActionCreators";
-import { summerVisitorCards, SummerVisitorId } from "../../game-data/visitors/summer/summerVisitorCards";
-import { winterVisitorCards, WinterVisitorId } from "../../game-data/visitors/winter/winterVisitorCards";
+import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
+import { pickVisitor } from "../../game-data/visitors/visitorActions";
+import { AppState } from "../../store/AppState";
 import Coins from "../icons/Coins";
 import Residuals from "../icons/Residuals";
 import VictoryPoints from "../icons/VictoryPoints";
@@ -18,14 +18,10 @@ import VineCard from "../cards/VineCard";
 import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 
-import "./PlayerMat.css";
-import { AppState } from "../../store/AppState";
-
 interface Props {
     currentTurn: CurrentTurn;
     playerState: PlayerState;
-    onSelectSummerVisitor: (id: SummerVisitorId) => void;
-    onSelectWinterVisitor: (id: WinterVisitorId) => void;
+    onSelectVisitor: (id: VisitorId) => void;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
@@ -50,7 +46,7 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
         </div>
         <ul className="PlayerMat-cards">
             {playerState.cardsInHand.summerVisitor.map(id => {
-                const cardData = summerVisitorCards[id];
+                const cardData = visitorCards[id];
                 const canPlaySummerVisitor = currentTurn.playerId === playerState.id &&
                     currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
@@ -62,13 +58,13 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                         type={"summer"}
                         cardData={cardData}
                         onClick={canPlaySummerVisitor
-                            ? () => props.onSelectSummerVisitor(id)
+                            ? () => props.onSelectVisitor(id)
                             : undefined}
                     />
                 </li>;
             })}
             {playerState.cardsInHand.winterVisitor.map(id => {
-                const cardData = winterVisitorCards[id];
+                const cardData = visitorCards[id];
                 const canPlayWinterVisitor = currentTurn.playerId === playerState.id &&
                     currentTurn.type === "workerPlacement" &&
                     currentTurn.pendingAction !== null &&
@@ -80,7 +76,7 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                         type={"winter"}
                         cardData={cardData}
                         onClick={canPlayWinterVisitor
-                            ? () => props.onSelectWinterVisitor(id)
+                            ? () => props.onSelectVisitor(id)
                             : undefined}
                     />
                 </li>;
@@ -107,8 +103,7 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
-        onSelectSummerVisitor: (id: SummerVisitorId) => dispatch(pickSummerVisitor(id)),
-        onSelectWinterVisitor: (id: WinterVisitorId) => dispatch(pickWinterVisitor(id)),
+        onSelectVisitor: (id: VisitorId) => dispatch(pickVisitor(id)),
     };
 };
 

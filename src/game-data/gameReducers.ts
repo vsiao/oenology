@@ -1,14 +1,13 @@
 import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
 import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
-import { summerVisitor } from "./visitors/summer/summerVisitorReducers";
-import { winterVisitor } from "./visitors/winter/winterVisitorReducers";
+import { visitor } from "./visitors/visitorReducer";
 
 export const game = (state: GameState | undefined, action: GameAction): GameState => {
     if (state === undefined) {
         return initGame();
     }
-    return board(summerVisitor(winterVisitor(state, action), action), action);
+    return board(visitor(state, action), action);
 };
 
 const EMPTY_CARD_PILES: CardsByType = {

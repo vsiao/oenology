@@ -1,28 +1,25 @@
-import { WinterVisitorId } from "./winterVisitorCards";
-import { default as VP } from "../../../game-views/icons/VictoryPoints";
-import Coins from "../../../game-views/icons/Coins";
-import Worker from "../../../game-views/icons/Worker";
-import { SummerVisitor } from "../../../game-views/icons/Card";
 import * as React from "react";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../../shared/sharedReducers";
-import GameState from "../../GameState";
-import { promptForAction, clearPrompt, promptToPickWine, promptToMakeWine } from "../../prompts/promptReducers";
-import { GameAction } from "../../gameActions";
+import { default as VP } from "../../game-views/icons/VictoryPoints";
+import Coins from "../../game-views/icons/Coins";
+import Worker from "../../game-views/icons/Worker";
+import { SummerVisitor } from "../../game-views/icons/Card";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../shared/sharedReducers";
+import GameState from "../GameState";
+import { promptForAction, clearPrompt, promptToPickWine, promptToMakeWine } from "../prompts/promptReducers";
+import { GameAction } from "../gameActions";
+import { WinterVisitorId } from "./visitorCards";
 
-const numCoins = (gameState: GameState) => {
-    return 0;
-};
 const mostValuableWine = (gameState: GameState) => {
     return 8;
 };
 
-const winterVisitorReducers: Record<
+export const winterVisitorReducers: Record<
     WinterVisitorId,
     (state: GameState, action: GameAction) => GameState
 > = {
     judge: (state, action) => {
         switch (action.type) {
-            case "PICK_WINTER_VISITOR":
+            case "PICK_VISITOR":
                 return promptForAction(state, [
                     <>Draw 2 <SummerVisitor /></>,
                     <>Discard 1 wine of value 4 or more to gain <VP>3</VP></>,
@@ -50,12 +47,13 @@ const winterVisitorReducers: Record<
     },
     politician: (state, action) => {
         switch (action.type) {
-            case "PICK_WINTER_VISITOR":
-                if (numCoins(state) < 0) {
-                    return endTurn(gainCoins(state, state.currentTurn.playerId, 6));
+            case "PICK_VISITOR":
+                const { playerId } = state.currentTurn;
+                if (state.players[playerId].victoryPoints < 0) {
+                    return endTurn(gainCoins(state, playerId, 6));
                 } else {
                     return endTurn(
-                        drawCards(state, state.currentTurn.playerId, {
+                        drawCards(state, playerId, {
                             vine: 1,
                             summerVisitor: 1,
                             order: 1,
@@ -68,7 +66,7 @@ const winterVisitorReducers: Record<
     },
     professor: (state, action) => {
         switch (action.type) {
-            case "PICK_WINTER_VISITOR":
+            case "PICK_VISITOR":
                 return promptForAction(state, [
                     <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
                     <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
@@ -88,7 +86,7 @@ const winterVisitorReducers: Record<
     },
     taster: (state, action) => {
         switch (action.type) {
-            case "PICK_WINTER_VISITOR":
+            case "PICK_VISITOR":
                 return promptToPickWine(state);
             case "PICK_WINE":
                 const currentTurnPlayerId = state.currentTurn.playerId;
@@ -104,7 +102,7 @@ const winterVisitorReducers: Record<
     },
     teacher: (state, action) => {
         switch (action.type) {
-            case "PICK_WINTER_VISITOR":
+            case "PICK_VISITOR":
                 return promptForAction(state, [
                     <>Make up to 2 wine</>,
                     <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
@@ -123,36 +121,3 @@ const winterVisitorReducers: Record<
         }
     },
 }
-
-export const winterVisitor = (state: GameState, action: GameAction) => {
-    if (
-        state.currentTurn.type !== "workerPlacement" ||
-        state.currentTurn.pendingAction === null ||
-        state.currentTurn.pendingAction.type !== "playWinterVisitor"
-    ) {
-        // Not currently playing a winter visitor; short-circuit
-        return state;
-    }
-    switch (action.type) {
-        case "PICK_WINTER_VISITOR": {
-            const visitorId = action.visitorId;
-            state = {
-                ...state,
-                currentTurn: {
-                    ...state.currentTurn,
-                    pendingAction: {
-                        ...state.currentTurn.pendingAction,
-                        visitorId,
-                    }
-                },
-            };
-            return winterVisitorReducers[visitorId](state, action);
-        }
-        default:
-            const visitorId = state.currentTurn.pendingAction.visitorId;
-            if (visitorId === undefined) {
-                return state;
-            }
-            return winterVisitorReducers[visitorId](state, action);
-    }
-};
