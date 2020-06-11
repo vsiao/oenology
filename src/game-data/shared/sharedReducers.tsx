@@ -169,7 +169,7 @@ export const gainVP = (state: GameState, playerId: string, numVP: number) => {
     };
 };
 
-export const gainCoins = (state: GameState, playerId: string, numCoins: number) => {
+const editCoins = (state: GameState, playerId: string, numCoins: number) => {
     const playerState = state.players[playerId];
     return {
         ...state,
@@ -182,3 +182,6 @@ export const gainCoins = (state: GameState, playerId: string, numCoins: number) 
         },
     };
 };
+export const gainCoins = editCoins;
+export const payCoins = (state: GameState, playerId: string, numCoins: number) =>
+    editCoins(state, playerId, -numCoins);

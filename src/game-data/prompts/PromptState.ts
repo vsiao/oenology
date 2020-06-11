@@ -2,8 +2,9 @@
 export type PromptState =
     | null
     | ChooseActionPromptState
+    | { type: "chooseField" }
     | MakeWinePromptState
-    | PickWinePromptState;
+    | ChooseWinePromptState;
 
 export interface Choice {
     id: string;
@@ -19,7 +20,7 @@ export interface MakeWinePromptState {
     upToN: number;
 }
 
-export interface PickWinePromptState {
-    type: "pickWine";
+export interface ChooseWinePromptState {
+    type: "chooseWine";
     minValue: number;
 }

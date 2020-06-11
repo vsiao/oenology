@@ -81,6 +81,13 @@
 .SidebarPlayer-field + .SidebarPlayer-field {
     box-shadow: inset 0 1px 0 0 white;
 }
+.SidebarPlayer-fieldSold {
+    background: white;
+    color: #d80000;
+    font-weight: 600;
+    padding: 2px 4px;
+    transform: rotate(-5deg);
+}
 
 .SidebarPlayer-grapesAndWine {
     border-right: 1px solid #aaa;

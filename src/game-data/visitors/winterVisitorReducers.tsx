@@ -5,7 +5,7 @@ import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
 import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../shared/sharedReducers";
 import GameState from "../GameState";
-import { promptForAction, promptToPickWine, promptToMakeWine } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
 
@@ -31,11 +31,11 @@ export const winterVisitorReducers: Record<
                             drawCards(state, state.currentTurn.playerId, { summerVisitor: 2 })
                         );
                     case "JUDGE_DISCARD":
-                        return promptToPickWine(state, /* minValue */ 4);
+                        return promptToChooseWine(state, /* minValue */ 4);
                     default:
                         return state;
                 }
-            case "PICK_WINE":
+            case "CHOOSE_WINE":
                 return endTurn(gainVP(state, state.currentTurn.playerId, 3));
             default:
                 return state;
@@ -83,8 +83,8 @@ export const winterVisitorReducers: Record<
     taster: (state, action) => {
         switch (action.type) {
             case "PICK_VISITOR":
-                return promptToPickWine(state);
-            case "PICK_WINE":
+                return promptToChooseWine(state);
+            case "CHOOSE_WINE":
                 const currentTurnPlayerId = state.currentTurn.playerId;
                 const stateAfterDiscard = discardWine(state, currentTurnPlayerId, action.wine);
                 if (action.wine.value > mostValuableWine(stateAfterDiscard)) {

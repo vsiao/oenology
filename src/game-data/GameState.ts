@@ -48,7 +48,10 @@ export interface WorkerPlacementTurn {
     pendingAction:
         | null
         | { type: "playVisitor"; visitorId?: VisitorId; }
-        | { type: "buySell"; } // sell grape OR sell field OR buy field, then choose grape or choose field
+        | { type: "buySell"; }
+        | { type: "sellGrapes"; }
+        | { type: "buyField"; }
+        | { type: "sellField"; }
         | { type: "plant"; } // choose vine card
         | { type: "build"; } // choose structure
         | { type: "harvest"; } // choose field
@@ -74,7 +77,7 @@ export interface PlayerState {
         other: number;
     };
     cardsInHand: CardId[];
-    fields: Field[];
+    fields: Record<FieldId, Field>;
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
 }
@@ -92,7 +95,9 @@ export interface CardsByType {
     winterVisitor: WinterVisitorId[];
 }
 
-interface Field {
+export type FieldId = "field5" | "field6" | "field7";
+export interface Field {
+    id: FieldId;
     value: number;
     vines: VineId[];
     sold: boolean;

@@ -8,6 +8,7 @@ import { Vine, SummerVisitor, Order, WinterVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
+import { vineCards, VineCardData } from "../game-data/vineCards";
 
 interface Props {
     player: PlayerState;
@@ -38,12 +39,22 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <li className="SidebarPlayer-structure">Ta</li>
         </ul>
         <ul className="SidebarPlayer-fields">
-            <li className="SidebarPlayer-field">
-                <Grape color="red">1</Grape>
-                <Grape color="white">1</Grape>
-            </li>
-            <li className="SidebarPlayer-field"></li>
-            <li className="SidebarPlayer-field"></li>
+            {Object.values(player.fields).map(field => {
+                const totalRed = field.vines.reduce(
+                    (r, v) => r + (vineCards[v] as VineCardData).yields.red! || 0,
+                    0
+                );
+                const totalWhite = field.vines.reduce(
+                    (w, v) => w + (vineCards[v] as VineCardData).yields.white! || 0,
+                    0
+                );
+                return <li key={field.id} className="SidebarPlayer-field">
+                    {field.sold ? <span className="SidebarPlayer-fieldSold">SOLD</span> : <>
+                        {totalRed > 0 ? <Grape color="red">{totalRed}</Grape> : null}
+                        {totalWhite > 0 ? <Grape color="white">{totalWhite}</Grape> : null}
+                    </>}
+                </li>;
+            })}
         </ul>
         <div className="SidebarPlayer-grapesAndWine">
             <div className="SidebarPlayer-crushPad">

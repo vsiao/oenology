@@ -30,7 +30,7 @@ const renderStatus = ({ currentTurn, playerId, passTurn }: Props) => {
                     case "build":
                         return <span>{playerName} is building a structure.</span>;
                     case "buySell":
-                        return <span>{playerName} is selling a grape or buying/selling a field.</span>;
+                        return <span>{playerName} is selling grape(s) or buying/selling a field.</span>;
                     case "fillOrder":
                         return <span>{playerName} is filling an <Order />.</span>;
                     case "harvest":

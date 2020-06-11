@@ -1,22 +1,29 @@
+import { Action } from "redux";
+import { FieldId } from "../GameState";
+
 export type PromptAction =
     | ChooseAction
     | MakeWineAction
-    | PickWineAction;
+    | ChooseFieldAction
+    | ChooseWineAction;
 
-interface ChooseAction {
-    type: "CHOOSE_ACTION";
+interface ChooseAction extends Action<"CHOOSE_ACTION"> {
     choice: string;
 }
 export const chooseAction = (choice: string): PromptAction => {
     return { type: "CHOOSE_ACTION", choice };
 };
 
-interface MakeWineAction {
-    type: "MAKE_WINE";
-    upToN: number;
+interface MakeWineAction extends Action<"MAKE_WINE"> {
 }
 
-interface PickWineAction {
-    type: "PICK_WINE";
+interface ChooseFieldAction extends Action<"CHOOSE_FIELD"> {
+    fieldId: FieldId;
+}
+export const chooseField = (fieldId: FieldId): PromptAction => {
+    return { type: "CHOOSE_FIELD", fieldId };
+};
+
+interface ChooseWineAction extends Action<"CHOOSE_WINE"> {
     wine: { value: number }; // FIXME
 }

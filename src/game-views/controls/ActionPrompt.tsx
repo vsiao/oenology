@@ -3,6 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { PromptState } from "../../game-data/prompts/PromptState";
 import ChooseActionPrompt from "./ChooseActionPrompt";
+import ChooseFieldPrompt from "./ChooseFieldPrompt";
 import { AppState } from "../../store/AppState";
 import { CSSTransition } from "react-transition-group";
 
@@ -32,6 +33,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
     switch (prompt.type) {
         case "chooseAction":
             return <ChooseActionPrompt prompt={prompt} />;
+        case "chooseField":
+            return <ChooseFieldPrompt />;
         default:
             return JSON.stringify(prompt);
     }
