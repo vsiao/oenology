@@ -1,5 +1,14 @@
 import { Action } from "redux";
 
+export type BoardAction =
+    | PlaceWorkerAction
+    | PassAction;
+
+interface PassAction extends Action<"PASS"> {}
+export const pass = (): PassAction => {
+    return { type: "PASS" };
+};
+
 export type WorkerPlacement =
     | "drawVine"
     | "giveTour"
@@ -16,7 +25,7 @@ export type WorkerPlacement =
     | "gainCoin"
     | "yoke";
 
-export interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
+interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
     placement: WorkerPlacement;
 }
 export const placeWorker = (placement: WorkerPlacement): PlaceWorkerAction => {

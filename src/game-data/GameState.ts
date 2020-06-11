@@ -10,13 +10,13 @@ export default interface GameState {
     tableOrder: string[];
     grapeIndex: number; // index into tableOrder. picks wakeUpOrder first this year.
     wakeUpOrder: [
-        PlayerWakeUpOrder, // -
-        PlayerWakeUpOrder, // vine
-        PlayerWakeUpOrder, // order
-        PlayerWakeUpOrder, // coin
-        PlayerWakeUpOrder, // visitor
-        PlayerWakeUpOrder, // victory point
-        PlayerWakeUpOrder, // temp worker
+        WakeUpPosition | null, // -
+        WakeUpPosition | null, // vine
+        WakeUpPosition | null, // order
+        WakeUpPosition | null, // coin
+        WakeUpPosition | null, // visitor
+        WakeUpPosition | null, // victory point
+        WakeUpPosition | null, // temp worker
     ];
     drawPiles: CardsByType;
     discardPiles: CardsByType;
@@ -26,10 +26,10 @@ export default interface GameState {
     actionPrompt: PromptState;
 }
 
-type PlayerWakeUpOrder = null | {
+export interface WakeUpPosition {
     playerId: string;
     passed?: true;
-};
+}
 
 export type CurrentTurn =
     | { type: "papaSetUp"; playerId: string; }

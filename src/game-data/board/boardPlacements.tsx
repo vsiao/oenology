@@ -1,5 +1,5 @@
 import * as React from "react";
-import { WorkerPlacement } from "./boardActionCreators";
+import { WorkerPlacement } from "./boardActions";
 import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 

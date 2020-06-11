@@ -1,5 +1,5 @@
-import { PromptAction } from "./prompts/promptActionTypes";
-import { PlaceWorkerAction } from "./board/boardActionCreators";
+import { PromptAction } from "./prompts/promptActions";
+import { BoardAction } from "./board/boardActions";
 import { Action } from "redux";
 import {
     SummerVisitorId,
@@ -16,7 +16,7 @@ export type GameAction = (
     | StartGameAction
     | PromptAction
     | PickVisitorAction
-    | PlaceWorkerAction
+    | BoardAction
 ) & {
     // Every action should first be pushed to firebase to be
     // applied on other clients. Then, only on success do we

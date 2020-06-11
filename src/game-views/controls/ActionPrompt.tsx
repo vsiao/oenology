@@ -11,14 +11,16 @@ interface Props {
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
+    const nodeRef = React.useRef<HTMLDivElement>(null);
     return <CSSTransition
         in={props.actionPrompt !== null}
         timeout={200}
         classNames="ActionPrompt"
+        nodeRef={nodeRef}
         mountOnEnter
         unmountOnExit
     >
-        <div className="ActionPrompt">
+        <div ref={nodeRef} className="ActionPrompt">
             {props.actionPrompt === null
                 ? null
                 : renderPrompt(props.actionPrompt, props)}

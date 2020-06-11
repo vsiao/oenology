@@ -19,14 +19,14 @@ export const summerVisitorReducers: Record<
         switch (action.type) {
             case "PICK_VISITOR":
                 return promptForAction(state, [
-                    <>Gain <Coins>4</Coins></>,
-                    <>Harvest 1 field</>
+                    { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
+                    { id: "TOUR_HARVEST", label: <>Harvest 1 field</> },
                 ])
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case 0:
+                    case "TOUR_GAIN_4":
                         return endTurn(gainCoins(state, state.currentTurn.playerId, 4));
-                    case 1:
+                    case "TOUR_HARVEST":
                         return state; // TODO
                     default:
                         return state;

@@ -5,9 +5,13 @@ export type PromptState =
     | MakeWinePromptState
     | PickWinePromptState;
 
+export interface Choice {
+    id: string;
+    label: React.ReactNode;
+}
 export interface ChooseActionPromptState {
     type: "chooseAction";
-    choices: React.ReactNode[];
+    choices: Choice[];
 }
 
 export interface MakeWinePromptState {

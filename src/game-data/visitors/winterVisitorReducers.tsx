@@ -21,16 +21,16 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "PICK_VISITOR":
                 return promptForAction(state, [
-                    <>Draw 2 <SummerVisitor /></>,
-                    <>Discard 1 wine of value 4 or more to gain <VP>3</VP></>,
+                    { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
+                    { id: "JUDGE_DISCARD", label: <>Discard 1 wine of value 4 or more to gain <VP>3</VP></> },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case 0:
+                    case "JUDGE_DRAW":
                         return endTurn(
                             drawCards(state, state.currentTurn.playerId, { summerVisitor: 2 })
                         );
-                    case 1:
+                    case "JUDGE_DISCARD":
                         return promptToPickWine(state, /* minValue */ 4);
                     default:
                         return state;
@@ -64,14 +64,14 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "PICK_VISITOR":
                 return promptForAction(state, [
-                    <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
-                    <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
+                    { id: "PROFESSOR_TRAIN", label: <>Pay <Coins>2</Coins> to train 1 <Worker /></> },
+                    { id: "PROFESSOR_GAIN", label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></> },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case 0:
+                    case "PROFESSOR_TRAIN":
                         return state; // TODO
-                    case 1:
+                    case "PROFESSOR_GAIN":
                         return endTurn(gainVP(state, state.currentTurn.playerId, 2));
                     default:
                         return state;
@@ -100,14 +100,14 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "PICK_VISITOR":
                 return promptForAction(state, [
-                    <>Make up to 2 wine</>,
-                    <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                    { id: "TEACHER_MAKE", label: <>Make up to 2 wine</> },
+                    { id: "TEACHER_TRAIN", label: <>Pay <Coins>2</Coins> to train 1 <Worker /></> },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case 0:
+                    case "TEACHER_MAKE":
                         return promptToMakeWine(state, 2);
-                    case 1:
+                    case "TEACHER_TRAIN":
                         return state; // TODO
                     default:
                         return state;

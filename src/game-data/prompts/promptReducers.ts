@@ -1,5 +1,6 @@
 import GameState from "../GameState";
 import { GameAction } from "../gameActions";
+import { Choice } from "./PromptState";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
@@ -12,7 +13,10 @@ export const prompt = (state: GameState, action: GameAction) => {
     }
 };
 
-export const promptForAction = (state: GameState, choices: React.ReactNode[]): GameState => {
+export const promptForAction = (
+    state: GameState,
+    choices: Choice[]
+): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }

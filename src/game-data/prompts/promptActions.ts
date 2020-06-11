@@ -5,8 +5,11 @@ export type PromptAction =
 
 interface ChooseAction {
     type: "CHOOSE_ACTION";
-    choice: number;
+    choice: string;
 }
+export const chooseAction = (choice: string): PromptAction => {
+    return { type: "CHOOSE_ACTION", choice };
+};
 
 interface MakeWineAction {
     type: "MAKE_WINE";

@@ -1,16 +1,14 @@
-
+import "./ChooseActionPrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
-import { ChooseActionPromptState } from "../../game-data/prompts/PromptState";
-import { GameAction } from "../../game-data/gameActions";
 import { Dispatch } from "redux";
-import { chooseAction } from "../../game-data/prompts/promptActionCreators";
-
-import "./ChooseActionPrompt.css";
+import { GameAction } from "../../game-data/gameActions";
+import { ChooseActionPromptState } from "../../game-data/prompts/PromptState";
+import { chooseAction } from "../../game-data/prompts/promptActions";
 
 interface Props {
     prompt: ChooseActionPromptState;
-    onSelectChoice: (choice: number) => void;
+    onSelectChoice: (choice: string) => void;
 }
 
 const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
@@ -24,9 +22,9 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
                 return <li className="ChooseActionPrompt-choice" key={i}>
                     <button
                         className="ChooseActionPrompt-choiceButton"
-                        onClick={() => props.onSelectChoice(i)}
+                        onClick={() => props.onSelectChoice(choice.id)}
                     >
-                        {choice}
+                        {choice.label}
                     </button>
                 </li>;
             })}
@@ -36,7 +34,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
-        onSelectChoice: (choice: number) => dispatch(chooseAction(choice))
+        onSelectChoice: (choice: string) => dispatch(chooseAction(choice))
     };
 }
 

@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { GameAction } from "../game-data/gameActions";
-import { WorkerPlacement, placeWorker } from "../game-data/board/boardActionCreators";
+import { WorkerPlacement, placeWorker } from "../game-data/board/boardActions";
 import { SummerActions, WinterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 
@@ -10,12 +10,13 @@ import "./GameBoard.css";
 import { AppState } from "../store/AppState";
 
 interface Props {
-    canPlaceWorker: boolean;
+    canPlaceSummerWorker: boolean;
+    canPlaceWinterWorker: boolean;
     onPlaceWorker: (placement: WorkerPlacement) => void;
 }
 
 const GameBoard: React.FunctionComponent<Props> = props => {
-    const { canPlaceWorker, onPlaceWorker } = props;
+    const { canPlaceSummerWorker, canPlaceWinterWorker, onPlaceWorker } = props;
     return <div className="GameBoard">
         <div className="GameBoard-order">
             Order
@@ -24,7 +25,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
             {SummerActions.map(action =>
                 <BoardPlacement
                     key={action.type}
-                    onClick={canPlaceWorker ? () => onPlaceWorker(action.type) : null}
+                    onClick={canPlaceSummerWorker ? () => onPlaceWorker(action.type) : null}
                     title={action.title}
                     season="summer"
                 />)}
@@ -33,7 +34,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
             {WinterActions.map(action =>
                 <BoardPlacement
                     key={action.type}
-                    onClick={canPlaceWorker ? () => onPlaceWorker(action.type) : null}
+                    onClick={canPlaceWinterWorker ? () => onPlaceWorker(action.type) : null}
                     title={action.title}
                     season="winter"
                 />)}
@@ -44,9 +45,14 @@ const GameBoard: React.FunctionComponent<Props> = props => {
 const mapStateToProps = (state: AppState) => {
     const { currentTurn } = state.game;
     return {
-        canPlaceWorker: currentTurn.type === "workerPlacement" &&
+        canPlaceSummerWorker: currentTurn.type === "workerPlacement" &&
             currentTurn.pendingAction === null &&
-            currentTurn.playerId === state.playerId,
+            currentTurn.playerId === state.playerId &&
+            currentTurn.season === "summer",
+        canPlaceWinterWorker: currentTurn.type === "workerPlacement" &&
+            currentTurn.pendingAction === null &&
+            currentTurn.playerId === state.playerId &&
+            currentTurn.season === "winter",
     };
 };
 
