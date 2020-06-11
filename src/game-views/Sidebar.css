@@ -1,4 +1,5 @@
 .Sidebar {
+    background: #282c34;
     border-right: 4px solid #282c34;
     display: inline-block;
     grid-area: sidebar;

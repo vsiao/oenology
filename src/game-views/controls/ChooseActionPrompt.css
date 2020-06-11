@@ -1,5 +1,4 @@
 .ChooseActionPrompt {
-    background: #282c34;
     box-sizing: border-box;
     color: white;
     padding-bottom: 16px;
@@ -7,7 +6,6 @@
 
 .ChooseActionPrompt-header {
     align-items: center;
-    background: #ddd;
     color: black;
     display: flex;
     font-size: 12px;
@@ -25,8 +23,8 @@
 }
 
 .ChooseActionPrompt-choiceButton {
-    background: #ddd;
-    border: 0;
+    background: white;
+    border: 2px solid #ddd;
     border-radius: .4em;
     cursor: pointer;
     display: inline-block;
@@ -34,4 +32,8 @@
     height: 2.8em;
     margin: 6px;
     padding: 0 16px;
+}
+.ChooseActionPrompt-choiceButton:hover {
+    border-color: black;
+    transition: 150ms border-color;
 }

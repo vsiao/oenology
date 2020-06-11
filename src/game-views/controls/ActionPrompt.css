@@ -1,6 +1,25 @@
 .ActionPrompt {
-    bottom: 100%;
+    background: white;
+    border-top: 4px solid #282c34;
+    box-sizing: border-box;
     grid-area: main;
+    height: 100%;
     position: absolute;
     width: 100%;
+    z-index: 1;
+}
+
+.ActionPrompt-enter {
+    transform: translateY(100%);
+}
+.ActionPrompt-enter-active {
+    transform: translateY(0);
+    transition: 200ms transform cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ActionPrompt-exit {
+    transform: translateY(0);
+}
+.ActionPrompt-exit-active {
+    transform: translateY(100%);
+    transition: 200ms transform ease-in;
 }
