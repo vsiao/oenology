@@ -45,19 +45,20 @@ export interface WorkerPlacementTurn {
     // Non-null if the player has chosen to play a worker in a position
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
-    pendingAction:
-        | null
-        | { type: "playVisitor"; visitorId?: VisitorId; }
-        | { type: "buySell"; }
-        | { type: "sellGrapes"; }
-        | { type: "buyField"; }
-        | { type: "sellField"; }
-        | { type: "plant"; } // choose vine card
-        | { type: "build"; } // choose structure
-        | { type: "harvest"; } // choose field
-        | { type: "makeWine"; } // choose grape
-        | { type: "fillOrder"; }; // choose order card
+    pendingAction: WorkerPlacementTurnPendingAction | null;
 }
+
+export type WorkerPlacementTurnPendingAction =
+    | { type: "playVisitor"; visitorId?: VisitorId; }
+    | { type: "buySell"; }
+    | { type: "sellGrapes"; }
+    | { type: "buyField"; }
+    | { type: "sellField"; }
+    | { type: "plantVine"; vineId?: VineId }
+    | { type: "buildStructure"; } // choose structure
+    | { type: "harvestField"; } // choose field
+    | { type: "makeWine"; } // choose grape
+    | { type: "fillOrder"; }; // choose order card
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";

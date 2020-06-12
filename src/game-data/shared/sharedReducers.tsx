@@ -54,6 +54,8 @@ export const endTurn = (state: GameState): GameState => {
             return state;
 
         case "workerPlacement": {
+            state = discardPendingCard(state);
+
             if (compactWakeUpOrder.every(p => p.passed)) {
                 // If everyone passed, it's the end of the season
                 if (currentTurn.season === "summer") {
@@ -99,32 +101,8 @@ export const endTurn = (state: GameState): GameState => {
             const i = activeWakeUpOrder.findIndex(pos => pos.playerId === currentTurn.playerId);
             const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
 
-            let { discardPiles, players } = state;
-            if (
-                currentTurn.pendingAction !== null &&
-                currentTurn.pendingAction.type === "playVisitor"
-            ) {
-                const visitorId = currentTurn.pendingAction.visitorId;
-                // Filter out visitor card from current player's hand
-                players = {
-                    ...players,
-                    [currentTurn.playerId]: {
-                        ...players[currentTurn.playerId],
-                        cardsInHand: players[currentTurn.playerId].cardsInHand.filter(({ id }) => id !== visitorId),
-                    },
-                };
-                // And add it to the front of the appropriate discard pile
-                discardPiles = {
-                    ...discardPiles,
-                    ...(currentTurn.season === "summer"
-                        ? { summerVisitor: [visitorId as SummerVisitorId, ...discardPiles.summerVisitor] }
-                        : { winterVisitor: [visitorId as WinterVisitorId, ...discardPiles.winterVisitor] })
-                };
-            }
             return {
                 ...state,
-                players,
-                discardPiles,
                 currentTurn: {
                     type: "workerPlacement",
                     playerId: nextPlayerId,
@@ -157,6 +135,58 @@ export const endTurn = (state: GameState): GameState => {
                     },
                 });
             }
+    }
+};
+
+const discardPendingCard = (state: GameState): GameState => {
+    const { currentTurn, players, discardPiles } = state;
+    if (
+        currentTurn.type !== "workerPlacement" ||
+        currentTurn.pendingAction === null
+    ) {
+        return state;
+    }
+    const player = players[currentTurn.playerId];
+
+    switch (currentTurn.pendingAction.type) {
+        case "playVisitor":
+            const visitorId = currentTurn.pendingAction.visitorId;
+            return {
+                ...state,
+                // Filter out visitor card from current player's hand
+                players: {
+                    ...players,
+                    [player.id]: {
+                        ...player,
+                        cardsInHand: player.cardsInHand.filter(({ id }) => id !== visitorId),
+                    },
+                },
+                // And add it to the front of the appropriate discard pile
+                discardPiles: {
+                    ...discardPiles,
+                    ...(currentTurn.season === "summer"
+                        ? { summerVisitor: [visitorId as SummerVisitorId, ...discardPiles.summerVisitor] }
+                        : { winterVisitor: [visitorId as WinterVisitorId, ...discardPiles.winterVisitor] })
+                },
+            }
+        case "plantVine":
+            const vineId = currentTurn.pendingAction.vineId!;
+            return {
+                ...state,
+                players: {
+                    ...players,
+                    [player.id]: {
+                        ...player,
+                        cardsInHand: player.cardsInHand.filter(({ id }) => id !== vineId),
+                    },
+                },
+                discardPiles: {
+                    ...discardPiles,
+                    vine: [vineId, ...discardPiles.vine],
+                },
+            };
+        default:
+            return state;
     }
 };
 

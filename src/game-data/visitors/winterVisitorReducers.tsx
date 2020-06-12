@@ -20,7 +20,7 @@ export const winterVisitorReducers: Record<
 > = {
     judge: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 return promptForAction(state, [
                     { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
                     {
@@ -47,7 +47,7 @@ export const winterVisitorReducers: Record<
     },
     politician: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 const { playerId } = state.currentTurn;
                 if (state.players[playerId].victoryPoints < 0) {
                     return endTurn(gainCoins(state, playerId, 6));
@@ -66,7 +66,7 @@ export const winterVisitorReducers: Record<
     },
     professor: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 const playerState = state.players[state.currentTurn.playerId];
                 return promptForAction(state, [
                     {
@@ -97,7 +97,7 @@ export const winterVisitorReducers: Record<
     },
     taster: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 return promptToChooseWine(state);
             case "CHOOSE_WINE":
                 const currentTurnPlayerId = state.currentTurn.playerId;
@@ -113,7 +113,7 @@ export const winterVisitorReducers: Record<
     },
     teacher: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 return promptForAction(state, [
                     {
                         id: "TEACHER_MAKE",

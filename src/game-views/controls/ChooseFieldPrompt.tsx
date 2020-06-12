@@ -1,4 +1,4 @@
-import "./ChooseFieldPrompt";
+import "./ChooseFieldPrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
@@ -14,7 +14,7 @@ interface Props {
 const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     return <div className="ChooseFieldPrompt">
         <div className="ChooseFieldPrompt-header">
-            Choose an action
+            Choose a field
         </div>
         <ul className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {

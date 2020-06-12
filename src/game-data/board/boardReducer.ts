@@ -3,6 +3,7 @@ import GameState, { WorkerPlacementTurn } from "../GameState";
 import { endTurn, gainCoins, drawCards, payCoins, trainWorker } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction } from "../prompts/promptReducers";
 import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
+import { VineId } from "../vineCards";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -35,24 +36,23 @@ export const board = (state: GameState, action: GameAction): GameState => {
             }
         case "CHOOSE_FIELD": {
             const currentTurn = state.currentTurn as WorkerPlacementTurn;
-            switch (currentTurn.pendingAction!.type) {
+            const player = state.players[currentTurn.playerId];
+            const field = player.fields[action.fieldId];
+            const pendingAction = currentTurn.pendingAction!;
+
+            switch (pendingAction.type) {
                 case "buyField":
                 case "sellField":
-                    const player = state.players[currentTurn.playerId];
-                    const field = player.fields[action.fieldId];
                     return endTurn((field.sold ? payCoins : gainCoins)(
                         {
                             ...state,
                             players: {
                                 ...state.players,
-                                [currentTurn.playerId]: {
+                                [player.id]: {
                                     ...player,
                                     fields: {
                                         ...player.fields,
-                                        [action.fieldId]: {
-                                            ...player.fields[action.fieldId],
-                                            sold: !field.sold,
-                                        },
+                                        [field.id]: { ...field, sold: !field.sold },
                                     },
                                 },
                             },
@@ -60,12 +60,37 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         currentTurn.playerId,
                         field.value
                     ));
-                case "harvest":
+                case "plantVine":
+                    const vines: VineId[] = [...field.vines, pendingAction.vineId!];
+                    return endTurn({
+                        ...state,
+                        players: {
+                            ...state.players,
+                            [player.id]: {
+                                ...player,
+                                fields: {
+                                    ...player.fields,
+                                    [field.id]: { ...field, vines },
+                                },
+                            },
+                        },
+                    });
+                case "harvestField":
                     return endTurn(state); // TODO
                 default:
                     return state;
             }
         }
+        case "CHOOSE_VINE":
+            const currentTurn = state.currentTurn as WorkerPlacementTurn;
+            return promptToChooseField({
+                ...state,
+                currentTurn: {
+                    ...currentTurn,
+                    pendingAction: { type: "plantVine", vineId: action.vineId },
+                },
+            });
+
         case "PASS":
             if (state.currentTurn.type !== "workerPlacement") {
                 throw new Error("Unexpected state: can only pass a worker placement turn");
@@ -134,13 +159,19 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         ...state,
                         currentTurn: {
                             ...currentTurn,
-                            pendingAction: { type: "harvest" }
+                            pendingAction: { type: "harvestField" }
                         },
                     });
                 case "makeWine":
                     return state;
                 case "plantVine":
-                    return state;
+                    return {
+                        ...state,
+                        currentTurn: {
+                            ...currentTurn,
+                            pendingAction: { type: "plantVine" },
+                        },
+                    };
                 case "playSummerVisitor":
                 case "playWinterVisitor":
                     return {

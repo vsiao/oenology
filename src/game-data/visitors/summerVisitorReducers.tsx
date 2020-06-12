@@ -18,7 +18,7 @@ export const summerVisitorReducers: Record<
     producer: state => state,
     tourGuide: (state, action) => {
         switch (action.type) {
-            case "PICK_VISITOR":
+            case "CHOOSE_VISITOR":
                 return promptForAction(state, [
                     { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
                     {

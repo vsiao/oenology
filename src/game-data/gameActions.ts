@@ -6,16 +6,17 @@ import {
     WinterVisitorId,
     summerVisitorCards,
     winterVisitorCards,
+    VisitorId,
 } from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
 import { CardsByType } from "./GameState";
-import { PickVisitorAction } from "./visitors/visitorActions";
 
 export type GameAction = (
+    | ChooseVineAction
+    | ChooseVisitorAction
     | StartGameAction
     | PromptAction
-    | PickVisitorAction
     | BoardAction
 ) & {
     // Every action should first be pushed to firebase to be
@@ -57,4 +58,18 @@ const inPlaceShuffle = (cards: unknown[]) => {
         cards[i] = cards[j];
         cards[j] = tmp;
     }
+};
+
+interface ChooseVineAction extends Action<"CHOOSE_VINE"> {
+    vineId: VineId;
+}
+export const chooseVine = (vineId: VineId): ChooseVineAction => {
+    return { type: "CHOOSE_VINE", vineId };
+};
+
+export interface ChooseVisitorAction extends Action<"CHOOSE_VISITOR"> {
+    visitorId: VisitorId;
+}
+export const chooseVisitor = (visitorId: VisitorId): ChooseVisitorAction => {
+    return { type: "CHOOSE_VISITOR", visitorId };
 };

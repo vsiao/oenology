@@ -18,7 +18,7 @@ export const visitor = (state: GameState, action: GameAction) => {
         return state;
     }
     switch (action.type) {
-        case "PICK_VISITOR": {
+        case "CHOOSE_VISITOR": {
             const visitorId = action.visitorId;
             state = {
                 ...state,

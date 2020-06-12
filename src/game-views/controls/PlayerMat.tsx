@@ -2,12 +2,11 @@ import "./PlayerMat.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, chooseVine, chooseVisitor } from "../../game-data/gameActions";
 import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
-import { vineCards } from "../../game-data/vineCards";
+import { vineCards, VineId } from "../../game-data/vineCards";
 import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
-import { pickVisitor } from "../../game-data/visitors/visitorActions";
 import { AppState } from "../../store/AppState";
 import Coins from "../icons/Coins";
 import Residuals from "../icons/Residuals";
@@ -21,6 +20,7 @@ import ActionPrompt from "./ActionPrompt";
 interface Props {
     currentTurn: CurrentTurn;
     playerState: PlayerState;
+    onSelectVine: (id: VineId) => void;
     onSelectVisitor: (id: VisitorId) => void;
 }
 
@@ -49,8 +49,15 @@ const renderCard = (card: CardId, props: Props) => {
     const { currentTurn, playerState } = props;
     switch (card.type) {
         case "vine":
+            const canPlayVine = currentTurn.playerId === playerState.id &&
+                currentTurn.type === "workerPlacement" &&
+                currentTurn.pendingAction !== null &&
+                currentTurn.pendingAction.type === "plantVine";
             return <li key={card.id} className="PlayerMat-card">
-                <VineCard cardData={vineCards[card.id]} />
+                <VineCard
+                    cardData={vineCards[card.id]}
+                    onClick={canPlayVine ? () => props.onSelectVine(card.id) : undefined}
+                />
             </li>;
 
         case "order":
@@ -90,7 +97,8 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
-        onSelectVisitor: (id: VisitorId) => dispatch(pickVisitor(id)),
+        onSelectVine: (id: VineId) => dispatch(chooseVine(id)),
+        onSelectVisitor: (id: VisitorId) => dispatch(chooseVisitor(id)),
     };
 };
 
