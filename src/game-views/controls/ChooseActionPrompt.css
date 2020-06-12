@@ -24,16 +24,20 @@
 
 .ChooseActionPrompt-choiceButton {
     background: white;
-    border: 2px solid #ddd;
+    border: 2px solid #ccc;
     border-radius: .4em;
-    cursor: pointer;
     display: inline-block;
     font-size: .8em;
     height: 2.8em;
     margin: 6px;
     padding: 0 16px;
 }
-.ChooseActionPrompt-choiceButton:hover {
+.ChooseActionPrompt-choiceButton[disabled] {
+    background: #ddd;
+    border-color: #ccc;
+}
+.ChooseActionPrompt-choiceButton:enabled:hover {
     border-color: black;
+    cursor: pointer;
     transition: 150ms border-color;
 }

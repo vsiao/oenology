@@ -5,6 +5,7 @@ import { promptForAction } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import { endTurn, gainCoins } from "../shared/sharedReducers";
+import { harvestFieldDisabledReason } from "../shared/sharedSelectors";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
@@ -20,7 +21,11 @@ export const summerVisitorReducers: Record<
             case "PICK_VISITOR":
                 return promptForAction(state, [
                     { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
-                    { id: "TOUR_HARVEST", label: <>Harvest 1 field</> },
+                    {
+                        id: "TOUR_HARVEST",
+                        label: <>Harvest 1 field</>,
+                        disabledReason: harvestFieldDisabledReason(state),
+                    },
                 ])
             case "CHOOSE_ACTION":
                 switch (action.choice) {

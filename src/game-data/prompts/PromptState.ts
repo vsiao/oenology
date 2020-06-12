@@ -9,6 +9,7 @@ export type PromptState =
 export interface Choice {
     id: string;
     label: React.ReactNode;
+    disabledReason?: string;
 }
 export interface ChooseActionPromptState {
     type: "chooseAction";

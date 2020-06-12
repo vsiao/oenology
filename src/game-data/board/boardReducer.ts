@@ -2,6 +2,7 @@ import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
 import { endTurn, gainCoins, drawCards, payCoins } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction } from "../prompts/promptReducers";
+import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -92,9 +93,26 @@ export const board = (state: GameState, action: GameAction): GameState => {
                             pendingAction: { type: "buySell" },
                         },
                     }, [
-                        { id: "SELL_GRAPES", label: "Sell grape(s)" },
-                        { id: "BUY_FIELD", label: "Buy a field" },
-                        { id: "SELL_FIELD", label: "Sell a field" },
+                        {
+                            id: "SELL_GRAPES",
+                            label: "Sell grape(s)",
+                            disabledReason: hasNonEmptyCrushPad(state)
+                                ? undefined
+                                : "You don't have any grapes!",
+                        },
+                        {
+                            id: "BUY_FIELD",
+                            label: "Buy a field",
+                            disabledReason: buyFieldDisabledReason(state),
+                        },
+                        {
+                            id: "SELL_FIELD",
+                            label: "Sell a field",
+                            disabledReason: Object.values(state.players[currentTurn.playerId].fields)
+                                .every(fields => fields.sold)
+                                ? "You don't have any fields to sell."
+                                : undefined,
+                        },
                     ]);
                 case "drawOrder":
                     return endTurn(drawCards(state, state.currentTurn.playerId, {

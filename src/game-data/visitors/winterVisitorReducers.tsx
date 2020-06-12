@@ -8,6 +8,7 @@ import GameState from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
+import { hasNonEmptyCrushPad, trainWorkerDisabledReason } from "../shared/sharedSelectors";
 
 const mostValuableWine = (gameState: GameState) => {
     return 8;
@@ -22,7 +23,10 @@ export const winterVisitorReducers: Record<
             case "PICK_VISITOR":
                 return promptForAction(state, [
                     { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
-                    { id: "JUDGE_DISCARD", label: <>Discard 1 wine of value 4 or more to gain <VP>3</VP></> },
+                    {
+                        id: "JUDGE_DISCARD",
+                        label: <>Discard 1 wine of value 4 or more to gain <VP>3</VP></>,
+                    },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
@@ -63,9 +67,20 @@ export const winterVisitorReducers: Record<
     professor: (state, action) => {
         switch (action.type) {
             case "PICK_VISITOR":
+                const playerState = state.players[state.currentTurn.playerId];
                 return promptForAction(state, [
-                    { id: "PROFESSOR_TRAIN", label: <>Pay <Coins>2</Coins> to train 1 <Worker /></> },
-                    { id: "PROFESSOR_GAIN", label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></> },
+                    {
+                        id: "PROFESSOR_TRAIN",
+                        label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                        disabledReason: trainWorkerDisabledReason(state, 2),
+                    },
+                    {
+                        id: "PROFESSOR_GAIN",
+                        label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
+                        disabledReason: playerState.workers.filter(w => w.trained).length < 6
+                            ? "You don't have enough workers."
+                            : undefined,
+                    },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
@@ -100,8 +115,18 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "PICK_VISITOR":
                 return promptForAction(state, [
-                    { id: "TEACHER_MAKE", label: <>Make up to 2 wine</> },
-                    { id: "TEACHER_TRAIN", label: <>Pay <Coins>2</Coins> to train 1 <Worker /></> },
+                    {
+                        id: "TEACHER_MAKE",
+                        label: <>Make up to 2 wine</>,
+                        disabledReason: hasNonEmptyCrushPad(state)
+                            ? undefined
+                            : "You don't have any grapes.",
+                    },
+                    {
+                        id: "TEACHER_TRAIN",
+                        label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                        disabledReason: trainWorkerDisabledReason(state, 2),
+                    },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {

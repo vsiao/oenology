@@ -22,6 +22,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
                 return <li className="ChooseActionPrompt-choice" key={i}>
                     <button
                         className="ChooseActionPrompt-choiceButton"
+                        disabled={choice.disabledReason !== undefined}
                         onClick={() => props.onSelectChoice(choice.id)}
                     >
                         {choice.label}
