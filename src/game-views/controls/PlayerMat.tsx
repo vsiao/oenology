@@ -33,15 +33,11 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
-                <li className="PlayerMat-worker PlayerMat-worker--grande">
-                    <Worker className="PlayerMat-workerIcon" />
-                </li>
-                <li className="PlayerMat-worker">
-                    <Worker className="PlayerMat-workerIcon" />
-                </li>
-                <li className="PlayerMat-worker">
-                    <Worker className="PlayerMat-workerIcon" />
-                </li>
+                {playerState.trainedWorkers.map((worker, i) =>
+                    <li key={i} className="PlayerMat-worker">
+                        <Worker worker={worker} />
+                    </li>
+                )}
             </ul>
         </div>
         <ul className="PlayerMat-cards">

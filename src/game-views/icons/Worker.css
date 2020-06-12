@@ -1,5 +1,13 @@
 .Worker {
+    height: 1.4em;
+    vertical-align: text-bottom;
+    width: 1.4em;
+}
+.Worker--grande {
     height: 1.6em;
     vertical-align: text-bottom;
     width: 1.6em;
+}
+.Worker--placed {
+    opacity: 0.5;
 }

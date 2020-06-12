@@ -42,10 +42,6 @@
 .PlayerMat--yellow .PlayerMat-worker {
     fill: gold;
 }
-.PlayerMat-workerIcon {
-    height: 32px;
-    width: 32px;
-}
 
 .PlayerMat-cards {
     display: flex;

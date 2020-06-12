@@ -61,10 +61,11 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         coins: 0,
         residuals: 0,
         victoryPoints: 0,
-        availableWorkers: {
-            grande: true,
-            other: 2,
-        },
+        trainedWorkers: [
+            { type: "grande", available: true },
+            { type: "normal", available: true },
+            { type: "normal", available: true },
+        ],
         cardsInHand: [
             { type: "summerVisitor", id: "tourGuide" },
             { type: "winterVisitor", id: "judge" },

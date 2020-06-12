@@ -3,7 +3,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine } from "../shared/sharedReducers";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker } from "../shared/sharedReducers";
 import GameState from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
@@ -77,7 +77,7 @@ export const winterVisitorReducers: Record<
                     {
                         id: "PROFESSOR_GAIN",
                         label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
-                        disabledReason: playerState.workers.filter(w => w.trained).length < 6
+                        disabledReason: playerState.trainedWorkers.length < 6
                             ? "You don't have enough workers."
                             : undefined,
                     },
@@ -85,7 +85,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROFESSOR_TRAIN":
-                        return state; // TODO
+                        return endTurn(trainWorker(state, state.currentTurn.playerId, 2));
                     case "PROFESSOR_GAIN":
                         return endTurn(gainVP(state, state.currentTurn.playerId, 2));
                     default:
@@ -133,7 +133,7 @@ export const winterVisitorReducers: Record<
                     case "TEACHER_MAKE":
                         return promptToMakeWine(state, 2);
                     case "TEACHER_TRAIN":
-                        return state; // TODO
+                        return endTurn(trainWorker(state, state.currentTurn.playerId, 2));
                     default:
                         return state;
                 }

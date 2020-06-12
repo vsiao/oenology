@@ -72,14 +72,17 @@ export interface PlayerState {
     coins: number;
     residuals: number;
     victoryPoints: number;
-    availableWorkers: {
-        grande: boolean;
-        other: number;
-    };
+    trainedWorkers: TrainedWorker[],
     cardsInHand: CardId[];
     fields: Record<FieldId, Field>;
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
+}
+
+export type WorkerType = "grande" | "normal";
+export interface TrainedWorker {
+    type: WorkerType;
+    available: boolean;
 }
 
 export type CardId =

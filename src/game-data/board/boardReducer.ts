@@ -1,6 +1,6 @@
 import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
-import { endTurn, gainCoins, drawCards, payCoins } from "../shared/sharedReducers";
+import { endTurn, gainCoins, drawCards, payCoins, trainWorker } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction } from "../prompts/promptReducers";
 import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
 
@@ -29,7 +29,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         },
                     });
                 case "SELL_GRAPES":
-                    return state;
+                    return endTurn(state); // TODO
                 default:
                     return state;
             }
@@ -61,7 +61,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         field.value
                     ));
                 case "harvest":
-                    return state;
+                    return endTurn(state); // TODO
                 default:
                     return state;
             }
@@ -78,6 +78,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 return { ...pos, passed: true };
             }) as GameState["wakeUpOrder"];
 
+            // Then perform normal endTurn procedure, which may transition to the next season
             return endTurn({ ...state, wakeUpOrder });
 
         case "PLACE_WORKER": {
@@ -150,7 +151,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         },
                     };
                 case "trainWorker":
-                    return state;
+                    return endTurn(trainWorker(state, state.currentTurn.playerId, 4));
                 case "yoke":
                     return state;
                 default:

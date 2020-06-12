@@ -101,12 +101,11 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             </div>
         </div>
         <ul className="SidebarPlayer-workers">
-            <li className="SidebarPlayer-worker"><Worker /></li>
-            <li className="SidebarPlayer-worker"><Worker /></li>
-            <li className="SidebarPlayer-worker"><Worker /></li>
-            <li className="SidebarPlayer-worker"><Worker /></li>
-            <li className="SidebarPlayer-worker"><Worker /></li>
-            <li className="SidebarPlayer-worker"><Worker /></li>
+            {player.trainedWorkers.map((worker, i) =>
+                <li key={i} className="SidebarPlayer-worker">
+                    <Worker worker={worker} />
+                </li>
+            )}
         </ul>
     </div>;
 };

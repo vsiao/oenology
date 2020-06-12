@@ -2,6 +2,7 @@ import * as React from "react";
 import { WorkerPlacement } from "./boardActions";
 import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
+import Worker from "../../game-views/icons/Worker";
 
 export interface BoardAction {
     type: WorkerPlacement,
@@ -54,7 +55,7 @@ export const WinterActions: BoardAction[] = [
     },
     {
         type: "trainWorker",
-        title: "Train worker",
+        title: <>Pay <Coins>4</Coins> to train <Worker /></>,
     },
     {
         type: "fillOrder",

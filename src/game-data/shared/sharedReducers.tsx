@@ -81,6 +81,18 @@ export const endTurn = (state: GameState): GameState => {
                             season: "summer",
                             pendingAction: null,
                         },
+                        players: Object.fromEntries(
+                            Object.entries(state.players).map(([playerId, playerState]) => {
+                                return [playerId, {
+                                    ...playerState,
+                                    // Mark all trained workers as available again
+                                    trainedWorkers: playerState.trainedWorkers.map(w => ({
+                                        ...w,
+                                        available: true,
+                                    })),
+                                }];
+                            })
+                        ),
                     };
                 }
             }
@@ -185,3 +197,20 @@ const editCoins = (state: GameState, playerId: string, numCoins: number) => {
 export const gainCoins = editCoins;
 export const payCoins = (state: GameState, playerId: string, numCoins: number) =>
     editCoins(state, playerId, -numCoins);
+
+export const trainWorker = (state: GameState, playerId: string, cost: number): GameState => {
+    state = payCoins(state, playerId, cost);
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [playerId]: {
+                ...state.players[playerId],
+                trainedWorkers: [
+                    ...state.players[playerId].trainedWorkers,
+                    { type: "normal", available: false },
+                ],
+            },
+        },
+    };
+};
