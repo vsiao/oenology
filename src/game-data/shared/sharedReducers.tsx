@@ -1,11 +1,42 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
 import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
+import { fieldYields } from "./sharedSelectors";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
+};
+
+export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    let { red, white } = fieldYields(player.fields[fieldId]);
+
+    // devalue grapes if crush pad already contains the same value
+    for (red--; red >= 0; --red) {
+        if (!player.crushPad.red[red]) {
+            break;
+        }
+    }
+    for (white--; white >= 0; --white) {
+        if (!player.crushPad.white[white]) {
+            break;
+        }
+    }
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                crushPad: {
+                    red: player.crushPad.red.map((r, i) => i === red || r) as TokenMap,
+                    white: player.crushPad.white.map((w, i) => i === white || w) as TokenMap,
+                },
+            },
+        },
+    };
 };
 
 const splitDeck = <T extends unknown>(deck: T[], n: number | undefined): [T[], T[]] => {
@@ -92,6 +123,10 @@ export const endTurn = (state: GameState): GameState => {
                                         ...w,
                                         available: true,
                                     })),
+                                    crushPad: {
+                                        red: age(playerState.crushPad.red),
+                                        white: age(playerState.crushPad.white),
+                                    },
                                 }];
                             })
                         ),
@@ -136,6 +171,22 @@ export const endTurn = (state: GameState): GameState => {
                 });
             }
     }
+};
+
+const age = (tokens: TokenMap): TokenMap => {
+    const newTokenMap = new Array(9).fill(false) as TokenMap;
+    for (let i = tokens.length - 1; i >= 0; --i) {
+        if (!tokens[i]) {
+            continue;
+        }
+        if (i === tokens.length - 1 || newTokenMap[i + 1]) {
+            // can't age
+            newTokenMap[i] = true;
+        } else {
+            newTokenMap[i + 1] = true;
+        }
+    }
+    return newTokenMap;
 };
 
 const discardPendingCard = (state: GameState): GameState => {

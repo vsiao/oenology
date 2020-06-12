@@ -1,6 +1,6 @@
 import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
-import { endTurn, gainCoins, drawCards, payCoins, trainWorker } from "../shared/sharedReducers";
+import { endTurn, gainCoins, drawCards, payCoins, trainWorker, harvestField } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction } from "../prompts/promptReducers";
 import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
@@ -76,7 +76,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         },
                     });
                 case "harvestField":
-                    return endTurn(state); // TODO
+                    return endTurn(harvestField(state, field.id));
                 default:
                     return state;
             }

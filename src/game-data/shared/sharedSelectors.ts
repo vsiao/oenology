@@ -1,4 +1,18 @@
-import GameState from "../GameState";
+import GameState, { Field } from "../GameState";
+import { vineCards, VineCardData } from "../vineCards";
+
+export const fieldYields = (field: Field): { red: number; white: number; } => {
+    return {
+        red: field.vines.reduce(
+            (r, v) => r + ((vineCards[v] as VineCardData).yields.red! || 0),
+            0
+        ),
+        white: field.vines.reduce(
+            (w, v) => w + ((vineCards[v] as VineCardData).yields.white! || 0),
+            0
+        ),
+    };
+};
 
 export const hasNonEmptyCrushPad = (state: GameState) => {
     const playerId = state.currentTurn.playerId;

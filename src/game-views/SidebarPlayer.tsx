@@ -8,7 +8,7 @@ import { Vine, SummerVisitor, Order, WinterVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
-import { vineCards, VineCardData } from "../game-data/vineCards";
+import { fieldYields } from "../game-data/shared/sharedSelectors";
 
 interface Props {
     player: PlayerState;
@@ -40,32 +40,33 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         </ul>
         <ul className="SidebarPlayer-fields">
             {Object.values(player.fields).map(field => {
-                const totalRed = field.vines.reduce(
-                    (r, v) => r + (vineCards[v] as VineCardData).yields.red! || 0,
-                    0
-                );
-                const totalWhite = field.vines.reduce(
-                    (w, v) => w + (vineCards[v] as VineCardData).yields.white! || 0,
-                    0
-                );
+                const { red, white } = fieldYields(field);
                 return <li key={field.id} className="SidebarPlayer-field">
                     {field.sold ? <span className="SidebarPlayer-fieldSold">SOLD</span> : <>
-                        {totalRed > 0 ? <Grape color="red">{totalRed}</Grape> : null}
-                        {totalWhite > 0 ? <Grape color="white">{totalWhite}</Grape> : null}
+                        {red > 0 ? <Grape color="red">{red}</Grape> : null}
+                        {white > 0 ? <Grape color="white">{white}</Grape> : null}
                     </>}
                 </li>;
             })}
         </ul>
         <div className="SidebarPlayer-grapesAndWine">
             <div className="SidebarPlayer-crushPad">
-                <div className="SidebarPlayer-redGrapes">
-                    {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-grape" key={i}>{i + 1}</div>
+                <div className="SidebarPlayer-grapes">
+                    {player.crushPad.red.map((hasGrape, i) =>
+                        <div key={i} className="SidebarPlayer-grape">
+                            {hasGrape
+                                ? <Grape color="red">{i + 1}</Grape>
+                                : i + 1}
+                        </div>
                     )}
                 </div>
-                <div className="SidebarPlayer-redGrapes">
-                    {new Array(9).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-grape" key={i}>{i + 1}</div>
+                <div className="SidebarPlayer-grapes">
+                    {player.crushPad.white.map((hasGrape, i) =>
+                        <div key={i} className="SidebarPlayer-grape">
+                            {hasGrape
+                                ? <Grape color="white">{i + 1}</Grape>
+                                : i + 1}
+                        </div>
                     )}
                 </div>
             </div>
