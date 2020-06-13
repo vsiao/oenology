@@ -72,32 +72,46 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             </div>
             <div className="SidebarPlayer-cellar">
                 <div className="SidebarPlayer-wines">
-                    {new Array(9).fill(0).map((_, i) =>
+                    {player.cellar.red.map((hasWine, i) =>
                         <div className="SidebarPlayer-wine" key={i}>
-                            <WineGlass color="red">{i + 1}</WineGlass>
+                            {hasWine
+                                ? <WineGlass color="red">{i + 1}</WineGlass>
+                                : i + 1}
                         </div>
                     )}
                 </div>
                 <div className="SidebarPlayer-wines">
-                    {new Array(9).fill(0).map((_, i) =>
+                    {player.cellar.white.map((hasWine, i) =>
                         <div className="SidebarPlayer-wine" key={i}>
-                            <WineGlass color="white">{i + 1}</WineGlass>
+                            {hasWine
+                                ? <WineGlass color="white">{i + 1}</WineGlass>
+                                : i + 1}
                         </div>
                     )}
                 </div>
                 <div className="SidebarPlayer-wines">
-                    {new Array(6).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>
-                            <WineGlass color="blush">{i + 4}</WineGlass>
-                        </div>
-                    )}
+                    {player.cellar.blush.map((hasWine, i) => {
+                        if (i < 3) {
+                            return null;
+                        }
+                        return <div className="SidebarPlayer-wine" key={i}>
+                            {hasWine
+                                ? <WineGlass color="blush">{i + 1}</WineGlass>
+                                : i + 1}
+                        </div>;
+                    })}
                 </div>
                 <div className="SidebarPlayer-wines">
-                    {new Array(3).fill(0).map((_, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>
-                            <WineGlass color="sparkling">{i + 7}</WineGlass>
-                        </div>
-                    )}
+                    {player.cellar.blush.map((hasWine, i) => {
+                        if (i < 6) {
+                            return null;
+                        }
+                        return <div className="SidebarPlayer-wine" key={i}>
+                            {hasWine
+                                ? <WineGlass color="sparkling">{i + 1}</WineGlass>
+                                : i + 1}
+                        </div>;
+                    })}
                 </div>
             </div>
         </div>

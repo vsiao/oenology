@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { FieldId } from "../GameState";
+import { FieldId, GrapeColor, WineColor } from "../GameState";
 
 export type PromptAction =
     | ChooseAction
@@ -14,8 +14,20 @@ export const chooseAction = (choice: string): PromptAction => {
     return { type: "CHOOSE_ACTION", choice };
 };
 
-interface MakeWineAction extends Action<"MAKE_WINE"> {
+export interface GrapeSpec {
+    color: GrapeColor;
+    value: number;
 }
+export interface WineIngredients {
+    type: WineColor;
+    grapes: GrapeSpec[];
+}
+interface MakeWineAction extends Action<"MAKE_WINE"> {
+    ingredients: WineIngredients[];
+}
+export const makeWine = (ingredients: WineIngredients[]): PromptAction => {
+    return { type: "MAKE_WINE", ingredients };
+};
 
 interface ChooseFieldAction extends Action<"CHOOSE_FIELD"> {
     fieldId: FieldId;

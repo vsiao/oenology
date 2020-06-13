@@ -1,7 +1,7 @@
 import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
-import { endTurn, gainCoins, drawCards, payCoins, trainWorker, harvestField } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction } from "../prompts/promptReducers";
+import { endTurn, gainCoins, drawCards, makeWineFromGrapes, payCoins, trainWorker, harvestField } from "../shared/sharedReducers";
+import { promptToChooseField, promptForAction, promptToMakeWine } from "../prompts/promptReducers";
 import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
 
@@ -35,7 +35,14 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     return state;
             }
         case "CHOOSE_FIELD": {
-            const currentTurn = state.currentTurn as WorkerPlacementTurn;
+            if (
+                state.currentTurn.type !== "workerPlacement" ||
+                state.currentTurn.pendingAction === null ||
+                state.currentTurn.pendingAction.type === "playVisitor"
+            ) {
+                return state;
+            }
+            const currentTurn = state.currentTurn;
             const player = state.players[currentTurn.playerId];
             const field = player.fields[action.fieldId];
             const pendingAction = currentTurn.pendingAction!;
@@ -90,6 +97,15 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     pendingAction: { type: "plantVine", vineId: action.vineId },
                 },
             });
+
+        case "MAKE_WINE":
+            if (
+                state.currentTurn.type !== "workerPlacement" ||
+                state.currentTurn.pendingAction?.type !== "makeWine"
+            ) {
+                return state;
+            }
+            return endTurn(makeWineFromGrapes(state, action.ingredients));
 
         case "PASS":
             if (state.currentTurn.type !== "workerPlacement") {
@@ -159,11 +175,17 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         ...state,
                         currentTurn: {
                             ...currentTurn,
-                            pendingAction: { type: "harvestField" }
+                            pendingAction: { type: "harvestField" },
                         },
                     });
                 case "makeWine":
-                    return state;
+                    return promptToMakeWine({
+                        ...state,
+                        currentTurn: {
+                            ...currentTurn,
+                            pendingAction: { type: "makeWine" },
+                        },
+                    }, 2);
                 case "plantVine":
                     return {
                         ...state,

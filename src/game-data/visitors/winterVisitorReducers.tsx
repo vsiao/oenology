@@ -3,7 +3,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker } from "../shared/sharedReducers";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes } from "../shared/sharedReducers";
 import GameState from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
@@ -137,6 +137,8 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            case "MAKE_WINE":
+                return endTurn(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }

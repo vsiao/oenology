@@ -1,29 +1,31 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, WineColor } from "../GameState";
 import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
+import { WineIngredients } from "../prompts/promptActions";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
 };
 
+const devaluedIndex = (value: number, tokens: TokenMap) => {
+    for (value--; value >= 0; --value) {
+        if (!tokens[value]) {
+            return value;
+        }
+    }
+    return -1;
+}
+
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    let { red, white } = fieldYields(player.fields[fieldId]);
+    const yields = fieldYields(player.fields[fieldId]);
 
     // devalue grapes if crush pad already contains the same value
-    for (red--; red >= 0; --red) {
-        if (!player.crushPad.red[red]) {
-            break;
-        }
-    }
-    for (white--; white >= 0; --white) {
-        if (!player.crushPad.white[white]) {
-            break;
-        }
-    }
+    const red = devaluedIndex(yields.red, player.crushPad.red);
+    const white = devaluedIndex(yields.white, player.crushPad.white)
     return {
         ...state,
         players: {
@@ -34,6 +36,40 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
                     red: player.crushPad.red.map((r, i) => i === red || r) as TokenMap,
                     white: player.crushPad.white.map((w, i) => i === white || w) as TokenMap,
                 },
+            },
+        },
+    };
+};
+
+export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+
+    let { cellar, crushPad } = player;
+    wine.forEach(({ type, grapes }) => {
+        const value = grapes.reduce((v, g) => v + g.value, 0);
+        const newWineIdx = devaluedIndex(value, cellar[type]);
+        cellar = {
+            ...cellar,
+            [type]: cellar[type].map((w, i) => w || i === newWineIdx)
+        };
+        crushPad = {
+            red: crushPad.red.map((r, i) =>
+                r && grapes.every(({ color, value }) => color !== "red" || value !== i + 1)
+            ) as TokenMap,
+            white: crushPad.white.map((w, i) =>
+                w && grapes.every(({ color, value }) => color !== "white" || value !== i + 1)
+            ) as TokenMap,
+        };
+    });
+
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                crushPad,
+                cellar,
             },
         },
     };
@@ -126,6 +162,12 @@ export const endTurn = (state: GameState): GameState => {
                                     crushPad: {
                                         red: age(playerState.crushPad.red),
                                         white: age(playerState.crushPad.white),
+                                    },
+                                    cellar: {
+                                        red: age(playerState.cellar.red),
+                                        white: age(playerState.cellar.white),
+                                        blush: age(playerState.cellar.blush),
+                                        sparkling: age(playerState.cellar.sparkling),
                                     },
                                 }];
                             })

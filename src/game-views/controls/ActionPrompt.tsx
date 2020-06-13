@@ -6,6 +6,7 @@ import ChooseActionPrompt from "./ChooseActionPrompt";
 import ChooseFieldPrompt from "./ChooseFieldPrompt";
 import { AppState } from "../../store/AppState";
 import { CSSTransition } from "react-transition-group";
+import MakeWinePrompt from "./MakeWinePrompt";
 
 interface Props {
     actionPrompt: PromptState;
@@ -35,6 +36,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
             return <ChooseActionPrompt prompt={prompt} />;
         case "chooseField":
             return <ChooseFieldPrompt />;
+        case "makeWine":
+            return <MakeWinePrompt upToN={prompt.upToN} />;
         default:
             return JSON.stringify(prompt);
     }

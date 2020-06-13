@@ -83,7 +83,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         cellar: {
             red: [false, false, false, false, false, false, false, false, false],
             white: [false, false, false, false, false, false, false, false, false],
-            rose: [false, false, false, false, false, false, false, false, false],
+            blush: [false, false, false, false, false, false, false, false, false],
             sparkling: [false, false, false, false, false, false, false, false, false],
         },
     };

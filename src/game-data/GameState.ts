@@ -77,7 +77,7 @@ export interface PlayerState {
     cardsInHand: CardId[];
     fields: Record<FieldId, Field>;
     crushPad: Record<"red" | "white", TokenMap>;
-    cellar: Record<"red" | "white" | "rose" | "sparkling", TokenMap>;
+    cellar: Record<"red" | "white" | "blush" | "sparkling", TokenMap>;
 }
 
 export type WorkerType = "grande" | "normal";
