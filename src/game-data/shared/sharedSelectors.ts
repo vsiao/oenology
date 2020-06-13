@@ -14,10 +14,11 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
     };
 };
 
-export const hasNonEmptyCrushPad = (state: GameState) => {
+export const needGrapesDisabledReason = (state: GameState) => {
     const playerId = state.currentTurn.playerId;
-    return Object.values(state.players[playerId].crushPad)
+    const hasGrapes = Object.values(state.players[playerId].crushPad)
         .some(grapes => grapes.some(g => g === true));
+    return hasGrapes ? undefined : "You don't have any grapes.";
 };
 
 export const buyFieldDisabledReason = (state: GameState): string | undefined => {
@@ -27,10 +28,7 @@ export const buyFieldDisabledReason = (state: GameState): string | undefined => 
         return "You don't have any fields to buy.";
     }
     const minValue = soldFields.map(f => f.value).reduce((a, b) => Math.min(a, b));
-    if (minValue > playerState.coins) {
-        return "You don't have enough money.";
-    }
-    return undefined;
+    return moneyDisabledReason(state, minValue);
 };
 
 export const harvestFieldDisabledReason = (state: GameState): string | undefined => {
@@ -47,8 +45,10 @@ export const trainWorkerDisabledReason = (state: GameState, cost: number): strin
     if (playerState.trainedWorkers.length >= MAX_TRAINED_WORKERS) {
         return "You can't train any more workers.";
     }
-    if (playerState.coins < cost) {
-        return "You don't have enough money.";
-    }
-    return undefined;
+    return moneyDisabledReason(state, cost);
+};
+
+export const moneyDisabledReason = (state: GameState, cost: number): string | undefined => {
+    const playerState = state.players[state.currentTurn.playerId];
+    return playerState.coins < cost ? "You don't have enough money." : undefined;
 };

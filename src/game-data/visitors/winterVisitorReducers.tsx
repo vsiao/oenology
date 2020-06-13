@@ -3,12 +3,13 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes } from "../shared/sharedReducers";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins } from "../shared/sharedReducers";
 import GameState from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
-import { hasNonEmptyCrushPad, trainWorkerDisabledReason } from "../shared/sharedSelectors";
+import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
+import WineGlass from "../../game-views/icons/WineGlass";
 
 const mostValuableWine = (gameState: GameState) => {
     return 8;
@@ -25,22 +26,20 @@ export const winterVisitorReducers: Record<
                     { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
                     {
                         id: "JUDGE_DISCARD",
-                        label: <>Discard 1 wine of value 4 or more to gain <VP>3</VP></>,
+                        label: <>Discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP></>,
                     },
                 ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "JUDGE_DRAW":
-                        return endTurn(
-                            drawCards(state, state.currentTurn.playerId, { summerVisitor: 2 })
-                        );
+                        return endTurn(drawCards(state, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
                         return promptToChooseWine(state, /* minValue */ 4);
                     default:
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(gainVP(state, state.currentTurn.playerId, 3));
+                return endTurn(gainVP(3, state));
             default:
                 return state;
         }
@@ -50,15 +49,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_VISITOR":
                 const { playerId } = state.currentTurn;
                 if (state.players[playerId].victoryPoints < 0) {
-                    return endTurn(gainCoins(state, playerId, 6));
+                    return endTurn(gainCoins(6, state));
                 } else {
-                    return endTurn(
-                        drawCards(state, playerId, {
-                            vine: 1,
-                            summerVisitor: 1,
-                            order: 1,
-                        })
-                    );
+                    return endTurn(drawCards(state, { vine: 1, summerVisitor: 1, order: 1, }));
                 }
             default:
                 return state;
@@ -85,9 +78,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROFESSOR_TRAIN":
-                        return endTurn(trainWorker(state, state.currentTurn.playerId, 2));
+                        return endTurn(trainWorker(payCoins(2, state)));
                     case "PROFESSOR_GAIN":
-                        return endTurn(gainVP(state, state.currentTurn.playerId, 2));
+                        return endTurn(gainVP(2, state));
                     default:
                         return state;
                 }
@@ -103,7 +96,7 @@ export const winterVisitorReducers: Record<
                 const currentTurnPlayerId = state.currentTurn.playerId;
                 const stateAfterDiscard = discardWine(state, currentTurnPlayerId, action.wine);
                 if (action.wine.value > mostValuableWine(stateAfterDiscard)) {
-                    return endTurn(gainVP(stateAfterDiscard, currentTurnPlayerId, 2))
+                    return endTurn(gainVP(2, stateAfterDiscard))
                 } else {
                     return endTurn(stateAfterDiscard);
                 }
@@ -117,10 +110,8 @@ export const winterVisitorReducers: Record<
                 return promptForAction(state, [
                     {
                         id: "TEACHER_MAKE",
-                        label: <>Make up to 2 wine</>,
-                        disabledReason: hasNonEmptyCrushPad(state)
-                            ? undefined
-                            : "You don't have any grapes.",
+                        label: <>Make up to 2 <WineGlass /></>,
+                        disabledReason: needGrapesDisabledReason(state),
                     },
                     {
                         id: "TEACHER_TRAIN",
@@ -131,9 +122,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "TEACHER_MAKE":
-                        return promptToMakeWine(state, 2);
+                        return promptToMakeWine(state, /* upToN */ 2);
                     case "TEACHER_TRAIN":
-                        return endTurn(trainWorker(state, state.currentTurn.playerId, 2));
+                        return endTurn(trainWorker(payCoins(2, state)));
                     default:
                         return state;
                 }

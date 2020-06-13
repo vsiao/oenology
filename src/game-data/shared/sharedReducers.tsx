@@ -1,5 +1,5 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, WineColor } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
 import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
@@ -22,10 +22,18 @@ const devaluedIndex = (value: number, tokens: TokenMap) => {
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const yields = fieldYields(player.fields[fieldId]);
+    return placeGrapes(state, yields);
+};
+
+export const placeGrapes = (
+    state: GameState,
+    values: { red: number; white: number }
+): GameState => {
+    const player = state.players[state.currentTurn.playerId];
 
     // devalue grapes if crush pad already contains the same value
-    const red = devaluedIndex(yields.red, player.crushPad.red);
-    const white = devaluedIndex(yields.white, player.crushPad.white)
+    const red = devaluedIndex(values.red, player.crushPad.red);
+    const white = devaluedIndex(values.white, player.crushPad.white);
     return {
         ...state,
         players: {
@@ -39,7 +47,7 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
             },
         },
     };
-};
+}
 
 export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): GameState => {
     const player = state.players[state.currentTurn.playerId];
@@ -80,8 +88,8 @@ const splitDeck = <T extends unknown>(deck: T[], n: number | undefined): [T[], T
 };
 export const drawCards = (
     state: GameState,
-    playerId: string,
-    numCards: { [K in CardType]?: number }
+    numCards: { [K in CardType]?: number },
+    playerId = state.currentTurn.playerId,
 ): GameState => {
     const drawPiles = state.drawPiles;
     const [drawnVines, vine] = splitDeck(drawPiles.vine, numCards.vine);
@@ -290,7 +298,7 @@ const promptToDrawFallVisitor = (state: GameState) => {
     ]);
 };
 
-export const gainVP = (state: GameState, playerId: string, numVP: number) => {
+const editVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) => {
     const playerState = state.players[playerId];
     return {
         ...state,
@@ -303,8 +311,11 @@ export const gainVP = (state: GameState, playerId: string, numVP: number) => {
         },
     };
 };
+export const gainVP = editVP;
+export const loseVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) =>
+    editVP(-numVP, state, playerId);
 
-const editCoins = (state: GameState, playerId: string, numCoins: number) => {
+const editCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) => {
     const playerState = state.players[playerId];
     return {
         ...state,
@@ -318,11 +329,10 @@ const editCoins = (state: GameState, playerId: string, numCoins: number) => {
     };
 };
 export const gainCoins = editCoins;
-export const payCoins = (state: GameState, playerId: string, numCoins: number) =>
-    editCoins(state, playerId, -numCoins);
+export const payCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) =>
+    editCoins(-numCoins, state, playerId);
 
-export const trainWorker = (state: GameState, playerId: string, cost: number): GameState => {
-    state = payCoins(state, playerId, cost);
+export const trainWorker = (state: GameState, playerId = state.currentTurn.playerId): GameState => {
     return {
         ...state,
         players: {

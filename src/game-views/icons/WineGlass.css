@@ -1,10 +1,11 @@
 .WineGlass {
     color: black;
-    display: flex;
+    display: inline-flex;
     fill: #ddd;
     flex-shrink: 0;
     height: 1.6em;
     position: relative;
+    vertical-align: bottom;
     width: 1.6em;
 }
 .WineGlass--red {

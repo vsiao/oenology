@@ -1,10 +1,11 @@
 import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
-import { Vine, SummerVisitor, Order } from "../../game-views/icons/Card";
+import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import Residuals from "../../game-views/icons/Residuals";
+import WineGlass from "../../game-views/icons/WineGlass";
 
 export interface VisitorCardData {
     name: string;
@@ -23,6 +24,18 @@ export type WinterVisitorId = keyof typeof winterVisitorCards;
 export type VisitorId = SummerVisitorId | WinterVisitorId;
 
 export const summerVisitorCards = {
+    buyer: visitorCard(
+        "Buyer",
+        <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad OR discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP>.</>
+    ),
+    contractor: visitorCard(
+        "Contractor",
+        <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
+    ),
+    entertainer: visitorCard(
+        "Entertainer",
+        <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
+    ),
     handyman: visitorCard(
         "Handyman",
         <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
@@ -35,9 +48,17 @@ export const summerVisitorCards = {
         "Negotiator",
         <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
     ),
+    patron: visitorCard(
+        "Patron",
+        <>Gain <Coins>4</Coins> OR draw 1 <Order />  and 1 <WinterVisitor />.</>
+    ),
     planner: visitorCard(
         "Planner",
         <>Place a worker on an action in a future season. Take the action at the beginning of that season.</>,
+    ),
+    planter: visitorCard(
+        "Planter",
+        <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
     ),
     producer: visitorCard(
         "Producer",
@@ -45,14 +66,26 @@ export const summerVisitorCards = {
     ),
     tourGuide: visitorCard(
         "Tour Guide",
-        <>Gain <Coins>4</Coins> OR harvest 1 field.</>,
+        <>Gain <Coins>4</Coins> OR harvest 1 field.</>
+    ),
+    uncertifiedArchitect: visitorCard(
+        "Uncertified Architect",
+        <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure OR lose <VP>2</VP> to build any structure.</>
+    ),
+    uncertifiedBroker: visitorCard(
+        "Uncertified Broker",
+        <>Lose <VP>3</VP> to gain <Coins>9</Coins> OR pay <Coins>6</Coins> to gain <VP>2</VP>.</>
+    ),
+    volunteerCrew: visitorCard(
+        "Volunteer Crew",
+        <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
     ),
 };
 
 export const winterVisitorCards = {
     judge: visitorCard(
         "Judge",
-        <>Draw 2 <SummerVisitor /> OR discard 1 wine of value 4 or more to gain <VP>3</VP>.</>,
+        <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
     ),
     politician: visitorCard(
         "Politician",
@@ -64,7 +97,7 @@ export const winterVisitorCards = {
     ),
     taster: visitorCard(
         "Taster",
-        <>Discard 1 wine to gain <Coins>4</Coins>. If it is the most valuable wine in any player's cellar (no ties), gain <VP>2</VP>.</>,
+        <>Discard 1 <WineGlass /> to gain <Coins>4</Coins>. If it is the most valuable <WineGlass /> in any player's cellar (no ties), gain <VP>2</VP>.</>,
     ),
     teacher: visitorCard(
         "Teacher",

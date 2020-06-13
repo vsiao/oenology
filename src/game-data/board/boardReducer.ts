@@ -2,7 +2,7 @@ import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
 import { endTurn, gainCoins, drawCards, makeWineFromGrapes, payCoins, trainWorker, harvestField } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine } from "../prompts/promptReducers";
-import { hasNonEmptyCrushPad, buyFieldDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
 
 export const board = (state: GameState, action: GameAction): GameState => {
@@ -10,9 +10,9 @@ export const board = (state: GameState, action: GameAction): GameState => {
         case "CHOOSE_ACTION":
             switch (action.choice) {
                 case "FALL_DRAW_SUMMER":
-                    return endTurn(drawCards(state, state.currentTurn.playerId, { summerVisitor: 1 }));
+                    return endTurn(drawCards(state, { summerVisitor: 1 }));
                 case "FALL_DRAW_WINTER":
-                    return endTurn(drawCards(state, state.currentTurn.playerId, { winterVisitor: 1 }));
+                    return endTurn(drawCards(state, { winterVisitor: 1 }));
                 case "BUY_FIELD":
                     return promptToChooseField({
                         ...state,
@@ -51,6 +51,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "buyField":
                 case "sellField":
                     return endTurn((field.sold ? payCoins : gainCoins)(
+                        field.value,
                         {
                             ...state,
                             players: {
@@ -63,9 +64,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                                     },
                                 },
                             },
-                        },
-                        currentTurn.playerId,
-                        field.value
+                        }
                     ));
                 case "plantVine":
                     const vines: VineId[] = [...field.vines, pendingAction.vineId!];
@@ -138,9 +137,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         {
                             id: "SELL_GRAPES",
                             label: "Sell grape(s)",
-                            disabledReason: hasNonEmptyCrushPad(state)
-                                ? undefined
-                                : "You don't have any grapes!",
+                            disabledReason: needGrapesDisabledReason(state),
                         },
                         {
                             id: "BUY_FIELD",
@@ -157,19 +154,15 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         },
                     ]);
                 case "drawOrder":
-                    return endTurn(drawCards(state, state.currentTurn.playerId, {
-                        order: 1
-                    }));
+                    return endTurn(drawCards(state, { order: 1 }));
                 case "drawVine":
-                    return endTurn(drawCards(state, state.currentTurn.playerId, {
-                        vine: 1
-                    }));
+                    return endTurn(drawCards(state, { vine: 1 }));
                 case "fillOrder":
                     return state;
                 case "gainCoin":
-                    return endTurn(gainCoins(state, state.currentTurn.playerId, 1));
+                    return endTurn(gainCoins(1, state));
                 case "giveTour":
-                    return endTurn(gainCoins(state, state.currentTurn.playerId, 2));
+                    return endTurn(gainCoins(2, state));
                 case "harvestField":
                     return promptToChooseField({
                         ...state,
@@ -204,7 +197,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         },
                     };
                 case "trainWorker":
-                    return endTurn(trainWorker(state, state.currentTurn.playerId, 4));
+                    return endTurn(trainWorker(payCoins(4, state)));
                 case "yoke":
                     return state;
                 default:
