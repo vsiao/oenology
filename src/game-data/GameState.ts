@@ -54,7 +54,7 @@ export type WorkerPlacementTurnPendingAction =
     | { type: "sellGrapes"; }
     | { type: "buyField"; }
     | { type: "sellField"; }
-    | { type: "plantVine"; vineId?: VineId }
+    | { type: "plantVine"; vineId?: VineId; }
     | { type: "buildStructure"; } // choose structure
     | { type: "harvestField"; } // choose field
     | { type: "makeWine"; } // choose grape
@@ -63,7 +63,7 @@ export type WorkerPlacementTurnPendingAction =
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";
 export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
-export type Structure = "trellis" | "irrigation" | "yoke" | "windmill" | "cottage" | "tastingRoom";
+export type StructureId = "trellis" | "irrigation" | "yoke" | "windmill" | "cottage" | "tastingRoom" | "mediumCellar" | "largeCellar";
 export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
 export type WineColor = "red" | "white" | "blush" | "sparkling";
 
@@ -78,6 +78,7 @@ export interface PlayerState {
     fields: Record<FieldId, Field>;
     crushPad: Record<"red" | "white", TokenMap>;
     cellar: Record<"red" | "white" | "blush" | "sparkling", TokenMap>;
+    structures: Record<StructureId, boolean>;
 }
 
 export type WorkerType = "grande" | "normal";
@@ -87,10 +88,10 @@ export interface TrainedWorker {
 }
 
 export type CardId =
-    | { type: "vine"; id: VineId }
-    | { type: "summerVisitor"; id: SummerVisitorId }
-    | { type: "order"; id: OrderId }
-    | { type: "winterVisitor"; id: WinterVisitorId };
+    | { type: "vine"; id: VineId; }
+    | { type: "summerVisitor"; id: SummerVisitorId; }
+    | { type: "order"; id: OrderId; }
+    | { type: "winterVisitor"; id: WinterVisitorId; };
 
 export interface CardsByType {
     vine: VineId[];

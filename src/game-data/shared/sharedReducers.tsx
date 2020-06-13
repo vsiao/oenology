@@ -1,10 +1,11 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, StructureId } from "../GameState";
 import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
 import { WineIngredients } from "../prompts/promptActions";
+import { structures } from "../structures";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -17,7 +18,7 @@ const devaluedIndex = (value: number, tokens: TokenMap) => {
         }
     }
     return -1;
-}
+};
 
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
@@ -27,7 +28,7 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
 
 export const placeGrapes = (
     state: GameState,
-    values: { red: number; white: number }
+    values: { red: number; white: number; }
 ): GameState => {
     const player = state.players[state.currentTurn.playerId];
 
@@ -47,7 +48,7 @@ export const placeGrapes = (
             },
         },
     };
-}
+};
 
 export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): GameState => {
     const player = state.players[state.currentTurn.playerId];
@@ -78,6 +79,25 @@ export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): G
                 ...player,
                 crushPad,
                 cellar,
+            },
+        },
+    };
+};
+
+export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const structure = structures[structureId];
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                coins: player.coins - structure.cost,
+                structures: {
+                    ...player.structures,
+                    [structureId]: true
+                }
             },
         },
     };
@@ -269,7 +289,7 @@ const discardPendingCard = (state: GameState): GameState => {
                         ? { summerVisitor: [visitorId as SummerVisitorId, ...discardPiles.summerVisitor] }
                         : { winterVisitor: [visitorId as WinterVisitorId, ...discardPiles.winterVisitor] })
                 },
-            }
+            };
         case "plantVine":
             const vineId = currentTurn.pendingAction.vineId!;
             return {

@@ -86,5 +86,15 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             blush: [false, false, false, false, false, false, false, false, false],
             sparkling: [false, false, false, false, false, false, false, false, false],
         },
+        structures: {
+            trellis: false,
+            irrigation: false,
+            yoke: false,
+            windmill: false,
+            cottage: false,
+            tastingRoom: false,
+            mediumCellar: false,
+            largeCellar: false
+        }
     };
 };
