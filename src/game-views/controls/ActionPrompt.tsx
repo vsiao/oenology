@@ -40,7 +40,7 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
         case "makeWine":
             return <MakeWinePrompt upToN={prompt.upToN} />;
         case "buildStructure":
-            return <BuildStructurePrompt />;
+            return <BuildStructurePrompt coupon={prompt.coupon} />;
         default:
             return JSON.stringify(prompt);
     }

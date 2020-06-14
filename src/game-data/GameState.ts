@@ -2,6 +2,7 @@ import { SummerVisitorId, VisitorId, WinterVisitorId } from "./visitors/visitorC
 import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
+import { StructureId } from "./structures";
 
 export default interface GameState {
     // shared state
@@ -63,7 +64,6 @@ export type WorkerPlacementTurnPendingAction =
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";
 export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
-export type StructureId = "trellis" | "irrigation" | "yoke" | "windmill" | "cottage" | "tastingRoom" | "mediumCellar" | "largeCellar";
 export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
 export type WineColor = "red" | "white" | "blush" | "sparkling";
 

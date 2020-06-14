@@ -1,5 +1,6 @@
 import { Action } from "redux";
-import { FieldId, GrapeColor, WineColor, StructureId } from "../GameState";
+import { FieldId, GrapeColor, WineColor } from "../GameState";
+import { StructureId } from "../structures";
 
 export type PromptAction =
     | ChooseAction

@@ -1,14 +1,15 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState from "../GameState";
-import { promptForAction, promptToChooseField } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseField, promptToBuildStructure } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
-import { endTurn, gainCoins, drawCards, harvestField, payCoins, placeGrapes, loseVP, gainVP } from "../shared/sharedReducers";
+import { endTurn, gainCoins, drawCards, harvestField, payCoins, placeGrapes, loseVP, gainVP, buildStructure } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
+import { maxStructureCost } from "../structures";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
@@ -104,7 +105,7 @@ export const summerVisitorReducers: Record<
                         label: <>Harvest 1 field</>,
                         disabledReason: harvestFieldDisabledReason(state),
                     },
-                ])
+                ]);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "TOUR_GAIN_4":
@@ -120,7 +121,28 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    uncertifiedArchitect: s => endTurn(s),
+    uncertifiedArchitect: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_VISITOR":
+                return promptForAction(state, [
+                    { id: "UARCHITECT_LOSE_1_VP", label: <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure</> },
+                    { id: "UARCHITECT_LOSE_2_VP", label: <>Lose <VP>2</VP> to build any structure</> }
+                ]);
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "UARCHITECT_LOSE_1_VP":
+                        return promptToBuildStructure(loseVP(1, state), { kind: "voucher", upToCost: 3 });
+                    case "UARCHITECT_LOSE_2_VP":
+                        return promptToBuildStructure(loseVP(2, state), { kind: "voucher", upToCost: maxStructureCost });
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                return endTurn(buildStructure(state, action.structureId));
+            default:
+                return state;
+        }
+    },
     uncertifiedBroker: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":

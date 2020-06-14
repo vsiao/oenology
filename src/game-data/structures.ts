@@ -1,9 +1,21 @@
-import { StructureId } from "./GameState";
+export type StructureId = "trellis" | "irrigation" | "yoke" | "windmill" | "cottage" | "tastingRoom" | "mediumCellar" | "largeCellar";
 
 export interface StructureData {
     name: string;
     cost: number;
 }
+
+interface Discount {
+    kind: "discount",
+    amount: number;
+}
+
+interface Voucher {
+    kind: "voucher",
+    upToCost: number;
+}
+
+export type Coupon = Discount | Voucher;
 
 export const structures: Record<StructureId, StructureData> = {
     trellis: {
@@ -39,6 +51,13 @@ export const structures: Record<StructureId, StructureData> = {
         cost: 6
     }
 };
+
+export const maxStructureCost = Object.values(structures).reduce((max, structure) => {
+    if (structure.cost > max) {
+        return structure.cost;
+    }
+    return max;
+}, 0);
 
 export const structureAbbreviations: Record<StructureId, string> = {
     trellis: 'Tr',

@@ -4,6 +4,7 @@ import { endTurn, gainCoins, drawCards, makeWineFromGrapes, buildStructure, payC
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
+import { structures } from "../structures";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -113,7 +114,8 @@ export const board = (state: GameState, action: GameAction): GameState => {
             ) {
                 return state;
             }
-            return endTurn(buildStructure(state, action.structureId));
+            const structure = structures[action.structureId];
+            return endTurn(buildStructure(payCoins(structure.cost, state), action.structureId));
 
 
         case "PASS":
