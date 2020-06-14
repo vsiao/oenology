@@ -87,10 +87,9 @@ export interface TrainedWorker {
 }
 
 export type CardId =
-    | { type: "vine"; id: VineId }
-    | { type: "summerVisitor"; id: SummerVisitorId }
     | { type: "order"; id: OrderId }
-    | { type: "winterVisitor"; id: WinterVisitorId };
+    | { type: "vine"; id: VineId }
+    | { type: "visitor"; id: VisitorId }
 
 export interface CardsByType {
     vine: VineId[];

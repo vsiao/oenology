@@ -9,6 +9,7 @@ import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
+import { visitorCards } from "../game-data/visitors/visitorCards";
 
 interface Props {
     player: PlayerState;
@@ -125,16 +126,19 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const renderCard = ({ type }: CardId): React.ReactNode => {
-    switch (type) {
-        case "order":
-            return <Order />;
-        case "summerVisitor":
-            return <SummerVisitor />;
+const renderCard = (card: CardId): React.ReactNode => {
+    switch (card.type) {
         case "vine":
             return <Vine />;
-        case "winterVisitor":
-            return <WinterVisitor />;
+        case "order":
+            return <Order />;
+        case "visitor":
+            switch (visitorCards[card.id].season) {
+                case "summer":
+                    return <SummerVisitor />;
+                case "winter":
+                    return <WinterVisitor />;
+            }
     }
 };
 

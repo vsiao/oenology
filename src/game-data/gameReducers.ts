@@ -67,9 +67,9 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             { type: "normal", available: true },
         ],
         cardsInHand: [
-            { type: "summerVisitor", id: "tourGuide" },
-            { type: "winterVisitor", id: "judge" },
-            { type: "winterVisitor", id: "politician" },
+            { type: "visitor", id: "tourGuide" },
+            { type: "visitor", id: "assessor" },
+            { type: "visitor", id: "politician" },
         ],
         fields: {
             field5: { id: "field5", value: 5, vines: [], sold: false },

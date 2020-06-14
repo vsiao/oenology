@@ -3,7 +3,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins } from "../shared/sharedReducers";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins, discardCards } from "../shared/sharedReducers";
 import GameState from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
@@ -11,14 +11,36 @@ import { WinterVisitorId } from "./visitorCards";
 import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 
-const mostValuableWine = (gameState: GameState) => {
-    return 8;
-};
-
 export const winterVisitorReducers: Record<
     WinterVisitorId,
     (state: GameState, action: GameAction) => GameState
 > = {
+    assessor: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+        const numCards = player.cardsInHand.length;
+        switch (action.type) {
+            case "CHOOSE_VISITOR":
+                return promptForAction(state, [
+                    { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</> },
+                    {
+                        id: "ASSESSOR_DISCARD",
+                        label: <>Discard your hand to gain <VP>2</VP></>,
+                        disabledReason: numCards < 1 ? "You don't have any cards." : undefined,
+                    },
+                ]);
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ASSESSOR_GAIN":
+                        return endTurn(gainCoins(numCards, state));
+                    case "ASSESSOR_DISCARD":
+                        return endTurn(gainVP(2, discardCards(player.cardsInHand, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     judge: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
@@ -95,7 +117,16 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_WINE":
                 const currentTurnPlayerId = state.currentTurn.playerId;
                 const stateAfterDiscard = discardWine(state, currentTurnPlayerId, action.wine);
-                if (action.wine.value > mostValuableWine(stateAfterDiscard)) {
+
+                const mostValuableWine = Object.values(stateAfterDiscard.players)
+                    .map(player =>
+                        Object.values(player.cellar)
+                            .map(wines => wines.lastIndexOf(true) + 1)
+                            .reduce((v1, v2) => Math.max(v1, v2))
+                    )
+                    .reduce((v1, v2) => Math.max(v1, v2));
+
+                if (action.wine.value > mostValuableWine) {
                     return endTurn(gainVP(2, stateAfterDiscard))
                 } else {
                     return endTurn(stateAfterDiscard);

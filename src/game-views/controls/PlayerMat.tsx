@@ -65,21 +65,18 @@ const renderCard = (card: CardId, props: Props) => {
                 <OrderCard cardData={orderCards[card.id]} />
             </li>;
 
-        case "summerVisitor":
-        case "winterVisitor":
+        case "visitor":
             const cardData = visitorCards[card.id];
             const canPlayVisitor = currentTurn.playerId === playerState.id &&
                 currentTurn.type === "workerPlacement" &&
                 currentTurn.pendingAction !== null &&
                 currentTurn.pendingAction.type === "playVisitor" &&
-                currentTurn.pendingAction.visitorId === undefined && (
-                    (currentTurn.season === "summer" && card.type === "summerVisitor") ||
-                    (currentTurn.season === "winter" && card.type === "winterVisitor")
-                );
+                currentTurn.pendingAction.visitorId === undefined &&
+                currentTurn.season === cardData.season;
             return <li key={card.id} className="PlayerMat-card">
                 <VisitorCard
                     interactive={canPlayVisitor}
-                    type={card.type === "summerVisitor" ? "summer" : "winter"}
+                    type={cardData.season}
                     cardData={cardData}
                     onClick={canPlayVisitor
                         ? () => props.onSelectVisitor(card.id)

@@ -1,6 +1,6 @@
 import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
-import { endTurn, gainCoins, drawCards, makeWineFromGrapes, payCoins, trainWorker, harvestField } from "../shared/sharedReducers";
+import { endTurn, gainCoins, drawCards, makeWineFromGrapes, payCoins, trainWorker, harvestField, removeCardsFromHand } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
@@ -89,13 +89,15 @@ export const board = (state: GameState, action: GameAction): GameState => {
         }
         case "CHOOSE_VINE":
             const currentTurn = state.currentTurn as WorkerPlacementTurn;
-            return promptToChooseField({
-                ...state,
-                currentTurn: {
-                    ...currentTurn,
-                    pendingAction: { type: "plantVine", vineId: action.vineId },
-                },
-            });
+            return promptToChooseField(
+                removeCardsFromHand([{ type: "vine", id: action.vineId }], {
+                    ...state,
+                    currentTurn: {
+                        ...currentTurn,
+                        pendingAction: { type: "plantVine", vineId: action.vineId },
+                    },
+                })
+            );
 
         case "MAKE_WINE":
             if (

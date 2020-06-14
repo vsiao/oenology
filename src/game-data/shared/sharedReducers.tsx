@@ -1,6 +1,6 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
-import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, CardId } from "../GameState";
+import { visitorCards } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
@@ -107,13 +107,47 @@ export const drawCards = (
                 cardsInHand: [
                     ...state.players[playerId].cardsInHand,
                     ...drawnVines.map(id => ({ type: "vine" as const, id })),
-                    ...drawnSummerVisitors.map(id => ({ type: "summerVisitor" as const, id })),
+                    ...drawnSummerVisitors.map(id => ({ type: "visitor" as const, id })),
                     ...drawnOrders.map(id => ({ type: "order" as const, id })),
-                    ...drawnWinterVisitors.map(id => ({ type: "winterVisitor" as const, id })),
+                    ...drawnWinterVisitors.map(id => ({ type: "visitor" as const, id })),
                 ],
             }
         }
     };
+};
+
+export const discardCards = (cards: CardId[], state: GameState): GameState => {
+    return addToDiscard(cards, removeCardsFromHand(cards, state));
+};
+
+export const removeCardsFromHand = (cards: CardId[], state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                cardsInHand: player.cardsInHand.filter(({ id }) =>
+                    cards.every(card => card.id !== id)
+                ),
+            },
+        },
+    };
+};
+
+export const addToDiscard = (cards: CardId[], state: GameState): GameState => {
+    let discardPiles = state.discardPiles;
+    for (const card of cards) {
+        const pileType = card.type === "visitor"
+            ? (visitorCards[card.id].season === "summer" ? "summerVisitor" : "winterVisitor")
+            : card.type;
+        discardPiles = {
+            ...discardPiles,
+            [pileType]: [card.id, ...discardPiles[pileType]],
+        };
+    }
+    return { ...state, discardPiles };
 };
 
 export const endTurn = (state: GameState): GameState => {
@@ -129,7 +163,7 @@ export const endTurn = (state: GameState): GameState => {
             return state;
 
         case "workerPlacement": {
-            state = discardPendingCard(state);
+            state = movePendingCardToDiscard(state);
 
             if (compactWakeUpOrder.every(p => p.passed)) {
                 // If everyone passed, it's the end of the season
@@ -239,53 +273,21 @@ const age = (tokens: TokenMap): TokenMap => {
     return newTokenMap;
 };
 
-const discardPendingCard = (state: GameState): GameState => {
-    const { currentTurn, players, discardPiles } = state;
+const movePendingCardToDiscard = (state: GameState): GameState => {
+    const { currentTurn } = state;
     if (
         currentTurn.type !== "workerPlacement" ||
         currentTurn.pendingAction === null
     ) {
         return state;
     }
-    const player = players[currentTurn.playerId];
-
     switch (currentTurn.pendingAction.type) {
         case "playVisitor":
-            const visitorId = currentTurn.pendingAction.visitorId;
-            return {
-                ...state,
-                // Filter out visitor card from current player's hand
-                players: {
-                    ...players,
-                    [player.id]: {
-                        ...player,
-                        cardsInHand: player.cardsInHand.filter(({ id }) => id !== visitorId),
-                    },
-                },
-                // And add it to the front of the appropriate discard pile
-                discardPiles: {
-                    ...discardPiles,
-                    ...(currentTurn.season === "summer"
-                        ? { summerVisitor: [visitorId as SummerVisitorId, ...discardPiles.summerVisitor] }
-                        : { winterVisitor: [visitorId as WinterVisitorId, ...discardPiles.winterVisitor] })
-                },
-            }
+            const visitorId = currentTurn.pendingAction.visitorId!;
+            return addToDiscard([{ type: "visitor", id: visitorId }], state);
         case "plantVine":
             const vineId = currentTurn.pendingAction.vineId!;
-            return {
-                ...state,
-                players: {
-                    ...players,
-                    [player.id]: {
-                        ...player,
-                        cardsInHand: player.cardsInHand.filter(({ id }) => id !== vineId),
-                    },
-                },
-                discardPiles: {
-                    ...discardPiles,
-                    vine: [vineId, ...discardPiles.vine],
-                },
-            };
+            return addToDiscard([{ type: "vine", id: vineId }], state);
         default:
             return state;
     }
