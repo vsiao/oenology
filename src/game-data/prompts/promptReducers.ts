@@ -1,6 +1,7 @@
 import GameState from "../GameState";
 import { GameAction } from "../gameActions";
 import { Choice } from "./PromptState";
+import { Coupon } from "../structures";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
@@ -58,12 +59,12 @@ export const promptToMakeWine = (state: GameState, upToN: number): GameState => 
     };
 };
 
-export const promptToBuildStructure = (state: GameState): GameState => {
+export const promptToBuildStructure = (state: GameState, coupon?: Coupon): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
     return {
         ...state,
-        actionPrompt: { type: "buildStructure" },
+        actionPrompt: { type: "buildStructure", coupon },
     };
 };

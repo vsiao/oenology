@@ -1,11 +1,11 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, StructureId } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap } from "../GameState";
 import { SummerVisitorId, WinterVisitorId } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
 import { WineIngredients } from "../prompts/promptActions";
-import { structures } from "../structures";
+import { StructureId } from "../structures";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -86,14 +86,12 @@ export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): G
 
 export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    const structure = structures[structureId];
     return {
         ...state,
         players: {
             ...state.players,
             [player.id]: {
                 ...player,
-                coins: player.coins - structure.cost,
                 structures: {
                     ...player.structures,
                     [structureId]: true

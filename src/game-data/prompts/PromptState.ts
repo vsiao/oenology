@@ -1,3 +1,4 @@
+import { Coupon } from "../structures";
 
 export type PromptState =
     | null
@@ -29,4 +30,5 @@ export interface ChooseWinePromptState {
 
 export interface BuildStructurePromptState {
     type: "buildStructure";
+    coupon?: Coupon;
 }

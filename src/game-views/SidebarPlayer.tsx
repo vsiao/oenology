@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId, StructureId } from "../game-data/GameState";
+import { PlayerState, CardId } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -10,7 +10,7 @@ import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
-import { structureAbbreviations } from "../game-data/structures";
+import { structureAbbreviations, StructureId } from "../game-data/structures";
 
 interface Props {
     player: PlayerState;
