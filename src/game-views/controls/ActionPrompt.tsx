@@ -7,6 +7,7 @@ import ChooseFieldPrompt from "./ChooseFieldPrompt";
 import { AppState } from "../../store/AppState";
 import { CSSTransition } from "react-transition-group";
 import MakeWinePrompt from "./MakeWinePrompt";
+import BuildStructurePrompt from "./BuildStructurePrompt";
 
 interface Props {
     actionPrompt: PromptState;
@@ -38,6 +39,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
             return <ChooseFieldPrompt />;
         case "makeWine":
             return <MakeWinePrompt upToN={prompt.upToN} />;
+        case "buildStructure":
+            return <BuildStructurePrompt />;
         default:
             return JSON.stringify(prompt);
     }
