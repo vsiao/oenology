@@ -1,5 +1,5 @@
 import * as React from "react";
-import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, CardId } from "../GameState";
+import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, CardId, WorkerPlacementTurnPendingAction, WorkerPlacementTurn } from "../GameState";
 import { visitorCards } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
@@ -97,6 +97,16 @@ export const buildStructure = (state: GameState, structureId: StructureId): Game
                     [structureId]: true
                 }
             },
+        },
+    };
+};
+
+export const setPendingAction = (pendingAction: WorkerPlacementTurnPendingAction, state: GameState): GameState => {
+    return {
+        ...state,
+        currentTurn: {
+            ...state.currentTurn as WorkerPlacementTurn,
+            pendingAction
         },
     };
 };

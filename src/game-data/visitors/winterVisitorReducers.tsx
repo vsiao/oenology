@@ -61,7 +61,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(gainVP(3, state));
+                return endTurn(gainVP(3, state)); // TODO
             default:
                 return state;
         }

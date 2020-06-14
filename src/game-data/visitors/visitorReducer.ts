@@ -2,7 +2,7 @@ import GameState from "../GameState";
 import { GameAction } from "../gameActions";
 import { summerVisitorReducers } from "./summerVisitorReducers";
 import { winterVisitorReducers } from "./winterVisitorReducers";
-import { removeCardsFromHand } from "../shared/sharedReducers";
+import { removeCardsFromHand, setPendingAction } from "../shared/sharedReducers";
 
 const visitorReducers = {
     ...summerVisitorReducers,
@@ -21,16 +21,13 @@ export const visitor = (state: GameState, action: GameAction) => {
     switch (action.type) {
         case "CHOOSE_VISITOR": {
             const visitorId = action.visitorId;
-            state = removeCardsFromHand([{ type: "visitor", id: visitorId, }], {
-                ...state,
-                currentTurn: {
-                    ...state.currentTurn,
-                    pendingAction: {
-                        ...state.currentTurn.pendingAction,
-                        visitorId,
-                    }
-                },
-            });
+            state = removeCardsFromHand(
+                [{ type: "visitor", id: visitorId, }],
+                setPendingAction({
+                    ...state.currentTurn.pendingAction,
+                    visitorId,
+                }, state)
+            );
             return visitorReducers[visitorId](state, action);
         }
         default:
