@@ -5,6 +5,7 @@ import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
 import { WineIngredients } from "../prompts/promptActions";
+import { StructureId } from "../structures";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -17,7 +18,7 @@ const devaluedIndex = (value: number, tokens: TokenMap) => {
         }
     }
     return -1;
-}
+};
 
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
@@ -27,7 +28,7 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
 
 export const placeGrapes = (
     state: GameState,
-    values: { red: number; white: number }
+    values: { red: number; white: number; }
 ): GameState => {
     const player = state.players[state.currentTurn.playerId];
 
@@ -47,7 +48,7 @@ export const placeGrapes = (
             },
         },
     };
-}
+};
 
 export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): GameState => {
     const player = state.players[state.currentTurn.playerId];
@@ -78,6 +79,23 @@ export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): G
                 ...player,
                 crushPad,
                 cellar,
+            },
+        },
+    };
+};
+
+export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                structures: {
+                    ...player.structures,
+                    [structureId]: true
+                }
             },
         },
     };

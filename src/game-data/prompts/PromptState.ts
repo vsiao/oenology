@@ -1,10 +1,12 @@
+import { Coupon } from "../structures";
 
 export type PromptState =
     | null
     | ChooseActionPromptState
-    | { type: "chooseField" }
+    | { type: "chooseField"; }
     | MakeWinePromptState
-    | ChooseWinePromptState;
+    | ChooseWinePromptState
+    | BuildStructurePromptState;
 
 export interface Choice {
     id: string;
@@ -24,4 +26,9 @@ export interface MakeWinePromptState {
 export interface ChooseWinePromptState {
     type: "chooseWine";
     minValue: number;
+}
+
+export interface BuildStructurePromptState {
+    type: "buildStructure";
+    coupon?: Coupon;
 }

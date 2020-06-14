@@ -1,9 +1,10 @@
 import { GameAction } from "../gameActions";
 import GameState, { WorkerPlacementTurn } from "../GameState";
-import { endTurn, gainCoins, drawCards, makeWineFromGrapes, payCoins, trainWorker, harvestField, removeCardsFromHand } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction, promptToMakeWine } from "../prompts/promptReducers";
+import { endTurn, gainCoins, drawCards, makeWineFromGrapes, buildStructure, payCoins, trainWorker, harvestField, removeCardsFromHand } from "../shared/sharedReducers";
+import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
+import { structures } from "../structures";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -108,6 +109,17 @@ export const board = (state: GameState, action: GameAction): GameState => {
             }
             return endTurn(makeWineFromGrapes(state, action.ingredients));
 
+        case "BUILD_STRUCTURE":
+            if (
+                state.currentTurn.type !== "workerPlacement" ||
+                state.currentTurn.pendingAction?.type !== "buildStructure"
+            ) {
+                return state;
+            }
+            const structure = structures[action.structureId];
+            return endTurn(buildStructure(payCoins(structure.cost, state), action.structureId));
+
+
         case "PASS":
             if (state.currentTurn.type !== "workerPlacement") {
                 throw new Error("Unexpected state: can only pass a worker placement turn");
@@ -127,7 +139,13 @@ export const board = (state: GameState, action: GameAction): GameState => {
             const currentTurn = state.currentTurn as WorkerPlacementTurn;
             switch (action.placement) {
                 case "buildStructure":
-                    return state;
+                    return promptToBuildStructure({
+                        ...state,
+                        currentTurn: {
+                            ...currentTurn,
+                            pendingAction: { type: "buildStructure" },
+                        },
+                    });
                 case "buySell":
                     return promptForAction({
                         ...state,

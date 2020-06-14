@@ -64,6 +64,9 @@
     justify-content: center;
     width: 24px;
 }
+.SidebarPlayer-structure--built {
+    color: #222;
+}
 
 .SidebarPlayer-fields {
     display: inline-block;
