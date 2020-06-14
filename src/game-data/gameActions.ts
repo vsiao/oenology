@@ -73,3 +73,10 @@ export interface ChooseVisitorAction extends Action<"CHOOSE_VISITOR"> {
 export const chooseVisitor = (visitorId: VisitorId): ChooseVisitorAction => {
     return { type: "CHOOSE_VISITOR", visitorId };
 };
+
+export interface SetWorkerAction extends Action<"SET_WORKER_TYPE"> {
+    workerType: WorkerType;
+}
+export const setWorkerType = (workerType: WorkerType): SetWorkerAction => {
+    return { type: "SET_WORKER_TYPE", workerType };
+};

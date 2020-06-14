@@ -3,6 +3,7 @@ import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
+import { WorkerPlacement } from "./board/boardActions";
 
 export default interface GameState {
     // shared state
@@ -21,6 +22,7 @@ export default interface GameState {
     ];
     drawPiles: CardsByType;
     discardPiles: CardsByType;
+    workerPlacements: Record<WorkerPlacement, BoardWorker[]>;
 
     // local state
     playerId: string | null;
@@ -86,11 +88,16 @@ export interface TrainedWorker {
     type: WorkerType;
     available: boolean;
 }
+export interface BoardWorker {
+    type: WorkerType,
+    playerId: string,
+    color: string;
+}
 
 export type CardId =
     | { type: "order"; id: OrderId; }
     | { type: "vine"; id: VineId; }
-    | { type: "visitor"; id: VisitorId; }
+    | { type: "visitor"; id: VisitorId; };
 
 export interface CardsByType {
     vine: VineId[];

@@ -129,21 +129,3 @@
     justify-content: center;
     width: 24px;
 }
-.SidebarPlayer--blue .SidebarPlayer-worker {
-    fill: royalblue;
-}
-.SidebarPlayer--green .SidebarPlayer-worker {
-    fill: seagreen;
-}
-.SidebarPlayer--orange .SidebarPlayer-worker {
-    fill: darkorange;
-}
-.SidebarPlayer--purple .SidebarPlayer-worker {
-    fill: purple;
-}
-.SidebarPlayer--red .SidebarPlayer-worker {
-    fill: firebrick;
-}
-.SidebarPlayer--yellow .SidebarPlayer-worker {
-    fill: gold;
-}

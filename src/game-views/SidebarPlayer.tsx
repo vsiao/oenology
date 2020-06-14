@@ -121,7 +121,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         <ul className="SidebarPlayer-workers">
             {player.trainedWorkers.map((worker, i) =>
                 <li key={i} className="SidebarPlayer-worker">
-                    <Worker worker={worker} />
+                    <Worker workerType={worker.type} color={player.color} disabled={!worker.available} />
                 </li>
             )}
         </ul>

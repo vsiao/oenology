@@ -1,20 +1,22 @@
 import "./Worker.css";
 import cx from "classnames";
 import * as React from "react";
-import { TrainedWorker, WorkerType } from "../../game-data/GameState";
+import { WorkerType } from "../../game-data/GameState";
 
 interface Props {
-    className?: string;
-    worker?: TrainedWorker;
+    className?: string,
+    workerType?: WorkerType,
+    color?: string,
+    disabled?: boolean;
 }
 
-const Worker: React.FunctionComponent<Props> = ({ worker }) => {
-    const workerType: WorkerType = worker ? worker.type : "normal";
+const Worker: React.FunctionComponent<Props> = ({ workerType, color, disabled }) => {
     return <svg
         className={cx({
             "Worker": true,
-            "Worker--placed": worker && !worker.available,
-            [`Worker--${workerType}`]: true,
+            "Worker--disabled": disabled,
+            [`Worker--${workerType}`]: workerType,
+            [`Worker--${color}`]: color,
         })}
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"
