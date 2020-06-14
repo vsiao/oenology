@@ -24,23 +24,12 @@
     display: inline-block;
     margin-right: 8px;
 }
-.PlayerMat--blue .PlayerMat-worker {
-    fill: royalblue;
+.PlayerMat-worker--available {
+    cursor: pointer;
 }
-.PlayerMat--green .PlayerMat-worker {
-    fill: seagreen;
-}
-.PlayerMat--orange .PlayerMat-worker {
-    fill: darkorange;
-}
-.PlayerMat--purple .PlayerMat-worker {
-    fill: purple;
-}
-.PlayerMat--red .PlayerMat-worker {
-    fill: firebrick;
-}
-.PlayerMat--yellow .PlayerMat-worker {
-    fill: gold;
+.PlayerMat-worker--highlighted {
+    stroke: black;
+    stroke-width: 3px;
 }
 
 .PlayerMat-cards {
