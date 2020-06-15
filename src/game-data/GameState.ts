@@ -24,7 +24,7 @@ export default interface GameState {
 
     // local state
     playerId: string | null;
-    actionPrompt: PromptState;
+    actionPrompts: PromptState[];
 }
 
 export interface WakeUpPosition {

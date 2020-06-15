@@ -50,7 +50,7 @@ export const initGame = (
         grapeIndex: 1,
         wakeUpOrder: [null, { playerId: "stfy" }, null, null, null, null, { playerId: "viny" }],
         playerId,
-        actionPrompt: null,
+        actionPrompts: [],
     };
 };
 

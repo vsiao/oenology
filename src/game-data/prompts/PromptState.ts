@@ -1,7 +1,6 @@
 import { Coupon } from "../structures";
 
 export type PromptState =
-    | null
     | ChooseActionPromptState
     | { type: "chooseField"; }
     | MakeWinePromptState

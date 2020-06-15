@@ -10,13 +10,13 @@ import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
 
 interface Props {
-    actionPrompt: PromptState;
+    actionPrompt: PromptState | undefined;
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
     const nodeRef = React.useRef<HTMLDivElement>(null);
     return <CSSTransition
-        in={props.actionPrompt !== null}
+        in={props.actionPrompt !== undefined}
         timeout={200}
         classNames="ActionPrompt"
         nodeRef={nodeRef}
@@ -24,7 +24,7 @@ const ActionPrompt: React.FunctionComponent<Props> = props => {
         unmountOnExit
     >
         <div ref={nodeRef} className="ActionPrompt">
-            {props.actionPrompt === null
+            {props.actionPrompt === undefined
                 ? null
                 : renderPrompt(props.actionPrompt, props)}
         </div>
@@ -47,7 +47,7 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
 };
 
 const mapStateToProps = (state: AppState) => {
-    return { actionPrompt: state.game.actionPrompt, };
+    return { actionPrompt: state.game.actionPrompts[0], };
 };
 
 export default connect(mapStateToProps)(ActionPrompt);

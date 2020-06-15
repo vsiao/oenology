@@ -10,7 +10,7 @@ export const prompt = (state: GameState, action: GameAction) => {
         case "CHOOSE_WINE":
         case "MAKE_WINE":
         case "BUILD_STRUCTURE":
-            return { ...state, actionPrompt: null };
+            return { ...state, actionPrompts: state.actionPrompts.slice(1) };
         default:
             return state;
     }
@@ -25,7 +25,7 @@ export const promptForAction = (
     }
     return {
         ...state,
-        actionPrompt: { type: "chooseAction", choices },
+        actionPrompts: [...state.actionPrompts, { type: "chooseAction", choices }],
     };
 };
 
@@ -35,7 +35,7 @@ export const promptToChooseField = (state: GameState): GameState => {
     }
     return {
         ...state,
-        actionPrompt: { type: "chooseField" },
+        actionPrompts: [...state.actionPrompts, { type: "chooseField" }],
     };
 };
 
@@ -45,7 +45,7 @@ export const promptToChooseWine = (state: GameState, minValue = 1): GameState =>
     }
     return {
         ...state,
-        actionPrompt: { type: "chooseWine", minValue },
+        actionPrompts: [...state.actionPrompts, { type: "chooseWine", minValue }],
     };
 };
 
@@ -55,7 +55,7 @@ export const promptToMakeWine = (state: GameState, upToN: number): GameState => 
     }
     return {
         ...state,
-        actionPrompt: { type: "makeWine", upToN },
+        actionPrompts: [...state.actionPrompts, { type: "makeWine", upToN }],
     };
 };
 
@@ -65,6 +65,6 @@ export const promptToBuildStructure = (state: GameState, coupon?: Coupon): GameS
     }
     return {
         ...state,
-        actionPrompt: { type: "buildStructure", coupon },
+        actionPrompts: [...state.actionPrompts, { type: "buildStructure", coupon }],
     };
 };
