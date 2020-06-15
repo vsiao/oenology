@@ -2,10 +2,12 @@ import "./MakeWinePrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
+import cx from 'classnames';
 import { GameAction } from "../../game-data/gameActions";
 import { makeWine, GrapeSpec, WineIngredients } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 import Grape from "../icons/Grape";
+import WineGlass from "../icons/WineGlass";
 
 interface Props {
     upToN: number;
@@ -18,6 +20,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     const [selectedGrapes, setSelectedGrapes] = React.useState<GrapeSpec[]>([]);
     const [cart, setCart] = React.useState<WineIngredients[]>([]);
     const wine = wineFromGrapes(selectedGrapes);
+    const wineValueReducer = (v: number, g: GrapeSpec) => v + g.value;
 
     return <div className="MakeWinePrompt">
         <div className="MakeWinePrompt-header">
@@ -25,12 +28,15 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
         </div>
         <ul className="MakeWinePrompt-grapes">
             {availableGrapes.map(grape => {
-                const isSelected = selectedGrapes.some(g => g === grape)
+                const isSelected = selectedGrapes.some(g => g === grape);
                 return <li key={`${grape.color}${grape.value}`}>
                     <button
-                        className="MakeWinePrompt-grapeButton"
+                        className={cx("MakeWinePrompt-grapeButton", {
+                            "MakeWinePrompt-grapeButton--selected": isSelected
+                        })}
                         role="switch"
                         aria-checked={isSelected}
+                        disabled={cart.length >= props.upToN}
                         onClick={() => setSelectedGrapes(
                             isSelected
                                 ? selectedGrapes.filter(g => g !== grape)
@@ -39,7 +45,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                     >
                         <Grape color={grape.color}>{grape.value}</Grape>
                     </button>
-                </li>
+                </li>;
             })}
         </ul>
         <button
@@ -56,15 +62,19 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                 : undefined
             }
         >
-            Add to cart
+            Add {wine ? <WineGlass color={wine.type}>
+                {wine.grapes.reduce(wineValueReducer, 0)}
+            </WineGlass> : null} to cart
         </button>
         <div className="MakeWinePrompt-cart">
+            <div className="MakeWinePrompt-header">Cart</div>
             <ul className="MakeWinePrompt-wineList">
-                {cart.map(w =>
-                    <li key={JSON.stringify(w)}>
-                        {JSON.stringify(w)}
-                    </li>
-                )}
+                {cart.map(w => {
+                    const wineValue = w.grapes.reduce(wineValueReducer, 0);
+                    return <li key={`${w.type}${wineValue}`}>
+                        <WineGlass color={w.type}>{wineValue}</WineGlass>
+                    </li>;
+                })}
             </ul>
             <button
                 className="MakeWinePrompt-confirm"
@@ -105,6 +115,6 @@ const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
         onConfirm: (grapes: WineIngredients[]) => dispatch(makeWine(grapes))
     };
-}
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(MakeWinePrompt);

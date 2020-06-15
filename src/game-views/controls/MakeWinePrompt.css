@@ -1,0 +1,64 @@
+.MakeWinePrompt {
+    padding: 16px;
+}
+
+.MakeWinePrompt-header {
+    align-items: center;
+    color: black;
+    font-size: 12px;
+    font-weight: 600;
+    height: 20px;
+    text-transform: uppercase;
+}
+
+.MakeWinePrompt-grapes,
+.MakeWinePrompt-wineList {
+    display: flex;
+    margin-top: 16px;
+}
+
+.MakeWinePrompt-grapeButton {
+    background: none;
+    border: 0;
+    margin: 0;
+    outline: 0;
+    padding: 0 8px 0 0;
+}
+.MakeWinePrompt-grapeButton:enabled {
+    cursor: pointer;
+}
+.MakeWinePrompt-grapeButton:enabled:hover .Grape--red {
+    background: #890000;
+}
+.MakeWinePrompt-grapeButton:enabled:hover .Grape--white {
+    background: #f6d000;
+}
+.MakeWinePrompt-grapeButton--selected .Grape {
+    box-shadow: 0 0 2px 3px #61dafb;
+}
+.MakeWinePrompt-grapeButton:disabled .Grape--red,
+.MakeWinePrompt-grapeButton:disabled .Grape--white {
+    opacity: 0.7;
+}
+
+.MakeWinePrompt-addToCart,
+.MakeWinePrompt-confirm {
+    background: white;
+    border: 2px solid #ccc;
+    border-radius: .4em;
+    display: inline-block;
+    font-size: .8em;
+    height: 2.8em;
+    margin-top: 16px;
+    padding: 0 16px;
+}
+.MakeWinePrompt-addToCart:enabled:hover,
+.MakeWinePrompt-confirm:enabled:hover {
+    background: #efefef;
+    border-color: #999;
+    cursor: pointer;
+}
+
+.MakeWinePrompt-cart {
+    margin-top: 20px;
+}
