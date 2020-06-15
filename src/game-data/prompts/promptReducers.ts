@@ -10,22 +10,28 @@ export const prompt = (state: GameState, action: GameAction) => {
         case "CHOOSE_WINE":
         case "MAKE_WINE":
         case "BUILD_STRUCTURE":
-            return { ...state, actionPrompts: state.actionPrompts.slice(1) };
+            return action.playerId === state.playerId
+                ? { ...state, actionPrompts: state.actionPrompts.slice(1) }
+                : state;
         default:
             return state;
     }
 };
 
-export const promptForAction = (
-    state: GameState,
-    choices: Choice[]
-): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
+export const promptForAction = (state: GameState, choices: Choice[], allPlayers = false): GameState => {
+    if (
+        state.playerId === null ||
+        (!allPlayers && state.playerId !== state.currentTurn.playerId)
+    ) {
         return state;
     }
     return {
         ...state,
-        actionPrompts: [...state.actionPrompts, { type: "chooseAction", choices }],
+        actionPrompts: [...state.actionPrompts, {
+            type: "chooseAction",
+            playerId: state.playerId,
+            choices
+        }],
     };
 };
 
@@ -49,8 +55,12 @@ export const promptToChooseWine = (state: GameState, minValue = 1): GameState =>
     };
 };
 
-export const promptToMakeWine = (state: GameState, upToN: number): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
+export const promptToMakeWine = (
+    state: GameState,
+    upToN: number,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    if (state.playerId !== playerId) {
         return state;
     }
     return {

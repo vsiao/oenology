@@ -21,20 +21,18 @@ export const visitor = (state: GameState, action: GameAction) => {
     switch (action.type) {
         case "CHOOSE_VISITOR": {
             const visitorId = action.visitorId;
+            const pendingAction = { ...state.currentTurn.pendingAction, visitorId };
             state = removeCardsFromHand(
                 [{ type: "visitor", id: visitorId, }],
-                setPendingAction({
-                    ...state.currentTurn.pendingAction,
-                    visitorId,
-                }, state)
+                setPendingAction(pendingAction, state)
             );
-            return visitorReducers[visitorId](state, action);
+            return visitorReducers[visitorId](state, action, pendingAction);
         }
         default:
-            const visitorId = state.currentTurn.pendingAction.visitorId;
-            if (visitorId === undefined) {
+            const pendingAction = state.currentTurn.pendingAction;
+            if (pendingAction.visitorId === undefined) {
                 return state;
             }
-            return visitorReducers[visitorId](state, action);
+            return visitorReducers[pendingAction.visitorId](state, action, pendingAction);
     }
 };

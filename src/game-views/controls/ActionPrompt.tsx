@@ -11,6 +11,7 @@ import BuildStructurePrompt from "./BuildStructurePrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
+    playerId: string;
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
@@ -36,18 +37,21 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
         case "chooseAction":
             return <ChooseActionPrompt prompt={prompt} />;
         case "chooseField":
-            return <ChooseFieldPrompt />;
+            return <ChooseFieldPrompt playerId={props.playerId} />;
         case "makeWine":
-            return <MakeWinePrompt upToN={prompt.upToN} />;
+            return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
         case "buildStructure":
-            return <BuildStructurePrompt coupon={prompt.coupon} />;
+            return <BuildStructurePrompt coupon={prompt.coupon} playerId={props.playerId} />;
         default:
             return JSON.stringify(prompt);
     }
 };
 
 const mapStateToProps = (state: AppState) => {
-    return { actionPrompt: state.game.actionPrompts[0], };
+    return {
+        actionPrompt: state.game.actionPrompts[0],
+        playerId: state.game.playerId!,
+    };
 };
 
 export default connect(mapStateToProps)(ActionPrompt);

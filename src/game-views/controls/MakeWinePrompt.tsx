@@ -90,20 +90,21 @@ const wineFromGrapes = (grapes: GrapeSpec[]): WineIngredients | null => {
     return null;
 };
 
-const mapStateToProps = (state: AppState) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
     const grapes: GrapeSpec[] = [];
-    const { red, white } = state.game.players[state.game.currentTurn.playerId].crushPad;
+    const { red, white } = state.game.players[ownProps.playerId].crushPad;
     red.forEach((r, i) => {
         if (r) grapes.push({ color: "red", value: i + 1 });
     });
     white.forEach((w, i) => {
         if (w) grapes.push({ color: "white", value: i + 1 });
     });
-    return { grapes };
+    return { grapes, playerId: ownProps.playerId };
 };
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
     return {
-        onConfirm: (grapes: WineIngredients[]) => dispatch(makeWine(grapes))
+        onConfirm: (grapes: WineIngredients[]) =>
+            dispatch(makeWine(grapes, ownProps.playerId)),
     };
 }
 

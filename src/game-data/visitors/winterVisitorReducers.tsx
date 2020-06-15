@@ -2,9 +2,9 @@ import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import { SummerVisitor } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins, discardCards } from "../shared/sharedReducers";
-import GameState from "../GameState";
+import { SummerVisitor, Vine } from "../../game-views/icons/Card";
+import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins, discardCards, setPendingAction } from "../shared/sharedReducers";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
 import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
@@ -13,7 +13,7 @@ import WineGlass from "../../game-views/icons/WineGlass";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
-    (state: GameState, action: GameAction) => GameState
+    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     assessor: (state, action) => {
         const player = state.players[state.currentTurn.playerId];
@@ -62,6 +62,85 @@ export const winterVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endTurn(gainVP(3, state)); // TODO
+            default:
+                return state;
+        }
+    },
+    mentor: (state, action, pendingAction) => {
+        interface MentorPendingAction extends PlayVisitorPendingAction {
+            // list of players who have yet to complete their main action (make wine, or pass)
+            mainActions: string[];
+            // number of reactionary choices left for the current turn player
+            // ie. to choose what to draw for each opponent who makes wine
+            reactions: number;
+        }
+        const mentorAction = pendingAction as MentorPendingAction;
+        const maybeEndTurn = (state2: GameState) => {
+            const { mainActions, reactions } = (state2.currentTurn as WorkerPlacementTurn)
+                .pendingAction as MentorPendingAction;
+            return mainActions.length === 0 && reactions === 0 ? endTurn(state2) : state2;
+        };
+        const endMainAction = (state2: GameState, playerId: string) => {
+            const mainActions = mentorAction.mainActions.filter(id => id !== playerId);
+            return maybeEndTurn(setPendingAction({ ...mentorAction, mainActions }, state2));
+        };
+
+        switch (action.type) {
+            case "CHOOSE_VISITOR":
+                return promptForAction(
+                    setPendingAction({
+                        ...mentorAction,
+                        mainActions: Object.keys(state.players),
+                        reactions: 0,
+                    }, state),
+                    [{
+                        id: "MENTOR_MAKE",
+                        label: <>
+                            Make up to 2 <WineGlass />
+                            {state.playerId !== state.currentTurn.playerId
+                                ? <>(<strong>{state.currentTurn.playerId}</strong> draws 1 <Vine /> or 1 <SummerVisitor />)</>
+                                : null}
+                        </>,
+                        disabledReason: needGrapesDisabledReason(state, state.playerId!),
+                    }, {
+                        id: "MENTOR_PASS",
+                        label: <>Pass</>,
+                    }],
+                    /* allPlayers */ true
+                );
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MENTOR_MAKE":
+                        state = promptToMakeWine(state, /* upToN */ 2, action.playerId);
+                        return action.playerId !== state.currentTurn.playerId
+                            ? promptForAction(
+                                  setPendingAction({ ...mentorAction, reactions: mentorAction.reactions + 1 }, state),
+                                  [
+                                      { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
+                                      { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
+                                  ]
+                              )
+                            : state;
+
+                    case "MENTOR_PASS":
+                        return endMainAction(state, action.playerId);
+
+                    case "MENTOR_DRAW_VINE":
+                    case "MENTOR_DRAW_VISITOR":
+                        return maybeEndTurn(
+                            drawCards(
+                                setPendingAction({ ...mentorAction, reactions: mentorAction.reactions - 1 }, state),
+                                action.choice === "MENTOR_DRAW_VINE" ? { vine: 1 } : { summerVisitor: 1 }
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endMainAction(
+                    makeWineFromGrapes(state, action.ingredients, action.playerId),
+                    action.playerId
+                );
             default:
                 return state;
         }

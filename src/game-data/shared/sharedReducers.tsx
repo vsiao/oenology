@@ -50,8 +50,12 @@ export const placeGrapes = (
     };
 };
 
-export const makeWineFromGrapes = (state: GameState, wine: WineIngredients[]): GameState => {
-    const player = state.players[state.currentTurn.playerId];
+export const makeWineFromGrapes = (
+    state: GameState,
+    wine: WineIngredients[],
+    playerId = state.currentTurn.playerId
+): GameState => {
+    const player = state.players[playerId];
 
     let { cellar, crushPad } = player;
     wine.forEach(({ type, grapes }) => {
@@ -101,7 +105,10 @@ export const buildStructure = (state: GameState, structureId: StructureId): Game
     };
 };
 
-export const setPendingAction = (pendingAction: WorkerPlacementTurnPendingAction, state: GameState): GameState => {
+export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
+    pendingAction: T,
+    state: GameState
+): GameState => {
     return {
         ...state,
         currentTurn: {

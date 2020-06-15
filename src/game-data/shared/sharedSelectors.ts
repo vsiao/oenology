@@ -14,8 +14,7 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
     };
 };
 
-export const needGrapesDisabledReason = (state: GameState) => {
-    const playerId = state.currentTurn.playerId;
+export const needGrapesDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
     const hasGrapes = Object.values(state.players[playerId].crushPad)
         .some(grapes => grapes.some(g => g === true));
     return hasGrapes ? undefined : "You don't have any grapes.";

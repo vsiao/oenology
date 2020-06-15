@@ -47,16 +47,17 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const mapStateToProps = (state: AppState) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
     return {
-        currentCoins: state.game.players[state.game.currentTurn.playerId].coins,
-        currentStructures: state.game.players[state.game.currentTurn.playerId].structures
+        currentCoins: state.game.players[ownProps.playerId].coins,
+        currentStructures: state.game.players[ownProps.playerId].structures
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
     return {
-        onSelectStructure: (structureId: StructureId) => dispatch(buildStructure(structureId))
+        onSelectStructure: (structureId: StructureId) =>
+            dispatch(buildStructure(structureId, ownProps.playerId)),
     };
 };
 

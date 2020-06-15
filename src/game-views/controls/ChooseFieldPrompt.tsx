@@ -28,14 +28,14 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const mapStateToProps = (state: AppState) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
     return {
-        fields: Object.values(state.game.players[state.game.currentTurn.playerId].fields)
+        fields: Object.values(state.game.players[ownProps.playerId].fields)
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
-    return { chooseField: (id: FieldId) => dispatch(chooseField(id)) };
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string }) => {
+    return { chooseField: (id: FieldId) => dispatch(chooseField(id, ownProps.playerId)) };
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChooseFieldPrompt);

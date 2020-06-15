@@ -51,8 +51,12 @@ export interface WorkerPlacementTurn {
     pendingAction: WorkerPlacementTurnPendingAction | null;
 }
 
+export interface PlayVisitorPendingAction {
+    type: "playVisitor";
+    visitorId?: VisitorId;
+}
 export type WorkerPlacementTurnPendingAction =
-    | { type: "playVisitor"; visitorId?: VisitorId; }
+    | PlayVisitorPendingAction
     | { type: "buySell"; }
     | { type: "sellGrapes"; }
     | { type: "buyField"; }

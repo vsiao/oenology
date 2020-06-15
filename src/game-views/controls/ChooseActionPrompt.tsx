@@ -8,7 +8,7 @@ import { chooseAction } from "../../game-data/prompts/promptActions";
 
 interface Props {
     prompt: ChooseActionPromptState;
-    onSelectChoice: (choice: string) => void;
+    onSelectChoice: (choice: string, playerId: string) => void;
 }
 
 const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
@@ -23,7 +23,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
                     <button
                         className="ChooseActionPrompt-choiceButton"
                         disabled={choice.disabledReason !== undefined}
-                        onClick={() => props.onSelectChoice(choice.id)}
+                        onClick={() => props.onSelectChoice(choice.id, prompt.playerId)}
                     >
                         {choice.label}
                     </button>
@@ -35,7 +35,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
-        onSelectChoice: (choice: string) => dispatch(chooseAction(choice))
+        onSelectChoice: (choice: string, playerId: string) => dispatch(chooseAction(choice, playerId))
     };
 }
 

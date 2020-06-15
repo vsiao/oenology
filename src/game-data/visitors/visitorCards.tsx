@@ -99,6 +99,10 @@ export const winterVisitorCards = {
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
     ),
+    mentor: winterVisitorCard(
+        "Mentor",
+        <>All players may make up to 2 <WineGlass />. Draw 1 <Vine /> or 1 <SummerVisitor /> for each opponent who does this.</>
+    ),
     politician: winterVisitorCard(
         "Politician",
         <>If you have less than <VP>0</VP>, gain <Coins>6</Coins>. Otherwise, draw 1 <Vine />, 1 <SummerVisitor />, and 1 <Order />.</>,

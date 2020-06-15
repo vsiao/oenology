@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState from "../GameState";
+import GameState, { PlayVisitorPendingAction } from "../GameState";
 import { promptForAction, promptToChooseField, promptToBuildStructure } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
@@ -13,7 +13,7 @@ import { maxStructureCost } from "../structures";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
-    (state: GameState, action: GameAction) => GameState
+    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     buyer: (state, action) => {
         switch (action.type) {
