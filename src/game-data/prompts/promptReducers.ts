@@ -18,20 +18,20 @@ export const prompt = (state: GameState, action: GameAction) => {
     }
 };
 
-export const promptForAction = (state: GameState, choices: Choice[], allPlayers = false): GameState => {
-    if (
-        state.playerId === null ||
-        (!allPlayers && state.playerId !== state.currentTurn.playerId)
-    ) {
+export const promptForAction = (
+    state: GameState,
+    choices: Choice[],
+    playerId = state.currentTurn.playerId
+): GameState => {
+    if (state.playerId !== playerId) {
         return state;
     }
     return {
         ...state,
-        actionPrompts: [...state.actionPrompts, {
-            type: "chooseAction",
-            playerId: state.playerId,
-            choices
-        }],
+        actionPrompts: [
+            ...state.actionPrompts,
+            { type: "chooseAction", playerId, choices },
+        ],
     };
 };
 

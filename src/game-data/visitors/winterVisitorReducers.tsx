@@ -106,7 +106,7 @@ export const winterVisitorReducers: Record<
                         id: "MENTOR_PASS",
                         label: <>Pass</>,
                     }],
-                    /* allPlayers */ true
+                    state.playerId!
                 );
             case "CHOOSE_ACTION":
                 switch (action.choice) {

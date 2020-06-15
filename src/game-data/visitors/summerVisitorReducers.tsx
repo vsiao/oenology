@@ -4,7 +4,7 @@ import GameState, { PlayVisitorPendingAction } from "../GameState";
 import { promptForAction, promptToChooseField, promptToBuildStructure } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
-import { endTurn, gainCoins, drawCards, harvestField, payCoins, placeGrapes, loseVP, gainVP, buildStructure } from "../shared/sharedReducers";
+import { endTurn, gainCoins, drawCards, harvestField, payCoins, placeGrapes, loseVP, gainVP, buildStructure, setPendingAction } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -15,6 +15,46 @@ export const summerVisitorReducers: Record<
     SummerVisitorId,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
+    banker: (state, action, pendingAction) => {
+        interface BankerPendingAction extends PlayVisitorPendingAction {
+            // list of players who have yet to decide whether to lose VP / gain coins
+            mainActions: string[];
+        }
+        const bankerAction = pendingAction as BankerPendingAction;
+        const maybeEndTurn = (state2: GameState, playerId: string) => {
+            const mainActions = bankerAction.mainActions.filter(id => id !== playerId);
+            state2 = setPendingAction({ ...bankerAction, mainActions }, state2);
+            return mainActions.length === 0 ? endTurn(state2) : state2;
+        };
+        switch (action.type) {
+            case "CHOOSE_VISITOR":
+                const currentTurnPlayerId = state.currentTurn.playerId
+                state = setPendingAction({
+                    ...bankerAction,
+                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
+                }, state);
+                return currentTurnPlayerId === state.playerId
+                    ? state
+                    : promptForAction(state, [
+                          { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
+                          { id: "BANKER_PASS", label: <>Pass</> },
+                      ], state.playerId!);
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BANKER_GAIN":
+                        return maybeEndTurn(
+                            gainCoins(3, loseVP(1, state, action.playerId), action.playerId),
+                            action.playerId
+                        );
+                    case "BANKER_PASS":
+                        return maybeEndTurn(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     buyer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":

@@ -29,6 +29,10 @@ const summerVisitorCard = (name: string, description: React.ReactNode) =>
     visitorCard("summer", name, description);
 
 export const summerVisitorCards = {
+    banker: summerVisitorCard(
+        "Banker",
+        <>Gain <Coins>5</Coins>. Each opponent may lose <VP>1</VP> to gain <Coins>3</Coins>.</>
+    ),
     buyer: summerVisitorCard(
         "Buyer",
         <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad OR discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP>.</>

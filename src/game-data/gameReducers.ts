@@ -41,7 +41,7 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
-            // linz: initPlayer("linz", "yellow"),
+            linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
             // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
@@ -83,7 +83,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             { type: "normal", available: true },
         ],
         cardsInHand: [
-            { type: "visitor", id: "tourGuide" },
+            { type: "visitor", id: "banker" },
             { type: "visitor", id: "uncertifiedArchitect" },
             { type: "visitor", id: "assessor" },
             { type: "visitor", id: "politician" },
