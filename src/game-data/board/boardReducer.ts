@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn  } from "../GameState";
+import GameState, { WorkerPlacementTurn } from "../GameState";
 import {
     buildStructure,
     drawCards,
@@ -131,59 +131,87 @@ export const board = (state: GameState, action: GameAction): GameState => {
 
         case "PLACE_WORKER": {
             const currentTurn = state.currentTurn as WorkerPlacementTurn;
+            const currentPlayer = state.players[currentTurn.playerId];
+            const newTrainedWorkers = currentPlayer.trainedWorkers;
+            const workerIndex = newTrainedWorkers.findIndex(worker => worker.type === action.workerType);
+            if (workerIndex === -1) {
+                // Shouldn't get here?
+                return state;
+            }
+            newTrainedWorkers[workerIndex].available = false;
+
+            const newState = {
+                ...state,
+                players: {
+                    ...state.players,
+                    [currentTurn.playerId]: {
+                        ...currentPlayer,
+                        trainedWorkers: newTrainedWorkers
+                    }
+                },
+                workerPlacements: {
+                    ...state.workerPlacements,
+                    [action.placement]: [...state.workerPlacements[action.placement], {
+                        type: action.workerType,
+                        playerId: currentTurn.playerId,
+                        color: currentPlayer.color
+                    }]
+                }
+            };
+
             switch (action.placement) {
                 case "buildStructure":
                     return promptToBuildStructure(
-                        setPendingAction({ type: "buildStructure" }, state)
+                        setPendingAction({ type: "buildStructure" }, newState)
                     );
                 case "buySell":
-                    return promptForAction(setPendingAction({ type: "buySell" }, state), [
+                    return promptForAction(setPendingAction({ type: "buySell" }, newState), [
                         {
                             id: "SELL_GRAPES",
                             label: "Sell grape(s)",
-                            disabledReason: needGrapesDisabledReason(state),
+                            disabledReason: needGrapesDisabledReason(newState),
                         },
                         {
                             id: "BUY_FIELD",
                             label: "Buy a field",
-                            disabledReason: buyFieldDisabledReason(state),
+                            disabledReason: buyFieldDisabledReason(newState),
                         },
                         {
                             id: "SELL_FIELD",
                             label: "Sell a field",
-                            disabledReason: Object.values(state.players[currentTurn.playerId].fields)
+                            disabledReason: Object.values(newState.players[currentTurn.playerId].fields)
                                 .every(fields => fields.sold)
                                 ? "You don't have any fields to sell."
                                 : undefined,
                         },
                     ]);
                 case "drawOrder":
-                    return endTurn(drawCards(state, { order: 1 }));
+                    return endTurn(drawCards(newState, { order: 1 }));
                 case "drawVine":
-                    return endTurn(drawCards(state, { vine: 1 }));
+                    return endTurn(drawCards(newState, { vine: 1 }));
                 case "fillOrder":
-                    return state;
+                    return newState;
                 case "gainCoin":
-                    return endTurn(gainCoins(1, state));
+                    return endTurn(gainCoins(1, newState));
                 case "giveTour":
-                    return endTurn(gainCoins(2, state));
+                    return endTurn(gainCoins(2, newState));
                 case "harvestField":
-                    return promptToChooseField(setPendingAction({ type: "harvestField" }, state));
+                    return promptToChooseField(setPendingAction({ type: "harvestField" }, newState));
                 case "makeWine":
-                    return promptToMakeWine(setPendingAction({ type: "makeWine" }, state), /* upToN */ 2);
+                    return promptToMakeWine(setPendingAction({ type: "makeWine" }, newState), /* upToN */ 2);
                 case "plantVine":
-                    return setPendingAction({ type: "plantVine" }, state);
+                    return setPendingAction({ type: "plantVine" }, newState);
                 case "playSummerVisitor":
                 case "playWinterVisitor":
-                    return setPendingAction({ type: "playVisitor" }, state);
+                    return setPendingAction({ type: "playVisitor" }, newState);
                 case "trainWorker":
-                    return endTurn(trainWorker(payCoins(4, state)));
+                    return endTurn(trainWorker(payCoins(4, newState)));
                 case "yoke":
-                    return state;
+                    return newState;
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const exhaustivenessCheck: never = action.placement;
-                    return state;
+                    return newState;
             }
         }
         default:

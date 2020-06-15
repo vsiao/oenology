@@ -2,8 +2,9 @@ import "./PlayerMat.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
+import cx from "classnames";
 import { GameAction, chooseVine, chooseVisitor } from "../../game-data/gameActions";
-import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
+import { CardId, CurrentTurn, PlayerState, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards, VineId } from "../../game-data/vineCards";
 import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
@@ -22,10 +23,21 @@ interface Props {
     playerState: PlayerState;
     onSelectVine: (id: VineId) => void;
     onSelectVisitor: (id: VisitorId) => void;
+    pendingWorkerType: WorkerType;
+    setPendingWorkerType: (workerType: WorkerType) => void;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { playerState } = props;
+    const { playerState, pendingWorkerType, setPendingWorkerType } = props;
+    const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+    if (!playerState.trainedWorkers[highlightedIndex].available) {
+        const newHighlightedIndex = playerState.trainedWorkers.findIndex(worker => worker.available && worker.type === pendingWorkerType);
+        if (highlightedIndex !== newHighlightedIndex) {
+            setHighlightedIndex(newHighlightedIndex);
+        }
+    }
+
+
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />
         <div className="PlayerMat-header">
@@ -34,8 +46,17 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
                 {playerState.trainedWorkers.map((worker, i) =>
-                    <li key={i} className="PlayerMat-worker">
-                        <Worker worker={worker} />
+                    <li key={i} className={cx({
+                        "PlayerMat-worker": true,
+                        "PlayerMat-worker--available": worker.available,
+                        "PlayerMat-worker--highlighted": highlightedIndex === i
+                    })}
+                        onClick={worker.available ? () => {
+                            setPendingWorkerType(worker.type);
+                            setHighlightedIndex(i);
+                        } : undefined}
+                    >
+                        <Worker workerType={worker.type} color={playerState.color} disabled={!worker.available} />
                     </li>
                 )}
             </ul>
@@ -86,10 +107,10 @@ const renderCard = (card: CardId, props: Props) => {
     }
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     return {
         currentTurn: state.game.currentTurn,
-        playerState: state.game.players[ownProps.playerId],
+        playerState: state.game.players[ownProps.playerId]
     };
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {

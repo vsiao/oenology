@@ -29,7 +29,7 @@ export const initGame = (
             type: "workerPlacement",
             playerId: "viny",
             pendingAction: null,
-            season: "summer",
+            season: "summer"
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -49,6 +49,22 @@ export const initGame = (
         tableOrder: ["stfy", "viny"],
         grapeIndex: 1,
         wakeUpOrder: [null, { playerId: "stfy" }, null, null, null, null, { playerId: "viny" }],
+        workerPlacements: {
+            drawVine: [],
+            giveTour: [],
+            buildStructure: [],
+            playSummerVisitor: [],
+            buySell: [],
+            plantVine: [],
+            drawOrder: [],
+            harvestField: [],
+            trainWorker: [],
+            playWinterVisitor: [],
+            makeWine: [],
+            fillOrder: [],
+            gainCoin: [],
+            yoke: []
+        },
         playerId,
         actionPrompts: [],
     };

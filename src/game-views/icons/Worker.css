@@ -8,6 +8,24 @@
     vertical-align: text-bottom;
     width: 1.6em;
 }
-.Worker--placed {
+.Worker--disabled {
     opacity: 0.5;
+}
+.Worker--blue {
+    fill: royalblue;
+}
+.Worker--green {
+    fill: seagreen;
+}
+.Worker--orange {
+    fill: darkorange;
+}
+.Worker--purple {
+    fill: purple;
+}
+.Worker--red {
+    fill: firebrick;
+}
+.Worker--yellow {
+    fill: gold;
 }
