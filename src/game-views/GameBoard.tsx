@@ -1,3 +1,5 @@
+import "./GameBoard.css";
+import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
@@ -5,15 +7,15 @@ import { GameAction } from "../game-data/gameActions";
 import { WorkerPlacement, placeWorker } from "../game-data/board/boardActions";
 import { summerActions, winterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
-
-import "./GameBoard.css";
 import { AppState } from "../store/AppState";
-import { BoardWorker, WorkerType } from "../game-data/GameState";
+import { BoardWorker, WorkerType, PlayerColor } from "../game-data/GameState";
+import Rooster from "./icons/Rooster";
 
 interface Props {
     canPlaceSummerWorker: boolean;
     canPlaceWinterWorker: boolean;
-    workerPlacements: Record<WorkerPlacement, BoardWorker[]>,
+    wakeUpOrder: ({ current: boolean; passed?: boolean; color: PlayerColor; } | null)[];
+    workerPlacements: Record<WorkerPlacement, BoardWorker[]>;
     onPlaceWorker: (placement: WorkerPlacement, workerType: WorkerType) => void;
     pendingWorkerType: WorkerType;
 }
@@ -21,9 +23,17 @@ interface Props {
 const GameBoard: React.FunctionComponent<Props> = props => {
     const { canPlaceSummerWorker, canPlaceWinterWorker, onPlaceWorker, pendingWorkerType, workerPlacements } = props;
     return <div className="GameBoard">
-        <div className="GameBoard-order">
-            Order
-        </div>
+        <ol className="GameBoard-wakeUpOrder">
+            {props.wakeUpOrder.map((pos, i) =>
+                <li key={i} className={cx({
+                    "GameBoard-wakeUpPosition": true,
+                    "GameBoard-wakeUpPosition--current": pos && pos.current,
+                    "GameBoard-wakeUpPosition--passed": pos && pos.passed,
+                })}>
+                    {pos ? <Rooster color={pos.color} /> : i + 1}
+                </li>
+            )}
+        </ol>
         <div className="GameBoard-summerActions">
             {summerActions.map(action =>
                 <BoardPlacement
@@ -50,7 +60,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
 };
 
 const mapStateToProps = (state: AppState) => {
-    const { currentTurn, workerPlacements } = state.game;
+    const { currentTurn, wakeUpOrder, workerPlacements, players } = state.game;
     return {
         canPlaceSummerWorker: currentTurn.type === "workerPlacement" &&
             currentTurn.pendingAction === null &&
@@ -60,7 +70,14 @@ const mapStateToProps = (state: AppState) => {
             currentTurn.pendingAction === null &&
             currentTurn.playerId === state.playerId &&
             currentTurn.season === "winter",
-        workerPlacements
+        wakeUpOrder: wakeUpOrder.map(pos => {
+            return !pos ? null : {
+                current: pos.playerId === currentTurn.playerId,
+                passed: pos.passed,
+                color: players[pos.playerId].color,
+            };
+        }),
+        workerPlacements,
     };
 };
 

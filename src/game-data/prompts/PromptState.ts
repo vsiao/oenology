@@ -14,6 +14,7 @@ export interface Choice {
 }
 export interface ChooseActionPromptState {
     type: "chooseAction";
+    title: string;
     playerId: string;
     choices: Choice[];
 }

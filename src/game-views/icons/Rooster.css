@@ -1,0 +1,25 @@
+.Rooster {
+    height: 2em;
+    stroke: black;
+    stroke-width: .8em;
+    transform: scaleX(-1);
+    width: 2em;
+}
+.Rooster--blue {
+    fill: royalblue;
+}
+.Rooster--green {
+    fill: seagreen;
+}
+.Rooster--orange {
+    fill: darkorange;
+}
+.Rooster--purple {
+    fill: purple;
+}
+.Rooster--red {
+    fill: firebrick;
+}
+.Rooster--yellow {
+    fill: gold;
+}

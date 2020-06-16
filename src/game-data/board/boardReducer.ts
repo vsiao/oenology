@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn } from "../GameState";
+import GameState from "../GameState";
 import {
     buildStructure,
     drawCards,
@@ -12,6 +12,9 @@ import {
     setPendingAction,
     trainWorker,
     passToNextSeason,
+    chooseWakeUpIndex,
+    gainVP,
+    promptToDrawWakeUpVisitor,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
@@ -32,6 +35,24 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     return promptToChooseField(setPendingAction({ type: "sellField" }, state));
                 case "SELL_GRAPES":
                     return endTurn(state); // TODO
+                case "WAKE_UP_1":
+                    return chooseWakeUpIndex(0, state);
+                case "WAKE_UP_2":
+                    return chooseWakeUpIndex(1, drawCards(state, { vine: 1 }));
+                case "WAKE_UP_3":
+                    return chooseWakeUpIndex(2, drawCards(state, { order: 1 }));
+                case "WAKE_UP_4":
+                    return chooseWakeUpIndex(3, gainCoins(1, state));
+                case "WAKE_UP_5":
+                    return promptToDrawWakeUpVisitor(state);
+                case "WAKE_UP_DRAW_SUMMER":
+                    return chooseWakeUpIndex(4, drawCards(state, { summerVisitor: 1 }));
+                case "WAKE_UP_DRAW_WINTER":
+                    return chooseWakeUpIndex(4, drawCards(state, { winterVisitor: 1 }));
+                case "WAKE_UP_6":
+                    return chooseWakeUpIndex(5, gainVP(1, state));
+                case "WAKE_UP_7":
+                    return chooseWakeUpIndex(6, state); // TODO
                 default:
                     return state;
             }
@@ -160,26 +181,28 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         setPendingAction({ type: "buildStructure" }, state)
                     );
                 case "buySell":
-                    return promptForAction(setPendingAction({ type: "buySell" }, state), [
-                        {
-                            id: "SELL_GRAPES",
-                            label: "Sell grape(s)",
-                            disabledReason: needGrapesDisabledReason(state),
-                        },
-                        {
-                            id: "BUY_FIELD",
-                            label: "Buy a field",
-                            disabledReason: buyFieldDisabledReason(state),
-                        },
-                        {
-                            id: "SELL_FIELD",
-                            label: "Sell a field",
-                            disabledReason: Object.values(state.players[player.id].fields)
-                                .every(fields => fields.sold)
-                                ? "You don't have any fields to sell."
-                                : undefined,
-                        },
-                    ]);
+                    return promptForAction(setPendingAction({ type: "buySell" }, state), {
+                        choices: [
+                            {
+                                id: "SELL_GRAPES",
+                                label: "Sell grape(s)",
+                                disabledReason: needGrapesDisabledReason(state),
+                            },
+                            {
+                                id: "BUY_FIELD",
+                                label: "Buy a field",
+                                disabledReason: buyFieldDisabledReason(state),
+                            },
+                            {
+                                id: "SELL_FIELD",
+                                label: "Sell a field",
+                                disabledReason: Object.values(state.players[player.id].fields)
+                                    .every(fields => fields.sold)
+                                    ? "You don't have any fields to sell."
+                                    : undefined,
+                            },
+                        ],
+                    });
                 case "drawOrder":
                     return endTurn(drawCards(state, { order: 1 }));
                 case "drawVine":

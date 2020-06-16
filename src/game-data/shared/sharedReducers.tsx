@@ -2,10 +2,13 @@ import * as React from "react";
 import GameState, { CardType, WakeUpPosition, FieldId, TokenMap, CardId, WorkerPlacementTurnPendingAction, WorkerPlacementTurn } from "../GameState";
 import { visitorCards } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
-import { SummerVisitor, WinterVisitor } from "../../game-views/icons/Card";
+import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import { fieldYields } from "./sharedSelectors";
 import { WineIngredients } from "../prompts/promptActions";
 import { StructureId } from "../structures";
+import Coins from "../../game-views/icons/Coins";
+import VictoryPoints from "../../game-views/icons/VictoryPoints";
+import Worker from "../../game-views/icons/Worker";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -249,12 +252,15 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                 }
             });
         } else {
-            // TODO end of year stuff, and then reset wakeUpOrder
-            return startWorkerPlacementTurn("summer", compactWakeUpOrder[0].playerId, {
+            // End of year
+            // TODO discard too many cards
+            const tableOrder = state.tableOrder;
+            const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
+            return promptForWakeUpOrder({
                 ...state,
-                wakeUpOrder: wakeUpOrder.map(pos => {
-                    return pos === null ? null : { ...pos, passed: false };
-                }) as GameState["wakeUpOrder"],
+                grapeIndex,
+                currentTurn: { type: "wakeUpOrder", playerId: tableOrder[grapeIndex], },
+                wakeUpOrder: wakeUpOrder.map(pos => null) as GameState["wakeUpOrder"],
                 workerPlacements: Object.fromEntries(
                     Object.entries(state.workerPlacements).map(([placement]) => [placement, []])
                 ) as unknown as GameState["workerPlacements"],
@@ -262,7 +268,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                     Object.entries(state.players).map(([playerId, playerState]) => {
                         return [playerId, {
                             ...playerState,
-                            // Mark all trained workers as available again
+                            coins: playerState.coins + playerState.residuals,
                             trainedWorkers: playerState.trainedWorkers.map(w => ({
                                 ...w,
                                 available: true,
@@ -338,11 +344,64 @@ const movePendingCardToDiscard = (state: GameState): GameState => {
     }
 };
 
+export const chooseWakeUpIndex = (orderIndex: number, state: GameState) => {
+    const { grapeIndex, tableOrder } = state;
+    const playerId = state.currentTurn.playerId;
+    const wakeUpOrder = state.wakeUpOrder.map(
+        (pos, i) => i === orderIndex ? { playerId } : pos
+    ) as GameState["wakeUpOrder"];
+    const nextWakeUpIndex = (tableOrder.indexOf(playerId) + 1) % tableOrder.length;
+    if (nextWakeUpIndex === grapeIndex) {
+        return startWorkerPlacementTurn(
+            "summer",
+            wakeUpOrder.filter(pos => pos)[0]!.playerId,
+            { ...state, wakeUpOrder }
+        );
+    }
+    return promptForWakeUpOrder({
+        ...state,
+        currentTurn: {
+            type: "wakeUpOrder",
+            playerId: tableOrder[nextWakeUpIndex],
+        },
+        wakeUpOrder,
+    });
+};
+
+const promptForWakeUpOrder = (state: GameState) => {
+    return promptForAction(state, {
+        title: "Pick a wake-up order",
+        choices: [
+            { id: "WAKE_UP_1", label: <>1: No bonus</> },
+            { id: "WAKE_UP_2", label: <>2: Draw <Vine /></> },
+            { id: "WAKE_UP_3", label: <>3: Draw <Order /></> },
+            { id: "WAKE_UP_4", label: <>4: Gain <Coins>1</Coins></> },
+            { id: "WAKE_UP_5", label: <>5: Draw <SummerVisitor /> or <WinterVisitor /></> },
+            { id: "WAKE_UP_6", label: <>6: Gain <VictoryPoints>1</VictoryPoints></> },
+            { id: "WAKE_UP_7", label: <>7: <Worker /> this year</> },
+        ].map((choice, i) => state.wakeUpOrder[i]
+            ? { ...choice, disabledReason: `Taken by ${state.wakeUpOrder[i]!.playerId}` }
+            : choice
+        ),
+    });
+};
+
+export const promptToDrawWakeUpVisitor = (state: GameState) => {
+    return promptForAction(state, {
+        choices: [
+            { id: "WAKE_UP_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></> },
+            { id: "WAKE_UP_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></> },
+        ],
+    });
+};
+
 const promptToDrawFallVisitor = (state: GameState) => {
-    return promptForAction(state, [
-        { id: "FALL_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></> },
-        { id: "FALL_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></> },
-    ]);
+    return promptForAction(state, {
+        choices: [
+            { id: "FALL_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></> },
+            { id: "FALL_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></> },
+        ],
+    });
 };
 
 const editVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) => {

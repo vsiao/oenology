@@ -95,7 +95,7 @@ export interface TrainedWorker {
 export interface BoardWorker {
     type: WorkerType,
     playerId: string,
-    color: string;
+    color: PlayerColor;
 }
 
 export type CardId =

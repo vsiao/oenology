@@ -35,10 +35,13 @@ export const summerVisitorReducers: Record<
                 }, gainCoins(5, state));
                 return currentTurnPlayerId === state.playerId
                     ? state
-                    : promptForAction(state, [
-                          { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
-                          { id: "BANKER_PASS", label: <>Pass</> },
-                      ], state.playerId!);
+                    : promptForAction(state, {
+                          playerId: state.playerId!,
+                          choices: [
+                              { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
+                              { id: "BANKER_PASS", label: <>Pass</> },
+                          ],
+                      });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BANKER_GAIN":
@@ -58,18 +61,20 @@ export const summerVisitorReducers: Record<
     buyer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    {
-                        id: "BUYER_PLACE",
-                        label: <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad</>,
-                        disabledReason: moneyDisabledReason(state, 2),
-                    },
-                    {
-                        id: "BUYER_DISCARD",
-                        label: <>Discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP></>,
-                        disabledReason: needGrapesDisabledReason(state),
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "BUYER_PLACE",
+                            label: <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad</>,
+                            disabledReason: moneyDisabledReason(state, 2),
+                        },
+                        {
+                            id: "BUYER_DISCARD",
+                            label: <>Discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BUYER_PLACE":
@@ -89,14 +94,16 @@ export const summerVisitorReducers: Record<
     landscaper: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
-                    {
-                        id: "LANDSCAPER_SWITCH",
-                        label: <>Switch 2 <Vine /> on your fields</>,
-                        disabledReason: "Not implemented yet", // TODO
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
+                        {
+                            id: "LANDSCAPER_SWITCH",
+                            label: <>Switch 2 <Vine /> on your fields</>,
+                            disabledReason: "Not implemented yet", // TODO
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "LANDSCAPER_DRAW_PLANT":
@@ -115,10 +122,12 @@ export const summerVisitorReducers: Record<
     patron: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "PATRON_GAIN", label: <>Gain <Coins>4</Coins></> },
-                    { id: "PATRON_DRAW", label: <>Draw 1 <Order /> and 1 <WinterVisitor /></> },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "PATRON_GAIN", label: <>Gain <Coins>4</Coins></> },
+                        { id: "PATRON_DRAW", label: <>Draw 1 <Order /> and 1 <WinterVisitor /></> },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PATRON_GAIN":
@@ -138,14 +147,16 @@ export const summerVisitorReducers: Record<
     tourGuide: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
-                    {
-                        id: "TOUR_HARVEST",
-                        label: <>Harvest 1 field</>,
-                        disabledReason: harvestFieldDisabledReason(state),
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
+                        {
+                            id: "TOUR_HARVEST",
+                            label: <>Harvest 1 field</>,
+                            disabledReason: harvestFieldDisabledReason(state),
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "TOUR_GAIN_4":
@@ -164,10 +175,12 @@ export const summerVisitorReducers: Record<
     uncertifiedArchitect: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "UARCHITECT_LOSE_1_VP", label: <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure</> },
-                    { id: "UARCHITECT_LOSE_2_VP", label: <>Lose <VP>2</VP> to build any structure</> }
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "UARCHITECT_LOSE_1_VP", label: <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure</> },
+                        { id: "UARCHITECT_LOSE_2_VP", label: <>Lose <VP>2</VP> to build any structure</> }
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UARCHITECT_LOSE_1_VP":
@@ -186,14 +199,16 @@ export const summerVisitorReducers: Record<
     uncertifiedBroker: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "UBROKER_LOSE_VP", label: <>Lose <VP>3</VP> to gain <Coins>9</Coins></> },
-                    {
-                        id: "UBROKER_GAIN_VP",
-                        label: <>Pay <Coins>6</Coins> to gain <VP>2</VP></>,
-                        disabledReason: moneyDisabledReason(state, 6),
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "UBROKER_LOSE_VP", label: <>Lose <VP>3</VP> to gain <Coins>9</Coins></> },
+                        {
+                            id: "UBROKER_GAIN_VP",
+                            label: <>Pay <Coins>6</Coins> to gain <VP>2</VP></>,
+                            disabledReason: moneyDisabledReason(state, 6),
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UBROKER_LOSE_VP":

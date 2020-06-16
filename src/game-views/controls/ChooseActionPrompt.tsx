@@ -15,7 +15,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
     const { prompt } = props;
     return <div className="ChooseActionPrompt">
         <div className="ChooseActionPrompt-header">
-            Choose an action
+            {prompt.title}
         </div>
         <ul className="ChooseActionPrompt-choices">
             {prompt.choices.map((choice, i) => {

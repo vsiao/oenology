@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import cx from "classnames";
 import { GameAction, chooseVine, chooseVisitor } from "../../game-data/gameActions";
-import { CardId, CurrentTurn, PlayerState, WorkerType, TrainedWorker } from "../../game-data/GameState";
+import { CardId, CurrentTurn, PlayerState, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards, VineId } from "../../game-data/vineCards";
 import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
@@ -36,15 +36,17 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
         null as number | null
     );
     const [highlightedIndex, setHighlightedIndex] = React.useState(defaultAvailableWorkerIndex);
-    if (
-        (highlightedIndex === null && defaultAvailableWorkerIndex !== null) ||
-        (highlightedIndex !== null && !trainedWorkers[highlightedIndex].available)
-    ) {
-        setHighlightedIndex(defaultAvailableWorkerIndex);
-        if (defaultAvailableWorkerIndex !== null) {
-            setPendingWorkerType(trainedWorkers[defaultAvailableWorkerIndex].type);
+    React.useEffect(() => {
+        if (
+            (highlightedIndex === null && defaultAvailableWorkerIndex !== null) ||
+            (highlightedIndex !== null && !trainedWorkers[highlightedIndex].available)
+        ) {
+            setHighlightedIndex(defaultAvailableWorkerIndex);
+            if (defaultAvailableWorkerIndex !== null) {
+                setPendingWorkerType(trainedWorkers[defaultAvailableWorkerIndex].type);
+            }
         }
-    }
+    }, [highlightedIndex, defaultAvailableWorkerIndex, trainedWorkers, setPendingWorkerType]);
 
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />

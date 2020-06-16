@@ -20,8 +20,15 @@ export const prompt = (state: GameState, action: GameAction) => {
 
 export const promptForAction = (
     state: GameState,
-    choices: Choice[],
-    playerId = state.currentTurn.playerId
+    {
+        title = "Choose an action",
+        playerId = state.currentTurn.playerId,
+        choices,
+    }: {
+        title?: string;
+        playerId?: string;
+        choices: Choice[];
+    }
 ): GameState => {
     if (state.playerId !== playerId) {
         return state;
@@ -30,7 +37,7 @@ export const promptForAction = (
         ...state,
         actionPrompts: [
             ...state.actionPrompts,
-            { type: "chooseAction", playerId, choices },
+            { type: "chooseAction", title, playerId, choices },
         ],
     };
 };

@@ -1,12 +1,12 @@
 import "./Worker.css";
 import cx from "classnames";
 import * as React from "react";
-import { WorkerType } from "../../game-data/GameState";
+import { WorkerType, PlayerColor } from "../../game-data/GameState";
 
 interface Props {
-    className?: string,
-    workerType?: WorkerType,
-    color?: string,
+    className?: string;
+    workerType?: WorkerType;
+    color?: PlayerColor;
     disabled?: boolean;
 }
 

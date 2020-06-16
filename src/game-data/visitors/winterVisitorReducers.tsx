@@ -20,14 +20,16 @@ export const winterVisitorReducers: Record<
         const numCards = player.cardsInHand.length;
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</> },
-                    {
-                        id: "ASSESSOR_DISCARD",
-                        label: <>Discard your hand to gain <VP>2</VP></>,
-                        disabledReason: numCards < 1 ? "You don't have any cards." : undefined,
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</> },
+                        {
+                            id: "ASSESSOR_DISCARD",
+                            label: <>Discard your hand to gain <VP>2</VP></>,
+                            disabledReason: numCards < 1 ? "You don't have any cards." : undefined,
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "ASSESSOR_GAIN":
@@ -44,13 +46,15 @@ export const winterVisitorReducers: Record<
     judge: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
-                    {
-                        id: "JUDGE_DISCARD",
-                        label: <>Discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP></>,
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
+                        {
+                            id: "JUDGE_DISCARD",
+                            label: <>Discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP></>,
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "JUDGE_DRAW":
@@ -93,20 +97,22 @@ export const winterVisitorReducers: Record<
                         mainActions: Object.keys(state.players),
                         reactions: 0,
                     }, state),
-                    [{
-                        id: "MENTOR_MAKE",
-                        label: <>
-                            Make up to 2 <WineGlass />
-                            {state.playerId !== state.currentTurn.playerId
-                                ? <>(<strong>{state.currentTurn.playerId}</strong> draws 1 <Vine /> or 1 <SummerVisitor />)</>
-                                : null}
-                        </>,
-                        disabledReason: needGrapesDisabledReason(state, state.playerId!),
-                    }, {
-                        id: "MENTOR_PASS",
-                        label: <>Pass</>,
-                    }],
-                    state.playerId!
+                    {
+                        playerId: state.playerId!,
+                        choices: [{
+                            id: "MENTOR_MAKE",
+                            label: <>
+                                Make up to 2 <WineGlass />
+                                {state.playerId !== state.currentTurn.playerId
+                                    ? <>(<strong>{state.currentTurn.playerId}</strong> draws 1 <Vine /> or 1 <SummerVisitor />)</>
+                                    : null}
+                            </>,
+                            disabledReason: needGrapesDisabledReason(state, state.playerId!),
+                        }, {
+                            id: "MENTOR_PASS",
+                            label: <>Pass</>,
+                        }],
+                    }
                 );
             case "CHOOSE_ACTION":
                 switch (action.choice) {
@@ -115,11 +121,13 @@ export const winterVisitorReducers: Record<
                         return action.playerId !== state.currentTurn.playerId
                             ? promptForAction(
                                   setPendingAction({ ...mentorAction, reactions: mentorAction.reactions + 1 }, state),
-                                  [
-                                      { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
-                                      { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
-                                  ]
-                              )
+                                  {
+                                      choices: [
+                                          { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
+                                          { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
+                                      ],
+                                  }
+                            )
                             : state;
 
                     case "MENTOR_PASS":
@@ -162,20 +170,22 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_VISITOR":
                 const playerState = state.players[state.currentTurn.playerId];
-                return promptForAction(state, [
-                    {
-                        id: "PROFESSOR_TRAIN",
-                        label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
-                        disabledReason: trainWorkerDisabledReason(state, 2),
-                    },
-                    {
-                        id: "PROFESSOR_GAIN",
-                        label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
-                        disabledReason: playerState.trainedWorkers.length < 6
-                            ? "You don't have enough workers."
-                            : undefined,
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "PROFESSOR_TRAIN",
+                            label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 2),
+                        },
+                        {
+                            id: "PROFESSOR_GAIN",
+                            label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
+                            disabledReason: playerState.trainedWorkers.length < 6
+                                ? "You don't have enough workers."
+                                : undefined,
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROFESSOR_TRAIN":
@@ -217,18 +227,20 @@ export const winterVisitorReducers: Record<
     teacher: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
-                return promptForAction(state, [
-                    {
-                        id: "TEACHER_MAKE",
-                        label: <>Make up to 2 <WineGlass /></>,
-                        disabledReason: needGrapesDisabledReason(state),
-                    },
-                    {
-                        id: "TEACHER_TRAIN",
-                        label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
-                        disabledReason: trainWorkerDisabledReason(state, 2),
-                    },
-                ]);
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "TEACHER_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        {
+                            id: "TEACHER_TRAIN",
+                            label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 2),
+                        },
+                    ],
+                });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "TEACHER_MAKE":
