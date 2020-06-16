@@ -1,15 +1,14 @@
 .Worker {
     height: 1.4em;
+    stroke: black;
+    stroke-width: .4em;
     vertical-align: text-bottom;
     width: 1.4em;
 }
 .Worker--grande {
-    height: 1.6em;
+    height: 2em;
     vertical-align: text-bottom;
-    width: 1.6em;
-}
-.Worker--disabled {
-    opacity: 0.5;
+    width: 2em;
 }
 .Worker--blue {
     fill: royalblue;
@@ -28,4 +27,7 @@
 }
 .Worker--yellow {
     fill: gold;
+}
+.Worker--disabled {
+    fill: white;
 }

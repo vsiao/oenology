@@ -1,6 +1,7 @@
 .BuildStructurePrompt-header {
     align-items: center;
     color: black;
+    display: flex;
     font-size: 12px;
     font-weight: 600;
     height: 20px;
@@ -8,9 +9,12 @@
     padding: 0 16px;
     text-transform: uppercase;
 }
-.BuildStructurePrompt-choice {
-    display: inline-block;
+.BuildStructurePrompt-choices {
+    display: flex;
+    flex-flow: row wrap;
+    margin: -6px 10px -6px;
 }
+
 .BuildStructurePrompt-choiceButton {
     background: white;
     border: 2px solid #ccc;

@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import cx from "classnames";
 import { GameAction, chooseVine, chooseVisitor } from "../../game-data/gameActions";
-import { CardId, CurrentTurn, PlayerState, WorkerType } from "../../game-data/GameState";
+import { CardId, CurrentTurn, PlayerState, WorkerType, TrainedWorker } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards, VineId } from "../../game-data/vineCards";
 import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
@@ -28,15 +28,23 @@ interface Props {
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { playerState, pendingWorkerType, setPendingWorkerType } = props;
-    const [highlightedIndex, setHighlightedIndex] = React.useState(0);
-    if (!playerState.trainedWorkers[highlightedIndex].available) {
-        const newHighlightedIndex = playerState.trainedWorkers.findIndex(worker => worker.available && worker.type === pendingWorkerType);
-        if (highlightedIndex !== newHighlightedIndex) {
-            setHighlightedIndex(newHighlightedIndex);
+    const { playerState, setPendingWorkerType } = props;
+    const trainedWorkers = playerState.trainedWorkers;
+    const defaultAvailableWorkerIndex = trainedWorkers.reduce(
+        (previousValue, trainedWorker, currentIndex) =>
+            trainedWorker.available ? currentIndex : previousValue,
+        null as number | null
+    );
+    const [highlightedIndex, setHighlightedIndex] = React.useState(defaultAvailableWorkerIndex);
+    if (
+        (highlightedIndex === null && defaultAvailableWorkerIndex !== null) ||
+        (highlightedIndex !== null && !trainedWorkers[highlightedIndex].available)
+    ) {
+        setHighlightedIndex(defaultAvailableWorkerIndex);
+        if (defaultAvailableWorkerIndex !== null) {
+            setPendingWorkerType(trainedWorkers[defaultAvailableWorkerIndex].type);
         }
     }
-
 
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />
@@ -45,11 +53,12 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
-                {playerState.trainedWorkers.map((worker, i) =>
+                {trainedWorkers.map((worker, i) =>
                     <li key={i} className={cx({
                         "PlayerMat-worker": true,
+                        "PlayerMat-worker--grande": worker.type === "grande",
                         "PlayerMat-worker--available": worker.available,
-                        "PlayerMat-worker--highlighted": highlightedIndex === i
+                        "PlayerMat-worker--highlighted": highlightedIndex !== null && highlightedIndex === i
                     })}
                         onClick={worker.available ? () => {
                             setPendingWorkerType(worker.type);

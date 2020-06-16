@@ -32,7 +32,7 @@ export const summerVisitorReducers: Record<
                 state = setPendingAction({
                     ...bankerAction,
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
-                }, state);
+                }, gainCoins(5, state));
                 return currentTurnPlayerId === state.playerId
                     ? state
                     : promptForAction(state, [

@@ -11,6 +11,7 @@ import {
     removeCardsFromHand,
     setPendingAction,
     trainWorker,
+    passToNextSeason,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
@@ -118,100 +119,94 @@ export const board = (state: GameState, action: GameAction): GameState => {
             if (state.currentTurn.type !== "workerPlacement") {
                 throw new Error("Unexpected state: can only pass a worker placement turn");
             }
-            // First, mark current player as passed
-            const wakeUpOrder = state.wakeUpOrder.map(pos => {
-                if (!pos || pos.playerId !== state.currentTurn.playerId) {
-                    return pos;
-                }
-                return { ...pos, passed: true };
-            }) as GameState["wakeUpOrder"];
-
-            // Then perform normal endTurn procedure, which may transition to the next season
-            return endTurn({ ...state, wakeUpOrder });
+            return passToNextSeason(state.currentTurn.playerId, state);
 
         case "PLACE_WORKER": {
-            const currentTurn = state.currentTurn as WorkerPlacementTurn;
-            const currentPlayer = state.players[currentTurn.playerId];
-            const newTrainedWorkers = currentPlayer.trainedWorkers;
-            const workerIndex = newTrainedWorkers.findIndex(worker => worker.type === action.workerType);
-            if (workerIndex === -1) {
-                // Shouldn't get here?
-                return state;
+            const player = state.players[state.currentTurn.playerId];
+            const workerIndex = player.trainedWorkers.reduce(
+                (previousValue, trainedWorker, currentIndex) =>
+                    trainedWorker.available && trainedWorker.type === action.workerType
+                        ? currentIndex
+                        : previousValue,
+                null as number | null
+            );
+            if (workerIndex === null) {
+                throw new Error("Unexpected state: no available workers");
             }
-            newTrainedWorkers[workerIndex].available = false;
-
-            const newState = {
+            state = {
                 ...state,
                 players: {
                     ...state.players,
-                    [currentTurn.playerId]: {
-                        ...currentPlayer,
-                        trainedWorkers: newTrainedWorkers
-                    }
+                    [player.id]: {
+                        ...player,
+                        trainedWorkers: player.trainedWorkers.map(
+                            (w, i) => i === workerIndex ? { ...w, available: false } : w
+                        ),
+                    },
                 },
                 workerPlacements: {
                     ...state.workerPlacements,
                     [action.placement]: [...state.workerPlacements[action.placement], {
                         type: action.workerType,
-                        playerId: currentTurn.playerId,
-                        color: currentPlayer.color
-                    }]
-                }
+                        playerId: state.currentTurn.playerId,
+                        color: player.color
+                    }],
+                },
             };
 
             switch (action.placement) {
                 case "buildStructure":
                     return promptToBuildStructure(
-                        setPendingAction({ type: "buildStructure" }, newState)
+                        setPendingAction({ type: "buildStructure" }, state)
                     );
                 case "buySell":
-                    return promptForAction(setPendingAction({ type: "buySell" }, newState), [
+                    return promptForAction(setPendingAction({ type: "buySell" }, state), [
                         {
                             id: "SELL_GRAPES",
                             label: "Sell grape(s)",
-                            disabledReason: needGrapesDisabledReason(newState),
+                            disabledReason: needGrapesDisabledReason(state),
                         },
                         {
                             id: "BUY_FIELD",
                             label: "Buy a field",
-                            disabledReason: buyFieldDisabledReason(newState),
+                            disabledReason: buyFieldDisabledReason(state),
                         },
                         {
                             id: "SELL_FIELD",
                             label: "Sell a field",
-                            disabledReason: Object.values(newState.players[currentTurn.playerId].fields)
+                            disabledReason: Object.values(state.players[player.id].fields)
                                 .every(fields => fields.sold)
                                 ? "You don't have any fields to sell."
                                 : undefined,
                         },
                     ]);
                 case "drawOrder":
-                    return endTurn(drawCards(newState, { order: 1 }));
+                    return endTurn(drawCards(state, { order: 1 }));
                 case "drawVine":
-                    return endTurn(drawCards(newState, { vine: 1 }));
+                    return endTurn(drawCards(state, { vine: 1 }));
                 case "fillOrder":
-                    return newState;
+                    return state;
                 case "gainCoin":
-                    return endTurn(gainCoins(1, newState));
+                    return endTurn(gainCoins(1, state));
                 case "giveTour":
-                    return endTurn(gainCoins(2, newState));
+                    return endTurn(gainCoins(2, state));
                 case "harvestField":
-                    return promptToChooseField(setPendingAction({ type: "harvestField" }, newState));
+                    return promptToChooseField(setPendingAction({ type: "harvestField" }, state));
                 case "makeWine":
-                    return promptToMakeWine(setPendingAction({ type: "makeWine" }, newState), /* upToN */ 2);
+                    return promptToMakeWine(setPendingAction({ type: "makeWine" }, state), /* upToN */ 2);
                 case "plantVine":
-                    return setPendingAction({ type: "plantVine" }, newState);
+                    return setPendingAction({ type: "plantVine" }, state);
                 case "playSummerVisitor":
                 case "playWinterVisitor":
-                    return setPendingAction({ type: "playVisitor" }, newState);
+                    return setPendingAction({ type: "playVisitor" }, state);
                 case "trainWorker":
-                    return endTurn(trainWorker(payCoins(4, newState)));
+                    return endTurn(trainWorker(payCoins(4, state)));
                 case "yoke":
-                    return newState;
+                    return state;
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const exhaustivenessCheck: never = action.placement;
-                    return newState;
+                    return state;
             }
         }
         default:

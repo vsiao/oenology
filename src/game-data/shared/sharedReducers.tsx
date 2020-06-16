@@ -185,10 +185,20 @@ export const addToDiscard = (cards: CardId[], state: GameState): GameState => {
     return { ...state, discardPiles };
 };
 
+export const passToNextSeason = (playerId: string, state: GameState): GameState => {
+    const wakeUpOrder = state.wakeUpOrder.map(pos => {
+        if (!pos || pos.playerId !== playerId) {
+            return pos;
+        }
+        return { ...pos, passed: true };
+    }) as GameState["wakeUpOrder"];
+
+    return endWorkerPlacementTurn({ ...state, wakeUpOrder, });
+};
+
 export const endTurn = (state: GameState): GameState => {
     const { currentTurn, wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter(pos => pos !== null) as WakeUpPosition[];
-    const activeWakeUpOrder = compactWakeUpOrder.filter(pos => !pos.passed);
 
     switch (currentTurn.type) {
         case "papaSetUp":
@@ -197,88 +207,14 @@ export const endTurn = (state: GameState): GameState => {
         case "wakeUpOrder":
             return state;
 
-        case "workerPlacement": {
-            state = movePendingCardToDiscard(state);
-
-            if (compactWakeUpOrder.every(p => p.passed)) {
-                // If everyone passed, it's the end of the season
-                if (currentTurn.season === "summer") {
-                    return promptToDrawFallVisitor({
-                        ...state,
-                        // preserve wake-up order; just reset "passed" state
-                        wakeUpOrder: wakeUpOrder.map(pos => {
-                            return pos === null ? null : { ...pos, passed: false };
-                        }) as GameState["wakeUpOrder"],
-                        currentTurn: {
-                            type: "fallVisitor",
-                            playerId: compactWakeUpOrder[0].playerId,
-                        }
-                    });
-                } else {
-                    // TODO end of year stuff, and then reset wakeUpOrder
-                    return {
-                        ...state,
-                        wakeUpOrder: wakeUpOrder.map(pos => {
-                            return pos === null ? null : { ...pos, passed: false };
-                        }) as GameState["wakeUpOrder"],
-                        currentTurn: {
-                            type: "workerPlacement",
-                            playerId: compactWakeUpOrder[0].playerId,
-                            season: "summer",
-                            pendingAction: null,
-                        },
-                        players: Object.fromEntries(
-                            Object.entries(state.players).map(([playerId, playerState]) => {
-                                return [playerId, {
-                                    ...playerState,
-                                    // Mark all trained workers as available again
-                                    trainedWorkers: playerState.trainedWorkers.map(w => ({
-                                        ...w,
-                                        available: true,
-                                    })),
-                                    crushPad: {
-                                        red: age(playerState.crushPad.red),
-                                        white: age(playerState.crushPad.white),
-                                    },
-                                    cellar: {
-                                        red: age(playerState.cellar.red),
-                                        white: age(playerState.cellar.white),
-                                        blush: age(playerState.cellar.blush),
-                                        sparkling: age(playerState.cellar.sparkling),
-                                    },
-                                }];
-                            })
-                        ),
-                    };
-                }
-            }
-            const i = activeWakeUpOrder.findIndex(pos => pos.playerId === currentTurn.playerId);
-            const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
-
-            return {
-                ...state,
-                currentTurn: {
-                    type: "workerPlacement",
-                    playerId: nextPlayerId,
-                    pendingAction: null,
-                    season: currentTurn.season,
-                },
-            };
-        }
+        case "workerPlacement":
+            return endWorkerPlacementTurn(movePendingCardToDiscard(state));
 
         case "fallVisitor":
             const i = compactWakeUpOrder.findIndex(pos => pos.playerId === currentTurn.playerId);
             if (i === compactWakeUpOrder.length - 1) {
                 // end of season
-                return {
-                    ...state,
-                    currentTurn: {
-                        type: "workerPlacement",
-                        playerId: compactWakeUpOrder[0].playerId,
-                        season: "winter",
-                        pendingAction: null,
-                    },
-                };
+                return startWorkerPlacementTurn("winter", compactWakeUpOrder[0].playerId, state);
             } else {
                 const nextPlayerId = compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
                 return promptToDrawFallVisitor({
@@ -290,6 +226,80 @@ export const endTurn = (state: GameState): GameState => {
                 });
             }
     }
+};
+
+const endWorkerPlacementTurn = (state: GameState): GameState => {
+    const { currentTurn, wakeUpOrder } = state;
+    const season = (state.currentTurn as WorkerPlacementTurn).season;
+    const compactWakeUpOrder = wakeUpOrder.filter(pos => pos !== null) as WakeUpPosition[];
+    const activeWakeUpOrder = compactWakeUpOrder.filter(pos => !pos.passed);
+
+    if (compactWakeUpOrder.every(p => p.passed)) {
+        // If everyone passed, it's the end of the season
+        if (season === "summer") {
+            return promptToDrawFallVisitor({
+                ...state,
+                // preserve wake-up order; just reset "passed" state
+                wakeUpOrder: wakeUpOrder.map(pos => {
+                    return pos === null ? null : { ...pos, passed: false };
+                }) as GameState["wakeUpOrder"],
+                currentTurn: {
+                    type: "fallVisitor",
+                    playerId: compactWakeUpOrder[0].playerId,
+                }
+            });
+        } else {
+            // TODO end of year stuff, and then reset wakeUpOrder
+            return startWorkerPlacementTurn("summer", compactWakeUpOrder[0].playerId, {
+                ...state,
+                wakeUpOrder: wakeUpOrder.map(pos => {
+                    return pos === null ? null : { ...pos, passed: false };
+                }) as GameState["wakeUpOrder"],
+                workerPlacements: Object.fromEntries(
+                    Object.entries(state.workerPlacements).map(([placement]) => [placement, []])
+                ) as unknown as GameState["workerPlacements"],
+                players: Object.fromEntries(
+                    Object.entries(state.players).map(([playerId, playerState]) => {
+                        return [playerId, {
+                            ...playerState,
+                            // Mark all trained workers as available again
+                            trainedWorkers: playerState.trainedWorkers.map(w => ({
+                                ...w,
+                                available: true,
+                            })),
+                            crushPad: {
+                                red: age(playerState.crushPad.red),
+                                white: age(playerState.crushPad.white),
+                            },
+                            cellar: {
+                                red: age(playerState.cellar.red),
+                                white: age(playerState.cellar.white),
+                                blush: age(playerState.cellar.blush),
+                                sparkling: age(playerState.cellar.sparkling),
+                            },
+                        }];
+                    })
+                ),
+            });
+        }
+    }
+    const i = activeWakeUpOrder.findIndex(pos => pos.playerId === currentTurn.playerId);
+    const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
+
+    return startWorkerPlacementTurn(season, nextPlayerId, state);
+};
+
+const startWorkerPlacementTurn = (season: "summer" | "winter", playerId: string, state: GameState) => {
+    state = {
+        ...state,
+        currentTurn: { type: "workerPlacement", playerId, pendingAction: null, season }
+    };
+    const player = state.players[playerId];
+    if (player.trainedWorkers.filter(w => w.available).length === 0) {
+        // player is out of workers, auto-pass them
+        return passToNextSeason(player.id, state);
+    }
+    return state;
 };
 
 const age = (tokens: TokenMap): TokenMap => {
