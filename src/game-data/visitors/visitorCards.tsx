@@ -4,7 +4,6 @@ import Coins from "../../game-views/icons/Coins";
 import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
-import Residuals from "../../game-views/icons/Residuals";
 import WineGlass from "../../game-views/icons/WineGlass";
 
 export interface VisitorCardData {
@@ -37,42 +36,42 @@ export const summerVisitorCards = {
         "Buyer",
         <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad OR discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP>.</>
     ),
-    contractor: summerVisitorCard(
-        "Contractor",
-        <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
-    ),
-    entertainer: summerVisitorCard(
-        "Entertainer",
-        <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
-    ),
-    handyman: summerVisitorCard(
-        "Handyman",
-        <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
-    ),
+    // contractor: summerVisitorCard(
+    //     "Contractor",
+    //     <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
+    // ),
+    // entertainer: summerVisitorCard(
+    //     "Entertainer",
+    //     <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
+    // ),
+    // handyman: summerVisitorCard(
+    //     "Handyman",
+    //     <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
+    // ),
     landscaper: summerVisitorCard(
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,
     ),
-    negotiator: summerVisitorCard(
-        "Negotiator",
-        <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
-    ),
+    // negotiator: summerVisitorCard(
+    //     "Negotiator",
+    //     <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
+    // ),
     patron: summerVisitorCard(
         "Patron",
         <>Gain <Coins>4</Coins> OR draw 1 <Order />  and 1 <WinterVisitor />.</>
     ),
-    planner: summerVisitorCard(
-        "Planner",
-        <>Place a worker on an action in a future season. Take the action at the beginning of that season.</>,
-    ),
-    planter: summerVisitorCard(
-        "Planter",
-        <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
-    ),
-    producer: summerVisitorCard(
-        "Producer",
-        <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
-    ),
+    // planner: summervisitorcard(
+    //     "planner",
+    //     <>place a worker on an action in a future season. take the action at the beginning of that season.</>,
+    // ),
+    // planter: summerVisitorCard(
+    //     "Planter",
+    //     <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    // ),
+    // producer: summerVisitorCard(
+    //     "Producer",
+    //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
+    // ),
     tourGuide: summerVisitorCard(
         "Tour Guide",
         <>Gain <Coins>4</Coins> OR harvest 1 field.</>
@@ -85,10 +84,10 @@ export const summerVisitorCards = {
         "Uncertified Broker",
         <>Lose <VP>3</VP> to gain <Coins>9</Coins> OR pay <Coins>6</Coins> to gain <VP>2</VP>.</>
     ),
-    volunteerCrew: summerVisitorCard(
-        "Volunteer Crew",
-        <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
-    ),
+    // volunteerCrew: summerVisitorCard(
+    //     "Volunteer Crew",
+    //     <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
+    // ),
 };
 
 const winterVisitorCard = (name: string, description: React.ReactNode) =>

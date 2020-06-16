@@ -80,7 +80,7 @@ export const summerVisitorReducers: Record<
                     case "BUYER_PLACE":
                         return endTurn(payCoins(2, placeGrapes(state, { red: 1, white: 1 })));
                     case "BUYER_DISCARD":
-                        return state; // TODO
+                        return endTurn(state); // TODO
                     default:
                         return state;
                 }
@@ -88,9 +88,9 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    contractor: s => endTurn(s),
-    entertainer: s => endTurn(s),
-    handyman: s => endTurn(s),
+    // contractor: s => endTurn(s),
+    // entertainer: s => endTurn(s),
+    // handyman: s => endTurn(s),
     landscaper: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
@@ -110,7 +110,7 @@ export const summerVisitorReducers: Record<
                         // TODO prompt to pick vine to plant, or pass
                         return endTurn(drawCards(state, { vine: 1 }));
                     case "LANDSCAPER_SWITCH":
-                        return state; // TODO
+                        return endTurn(state); // TODO
                     default:
                         return state;
                 }
@@ -118,7 +118,7 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    negotiator: s => endTurn(s),
+    // negotiator: s => endTurn(s),
     patron: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
@@ -141,9 +141,9 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    planner: s => endTurn(s),
-    planter: s => endTurn(s),
-    producer: s => endTurn(s),
+    // planner: s => endTurn(s),
+    // planter: s => endTurn(s),
+    // producer: s => endTurn(s),
     tourGuide: (state, action) => {
         switch (action.type) {
             case "CHOOSE_VISITOR":
@@ -222,5 +222,5 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    volunteerCrew: s => endTurn(s),
+    // volunteerCrew: s => endTurn(s),
 };

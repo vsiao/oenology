@@ -41,14 +41,14 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
-            linz: initPlayer("linz", "yellow"),
+            // linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
             // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
         },
         tableOrder: ["stfy", "viny"],
         grapeIndex: 1,
-        wakeUpOrder: [null, { playerId: "stfy" }, null, null, null, null, { playerId: "viny" }],
+        wakeUpOrder: [null, { playerId: "stfy" }, { playerId: "viny" }, null, null, null, null],
         workerPlacements: {
             drawVine: [],
             giveTour: [],
@@ -83,10 +83,6 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
             { type: "normal", available: true },
         ],
         cardsInHand: [
-            { type: "visitor", id: "banker" },
-            { type: "visitor", id: "uncertifiedArchitect" },
-            { type: "visitor", id: "assessor" },
-            { type: "visitor", id: "politician" },
         ],
         fields: {
             field5: { id: "field5", value: 5, vines: [], sold: false },
