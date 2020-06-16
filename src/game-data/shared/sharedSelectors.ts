@@ -1,23 +1,42 @@
 import GameState, { Field } from "../GameState";
-import { vineCards, VineCardData } from "../vineCards";
+import { vineCards } from "../vineCards";
 
 export const fieldYields = (field: Field): { red: number; white: number; } => {
     return {
         red: field.vines.reduce(
-            (r, v) => r + ((vineCards[v] as VineCardData).yields.red! || 0),
+            (r, v) => r + (vineCards[v].yields.red! || 0),
             0
         ),
         white: field.vines.reduce(
-            (w, v) => w + ((vineCards[v] as VineCardData).yields.white! || 0),
+            (w, v) => w + (vineCards[v].yields.white! || 0),
             0
         ),
     };
 };
 
-export const needGrapesDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
-    const hasGrapes = Object.values(state.players[playerId].crushPad)
+export const plantVineDisabledReason = (state: GameState) => {
+    const player = state.players[state.currentTurn.playerId];
+    const fields = Object.values(player.fields);
+    return player.cardsInHand.some(card => {
+        return card.type === "vine" &&
+            fields.some(field => {
+                const { red, white } = fieldYields({
+                    ...field,
+                    vines: [...field.vines, card.id],
+                });
+                return red + white <= field.value;
+            });
+    })
+        ? undefined
+        : "You don't have any vines you can plant.";
+};
+
+export const hasGrapes = (state: GameState, playerId = state.currentTurn.playerId) => {
+    return Object.values(state.players[playerId].crushPad)
         .some(grapes => grapes.some(g => g === true));
-    return hasGrapes ? undefined : "You don't have any grapes.";
+};
+export const needGrapesDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
+    return hasGrapes(state, playerId) ? undefined : "You don't have any grapes.";
 };
 
 export const buyFieldDisabledReason = (state: GameState): string | undefined => {

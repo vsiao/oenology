@@ -3,23 +3,28 @@ import cx from "classnames";
 import "./BoardPlacement.css";
 import Worker from "./icons/Worker";
 import { BoardWorker } from "../game-data/GameState";
+import { connect } from "react-redux";
+import { BoardAction } from "../game-data/board/boardPlacements";
+import { AppState } from "../store/AppState";
 
 interface Props {
-    title: React.ReactNode,
-    onClick: (() => void) | undefined,
-    season: string,
+    title: React.ReactNode;
+    disabledReason: string | undefined;
+    onClick: (() => void) | undefined;
+    season: string;
     workers: BoardWorker[];
 }
 
 const BoardPlacement: React.FunctionComponent<Props> = props => {
-    const { title, onClick, season, workers } = props;
+    const { title, disabledReason, onClick, season, workers } = props;
+    const interactive = onClick && !disabledReason;
     return <div
         className={cx({
             "BoardPlacement": true,
-            "BoardPlacement--interactive": !!onClick,
+            "BoardPlacement--interactive": interactive,
             [`BoardPlacement--${season}`]: true,
         })}
-        onClick={onClick}
+        onClick={interactive ? onClick : undefined}
     >
         <div className="BoardPlacement-title">
             {title}
@@ -35,4 +40,11 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-export default BoardPlacement;
+const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction }) => {
+    return {
+        disabledReason: ownProps.placement.disabledReason &&
+            ownProps.placement.disabledReason(state.game),
+    };
+}
+
+export default connect(mapStateToProps)(BoardPlacement);

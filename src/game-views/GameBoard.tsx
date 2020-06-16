@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { GameAction } from "../game-data/gameActions";
 import { WorkerPlacement, placeWorker } from "../game-data/board/boardActions";
-import { SummerActions, WinterActions } from "../game-data/board/boardPlacements";
+import { summerActions, winterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 
 import "./GameBoard.css";
@@ -25,21 +25,23 @@ const GameBoard: React.FunctionComponent<Props> = props => {
             Order
         </div>
         <div className="GameBoard-summerActions">
-            {SummerActions.map(action =>
+            {summerActions.map(action =>
                 <BoardPlacement
                     key={action.type}
                     onClick={canPlaceSummerWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
                     title={action.title}
+                    placement={action}
                     season="summer"
                     workers={workerPlacements[action.type]}
                 />)}
         </div>
         <div className="GameBoard-winterActions">
-            {WinterActions.map(action =>
+            {winterActions.map(action =>
                 <BoardPlacement
                     key={action.type}
                     onClick={canPlaceWinterWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
                     title={action.title}
+                    placement={action}
                     season="winter"
                     workers={workerPlacements[action.type]}
                 />)}

@@ -1,78 +1,31 @@
 import { GrapeColor } from "./GameState";
+import { StructureId } from "./structures";
 
 export type VineId = keyof typeof vineCards;
 
+type VineYields = {
+    [K in GrapeColor]?: number;
+};
 export interface VineCardData {
     name: string;
     structures: Array<string>,
-    yields: { [K in GrapeColor]?: number; };
+    yields: VineYields;
 }
 
+const vineCard = (name: string, structures: StructureId[], yields: VineYields): VineCardData => {
+    return { name, structures, yields };
+};
+
 const vineData = {
-    cabernetSauvignon: {
-        name: "Cabernet Sauvignon",
-        structures: ["trellis", "irrigation"],
-        yields: {
-            red: 4
-        },
-    },
-    merlot: {
-        name: "Merlot",
-        structures: ["irrigation"],
-        yields: {
-            red: 3
-        },
-    },
-    syrah: {
-        name: "Syrah",
-        structures: ["trellis"],
-        yields: {
-            red: 2
-        },
-    },
-    sangiovese: {
-        name: "Sangiovese",
-        structures: [],
-        yields: {
-            red: 1
-        },
-    },
-    pinot: {
-        name: "Pinot",
-        structures: ["trellis"],
-        yields: {
-            red: 1,
-            white: 1
-        },
-    },
-    malvasia: {
-        name: "Malvasia",
-        structures: [],
-        yields: {
-            white: 1
-        },
-    },
-    trebbiano: {
-        name: "Trebbiano",
-        structures: ["trellis"],
-        yields: {
-            white: 2
-        },
-    },
-    sauvignonBlanc: {
-        name: "Sauvignon Blanc",
-        structures: ["irrigation"],
-        yields: {
-            white: 3
-        },
-    },
-    chardonnay: {
-        name: "Chardonnay",
-        structures: ["trellis", "irrigation"],
-        yields: {
-            white: 4
-        },
-    },
+    cabernetSauvignon: vineCard("Cabernet Sauvignon", ["trellis", "irrigation"], { red: 4 }),
+    merlot: vineCard("Merlot", ["irrigation"], { red: 3 }),
+    syrah: vineCard("Syrah", ["trellis"], { red: 2 }),
+    sangiovese: vineCard("Sangiovese", [], { red: 1 }),
+    pinot: vineCard("Pinot", ["trellis"], { red: 1, white: 1 }),
+    malvasia: vineCard("Malvasia", [], { white: 1 }),
+    trebbiano: vineCard("Trebbiano", ["trellis"], { white: 2 }),
+    sauvignonBlanc: vineCard("Sauvignon Blanc", ["irrigation"], { white: 3 }),
+    chardonnay: vineCard("Chardonnay", ["trellis", "irrigation"], { white: 4 }),
 };
 
 export const vineCards = {
