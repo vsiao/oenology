@@ -5,6 +5,7 @@ import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icon
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import WineGlass from "../../game-views/icons/WineGlass";
+import Rooster from "../../game-views/icons/Rooster";
 
 export interface VisitorCardData {
     season: "summer" | "winter";
@@ -56,6 +57,10 @@ export const summerVisitorCards = {
     //     "Negotiator",
     //     <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
     // ),
+    organizer: summerVisitorCard(
+        "Organizer",
+        <>Move your <Rooster /> to an empty row on the wake-up chart, take the bonus, then pass to the next season.</>
+    ),
     patron: summerVisitorCard(
         "Patron",
         <>Gain <Coins>4</Coins> OR draw 1 <Order />  and 1 <WinterVisitor />.</>
@@ -72,6 +77,10 @@ export const summerVisitorCards = {
     //     "Producer",
     //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
     // ),
+    sponsor: summerVisitorCard(
+        "Sponsor",
+        <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
+    ),
     tourGuide: summerVisitorCard(
         "Tour Guide",
         <>Gain <Coins>4</Coins> OR harvest 1 field.</>

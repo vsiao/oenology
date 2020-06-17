@@ -188,7 +188,7 @@ export const addToDiscard = (cards: CardId[], state: GameState): GameState => {
     return { ...state, discardPiles };
 };
 
-export const passToNextSeason = (playerId: string, state: GameState): GameState => {
+export const passToNextSeason = (state: GameState, playerId = state.currentTurn.playerId): GameState => {
     const wakeUpOrder = state.wakeUpOrder.map(pos => {
         if (!pos || pos.playerId !== playerId) {
             return pos;
@@ -303,7 +303,7 @@ const startWorkerPlacementTurn = (season: "summer" | "winter", playerId: string,
     const player = state.players[playerId];
     if (player.trainedWorkers.filter(w => w.available).length === 0) {
         // player is out of workers, auto-pass them
-        return passToNextSeason(player.id, state);
+        return passToNextSeason(state, player.id);
     }
     return state;
 };
@@ -350,13 +350,17 @@ export const chooseWakeUpIndex = (orderIndex: number, state: GameState) => {
     const wakeUpOrder = state.wakeUpOrder.map(
         (pos, i) => i === orderIndex ? { playerId } : pos
     ) as GameState["wakeUpOrder"];
+
+    state = { ...state, wakeUpOrder };
+
+    if (state.currentTurn.type !== "wakeUpOrder") {
+        // eg. organizer visitor
+        return state;
+    }
     const nextWakeUpIndex = (tableOrder.indexOf(playerId) + 1) % tableOrder.length;
     if (nextWakeUpIndex === grapeIndex) {
-        return startWorkerPlacementTurn(
-            "summer",
-            wakeUpOrder.filter(pos => pos)[0]!.playerId,
-            { ...state, wakeUpOrder }
-        );
+        const firstPlayerId = wakeUpOrder.filter(pos => pos)[0]!.playerId;
+        return startWorkerPlacementTurn("summer", firstPlayerId, state);
     }
     return promptForWakeUpOrder({
         ...state,
@@ -364,11 +368,10 @@ export const chooseWakeUpIndex = (orderIndex: number, state: GameState) => {
             type: "wakeUpOrder",
             playerId: tableOrder[nextWakeUpIndex],
         },
-        wakeUpOrder,
     });
 };
 
-const promptForWakeUpOrder = (state: GameState) => {
+export const promptForWakeUpOrder = (state: GameState) => {
     return promptForAction(state, {
         title: "Choose wake-up order",
         choices: [

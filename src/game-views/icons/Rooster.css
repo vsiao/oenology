@@ -3,6 +3,7 @@
     stroke: black;
     stroke-width: .8em;
     transform: scaleX(-1);
+    vertical-align: bottom;
     width: 2em;
 }
 .Rooster--blue {

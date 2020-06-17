@@ -11,6 +11,20 @@ export const game = (state: GameState | undefined, action: GameAction): GameStat
     if (state === undefined) {
         return initGame();
     }
+    switch (action.type) {
+        case "CHEAT_DRAW_VISITOR":
+            const player = state.players[action.playerId];
+            return {
+                ...state,
+                players: {
+                    ...state.players,
+                    [player.id]: {
+                        ...player,
+                        cardsInHand: [...player.cardsInHand, { type: "visitor", id: action.visitorId }],
+                    },
+                },
+            };
+    }
     return visitor(board(prompt(state, action), action), action);
 };
 

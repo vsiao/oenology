@@ -4,7 +4,20 @@ import GameState, { PlayVisitorPendingAction } from "../GameState";
 import { promptForAction, promptToChooseField, promptToBuildStructure } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
-import { endTurn, gainCoins, drawCards, harvestField, payCoins, placeGrapes, loseVP, gainVP, buildStructure, setPendingAction } from "../shared/sharedReducers";
+import {
+    buildStructure,
+    drawCards,
+    endTurn,
+    gainCoins,
+    gainVP,
+    harvestField,
+    loseVP,
+    payCoins,
+    placeGrapes,
+    promptForWakeUpOrder,
+    setPendingAction,
+    passToNextSeason
+} from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -119,6 +132,46 @@ export const summerVisitorReducers: Record<
         }
     },
     // negotiator: s => endTurn(s),
+    organizer: (state, action, pendingAction) => {
+        interface OrganizerPendingAction extends PlayVisitorPendingAction {
+            currentWakeUpPos: number;
+        }
+        const organizerAction = pendingAction as OrganizerPendingAction;
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForWakeUpOrder(
+                    setPendingAction({
+                        ...organizerAction,
+                        currentWakeUpPos: state.wakeUpOrder.findIndex(
+                            pos => pos && pos.playerId === state.currentTurn.playerId
+                        ),
+                    }, state),
+                );
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "WAKE_UP_1":
+                    case "WAKE_UP_2":
+                    case "WAKE_UP_3":
+                    case "WAKE_UP_4":
+                    case "WAKE_UP_DRAW_SUMMER":
+                    case "WAKE_UP_DRAW_WINTER":
+                    case "WAKE_UP_6":
+                    case "WAKE_UP_7":
+                        return passToNextSeason({
+                            ...state,
+                            // Clear the previous wake-up position
+                            wakeUpOrder: state.wakeUpOrder.map(
+                                (pos, i) => i === organizerAction.currentWakeUpPos ? null : pos
+                            ) as GameState["wakeUpOrder"],
+                        });
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     patron: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -144,6 +197,31 @@ export const summerVisitorReducers: Record<
     // planner: s => endTurn(s),
     // planter: s => endTurn(s),
     // producer: s => endTurn(s),
+    sponsor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
+                        { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        { id: "SPONSOR_BOTH", label: <>Lose <VP>1</VP> to do both</>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SPONSOR_DRAW":
+                        return endTurn(drawCards(state, { vine: 2 }));
+                    case "SPONSOR_GAIN":
+                        return endTurn(gainCoins(3, state));
+                    case "SPONSOR_BOTH":
+                        return endTurn(gainCoins(3, drawCards(state, { vine: 2 })));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     tourGuide: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":

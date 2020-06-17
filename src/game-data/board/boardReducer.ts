@@ -167,7 +167,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
             if (state.currentTurn.type !== "workerPlacement") {
                 throw new Error("Unexpected state: can only pass a worker placement turn");
             }
-            return passToNextSeason(state.currentTurn.playerId, state);
+            return passToNextSeason(state);
 
         case "PLACE_WORKER": {
             const player = state.players[state.currentTurn.playerId];
@@ -257,7 +257,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         cards: state.players[state.currentTurn.playerId].cardsInHand
                             .filter(card => card.type === "visitor" &&
                                 visitorCards[card.id].season ===
-                                    (action.placement === "playSummerVisitor" ? "summer" : "winter"))
+                                (action.placement === "playSummerVisitor" ? "summer" : "winter"))
                     });
                 case "trainWorker":
                     return endTurn(trainWorker(payCoins(4, state)));
