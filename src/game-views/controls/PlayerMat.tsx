@@ -1,13 +1,11 @@
 import "./PlayerMat.css";
 import * as React from "react";
 import { connect } from "react-redux";
-import { Dispatch } from "redux";
 import cx from "classnames";
-import { GameAction, chooseVine, chooseVisitor } from "../../game-data/gameActions";
 import { CardId, CurrentTurn, PlayerState, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
-import { vineCards, VineId } from "../../game-data/vineCards";
-import { visitorCards, VisitorId } from "../../game-data/visitors/visitorCards";
+import { vineCards } from "../../game-data/vineCards";
+import { visitorCards } from "../../game-data/visitors/visitorCards";
 import { AppState } from "../../store/AppState";
 import Coins from "../icons/Coins";
 import Residuals from "../icons/Residuals";
@@ -21,8 +19,6 @@ import ActionPrompt from "./ActionPrompt";
 interface Props {
     currentTurn: CurrentTurn;
     playerState: PlayerState;
-    onSelectVine: (id: VineId) => void;
-    onSelectVisitor: (id: VisitorId) => void;
     pendingWorkerType: WorkerType;
     setPendingWorkerType: (workerType: WorkerType) => void;
 }
@@ -78,18 +74,10 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
     </div>;
 };
 const renderCard = (card: CardId, props: Props) => {
-    const { currentTurn, playerState } = props;
     switch (card.type) {
         case "vine":
-            const canPlayVine = currentTurn.playerId === playerState.id &&
-                currentTurn.type === "workerPlacement" &&
-                currentTurn.pendingAction !== null &&
-                currentTurn.pendingAction.type === "plantVine";
             return <li key={card.id} className="PlayerMat-card">
-                <VineCard
-                    cardData={vineCards[card.id]}
-                    onClick={canPlayVine ? () => props.onSelectVine(card.id) : undefined}
-                />
+                <VineCard cardData={vineCards[card.id]} onClick={undefined} />
             </li>;
 
         case "order":
@@ -99,20 +87,11 @@ const renderCard = (card: CardId, props: Props) => {
 
         case "visitor":
             const cardData = visitorCards[card.id];
-            const canPlayVisitor = currentTurn.playerId === playerState.id &&
-                currentTurn.type === "workerPlacement" &&
-                currentTurn.pendingAction !== null &&
-                currentTurn.pendingAction.type === "playVisitor" &&
-                currentTurn.pendingAction.visitorId === undefined &&
-                currentTurn.season === cardData.season;
             return <li key={card.id} className="PlayerMat-card">
                 <VisitorCard
-                    interactive={canPlayVisitor}
+                    interactive={false}
                     type={cardData.season}
                     cardData={cardData}
-                    onClick={canPlayVisitor
-                        ? () => props.onSelectVisitor(card.id)
-                        : undefined}
                 />
             </li>;
     }
@@ -124,11 +103,5 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
         playerState: state.game.players[ownProps.playerId]
     };
 };
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
-    return {
-        onSelectVine: (id: VineId) => dispatch(chooseVine(id)),
-        onSelectVisitor: (id: VisitorId) => dispatch(chooseVisitor(id)),
-    };
-};
 
-export default connect(mapStateToProps, mapDispatchToProps)(PlayerMat);
+export default connect(mapStateToProps)(PlayerMat);

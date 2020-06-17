@@ -1,7 +1,9 @@
 import { Coupon } from "../structures";
+import { CardId } from "../GameState";
 
 export type PromptState =
     | ChooseActionPromptState
+    | ChooseCardPromptState
     | { type: "chooseField"; }
     | MakeWinePromptState
     | ChooseWinePromptState
@@ -17,6 +19,12 @@ export interface ChooseActionPromptState {
     title: string;
     playerId: string;
     choices: Choice[];
+}
+
+export interface ChooseCardPromptState {
+    type: "chooseCard";
+    title: string;
+    cards: CardId[];
 }
 
 export interface MakeWinePromptState {

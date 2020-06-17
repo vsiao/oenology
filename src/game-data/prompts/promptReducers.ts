@@ -1,11 +1,12 @@
-import GameState from "../GameState";
+import GameState, { CardId } from "../GameState";
 import { GameAction } from "../gameActions";
-import { Choice } from "./PromptState";
+import { Choice, PromptState } from "./PromptState";
 import { Coupon } from "../structures";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
         case "CHOOSE_ACTION":
+        case "CHOOSE_CARD":
         case "CHOOSE_FIELD":
         case "CHOOSE_WINE":
         case "MAKE_WINE":
@@ -16,6 +17,10 @@ export const prompt = (state: GameState, action: GameAction) => {
         default:
             return state;
     }
+};
+
+const enqueueActionPrompt = (state: GameState, prompt: PromptState): GameState => {
+    return { ...state, actionPrompts: [...state.actionPrompts, prompt] };
 };
 
 export const promptForAction = (
@@ -33,33 +38,37 @@ export const promptForAction = (
     if (state.playerId !== playerId) {
         return state;
     }
-    return {
-        ...state,
-        actionPrompts: [
-            ...state.actionPrompts,
-            { type: "chooseAction", title, playerId, choices },
-        ],
-    };
+    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, choices });
+};
+
+export const promptToChooseCard = (
+    state: GameState,
+    {
+        title = "Choose a card",
+        cards,
+    }: {
+        title?: string;
+        cards: CardId[];
+    }
+): GameState => {
+    if (state.playerId !== state.currentTurn.playerId) {
+        return state;
+    }
+    return enqueueActionPrompt(state, { type: "chooseCard", title, cards });
 };
 
 export const promptToChooseField = (state: GameState): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return {
-        ...state,
-        actionPrompts: [...state.actionPrompts, { type: "chooseField" }],
-    };
+    return enqueueActionPrompt(state, { type: "chooseField" });
 };
 
 export const promptToChooseWine = (state: GameState, minValue = 1): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return {
-        ...state,
-        actionPrompts: [...state.actionPrompts, { type: "chooseWine", minValue }],
-    };
+    return enqueueActionPrompt(state, { type: "chooseWine", minValue });
 };
 
 export const promptToMakeWine = (
@@ -70,18 +79,12 @@ export const promptToMakeWine = (
     if (state.playerId !== playerId) {
         return state;
     }
-    return {
-        ...state,
-        actionPrompts: [...state.actionPrompts, { type: "makeWine", upToN }],
-    };
+    return enqueueActionPrompt(state, { type: "makeWine", upToN });
 };
 
 export const promptToBuildStructure = (state: GameState, coupon?: Coupon): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return {
-        ...state,
-        actionPrompts: [...state.actionPrompts, { type: "buildStructure", coupon }],
-    };
+    return enqueueActionPrompt(state, { type: "buildStructure", coupon });
 };

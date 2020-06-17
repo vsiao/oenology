@@ -370,7 +370,7 @@ export const chooseWakeUpIndex = (orderIndex: number, state: GameState) => {
 
 const promptForWakeUpOrder = (state: GameState) => {
     return promptForAction(state, {
-        title: "Pick a wake-up order",
+        title: "Choose wake-up order",
         choices: [
             { id: "WAKE_UP_1", label: <>1: No bonus</> },
             { id: "WAKE_UP_2", label: <>2: Draw <Vine /></> },

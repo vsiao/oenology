@@ -1,13 +1,14 @@
 import { Action } from "redux";
-import { FieldId, GrapeColor, WineColor } from "../GameState";
+import { FieldId, GrapeColor, WineColor, CardId } from "../GameState";
 import { StructureId } from "../structures";
 
 export type PromptAction =
     | ChooseAction
-    | MakeWineAction
+    | ChooseCardAction
     | ChooseFieldAction
     | ChooseWineAction
-    | BuildStructureAction;
+    | BuildStructureAction
+    | MakeWineAction;
 
 interface ChooseAction extends Action<"CHOOSE_ACTION"> {
     choice: string;
@@ -15,6 +16,14 @@ interface ChooseAction extends Action<"CHOOSE_ACTION"> {
 }
 export const chooseAction = (choice: string, playerId: string): PromptAction => {
     return { type: "CHOOSE_ACTION", choice, playerId };
+};
+
+interface ChooseCardAction extends Action<"CHOOSE_CARD"> {
+    card: CardId;
+    playerId: string;
+}
+export const chooseCard = (card: CardId, playerId: string): PromptAction => {
+    return { type: "CHOOSE_CARD", card, playerId };
 };
 
 export interface GrapeSpec {

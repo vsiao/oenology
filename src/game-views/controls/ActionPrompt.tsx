@@ -8,6 +8,7 @@ import { AppState } from "../../store/AppState";
 import { CSSTransition } from "react-transition-group";
 import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
+import ChooseCardPrompt from "./ChooseCardPrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -36,6 +37,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
     switch (prompt.type) {
         case "chooseAction":
             return <ChooseActionPrompt prompt={prompt} />;
+        case "chooseCard":
+            return <ChooseCardPrompt prompt={prompt} playerId={props.playerId} />;
         case "chooseField":
             return <ChooseFieldPrompt playerId={props.playerId} />;
         case "makeWine":

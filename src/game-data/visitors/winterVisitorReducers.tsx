@@ -19,7 +19,7 @@ export const winterVisitorReducers: Record<
         const player = state.players[state.currentTurn.playerId];
         const numCards = player.cardsInHand.length;
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</> },
@@ -45,7 +45,7 @@ export const winterVisitorReducers: Record<
     },
     judge: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
@@ -90,7 +90,7 @@ export const winterVisitorReducers: Record<
         };
 
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(
                     setPendingAction({
                         ...mentorAction,
@@ -120,13 +120,13 @@ export const winterVisitorReducers: Record<
                         state = promptToMakeWine(state, /* upToN */ 2, action.playerId);
                         return action.playerId !== state.currentTurn.playerId
                             ? promptForAction(
-                                  setPendingAction({ ...mentorAction, reactions: mentorAction.reactions + 1 }, state),
-                                  {
-                                      choices: [
-                                          { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
-                                          { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
-                                      ],
-                                  }
+                                setPendingAction({ ...mentorAction, reactions: mentorAction.reactions + 1 }, state),
+                                {
+                                    choices: [
+                                        { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
+                                        { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
+                                    ],
+                                }
                             )
                             : state;
 
@@ -155,7 +155,7 @@ export const winterVisitorReducers: Record<
     },
     politician: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 const { playerId } = state.currentTurn;
                 if (state.players[playerId].victoryPoints < 0) {
                     return endTurn(gainCoins(6, state));
@@ -168,7 +168,7 @@ export const winterVisitorReducers: Record<
     },
     professor: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 const playerState = state.players[state.currentTurn.playerId];
                 return promptForAction(state, {
                     choices: [
@@ -201,7 +201,7 @@ export const winterVisitorReducers: Record<
     },
     taster: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptToChooseWine(state);
             case "CHOOSE_WINE":
                 const currentTurnPlayerId = state.currentTurn.playerId;
@@ -226,7 +226,7 @@ export const winterVisitorReducers: Record<
     },
     teacher: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         {

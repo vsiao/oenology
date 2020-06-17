@@ -27,7 +27,7 @@ export const summerVisitorReducers: Record<
             return mainActions.length === 0 ? endTurn(state2) : state2;
         };
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 const currentTurnPlayerId = state.currentTurn.playerId
                 state = setPendingAction({
                     ...bankerAction,
@@ -36,12 +36,12 @@ export const summerVisitorReducers: Record<
                 return currentTurnPlayerId === state.playerId
                     ? state
                     : promptForAction(state, {
-                          playerId: state.playerId!,
-                          choices: [
-                              { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
-                              { id: "BANKER_PASS", label: <>Pass</> },
-                          ],
-                      });
+                        playerId: state.playerId!,
+                        choices: [
+                            { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
+                            { id: "BANKER_PASS", label: <>Pass</> },
+                        ],
+                    });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BANKER_GAIN":
@@ -60,7 +60,7 @@ export const summerVisitorReducers: Record<
     },
     buyer: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -93,7 +93,7 @@ export const summerVisitorReducers: Record<
     // handyman: s => endTurn(s),
     landscaper: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
@@ -121,7 +121,7 @@ export const summerVisitorReducers: Record<
     // negotiator: s => endTurn(s),
     patron: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "PATRON_GAIN", label: <>Gain <Coins>4</Coins></> },
@@ -146,7 +146,7 @@ export const summerVisitorReducers: Record<
     // producer: s => endTurn(s),
     tourGuide: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
@@ -174,7 +174,7 @@ export const summerVisitorReducers: Record<
     },
     uncertifiedArchitect: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "UARCHITECT_LOSE_1_VP", label: <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure</> },
@@ -198,7 +198,7 @@ export const summerVisitorReducers: Record<
     },
     uncertifiedBroker: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_VISITOR":
+            case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
                         { id: "UBROKER_LOSE_VP", label: <>Lose <VP>3</VP> to gain <Coins>9</Coins></> },

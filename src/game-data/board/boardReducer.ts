@@ -16,10 +16,11 @@ import {
     gainVP,
     promptToDrawWakeUpVisitor,
 } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure } from "../prompts/promptReducers";
+import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { VineId } from "../vineCards";
 import { structures } from "../structures";
+import { visitorCards } from "../visitors/visitorCards";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -109,13 +110,39 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     return state;
             }
         }
-        case "CHOOSE_VINE":
-            return promptToChooseField(
-                removeCardsFromHand(
-                    [{ type: "vine", id: action.vineId }],
-                    setPendingAction({ type: "plantVine", vineId: action.vineId }, state)
-                )
-            );
+        case "CHOOSE_CARD":
+            if (state.currentTurn.type !== "workerPlacement") {
+                return state;
+            }
+            switch (state.currentTurn.pendingAction?.type) {
+                case "plantVine":
+                    if (action.card.type !== "vine") {
+                        return state;
+                    }
+                    return promptToChooseField(
+                        removeCardsFromHand(
+                            [action.card],
+                            setPendingAction({ type: "plantVine", vineId: action.card.id }, state)
+                        )
+                    );
+                case "playVisitor":
+                    if (
+                        action.card.type !== "visitor" ||
+                        state.currentTurn.pendingAction?.visitorId !== undefined
+                    ) {
+                        return state;
+                    }
+                    // Further card-specific logic is handled by the `visitor` reducer.
+                    return removeCardsFromHand(
+                        [action.card],
+                        setPendingAction(
+                            { ...state.currentTurn.pendingAction, visitorId: action.card.id },
+                            state
+                        )
+                    );
+                default:
+                    return state;
+            }
 
         case "MAKE_WINE":
             if (
@@ -218,10 +245,20 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "makeWine":
                     return promptToMakeWine(setPendingAction({ type: "makeWine" }, state), /* upToN */ 2);
                 case "plantVine":
-                    return setPendingAction({ type: "plantVine" }, state);
+                    return promptToChooseCard(setPendingAction({ type: "plantVine" }, state), {
+                        title: "Choose a vine to plant",
+                        cards: state.players[state.currentTurn.playerId].cardsInHand
+                            .filter(({ type }) => type === "vine"),
+                    });
                 case "playSummerVisitor":
                 case "playWinterVisitor":
-                    return setPendingAction({ type: "playVisitor" }, state);
+                    return promptToChooseCard(setPendingAction({ type: "playVisitor" }, state), {
+                        title: "Choose a visitor",
+                        cards: state.players[state.currentTurn.playerId].cardsInHand
+                            .filter(card => card.type === "visitor" &&
+                                visitorCards[card.id].season ===
+                                    (action.placement === "playSummerVisitor" ? "summer" : "winter"))
+                    });
                 case "trainWorker":
                     return endTurn(trainWorker(payCoins(4, state)));
                 case "yoke":

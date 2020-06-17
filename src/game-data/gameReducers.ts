@@ -11,7 +11,7 @@ export const game = (state: GameState | undefined, action: GameAction): GameStat
     if (state === undefined) {
         return initGame();
     }
-    return board(visitor(prompt(state, action), action), action);
+    return visitor(board(prompt(state, action), action), action);
 };
 
 const UNSHUFFLED_CARDS: CardsByType = {
