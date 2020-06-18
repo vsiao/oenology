@@ -4,6 +4,8 @@ import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
 import {
+    ageCellar,
+    buildStructure,
     drawCards,
     gainVP,
     endTurn,
@@ -16,6 +18,7 @@ import {
     setPendingAction,
     gainResiduals,
     loseResiduals,
+    loseVP,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
 import {
@@ -28,6 +31,7 @@ import { WinterVisitorId } from "./visitorCards";
 import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
+import { access } from "fs";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -57,6 +61,34 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    crushExpert: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "CRUSHEX_GAIN", label: <>Gain <Coins>3</Coins> and draw 1 <Order /></>, },
+                        {
+                            id: "CRUSHEX_MAKE",
+                            label: <>Make up to 3 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CRUSHEX_GAIN":
+                        return endTurn(drawCards(gainCoins(3, state), { order: 1 }));
+                    case "CRUSHEX_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 3);
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endTurn(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -247,6 +279,48 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    oenologist: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "OENOLOGIST_AGE", label: <>Age all <WineGlass /> in your cellar twice</>, },
+                        {
+                            id: "OENOLOGIST_UPGRADE",
+                            label: <>Pay <Coins>3</Coins> to upgrade your cellar to the next level</>,
+                            disabledReason: player.structures.largeCellar
+                                ? "Your cellar is fully upgraded."
+                                : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "OENOLOGIST_AGE":
+                        return endTurn({
+                            ...state,
+                            players: {
+                                ...state.players,
+                                [player.id]: {
+                                    ...player,
+                                    cellar: ageCellar(player.cellar, 2),
+                                },
+                            },
+                        });
+                    case "EONOLOGIST_UPGRADE":
+                        return buildStructure(
+                            payCoins(3, state),
+                            player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     politician: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -347,6 +421,79 @@ export const winterVisitorReducers: Record<
                 }
             case "MAKE_WINE":
                 return endTurn(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
+    uncertifiedOenologist: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "UOENOLOGIST_AGE", label: <>Age all <WineGlass /> in your cellar twice</>, },
+                        {
+                            id: "UOENOLOGIST_UPGRADE",
+                            label: <>Lose <VP>1</VP> to upgrade your cellar to the next level</>,
+                            disabledReason: player.structures.largeCellar
+                                ? "Your cellar is fully upgraded."
+                                : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "UOENOLOGIST_AGE":
+                        return endTurn({
+                            ...state,
+                            players: {
+                                ...state.players,
+                                [player.id]: {
+                                    ...player,
+                                    cellar: ageCellar(player.cellar, 2),
+                                },
+                            },
+                        });
+                    case "UEONOLOGIST_UPGRADE":
+                        return buildStructure(
+                            loseVP(1, state),
+                            player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    uncertifiedTeacher: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "UTEACHER_LOSE",
+                            label: <>Lose <VP>1</VP> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 0),
+                        },
+                        {
+                            id: "UTEACHER_GAIN",
+                            label: <>Gain <VP>1</VP> for each opponent who has a total of 6 <Worker /></>,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "UTEACHER_LOSE":
+                        return endTurn(trainWorker(loseVP(1, state)));
+                    case "UTEACHER_GAIN":
+                        const numOpponents = Object.values(state.players)
+                            .filter(p => p.trainedWorkers.length === 6).length;
+                        return endTurn(gainVP(numOpponents, state));
+                    default:
+                        return state;
+                }
             default:
                 return state;
         }

@@ -7,6 +7,7 @@ import GameState, {
     CardId,
     WorkerPlacementTurnPendingAction,
     WorkerPlacementTurn,
+    PlayerState,
 } from "../GameState";
 import { visitorCards } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
@@ -294,12 +295,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                                     red: age(playerState.crushPad.red),
                                     white: age(playerState.crushPad.white),
                                 },
-                                cellar: {
-                                    red: age(playerState.cellar.red),
-                                    white: age(playerState.cellar.white),
-                                    blush: age(playerState.cellar.blush),
-                                    sparkling: age(playerState.cellar.sparkling),
-                                },
+                                cellar: ageCellar(playerState.cellar),
                             },
                         ];
                     })
@@ -311,6 +307,19 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
 
     return startWorkerPlacementTurn(season, nextPlayerId, state);
+};
+
+export const ageCellar = (cellar: PlayerState["cellar"], n = 1): PlayerState["cellar"] => {
+    cellar = {
+        red: age(cellar.red),
+        white: age(cellar.white),
+        blush: age(cellar.blush),
+        sparkling: age(cellar.sparkling),
+    };
+    if (n <= 1) {
+        return cellar;
+    }
+    return ageCellar(cellar, n - 1);
 };
 
 const startWorkerPlacementTurn = (

@@ -108,6 +108,10 @@ export const winterVisitorCards = {
         "Assessor",
         <>Gain <Coins>1</Coins> for each card in your hand OR discard your hand (min of 1 card) to gain <VP>2</VP>.</>,
     ),
+    crushExpert: winterVisitorCard(
+        "Crush Expert",
+        <>Gain <Coins>3</Coins> and draw 1 <Order /> OR make up to 3 <WineGlass />.</>
+    ),
     crusher: winterVisitorCard(
         "Crusher",
         <>Gain <Coins>3</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
@@ -124,6 +128,10 @@ export const winterVisitorCards = {
         "Noble",
         <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to gain <VP>2</VP>.</>
     ),
+    oenologist: winterVisitorCard(
+        "Oenologist",
+        <>Age all <WineGlass /> in your cellar twice OR pay <Coins>3</Coins> to upgrade your cellar to the next level.</>
+    ),
     politician: winterVisitorCard(
         "Politician",
         <>If you have less than <VP>0</VP>, gain <Coins>6</Coins>. Otherwise, draw 1 <Vine />, 1 <SummerVisitor />, and 1 <Order />.</>,
@@ -139,6 +147,14 @@ export const winterVisitorCards = {
     teacher: winterVisitorCard(
         "Teacher",
         <>Make up to 2 wine OR pay <Coins>2</Coins> to train 1 <Worker />.</>,
+    ),
+    uncertifiedOenologist: winterVisitorCard(
+        "Uncertified Oenologist",
+        <>Age all <WineGlass /> in your cellar twice OR lose <VP>1</VP> to upgrade your cellar to the next level.</>
+    ),
+    uncertifiedTeacher: winterVisitorCard(
+        "Uncertified Teacher",
+        <>Lose <VP>1</VP> to train 1 <Worker /> OR gain <VP>1</VP> for each opponent who has a total of 6 <Worker />.</>
     ),
 };
 
