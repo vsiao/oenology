@@ -2,14 +2,32 @@ import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import { SummerVisitor, Vine } from "../../game-views/icons/Card";
-import { drawCards, gainVP, endTurn, gainCoins, discardWine, trainWorker, makeWineFromGrapes, payCoins, discardCards, setPendingAction } from "../shared/sharedReducers";
+import { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
+import {
+    drawCards,
+    gainVP,
+    endTurn,
+    gainCoins,
+    discardWine,
+    trainWorker,
+    makeWineFromGrapes,
+    payCoins,
+    discardCards,
+    setPendingAction,
+    gainResiduals,
+    loseResiduals,
+} from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
-import { promptForAction, promptToChooseWine, promptToMakeWine } from "../prompts/promptReducers";
+import {
+    promptForAction,
+    promptToChooseWine,
+    promptToMakeWine,
+} from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
 import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
+import Residuals from "../../game-views/icons/Residuals";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -22,7 +40,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
-                        { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</> },
+                        { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</>, },
                         {
                             id: "ASSESSOR_DISCARD",
                             label: <>Discard your hand to gain <VP>2</VP></>,
@@ -43,15 +61,46 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    crusher: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "CRUSHER_GAIN", label: <>Gain <Coins>3</Coins> and draw 1 <SummerVisitor /></>, },
+                        {
+                            id: "CRUSHER_DRAW",
+                            label: <>Draw 1 <Order /> and make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CRUSHER_GAIN":
+                        return endTurn(gainCoins(3, drawCards(state, { summerVisitor: 1 })));
+                    case "CRUSHER_DRAW":
+                        return endTurn(
+                            promptToMakeWine(drawCards(state, { order: 1 }), /* upToN */ 2)
+                        );
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endTurn(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
     judge: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
-                        { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></> },
+                        { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></>, },
                         {
                             id: "JUDGE_DISCARD",
                             label: <>Discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP></>,
+                            disabledReason: undefined // TODO
                         },
                     ],
                 });
@@ -85,33 +134,41 @@ export const winterVisitorReducers: Record<
             return mainActions.length === 0 && reactions === 0 ? endTurn(state2) : state2;
         };
         const endMainAction = (state2: GameState, playerId: string) => {
-            const mainActions = mentorAction.mainActions.filter(id => id !== playerId);
+            const mainActions = mentorAction.mainActions.filter((id) => id !== playerId);
             return maybeEndTurn(setPendingAction({ ...mentorAction, mainActions }, state2));
         };
 
         switch (action.type) {
             case "CHOOSE_CARD":
                 return promptForAction(
-                    setPendingAction({
-                        ...mentorAction,
-                        mainActions: Object.keys(state.players),
-                        reactions: 0,
-                    }, state),
+                    setPendingAction(
+                        {
+                            ...mentorAction,
+                            mainActions: Object.keys(state.players),
+                            reactions: 0,
+                        },
+                        state
+                    ),
                     {
                         playerId: state.playerId!,
-                        choices: [{
-                            id: "MENTOR_MAKE",
-                            label: <>
-                                Make up to 2 <WineGlass />
-                                {state.playerId !== state.currentTurn.playerId
-                                    ? <>(<strong>{state.currentTurn.playerId}</strong> draws 1 <Vine /> or 1 <SummerVisitor />)</>
-                                    : null}
-                            </>,
-                            disabledReason: needGrapesDisabledReason(state, state.playerId!),
-                        }, {
-                            id: "MENTOR_PASS",
-                            label: <>Pass</>,
-                        }],
+                        choices: [
+                            {
+                                id: "MENTOR_MAKE",
+                                label: (
+                                    <>
+                                        Make up to 2 <WineGlass />
+                                        {state.playerId !== state.currentTurn.playerId
+                                            ? <>
+                                                (<strong>{state.currentTurn.playerId}</strong> draws
+                                                  1 <Vine /> or 1 <SummerVisitor />)
+                                            </>
+                                            : null}
+                                    </>
+                                ),
+                                disabledReason: needGrapesDisabledReason(state, state.playerId!),
+                            },
+                            { id: "MENTOR_PASS", label: <>Pass</>, },
+                        ],
                     }
                 );
             case "CHOOSE_ACTION":
@@ -120,11 +177,14 @@ export const winterVisitorReducers: Record<
                         state = promptToMakeWine(state, /* upToN */ 2, action.playerId);
                         return action.playerId !== state.currentTurn.playerId
                             ? promptForAction(
-                                setPendingAction({ ...mentorAction, reactions: mentorAction.reactions + 1 }, state),
+                                setPendingAction(
+                                    { ...mentorAction, reactions: mentorAction.reactions + 1 },
+                                    state
+                                ),
                                 {
                                     choices: [
                                         { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
-                                        { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, }
+                                        { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, },
                                     ],
                                 }
                             )
@@ -137,8 +197,13 @@ export const winterVisitorReducers: Record<
                     case "MENTOR_DRAW_VISITOR":
                         return maybeEndTurn(
                             drawCards(
-                                setPendingAction({ ...mentorAction, reactions: mentorAction.reactions - 1 }, state),
-                                action.choice === "MENTOR_DRAW_VINE" ? { vine: 1 } : { summerVisitor: 1 }
+                                setPendingAction(
+                                    { ...mentorAction, reactions: mentorAction.reactions - 1 },
+                                    state
+                                ),
+                                action.choice === "MENTOR_DRAW_VINE"
+                                    ? { vine: 1 }
+                                    : { summerVisitor: 1 }
                             )
                         );
                     default:
@@ -153,6 +218,35 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    noble: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "NOBLE_GAIN", label: <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals></>, },
+                        {
+                            id: "NOBLE_LOSE",
+                            label: <>Lose <Residuals>2</Residuals> to gain <VP>2</VP></>,
+                            disabledReason:
+                                state.players[state.currentTurn.playerId].residuals < 2
+                                    ? "You don't have enough residual payments."
+                                    : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "NOBLE_GAIN":
+                        return endTurn(gainResiduals(1, payCoins(1, state)));
+                    case "NOBLE_LOSE":
+                        return endTurn(gainVP(2, loseResiduals(2, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     politician: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -160,7 +254,7 @@ export const winterVisitorReducers: Record<
                 if (state.players[playerId].victoryPoints < 0) {
                     return endTurn(gainCoins(6, state));
                 } else {
-                    return endTurn(drawCards(state, { vine: 1, summerVisitor: 1, order: 1, }));
+                    return endTurn(drawCards(state, { vine: 1, summerVisitor: 1, order: 1 }));
                 }
             default:
                 return state;
@@ -180,9 +274,10 @@ export const winterVisitorReducers: Record<
                         {
                             id: "PROFESSOR_GAIN",
                             label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
-                            disabledReason: playerState.trainedWorkers.length < 6
-                                ? "You don't have enough workers."
-                                : undefined,
+                            disabledReason:
+                                playerState.trainedWorkers.length < 6
+                                    ? "You don't have enough workers."
+                                    : undefined,
                         },
                     ],
                 });
@@ -208,15 +303,15 @@ export const winterVisitorReducers: Record<
                 const stateAfterDiscard = discardWine(state, currentTurnPlayerId, action.wine);
 
                 const mostValuableWine = Object.values(stateAfterDiscard.players)
-                    .map(player =>
+                    .map((player) =>
                         Object.values(player.cellar)
-                            .map(wines => wines.lastIndexOf(true) + 1)
+                            .map((wines) => wines.lastIndexOf(true) + 1)
                             .reduce((v1, v2) => Math.max(v1, v2))
                     )
                     .reduce((v1, v2) => Math.max(v1, v2));
 
                 if (action.wine.value > mostValuableWine) {
-                    return endTurn(gainVP(2, stateAfterDiscard))
+                    return endTurn(gainVP(2, stateAfterDiscard));
                 } else {
                     return endTurn(stateAfterDiscard);
                 }
@@ -256,4 +351,4 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-}
+};

@@ -6,6 +6,7 @@ import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Rooster from "../../game-views/icons/Rooster";
+import Residuals from "../../game-views/icons/Residuals";
 
 export interface VisitorCardData {
     season: "summer" | "winter";
@@ -107,6 +108,10 @@ export const winterVisitorCards = {
         "Assessor",
         <>Gain <Coins>1</Coins> for each card in your hand OR discard your hand (min of 1 card) to gain <VP>2</VP>.</>,
     ),
+    crusher: winterVisitorCard(
+        "Crusher",
+        <>Gain <Coins>3</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
+    ),
     judge: winterVisitorCard(
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
@@ -114,6 +119,10 @@ export const winterVisitorCards = {
     mentor: winterVisitorCard(
         "Mentor",
         <>All players may make up to 2 <WineGlass />. Draw 1 <Vine /> or 1 <SummerVisitor /> for each opponent who does this.</>
+    ),
+    noble: winterVisitorCard(
+        "Noble",
+        <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to gain <VP>2</VP>.</>
     ),
     politician: winterVisitorCard(
         "Politician",
