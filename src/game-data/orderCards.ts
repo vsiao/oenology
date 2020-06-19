@@ -9,7 +9,7 @@ export interface OrderCardData {
     residualIncome: number;
 }
 
-interface WineSpec {
+export interface WineSpec {
     color: WineColor,
     value: number;
 }

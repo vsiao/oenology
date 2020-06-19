@@ -3,7 +3,7 @@ import { StructureId } from "./structures";
 
 export type VineId = keyof typeof vineCards;
 
-type VineYields = {
+export type VineYields = {
     [K in GrapeColor]?: number;
 };
 export interface VineCardData {

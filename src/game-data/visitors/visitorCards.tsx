@@ -1,7 +1,7 @@
 import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
-import Card, { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
+import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import WineGlass from "../../game-views/icons/WineGlass";

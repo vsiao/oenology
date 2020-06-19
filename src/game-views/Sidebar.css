@@ -1,7 +1,17 @@
 .Sidebar {
     background: #282c34;
     border-right: 4px solid #282c34;
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     grid-area: sidebar;
     overflow-y: auto;
+}
+
+.Sidebar-gameLog {
+    box-sizing: border-box;
+    color: #ddd;
+    font-size: .8em;
+    line-height: 2em;
+    max-width: 310px;
+    padding: 8px;
 }

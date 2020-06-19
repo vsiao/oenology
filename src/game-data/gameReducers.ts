@@ -6,6 +6,7 @@ import { prompt } from "./prompts/promptReducers";
 import { vineCards, VineId } from "./vineCards";
 import { summerVisitorCards, SummerVisitorId, winterVisitorCards, WinterVisitorId } from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
+import { updatePlayer } from "./shared/sharedReducers";
 
 export const game = (state: GameState | undefined, action: GameAction): GameState => {
     if (state === undefined) {
@@ -14,16 +15,9 @@ export const game = (state: GameState | undefined, action: GameAction): GameStat
     switch (action.type) {
         case "CHEAT_DRAW_VISITOR":
             const player = state.players[action.playerId];
-            return {
-                ...state,
-                players: {
-                    ...state.players,
-                    [player.id]: {
-                        ...player,
-                        cardsInHand: [...player.cardsInHand, { type: "visitor", id: action.visitorId }],
-                    },
-                },
-            };
+            return updatePlayer(state, player.id, {
+                cardsInHand: [...player.cardsInHand, { type: "visitor", id: action.visitorId }],
+            });
     }
     return visitor(board(prompt(state, action), action), action);
 };
@@ -79,6 +73,7 @@ export const initGame = (
             gainCoin: [],
             yoke: []
         },
+        activityLog: [],
         playerId,
         actionPrompts: [],
     };

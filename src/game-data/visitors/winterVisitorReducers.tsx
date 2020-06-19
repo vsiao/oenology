@@ -20,6 +20,7 @@ import {
     loseResiduals,
     loseVP,
     harvestField,
+    updatePlayer,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor } from "../GameState";
 import {
@@ -420,16 +421,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "OENOLOGIST_AGE":
-                        return endTurn({
-                            ...state,
-                            players: {
-                                ...state.players,
-                                [player.id]: {
-                                    ...player,
-                                    cellar: ageCellar(player.cellar, 2),
-                                },
-                            },
-                        });
+                        return endTurn(updatePlayer(state, player.id, {
+                            cellar: ageCellar(player.cellar, 2),
+                        }));
                     case "EONOLOGIST_UPGRADE":
                         return buildStructure(
                             payCoins(3, state),
@@ -611,16 +605,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UOENOLOGIST_AGE":
-                        return endTurn({
-                            ...state,
-                            players: {
-                                ...state.players,
-                                [player.id]: {
-                                    ...player,
-                                    cellar: ageCellar(player.cellar, 2),
-                                },
-                            },
-                        });
+                        return endTurn(updatePlayer(state, player.id, {
+                            cellar: ageCellar(player.cellar, 2),
+                        }));
                     case "UEONOLOGIST_UPGRADE":
                         return buildStructure(
                             loseVP(1, state),

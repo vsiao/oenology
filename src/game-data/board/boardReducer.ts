@@ -16,6 +16,7 @@ import {
     gainVP,
     promptToDrawWakeUpVisitor,
     plantVineInField,
+    updatePlayer,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
@@ -75,19 +76,12 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "sellField":
                     return endTurn((field.sold ? payCoins : gainCoins)(
                         field.value,
-                        {
-                            ...state,
-                            players: {
-                                ...state.players,
-                                [player.id]: {
-                                    ...player,
-                                    fields: {
-                                        ...player.fields,
-                                        [field.id]: { ...field, sold: !field.sold },
-                                    },
-                                },
+                        updatePlayer(state, player.id, {
+                            fields: {
+                                ...player.fields,
+                                [field.id]: { ...field, sold: !field.sold },
                             },
-                        }
+                        })
                     ));
                 case "plantVine":
                     return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
@@ -169,16 +163,11 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 throw new Error("Unexpected state: no available workers");
             }
             state = {
-                ...state,
-                players: {
-                    ...state.players,
-                    [player.id]: {
-                        ...player,
-                        trainedWorkers: player.trainedWorkers.map(
-                            (w, i) => i === workerIndex ? { ...w, available: false } : w
-                        ),
-                    },
-                },
+                ...updatePlayer(state, player.id, {
+                    trainedWorkers: player.trainedWorkers.map(
+                        (w, i) => i === workerIndex ? { ...w, available: false } : w
+                    ),
+                }),
                 workerPlacements: {
                     ...state.workerPlacements,
                     [action.placement]: [...state.workerPlacements[action.placement], {

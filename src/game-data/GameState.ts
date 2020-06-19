@@ -4,6 +4,7 @@ import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { WorkerPlacement } from "./board/boardActions";
+import { ActivityLog } from "./ActivityLog";
 
 export default interface GameState {
     // shared state
@@ -23,6 +24,7 @@ export default interface GameState {
     drawPiles: CardsByType;
     discardPiles: CardsByType;
     workerPlacements: Record<WorkerPlacement, BoardWorker[]>;
+    activityLog: ActivityLog;
 
     // local state
     playerId: string | null;

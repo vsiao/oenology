@@ -9,6 +9,7 @@ import GameState, {
     WorkerPlacementTurn,
     PlayerState,
 } from "../GameState";
+import { ActivityLogEvent } from "../ActivityLog";
 import { visitorCards } from "../visitors/visitorCards";
 import { promptForAction } from "../prompts/promptReducers";
 import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
@@ -19,6 +20,10 @@ import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
 import { VineId } from "../vineCards";
+
+export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
+    return { ...state, activityLog: [...state.activityLog, event], };
+};
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -37,25 +42,24 @@ export const plantVineInField = (vineId: VineId, fieldId: FieldId, state: GameSt
     const player = state.players[state.currentTurn.playerId];
     const field = player.fields[fieldId];
     const vines: VineId[] = [...field.vines, vineId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [player.id]: {
-                ...player,
-                fields: {
-                    ...player.fields,
-                    [field.id]: { ...field, vines },
-                },
+    return pushActivityLog(
+        { type: "plant", playerId: player.id, vineId },
+        updatePlayer(state, player.id, {
+            fields: {
+                ...player.fields,
+                [field.id]: { ...field, vines },
             },
-        },
-    };
+        })
+    );
 };
 
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const yields = fieldYields(player.fields[fieldId]);
-    return placeGrapes(state, yields);
+    return pushActivityLog(
+        { type: "harvest", playerId: player.id, yields },
+        placeGrapes(state, yields)
+    );
 };
 
 export const placeGrapes = (
@@ -67,19 +71,12 @@ export const placeGrapes = (
     // devalue grapes if crush pad already contains the same value
     const red = devaluedIndex(values.red, player.crushPad.red);
     const white = devaluedIndex(values.white, player.crushPad.white);
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [player.id]: {
-                ...player,
-                crushPad: {
-                    red: player.crushPad.red.map((r, i) => i === red || r) as TokenMap,
-                    white: player.crushPad.white.map((w, i) => i === white || w) as TokenMap,
-                },
-            },
+    return updatePlayer(state, player.id, {
+        crushPad: {
+            red: player.crushPad.red.map((r, i) => i === red || r) as TokenMap,
+            white: player.crushPad.white.map((w, i) => i === white || w) as TokenMap,
         },
-    };
+    });
 };
 
 export const makeWineFromGrapes = (
@@ -107,34 +104,20 @@ export const makeWineFromGrapes = (
         };
     });
 
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [player.id]: {
-                ...player,
-                crushPad,
-                cellar,
-            },
-        },
-    };
+    return updatePlayer(state, player.id, { crushPad, cellar, });
 };
 
 export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [player.id]: {
-                ...player,
-                structures: {
-                    ...player.structures,
-                    [structureId]: true,
-                },
+    return pushActivityLog(
+        { type: "build", playerId: player.id, structureId },
+        updatePlayer(state, player.id, {
+            structures: {
+                ...player.structures,
+                [structureId]: true,
             },
-        },
-    };
+        })
+    );
 };
 
 export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
@@ -164,23 +147,19 @@ export const drawCards = (
     const [drawnOrders, order] = splitDeck(drawPiles.order, numCards.order);
     const [drawnWinterVisitors, winterVisitor] = splitDeck(drawPiles.winterVisitor, numCards.winterVisitor);
 
-    return {
-        ...state,
-        drawPiles: { vine, summerVisitor, order, winterVisitor },
-        players: {
-            ...state.players,
-            [playerId]: {
-                ...state.players[playerId],
-                cardsInHand: [
-                    ...state.players[playerId].cardsInHand,
-                    ...drawnVines.map((id) => ({ type: "vine" as const, id })),
-                    ...drawnSummerVisitors.map((id) => ({ type: "visitor" as const, id })),
-                    ...drawnOrders.map((id) => ({ type: "order" as const, id })),
-                    ...drawnWinterVisitors.map((id) => ({ type: "visitor" as const, id })),
-                ],
-            },
-        },
-    };
+    return updatePlayer(
+        { ...state, drawPiles: { vine, summerVisitor, order, winterVisitor }, },
+        playerId,
+        {
+            cardsInHand: [
+                ...state.players[playerId].cardsInHand,
+                ...drawnVines.map((id) => ({ type: "vine" as const, id })),
+                ...drawnSummerVisitors.map((id) => ({ type: "visitor" as const, id })),
+                ...drawnOrders.map((id) => ({ type: "order" as const, id })),
+                ...drawnWinterVisitors.map((id) => ({ type: "visitor" as const, id })),
+            ],
+        }
+    );
 };
 
 export const discardCards = (cards: CardId[], state: GameState): GameState => {
@@ -189,18 +168,11 @@ export const discardCards = (cards: CardId[], state: GameState): GameState => {
 
 export const removeCardsFromHand = (cards: CardId[], state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [player.id]: {
-                ...player,
-                cardsInHand: player.cardsInHand.filter(({ id }) =>
-                    cards.every((card) => card.id !== id)
-                ),
-            },
-        },
-    };
+    return updatePlayer(state, player.id, {
+        cardsInHand: player.cardsInHand.filter(({ id }) =>
+            cards.every((card) => card.id !== id)
+        ),
+    });
 };
 
 export const addToDiscard = (cards: CardId[], state: GameState): GameState => {
@@ -231,7 +203,10 @@ export const passToNextSeason = (
         return { ...pos, passed: true };
     }) as GameState["wakeUpOrder"];
 
-    return endWorkerPlacementTurn({ ...state, wakeUpOrder });
+    return pushActivityLog(
+        { type: "pass", playerId },
+        endWorkerPlacementTurn({ ...state, wakeUpOrder })
+    );
 };
 
 export const endTurn = (state: GameState): GameState => {
@@ -458,16 +433,10 @@ const promptToDrawFallVisitor = (state: GameState) => {
 
 const editVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) => {
     const playerState = state.players[playerId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [playerId]: {
-                ...playerState,
-                victoryPoints: playerState.victoryPoints + numVP,
-            },
-        },
-    };
+    return pushActivityLog(
+        { type: "vp", playerId, delta: numVP },
+        updatePlayer(state, playerId, { victoryPoints: playerState.victoryPoints + numVP, })
+    );
 };
 export const gainVP = editVP;
 export const loseVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) =>
@@ -475,16 +444,7 @@ export const loseVP = (numVP: number, state: GameState, playerId = state.current
 
 const editCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) => {
     const playerState = state.players[playerId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [playerId]: {
-                ...playerState,
-                coins: playerState.coins + numCoins,
-            },
-        },
-    };
+    return updatePlayer(state, playerId, { coins: playerState.coins + numCoins, });
 };
 export const gainCoins = editCoins;
 export const payCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) =>
@@ -496,33 +456,31 @@ const editResiduals = (
     playerId = state.currentTurn.playerId
 ) => {
     const playerState = state.players[playerId];
-    return {
-        ...state,
-        players: {
-            ...state.players,
-            [playerId]: {
-                ...playerState,
-                residuals: playerState.residuals + numResiduals,
-            },
-        },
-    };
+    return updatePlayer(state, playerId, { residuals: playerState.residuals + numResiduals });
 };
 export const gainResiduals = editResiduals;
 export const loseResiduals = (numResiduals: number, state: GameState, playerId = state.currentTurn.playerId) =>
     editResiduals(-numResiduals, state, playerId);
 
 export const trainWorker = (state: GameState, playerId = state.currentTurn.playerId): GameState => {
+    return updatePlayer(state, playerId, {
+        trainedWorkers: [
+            ...state.players[playerId].trainedWorkers,
+            { type: "normal", available: false },
+        ]
+    });
+};
+
+export const updatePlayer = (state: GameState, playerId: string, updates: Partial<PlayerState>): GameState => {
+    const player = state.players[playerId];
     return {
         ...state,
         players: {
             ...state.players,
-            [playerId]: {
-                ...state.players[playerId],
-                trainedWorkers: [
-                    ...state.players[playerId].trainedWorkers,
-                    { type: "normal", available: false },
-                ],
+            [player.id]: {
+                ...player,
+                ...updates
             },
         },
     };
-};
+}
