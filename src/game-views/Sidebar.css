@@ -4,14 +4,26 @@
     display: flex;
     flex-direction: column;
     grid-area: sidebar;
+}
+
+.Sidebar-players {
     overflow-y: auto;
 }
 
-.Sidebar-gameLog {
+.Sidebar-activityLog {
     box-sizing: border-box;
-    color: #ddd;
-    font-size: .8em;
-    line-height: 2em;
+    flex: 1 1 520px;
     max-width: 310px;
+    overflow-y: auto;
+}
+
+.Sidebar-activityLogContents {
+    color: #ddd;
+    display: flex;
+    fill: #ddd;
+    flex-direction: column-reverse;
+    font-size: .8em;
+    justify-content: flex-end;
+    line-height: 2em;
     padding: 8px;
 }

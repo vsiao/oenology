@@ -4,6 +4,7 @@
     border: .2em solid goldenrod;
     border-radius: 1em;
     box-sizing: border-box;
+    color: black;
     display: inline-flex;
     font-weight: 600;
     height: 2em;

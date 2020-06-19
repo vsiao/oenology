@@ -17,6 +17,7 @@ import {
     promptToDrawWakeUpVisitor,
     plantVineInField,
     updatePlayer,
+    pushActivityLog,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
@@ -74,15 +75,18 @@ export const board = (state: GameState, action: GameAction): GameState => {
             switch (pendingAction.type) {
                 case "buyField":
                 case "sellField":
-                    return endTurn((field.sold ? payCoins : gainCoins)(
-                        field.value,
-                        updatePlayer(state, player.id, {
-                            fields: {
-                                ...player.fields,
-                                [field.id]: { ...field, sold: !field.sold },
-                            },
-                        })
-                    ));
+                    return pushActivityLog(
+                        { type: "buySellField", buy: field.sold, value: field.value, playerId: player.id },
+                        endTurn((field.sold ? payCoins : gainCoins)(
+                            field.value,
+                            updatePlayer(state, player.id, {
+                                fields: {
+                                    ...player.fields,
+                                    [field.id]: { ...field, sold: !field.sold },
+                                },
+                            })
+                        ))
+                    );
                 case "plantVine":
                     return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
                 case "harvestField":
@@ -114,11 +118,14 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         return state;
                     }
                     // Further card-specific logic is handled by the `visitor` reducer.
-                    return removeCardsFromHand(
-                        [action.card],
-                        setPendingAction(
-                            { ...state.currentTurn.pendingAction, visitorId: action.card.id },
-                            state
+                    return pushActivityLog(
+                        { type: "visitor", playerId: state.currentTurn.playerId, visitorId: action.card.id },
+                        removeCardsFromHand(
+                            [action.card],
+                            setPendingAction(
+                                { ...state.currentTurn.pendingAction, visitorId: action.card.id },
+                                state
+                            )
                         )
                     );
                 default:

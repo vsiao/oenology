@@ -147,18 +147,26 @@ export const drawCards = (
     const [drawnOrders, order] = splitDeck(drawPiles.order, numCards.order);
     const [drawnWinterVisitors, winterVisitor] = splitDeck(drawPiles.winterVisitor, numCards.winterVisitor);
 
-    return updatePlayer(
-        { ...state, drawPiles: { vine, summerVisitor, order, winterVisitor }, },
-        playerId,
+    const drawnCards = [
+        ...drawnVines.map((id) => ({ type: "vine" as const, id })),
+        ...drawnSummerVisitors.map((id) => ({ type: "visitor" as const, id })),
+        ...drawnOrders.map((id) => ({ type: "order" as const, id })),
+        ...drawnWinterVisitors.map((id) => ({ type: "visitor" as const, id })),
+    ];
+
+    return pushActivityLog(
         {
-            cardsInHand: [
-                ...state.players[playerId].cardsInHand,
-                ...drawnVines.map((id) => ({ type: "vine" as const, id })),
-                ...drawnSummerVisitors.map((id) => ({ type: "visitor" as const, id })),
-                ...drawnOrders.map((id) => ({ type: "order" as const, id })),
-                ...drawnWinterVisitors.map((id) => ({ type: "visitor" as const, id })),
-            ],
-        }
+            type: "draw",
+            playerId,
+            cards: drawnCards.map((card) => card.type === "visitor"
+                ? (visitorCards[card.id].season === "summer" ? "summerVisitor" : "winterVisitor")
+                : card.type),
+        },
+        updatePlayer(
+            { ...state, drawPiles: { vine, summerVisitor, order, winterVisitor }, },
+            playerId,
+            { cardsInHand: [...state.players[playerId].cardsInHand, ...drawnCards], }
+        )
     );
 };
 
@@ -463,12 +471,15 @@ export const loseResiduals = (numResiduals: number, state: GameState, playerId =
     editResiduals(-numResiduals, state, playerId);
 
 export const trainWorker = (state: GameState, playerId = state.currentTurn.playerId): GameState => {
-    return updatePlayer(state, playerId, {
-        trainedWorkers: [
-            ...state.players[playerId].trainedWorkers,
-            { type: "normal", available: false },
-        ]
-    });
+    return pushActivityLog(
+        { type: "trainWorker", playerId },
+        updatePlayer(state, playerId, {
+            trainedWorkers: [
+                ...state.players[playerId].trainedWorkers,
+                { type: "normal", available: false },
+            ]
+        })
+    );
 };
 
 export const updatePlayer = (state: GameState, playerId: string, updates: Partial<PlayerState>): GameState => {

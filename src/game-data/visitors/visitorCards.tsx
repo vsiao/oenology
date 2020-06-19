@@ -30,8 +30,8 @@ const summerVisitorCard = (name: string, description: React.ReactNode) =>
     visitorCard("summer", name, description);
 
 export const summerVisitorCards = {
-    agriculturalist: summerVisitorCard(
-        "Agriculturalist",
+    agriculturist: summerVisitorCard(
+        "Agriculturist",
         <>Plant 1 <Vine />. Then, if you have at least 3 different types of <Vine /> planted on that field, gain <VP>2</VP>.</>
     ),
     banker: summerVisitorCard(

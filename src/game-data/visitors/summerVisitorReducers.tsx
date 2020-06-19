@@ -33,8 +33,8 @@ export const summerVisitorReducers: Record<
     SummerVisitorId,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
-    agriculturalist: (state, action, pendingAction) => {
-        const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
+    agriculturist: (state, action, pendingAction) => {
+        const agriculturistAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -44,7 +44,7 @@ export const summerVisitorReducers: Record<
                     case "vine":
                         return promptToChooseField(
                             setPendingAction(
-                                { ...cultivatorAction, vineId: action.card.id },
+                                { ...agriculturistAction, vineId: action.card.id },
                                 removeCardsFromHand([action.card], state)
                             )
                         );
@@ -52,7 +52,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                state = plantVineInField(cultivatorAction.vineId, action.fieldId, state);
+                state = plantVineInField(agriculturistAction.vineId, action.fieldId, state);
                 const vinesById: { [vineId in VineId]?: boolean } = {};
                 state.players[state.currentTurn.playerId].fields[action.fieldId].vines.forEach(
                     v => vinesById[v] = true
