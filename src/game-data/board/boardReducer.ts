@@ -15,10 +15,10 @@ import {
     chooseWakeUpIndex,
     gainVP,
     promptToDrawWakeUpVisitor,
+    plantVineInField,
 } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard } from "../prompts/promptReducers";
+import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
-import { VineId } from "../vineCards";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
 
@@ -90,20 +90,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         }
                     ));
                 case "plantVine":
-                    const vines: VineId[] = [...field.vines, pendingAction.vineId!];
-                    return endTurn({
-                        ...state,
-                        players: {
-                            ...state.players,
-                            [player.id]: {
-                                ...player,
-                                fields: {
-                                    ...player.fields,
-                                    [field.id]: { ...field, vines },
-                                },
-                            },
-                        },
-                    });
+                    return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
                 case "harvestField":
                     return endTurn(harvestField(state, field.id));
                 default:
@@ -245,11 +232,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "makeWine":
                     return promptToMakeWine(setPendingAction({ type: "makeWine" }, state), /* upToN */ 2);
                 case "plantVine":
-                    return promptToChooseCard(setPendingAction({ type: "plantVine" }, state), {
-                        title: "Choose a vine to plant",
-                        cards: state.players[state.currentTurn.playerId].cardsInHand
-                            .filter(({ type }) => type === "vine"),
-                    });
+                    return promptToChooseVineCard(setPendingAction({ type: "plantVine" }, state));
                 case "playSummerVisitor":
                 case "playWinterVisitor":
                     return promptToChooseCard(setPendingAction({ type: "playVisitor" }, state), {

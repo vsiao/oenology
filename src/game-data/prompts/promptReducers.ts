@@ -57,6 +57,14 @@ export const promptToChooseCard = (
     return enqueueActionPrompt(state, { type: "chooseCard", title, cards });
 };
 
+export const promptToChooseVineCard = (state: GameState): GameState => {
+    return promptToChooseCard(state, {
+        title: "Choose a vine",
+        cards: state.players[state.currentTurn.playerId].cardsInHand
+            .filter(({ type }) => type === "vine"),
+    });
+};
+
 export const promptToChooseField = (state: GameState): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;

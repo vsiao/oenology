@@ -42,6 +42,10 @@ export const summerVisitorCards = {
     //     "Contractor",
     //     <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
     // ),
+    cultivator: summerVisitorCard(
+        "Cultivator",
+        <>Plant 1 <Vine />. You may plant it on a field even if the total value of that field exceeds the max vine value.</>,
+    ),
     // entertainer: summerVisitorCard(
     //     "Entertainer",
     //     <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
@@ -82,6 +86,10 @@ export const summerVisitorCards = {
         "Sponsor",
         <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
     ),
+    surveyor: summerVisitorCard(
+        "Surveyor",
+        <>Gain <Coins>2</Coins> for each empty field you own OR gain <VP>1</VP> for each planted field you own.</>
+    ),
     tourGuide: summerVisitorCard(
         "Tour Guide",
         <>Gain <Coins>4</Coins> OR harvest 1 field.</>
@@ -93,6 +101,10 @@ export const summerVisitorCards = {
     uncertifiedBroker: summerVisitorCard(
         "Uncertified Broker",
         <>Lose <VP>3</VP> to gain <Coins>9</Coins> OR pay <Coins>6</Coins> to gain <VP>2</VP>.</>
+    ),
+    vendor: summerVisitorCard(
+        "Vendor",
+        <>Draw 1 <Vine />, 1 <Order />, and 1 <WinterVisitor />. Each opponent may draw 1 <SummerVisitor />.</>
     ),
     // volunteerCrew: summerVisitorCard(
     //     "Volunteer Crew",

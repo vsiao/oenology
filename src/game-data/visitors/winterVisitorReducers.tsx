@@ -31,7 +31,6 @@ import { WinterVisitorId } from "./visitorCards";
 import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
-import { access } from "fs";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,

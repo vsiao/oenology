@@ -18,6 +18,7 @@ import { StructureId } from "../structures";
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
+import { VineId } from "../vineCards";
 
 export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
     return state;
@@ -30,6 +31,25 @@ const devaluedIndex = (value: number, tokens: TokenMap) => {
         }
     }
     return -1;
+};
+
+export const plantVineInField = (vineId: VineId, fieldId: FieldId, state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const field = player.fields[fieldId];
+    const vines: VineId[] = [...field.vines, vineId];
+    return {
+        ...state,
+        players: {
+            ...state.players,
+            [player.id]: {
+                ...player,
+                fields: {
+                    ...player.fields,
+                    [field.id]: { ...field, vines },
+                },
+            },
+        },
+    };
 };
 
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {

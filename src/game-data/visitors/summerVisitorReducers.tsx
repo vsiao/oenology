@@ -1,7 +1,7 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState, { PlayVisitorPendingAction } from "../GameState";
-import { promptForAction, promptToChooseField, promptToBuildStructure } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import {
@@ -16,13 +16,16 @@ import {
     placeGrapes,
     promptForWakeUpOrder,
     setPendingAction,
-    passToNextSeason
+    passToNextSeason,
+    removeCardsFromHand,
+    plantVineInField
 } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
-import { Vine, Order, WinterVisitor } from "../../game-views/icons/Card";
+import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost } from "../structures";
+import { VineId } from "../vineCards";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
@@ -102,6 +105,33 @@ export const summerVisitorReducers: Record<
         }
     },
     // contractor: s => endTurn(s),
+    cultivator: (state, action, pendingAction) => {
+        interface CultivatorPendingAction extends PlayVisitorPendingAction {
+            vineId: VineId;
+        }
+        const cultivatorAction = pendingAction as CultivatorPendingAction;
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptToChooseVineCard(state);
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...cultivatorAction, vineId: action.card.id },
+                                removeCardsFromHand([action.card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return endTurn(plantVineInField(cultivatorAction.vineId, action.fieldId, state));
+            default:
+                return state;
+        }
+    },
     // entertainer: s => endTurn(s),
     // handyman: s => endTurn(s),
     landscaper: (state, action) => {
@@ -197,6 +227,41 @@ export const summerVisitorReducers: Record<
     // planner: s => endTurn(s),
     // planter: s => endTurn(s),
     // producer: s => endTurn(s),
+    surveyor: (state, action) => {
+        const fields = Object.values(state.players[state.currentTurn.playerId].fields);
+        let numEmptyAndOwned = 0;
+        let numPlantedAndOwned = 0;
+        fields.forEach(f => {
+            if (f.sold) {
+                return;
+            }
+            if (f.vines.length === 0) {
+                numEmptyAndOwned++;
+            } else {
+                numPlantedAndOwned++;
+            }
+        });
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "SURVEYOR_EMPTY", label: <>Gain <Coins>2</Coins> for each empty field you own</>, },
+                        { id: "SURVEYOR_PLANTED", label: <>Gain <VP>1</VP> for each planted field you own</>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SURVEYOR_EMPTY":
+                        return endTurn(gainCoins(numEmptyAndOwned, state));
+                    case "SURVEYOR_PLANTED":
+                        return endTurn(gainVP(numPlantedAndOwned, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     sponsor: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -299,6 +364,50 @@ export const summerVisitorReducers: Record<
             default:
                 return state;
         }
+    },
+    vendor: (state, action, pendingAction) => {
+        interface VendorPendingAction extends PlayVisitorPendingAction {
+            // list of players who have yet to decide whether to draw
+            mainActions: string[];
+        }
+        const vendorAction = pendingAction as VendorPendingAction;
+        const maybeEndTurn = (state2: GameState, playerId: string) => {
+            const mainActions = vendorAction.mainActions.filter(id => id !== playerId);
+            state2 = setPendingAction({ ...vendorAction, mainActions }, state2);
+            return mainActions.length === 0 ? endTurn(state2) : state2;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                const currentTurnPlayerId = state.currentTurn.playerId
+                state = setPendingAction({
+                    ...vendorAction,
+                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
+                }, drawCards(state, { vine: 1, order: 1, winterVisitor: 1, }));
+                return currentTurnPlayerId === state.playerId
+                    ? state
+                    : promptForAction(state, {
+                        playerId: state.playerId!,
+                        choices: [
+                            { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor />.</> },
+                            { id: "VENDOR_PASS", label: <>Pass</> },
+                        ],
+                    });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "VENDOR_DRAW":
+                        return maybeEndTurn(
+                            drawCards(state, { summerVisitor: 1 }, action.playerId),
+                            action.playerId
+                        );
+                    case "VENDOR_PASS":
+                        return maybeEndTurn(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+
     },
     // volunteerCrew: s => endTurn(s),
 };
