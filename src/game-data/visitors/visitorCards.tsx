@@ -144,6 +144,22 @@ export const winterVisitorCards = {
         "Crusher",
         <>Gain <Coins>3</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
     ),
+    designer: winterVisitorCard(
+        "Designer",
+        <>Build 1 structure at its regular cost. Then, if you have at least 6 structures, gain <VP>2</VP>.</>
+    ),
+    guestSpeaker: winterVisitorCard(
+        "Guest Speaker",
+        <>All players may pay <Coins>1</Coins> to train 1 <Worker />. Gain <VP>1</VP> for each opponent who does this.</>
+    ),
+    // governor: winterVisitorCard(
+    //     "Governor",
+    //     <>Choose up to 3 opponents to each give you 1 <SummerVisitor />. Gain <VP>1</VP> for each of them who cannot.</>
+    // ),
+    harvestExpert: winterVisitorCard(
+        "Harvest Expert",
+        <>Harvest 1 field and either draw 1 <Vine /> or pay <Coins>1</Coins> to build a yoke.</>
+    ),
     judge: winterVisitorCard(
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
@@ -167,6 +183,10 @@ export const winterVisitorCards = {
     professor: winterVisitorCard(
         "Professor",
         <>Pay <Coins>2</Coins> to train 1 <Worker /> OR gain <VP>2</VP> if you have a total of 6 <Worker />.</>,
+    ),
+    scholar: winterVisitorCard(
+        "Scholar",
+        <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train <Worker />. You may lose <VP>1</VP> to do both.</>
     ),
     taster: winterVisitorCard(
         "Taster",

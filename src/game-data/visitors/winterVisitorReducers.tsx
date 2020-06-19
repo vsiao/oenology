@@ -19,16 +19,19 @@ import {
     gainResiduals,
     loseResiduals,
     loseVP,
+    harvestField,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
 import {
     promptForAction,
     promptToChooseWine,
     promptToMakeWine,
+    promptToChooseField,
+    promptToBuildStructure,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
-import { trainWorkerDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
+import { trainWorkerDisabledReason, needGrapesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
 
@@ -118,6 +121,112 @@ export const winterVisitorReducers: Record<
                 }
             case "MAKE_WINE":
                 return endTurn(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
+    designer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptToBuildStructure(state);
+            case "BUILD_STRUCTURE":
+                state = buildStructure(state, action.structureId);
+                const numBuilt = Object.values(state.players[state.currentTurn.playerId].structures)
+                    .filter(built => built).length;
+                return endTurn(numBuilt >= 6 ? gainVP(2, state) : state);
+            default:
+                return state;
+        }
+    },
+    guestSpeaker: (state, action, pendingAction) => {
+        const gspeakerAction = pendingAction as PlayVisitorPendingAction & {
+            // list of players who have yet to compelte their main action (train worker or pass)
+            mainActions: string[];
+        };
+        const endMainAction = (state2: GameState, playerId: string) => {
+            const mainActions = gspeakerAction.mainActions.filter((id) => id !== playerId);
+            state2 = setPendingAction({ ...gspeakerAction, mainActions }, state2);
+            return mainActions.length === 0 ? endTurn(state2) : state2;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(
+                    setPendingAction({ ...gspeakerAction, mainActions: Object.keys(state.players), }, state),
+                    {
+                        choices: [
+                            {
+                                id: "GSPEAKER_TRAIN",
+                                label: <>
+                                    Pay <Coins>1</Coins> to train 1 <Worker />
+                                    {state.playerId !== state.currentTurn.playerId
+                                        ? <>(<strong>{state.currentTurn.playerId}</strong> gains <VP>1</VP>)</>
+                                        : null}
+                                </>,
+                                disabledReason: trainWorkerDisabledReason(state, 1),
+                            },
+                            { id: "GSPEAKER_PASS", label: <>Pass</>, },
+                        ],
+                    }
+                );
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "GSPEAKER_TRAIN":
+                        state = trainWorker(payCoins(1, state, action.playerId), action.playerId);
+                        return endMainAction(
+                            state.playerId !== state.currentTurn.playerId
+                                ? gainVP(1, state)
+                                : state,
+                            action.playerId
+                        );
+                    case "GSPEAKER_PASS":
+                        return endMainAction(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    // governor: (state, action, pendingAction) => {
+    //     switch (action.type) {
+    //         case "CHOOSE_CARD":
+    //         default:
+    //             return state;
+    //     }
+    // },
+    harvestExpert: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "HEXPERT_HARVEST",
+                            label: <>Harvest 1 field</>,
+                            disabledReason: harvestFieldDisabledReason(state),
+                        },
+                        { id: "HEXPERT_DRAW", label: <>Draw 1 <Vine /></>, },
+                        {
+                            id: "HEXPERT_BUILD",
+                            label: <>Pay <Coins>1</Coins> to build a Yoke</>,
+                            disabledReason: state.players[state.currentTurn.playerId].structures.yoke
+                                ? "You already built a yoke."
+                                : moneyDisabledReason(state, 1),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HEXPERT_HARVEST":
+                        return promptToChooseField(state);
+                    case "HEXPERT_DRAW":
+                        return endTurn(drawCards(state, { vine: 1 }));
+                    case "HEXPERT_BUILD":
+                        return endTurn(buildStructure(payCoins(1, state), "yoke"));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return endTurn(harvestField(state, action.fieldId));
             default:
                 return state;
         }
@@ -291,7 +400,7 @@ export const winterVisitorReducers: Record<
                             label: <>Pay <Coins>3</Coins> to upgrade your cellar to the next level</>,
                             disabledReason: player.structures.largeCellar
                                 ? "Your cellar is fully upgraded."
-                                : undefined,
+                                : moneyDisabledReason(state, 3),
                         },
                     ],
                 });
@@ -360,6 +469,39 @@ export const winterVisitorReducers: Record<
                         return endTurn(trainWorker(payCoins(2, state)));
                     case "PROFESSOR_GAIN":
                         return endTurn(gainVP(2, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    scholar: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "SCHOLAR_DRAW", label: <>Draw 2 <Order /></>, },
+                        {
+                            id: "SCHOLAR_TRAIN",
+                            label: <>Pay <Coins>3</Coins> to train <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 3),
+                        },
+                        {
+                            id: "SCHOLAR_BOTH",
+                            label: <>Do both (lose <VP>1</VP>)</>,
+                            disabledReason: trainWorkerDisabledReason(state, 3),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SCHOLAR_DRAW":
+                        return endTurn(drawCards(state, { order: 2 }));
+                    case "SCHOLAR_TRAIN":
+                        return endTurn(trainWorker(payCoins(3, state)));
+                    case "SCHOLAR_BOTH":
+                        return endTurn(trainWorker(payCoins(3, drawCards(state, { order: 2 }))));
                     default:
                         return state;
                 }
