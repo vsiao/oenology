@@ -1,7 +1,7 @@
 import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
-import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
+import Card, { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import WineGlass from "../../game-views/icons/WineGlass";
@@ -82,6 +82,10 @@ export const summerVisitorCards = {
         "Organizer",
         <>Move your <Rooster /> to an empty row on the wake-up chart, take the bonus, then pass to the next season.</>
     ),
+    overseer: summerVisitorCard(
+        "Overseer",
+        <>Build 1 structure at its regular cost and plant 1 <Vine />. If it is a 4-value <Vine />, gain <VP>1</VP>.</>
+    ),
     patron: summerVisitorCard(
         "Patron",
         <>Gain <Coins>4</Coins> OR draw 1 <Order />  and 1 <WinterVisitor />.</>
@@ -105,6 +109,10 @@ export const summerVisitorCards = {
     surveyor: summerVisitorCard(
         "Surveyor",
         <>Gain <Coins>2</Coins> for each empty field you own OR gain <VP>1</VP> for each planted field you own.</>
+    ),
+    swindler: summerVisitorCard(
+        "Swindler",
+        <>Each opponent may give you <Coins>2</Coins>. For each opponent who does not, gain <VP>1</VP>.</>
     ),
     tourGuide: summerVisitorCard(
         "Tour Guide",
@@ -135,6 +143,10 @@ export const winterVisitorCards = {
     assessor: winterVisitorCard(
         "Assessor",
         <>Gain <Coins>1</Coins> for each card in your hand OR discard your hand (min of 1 card) to gain <VP>2</VP>.</>,
+    ),
+    bottler: winterVisitorCard(
+        "Bottler",
+        <>Make up to 3 <WineGlass />. Gain <VP>1</VP> for each type of wine you make.</>
     ),
     crushExpert: winterVisitorCard(
         "Crush Expert",
@@ -184,9 +196,17 @@ export const winterVisitorCards = {
         "Professor",
         <>Pay <Coins>2</Coins> to train 1 <Worker /> OR gain <VP>2</VP> if you have a total of 6 <Worker />.</>,
     ),
+    // queen: winterVisitorCard(
+    //     "Queen",
+    //     <>The player on your right must choose 1: lose <VP>1</VP>, give you 2 <Card />, or pay you <Coins>3</Coins>.</>
+    // ),
     scholar: winterVisitorCard(
         "Scholar",
         <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train <Worker />. You may lose <VP>1</VP> to do both.</>
+    ),
+    supervisor: winterVisitorCard(
+        "Supervisor",
+        <>Make up to 2 <WineGlass />. Gain <VP>1</VP> for each sparkling wine token you make.</>
     ),
     taster: winterVisitorCard(
         "Taster",

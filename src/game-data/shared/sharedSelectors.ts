@@ -66,7 +66,10 @@ export const trainWorkerDisabledReason = (state: GameState, cost: number): strin
     return moneyDisabledReason(state, cost);
 };
 
-export const moneyDisabledReason = (state: GameState, cost: number): string | undefined => {
-    const playerState = state.players[state.currentTurn.playerId];
-    return playerState.coins < cost ? "You don't have enough money." : undefined;
+export const moneyDisabledReason = (
+    state: GameState,
+    cost: number,
+    playerId = state.currentTurn.playerId
+): string | undefined => {
+    return state.players[playerId].coins < cost ? "You don't have enough money." : undefined;
 };

@@ -25,8 +25,8 @@ import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReas
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
-import { maxStructureCost } from "../structures";
-import { VineId } from "../vineCards";
+import { maxStructureCost, structures } from "../structures";
+import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
 
 export const summerVisitorReducers: Record<
@@ -299,6 +299,33 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
+    overseer: (state, action, pendingAction) => {
+        const overseerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptToBuildStructure(state);
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction({ ...overseerAction, vineId: action.card.id }, state)
+                        );
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                return promptToChooseVineCard(
+                    buildStructure(payCoins(structures[action.structureId].cost, state), action.structureId)
+                );
+            case "CHOOSE_FIELD":
+                state = plantVineInField(overseerAction.vineId, action.fieldId, state);
+                const { red, white } = vineCards[overseerAction.vineId].yields;
+                return endTurn((red || 0) + (white || 0) === 4 ? gainVP(1, state) : state);
+            default:
+                return state;
+        }
+    },
     patron: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -383,6 +410,54 @@ export const summerVisitorReducers: Record<
             default:
                 return state;
         }
+    },
+    swindler: (state, action, pendingAction) => {
+        const swindlerAction = pendingAction as PlayVisitorPendingAction & {
+            // list of players who have yet to decide whether to give coins
+            mainActions: string[];
+        };
+        const maybeEndTurn = (state2: GameState, playerId: string) => {
+            const mainActions = swindlerAction.mainActions.filter(id => id !== playerId);
+            state2 = setPendingAction({ ...swindlerAction, mainActions }, state2);
+            return mainActions.length === 0 ? endTurn(state2) : state2;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                const currentTurnPlayerId = state.currentTurn.playerId;
+                state = setPendingAction({
+                    ...swindlerAction,
+                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
+                }, state);
+                const playerName = <strong>{state.currentTurn.playerId}</strong>;
+                return currentTurnPlayerId === state.playerId
+                    ? state
+                    : promptForAction(state, {
+                        playerId: state.playerId!,
+                        choices: [
+                            {
+                                id: "SWINDLER_GIVE",
+                                label: <>Give {playerName} <Coins>2</Coins>.</>,
+                                disabledReason: moneyDisabledReason(state, 2, state.playerId!),
+                            },
+                            { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
+                        ],
+                    });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SWINDLER_GIVE":
+                        return maybeEndTurn(
+                            gainCoins(2, payCoins(2, state, action.playerId)),
+                            action.playerId
+                        );
+                    case "BANKER_PASS":
+                        return maybeEndTurn(gainVP(1, state), action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+
     },
     tourGuide: (state, action) => {
         switch (action.type) {

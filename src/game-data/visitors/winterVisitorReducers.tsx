@@ -21,7 +21,7 @@ import {
     loseVP,
     harvestField,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor } from "../GameState";
 import {
     promptForAction,
     promptToChooseWine,
@@ -63,6 +63,19 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    bottler: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptToMakeWine(state, /* upToN */ 3);
+            case "MAKE_WINE":
+                const wineByType: { [type in WineColor]?: boolean } = {};
+                action.ingredients.forEach(w => wineByType[w.type] = true);
+                const numTypes = Object.keys(wineByType).length;
+                return endTurn(gainVP(numTypes, makeWineFromGrapes(state, action.ingredients)));
             default:
                 return state;
         }
@@ -505,6 +518,18 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    supervisor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptToMakeWine(state, /* upToN */ 2);
+            case "MAKE_WINE":
+                const numSparkling = action.ingredients
+                    .filter(({ type }) => type === "sparkling").length;
+                return endTurn(gainVP(numSparkling, makeWineFromGrapes(state, action.ingredients)));
             default:
                 return state;
         }
