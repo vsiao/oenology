@@ -30,9 +30,17 @@ const summerVisitorCard = (name: string, description: React.ReactNode) =>
     visitorCard("summer", name, description);
 
 export const summerVisitorCards = {
+    agriculturalist: summerVisitorCard(
+        "Agriculturalist",
+        <>Plant 1 <Vine />. Then, if you have at least 3 different types of <Vine /> planted on that field, gain <VP>2</VP>.</>
+    ),
     banker: summerVisitorCard(
         "Banker",
         <>Gain <Coins>5</Coins>. Each opponent may lose <VP>1</VP> to gain <Coins>3</Coins>.</>
+    ),
+    broker: summerVisitorCard(
+        "Broker",
+        <>Pay <Coins>9</Coins> to gain <VP>3</VP> OR lose <VP>2</VP> to gain <Coins>6</Coins>.</>
     ),
     buyer: summerVisitorCard(
         "Buyer",
@@ -50,6 +58,10 @@ export const summerVisitorCards = {
     //     "Entertainer",
     //     <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
     // ),
+    grower: summerVisitorCard(
+        "Grower",
+        <>Plant 1 <Vine />. Then, if you have planted a total of at least 6 <Vine />, gain <VP>2</VP>.</>
+    ),
     // handyman: summerVisitorCard(
     //     "Handyman",
     //     <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
@@ -62,6 +74,10 @@ export const summerVisitorCards = {
     //     "Negotiator",
     //     <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
     // ),
+    noviceGuide: summerVisitorCard(
+        "Novice Guide",
+        <>Gain <Coins>3</Coins> OR make up to 2 <WineGlass />.</>
+    ),
     organizer: summerVisitorCard(
         "Organizer",
         <>Move your <Rooster /> to an empty row on the wake-up chart, take the bonus, then pass to the next season.</>

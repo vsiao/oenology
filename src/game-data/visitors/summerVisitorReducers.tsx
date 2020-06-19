@@ -1,7 +1,7 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState, { PlayVisitorPendingAction } from "../GameState";
-import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard, promptToMakeWine } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import {
@@ -18,7 +18,8 @@ import {
     setPendingAction,
     passToNextSeason,
     removeCardsFromHand,
-    plantVineInField
+    plantVineInField,
+    makeWineFromGrapes
 } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
@@ -26,17 +27,46 @@ import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost } from "../structures";
 import { VineId } from "../vineCards";
+import WineGlass from "../../game-views/icons/WineGlass";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
+    agriculturalist: (state, action, pendingAction) => {
+        const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptToChooseVineCard(state);
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...cultivatorAction, vineId: action.card.id },
+                                removeCardsFromHand([action.card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                state = plantVineInField(cultivatorAction.vineId, action.fieldId, state);
+                const vinesById: { [vineId in VineId]?: boolean } = {};
+                state.players[state.currentTurn.playerId].fields[action.fieldId].vines.forEach(
+                    v => vinesById[v] = true
+                );
+                return endTurn(Object.keys(vinesById).length >= 3 ? gainVP(2, state) : state);
+            default:
+                return state;
+        }
+    },
     banker: (state, action, pendingAction) => {
-        interface BankerPendingAction extends PlayVisitorPendingAction {
+        const bankerAction = pendingAction as PlayVisitorPendingAction & {
             // list of players who have yet to decide whether to lose VP / gain coins
             mainActions: string[];
-        }
-        const bankerAction = pendingAction as BankerPendingAction;
+        };
         const maybeEndTurn = (state2: GameState, playerId: string) => {
             const mainActions = bankerAction.mainActions.filter(id => id !== playerId);
             state2 = setPendingAction({ ...bankerAction, mainActions }, state2);
@@ -67,6 +97,28 @@ export const summerVisitorReducers: Record<
                         );
                     case "BANKER_PASS":
                         return maybeEndTurn(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    broker: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "BROKER_GAIN", label: <>Pay <Coins>9</Coins> to gain <VP>3</VP></>, },
+                        { id: "BROKER_LOSE", label: <>Lose <VP>2</VP> to gain <Coins>6</Coins></>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BROKER_GAIN":
+                        return endTurn(gainVP(3, payCoins(9, state)));
+                    case "BROKER_LOSE":
+                        return endTurn(gainCoins(6, loseVP(2, state)));
                     default:
                         return state;
                 }
@@ -106,10 +158,7 @@ export const summerVisitorReducers: Record<
     },
     // contractor: s => endTurn(s),
     cultivator: (state, action, pendingAction) => {
-        interface CultivatorPendingAction extends PlayVisitorPendingAction {
-            vineId: VineId;
-        }
-        const cultivatorAction = pendingAction as CultivatorPendingAction;
+        const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -133,6 +182,33 @@ export const summerVisitorReducers: Record<
         }
     },
     // entertainer: s => endTurn(s),
+    grower: (state, action, pendingAction) => {
+        const growerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptToChooseVineCard(state);
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...growerAction, vineId: action.card.id },
+                                removeCardsFromHand([action.card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                state = plantVineInField(growerAction.vineId, action.fieldId, state);
+                const numVinesPlanted = Object.values(state.players[state.currentTurn.playerId].fields)
+                    .reduce((numVines, field) => numVines + field.vines.length, 0)
+                return endTurn(numVinesPlanted >= 6 ? gainVP(2, state) : state);
+            default:
+                return state;
+        }
+    },
     // handyman: s => endTurn(s),
     landscaper: (state, action) => {
         switch (action.type) {
@@ -162,11 +238,32 @@ export const summerVisitorReducers: Record<
         }
     },
     // negotiator: s => endTurn(s),
-    organizer: (state, action, pendingAction) => {
-        interface OrganizerPendingAction extends PlayVisitorPendingAction {
-            currentWakeUpPos: number;
+    noviceGuide: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "NGUIDE_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        { id: "NGUIDE_MAKE", label: <>Make up to 2 <WineGlass /></>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "NGUIDE_GAIN":
+                        return endTurn(gainCoins(3, state));
+                    case "NGUIDE_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 2);
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endTurn(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
         }
-        const organizerAction = pendingAction as OrganizerPendingAction;
+    },
+    organizer: (state, action, pendingAction) => {
+        const organizerAction = pendingAction as PlayVisitorPendingAction & { currentWakeUpPos: number };
 
         switch (action.type) {
             case "CHOOSE_CARD":
@@ -366,11 +463,10 @@ export const summerVisitorReducers: Record<
         }
     },
     vendor: (state, action, pendingAction) => {
-        interface VendorPendingAction extends PlayVisitorPendingAction {
+        const vendorAction = pendingAction as PlayVisitorPendingAction & {
             // list of players who have yet to decide whether to draw
-            mainActions: string[];
-        }
-        const vendorAction = pendingAction as VendorPendingAction;
+            mainActions: string[]
+        };
         const maybeEndTurn = (state2: GameState, playerId: string) => {
             const mainActions = vendorAction.mainActions.filter(id => id !== playerId);
             state2 = setPendingAction({ ...vendorAction, mainActions }, state2);
