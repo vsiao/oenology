@@ -211,9 +211,8 @@ export const passToNextSeason = (
         return { ...pos, passed: true };
     }) as GameState["wakeUpOrder"];
 
-    return pushActivityLog(
-        { type: "pass", playerId },
-        endWorkerPlacementTurn({ ...state, wakeUpOrder })
+    return endWorkerPlacementTurn(
+        pushActivityLog({ type: "pass", playerId }, { ...state, wakeUpOrder })
     );
 };
 
@@ -235,7 +234,11 @@ export const endTurn = (state: GameState): GameState => {
             const i = compactWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
             if (i === compactWakeUpOrder.length - 1) {
                 // end of season
-                return startWorkerPlacementTurn("winter", compactWakeUpOrder[0].playerId, state);
+                return startWorkerPlacementTurn(
+                    "winter",
+                    compactWakeUpOrder[0].playerId,
+                    pushActivityLog({ type: "season", season: "Winter" }, state)
+                );
             } else {
                 const nextPlayerId =
                     compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
@@ -259,7 +262,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     if (compactWakeUpOrder.every((p) => p.passed)) {
         // If everyone passed, it's the end of the season
         if (season === "summer") {
-            return promptToDrawFallVisitor({
+            return pushActivityLog({ type: "season", season: "Fall" }, promptToDrawFallVisitor({
                 ...state,
                 // preserve wake-up order; just reset "passed" state
                 wakeUpOrder: wakeUpOrder.map((pos) => {
@@ -269,13 +272,13 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                     type: "fallVisitor",
                     playerId: compactWakeUpOrder[0].playerId,
                 },
-            });
+            }));
         } else {
             // End of year
             // TODO discard too many cards
             const tableOrder = state.tableOrder;
             const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
-            return promptForWakeUpOrder({
+            return pushActivityLog({ type: "season", season: "Spring" }, promptForWakeUpOrder({
                 ...state,
                 grapeIndex,
                 currentTurn: { type: "wakeUpOrder", playerId: tableOrder[grapeIndex] },
@@ -303,7 +306,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                         ];
                     })
                 ),
-            });
+            }));
         }
     }
     const i = activeWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
@@ -391,7 +394,11 @@ export const chooseWakeUpIndex = (orderIndex: number, state: GameState) => {
     const nextWakeUpIndex = (tableOrder.indexOf(playerId) + 1) % tableOrder.length;
     if (nextWakeUpIndex === grapeIndex) {
         const firstPlayerId = wakeUpOrder.filter((pos) => pos)[0]!.playerId;
-        return startWorkerPlacementTurn("summer", firstPlayerId, state);
+        return startWorkerPlacementTurn(
+            "summer",
+            firstPlayerId,
+            pushActivityLog({ type: "season", season: "Summer" }, state)
+        );
     }
     return promptForWakeUpOrder({
         ...state,
@@ -452,7 +459,10 @@ export const loseVP = (numVP: number, state: GameState, playerId = state.current
 
 const editCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) => {
     const playerState = state.players[playerId];
-    return updatePlayer(state, playerId, { coins: playerState.coins + numCoins, });
+    return pushActivityLog(
+        { type: "coins", playerId, delta: numCoins },
+        updatePlayer(state, playerId, { coins: playerState.coins + numCoins, })
+    );
 };
 export const gainCoins = editCoins;
 export const payCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) =>

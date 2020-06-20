@@ -67,25 +67,33 @@ export const board = (state: GameState, action: GameAction): GameState => {
             ) {
                 return state;
             }
-            const currentTurn = state.currentTurn;
-            const player = state.players[currentTurn.playerId];
+            const playerId = state.currentTurn.playerId;
+            const player = state.players[playerId];
             const field = player.fields[action.fieldId];
-            const pendingAction = currentTurn.pendingAction!;
+            const pendingAction = state.currentTurn.pendingAction!;
 
             switch (pendingAction.type) {
                 case "buyField":
                 case "sellField":
-                    return pushActivityLog(
-                        { type: "buySellField", buy: field.sold, value: field.value, playerId: player.id },
-                        endTurn((field.sold ? payCoins : gainCoins)(
-                            field.value,
-                            updatePlayer(state, player.id, {
-                                fields: {
-                                    ...player.fields,
-                                    [field.id]: { ...field, sold: !field.sold },
-                                },
-                            })
-                        ))
+                    state = updatePlayer(state, player.id, {
+                        fields: {
+                            ...player.fields,
+                            [field.id]: { ...field, sold: !field.sold },
+                        },
+                    });
+                    return endTurn(
+                        field.sold
+                            ? pushActivityLog(
+                                  { type: "buySellField", buy: true, playerId },
+                                  payCoins(field.value, state)
+                              )
+                            : gainCoins(
+                                  field.value,
+                                  pushActivityLog(
+                                      { type: "buySellField", buy: false, playerId },
+                                      state
+                                  )
+                              )
                     );
                 case "plantVine":
                     return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));

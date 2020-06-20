@@ -9,11 +9,13 @@ export type ActivityLog = ActivityLogEvent[];
 export type ActivityLogEvent =
     | BuildEvent
     | BuySellFieldEvent
+    | CoinsEvent
     | DrawEvent
     | HarvestEvent
     | MakeWineEvent
     | PassEvent
     | PlantEvent
+    | SeasonEvent
     | TrainWorkerEvent
     | VisitorEvent
     | VPChangeEvent;
@@ -28,7 +30,9 @@ interface BuildEvent extends LogEvent<"build"> {
 }
 interface BuySellFieldEvent extends LogEvent<"buySellField"> {
     buy: boolean;
-    value: number;
+}
+interface CoinsEvent extends LogEvent<"coins"> {
+    delta: number;
 }
 interface DrawEvent extends LogEvent<"draw"> {
     cards: CardType[];
@@ -46,6 +50,10 @@ interface MakeWineEvent extends LogEvent<"makeWine"> {
     wines: WineSpec[];
 }
 interface PassEvent extends LogEvent<"pass"> { }
+interface SeasonEvent {
+    type: "season";
+    season: string;
+}
 interface TrainWorkerEvent extends LogEvent<"trainWorker"> { }
 interface VPChangeEvent extends LogEvent<"vp"> {
     delta: number;

@@ -2,12 +2,12 @@
     align-items: center;
     background: gold;
     border: .2em solid goldenrod;
-    border-radius: 1em;
+    border-radius: .9em;
     box-sizing: border-box;
     color: black;
     display: inline-flex;
     font-weight: 600;
-    height: 2em;
+    height: 1.8em;
     justify-content: center;
-    width: 2em;
+    width: 1.8em;
 }

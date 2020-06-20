@@ -12,6 +12,7 @@ import { visitorCards } from "../game-data/visitors/visitorCards";
 import Worker from "./icons/Worker";
 import Coins from "./icons/Coins";
 import Card from "./icons/Card";
+import { default as VP } from "./icons/VictoryPoints";
 
 interface Props {
     players: Record<string, PlayerState>;
@@ -36,14 +37,19 @@ const Sidebar: React.FunctionComponent<Props> = props => {
 };
 
 const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
+    if (event.type === "season") {
+        return <div className="Sidebar-seasonSeparator">{event.season}</div>;
+    }
     const player = <strong>{event.playerId}</strong>;
     switch (event.type) {
         case "build":
             return <>{player} built the <strong>{structures[event.structureId].name}</strong></>;
+        case "coins":
+            return <>{player} {event.delta < 0 ? "paid" : "gained"} <Coins>{Math.abs(event.delta)}</Coins></>;
         case "draw":
             return <>{player} drew {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
         case "buySellField":
-            return <>{player} {event.buy ? "bought" : "sold"} a <Coins>{event.value}</Coins> field</>;
+            return <>{player} {event.buy ? "bought" : "sold"} a field</>;
         case "harvest":
             return <>{player} harvested {renderYields(event.yields)}</>;
         case "makeWine":
@@ -57,6 +63,8 @@ const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
             return <>{player} trained a <Worker /></>;
         case "visitor":
             return <>{player} played <strong>{visitorCards[event.visitorId].name}</strong></>;
+        case "vp":
+            return <>{player} {event.delta < 0 ? "lost" : "gained"} <VP>{Math.abs(event.delta)}</VP></>;
         default:
             return JSON.stringify(event);
     }

@@ -24,6 +24,10 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
 const renderStatus = ({ currentTurn, playerId, passTurn }: Props) => {
     const playerName = <strong>{currentTurn.playerId}</strong>;
     switch (currentTurn.type) {
+        case "wakeUpOrder":
+            return <span>{playerName} is picking their wake-up position.</span>;
+        case "fallVisitor":
+            return <span>{playerName} is picking their fall visitor.</span>;
         case "workerPlacement":
             if (currentTurn.pendingAction !== null) {
                 return renderPendingActionStatus(
@@ -33,10 +37,10 @@ const renderStatus = ({ currentTurn, playerId, passTurn }: Props) => {
                 );
             }
             const isCurrentPlayerTurn = currentTurn.playerId === playerId;
-            return <>
-                It's&nbsp;{isCurrentPlayerTurn ? "your" : <>{playerName}'s</>} turn.
+            return <span>
+                It's {isCurrentPlayerTurn ? "your" : <>{playerName}'s</>} turn.
                 {isCurrentPlayerTurn ? <>&nbsp;<button onClick={passTurn}>Pass</button></> : null}
-            </>;
+            </span>;
         default:
             return JSON.stringify(currentTurn);
     }
@@ -64,7 +68,7 @@ const renderPendingActionStatus = (
             return <span>{playerName} is planting a <Vine />.</span>
         case "playVisitor":
             const card = season === "summer" ? <SummerVisitor /> : <WinterVisitor />;
-            if  (pendingAction.visitorId) {
+            if (pendingAction.visitorId) {
                 const { name } = visitorCards[pendingAction.visitorId];
                 return <span>{playerName} is playing the <strong>{name}</strong> {card}.</span>
             }
