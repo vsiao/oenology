@@ -12,6 +12,7 @@ import VineCard from "../cards/VineCard";
 import OrderCard from "../cards/OrderCard";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
 import VisitorCard from "../cards/VisitorCard";
+import PromptStructure from "./PromptStructure";
 
 interface Props {
     prompt: ChooseCardPromptState;
@@ -20,10 +21,7 @@ interface Props {
 
 const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
     const { prompt } = props;
-    return <div className="ChooseCardPrompt">
-        <div className="ChooseCardPrompt-header">
-            {prompt.title}
-        </div>
+    return <PromptStructure title={prompt.title}>
         <ul className="ChooseCardPrompt-cards">
             {prompt.cards.map((card, i) => {
                 return <li className="ChooseCardPrompt-card" key={card.id}>
@@ -31,7 +29,7 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
                 </li>;
             })}
         </ul>
-    </div>;
+    </PromptStructure>;
 };
 
 const renderCard = (card: CardId, props: Props) => {

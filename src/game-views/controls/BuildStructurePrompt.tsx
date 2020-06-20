@@ -7,6 +7,8 @@ import { buildStructure } from "../../game-data/prompts/promptActions";
 import { structures, StructureId, Coupon } from "../../game-data/structures";
 import { AppState } from "../../store/AppState";
 import Coins from "../icons/Coins";
+import PromptStructure from "./PromptStructure";
+import ChoiceButton from "./ChoiceButton";
 
 interface Props {
     coupon?: Coupon,
@@ -20,10 +22,7 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     const voucherFor = coupon?.kind === "voucher" ? coupon.upToCost : 0;
     const discount = coupon?.kind === "discount" ? coupon.amount : 0;
 
-    return <div className="BuildStructurePrompt">
-        <div className="BuildStructurePrompt-header">
-            Choose a structure
-        </div>
+    return <PromptStructure title="Build a structure">
         <ul className="BuildStructurePrompt-choices">
             {Object.entries(structures).map(([structureId, structure]) => {
                 if (voucherFor && structure.cost > voucherFor) {
@@ -33,18 +32,18 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
                 const cost = voucherFor ? 0 : structure.cost - discount;
                 const canAfford = !cost || cost <= currentCoins;
                 return <li className="BuildStructurePrompt-choice" key={structureId}>
-                    <button
+                    <ChoiceButton
                         className="BuildStructurePrompt-choiceButton"
                         disabled={hasBuilt || !canAfford}
                         onClick={() => onSelectStructure(structureId as StructureId)}
                     >
                         {structure.name}{' '}
                         <Coins>{structure.cost}</Coins>
-                    </button>
+                    </ChoiceButton>
                 </li>;
             })}
         </ul>
-    </div>;
+    </PromptStructure>;
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {

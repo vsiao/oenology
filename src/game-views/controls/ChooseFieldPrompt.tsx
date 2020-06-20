@@ -5,6 +5,7 @@ import { Dispatch } from "redux";
 import { FieldId, Field } from "../../game-data/GameState";
 import { chooseField } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
+import PromptStructure from "./PromptStructure";
 
 interface Props {
     fields: Field[];
@@ -12,10 +13,7 @@ interface Props {
 }
 
 const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
-    return <div className="ChooseFieldPrompt">
-        <div className="ChooseFieldPrompt-header">
-            Choose a field
-        </div>
+    return <PromptStructure title="Choose a field">
         <ul className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
                 return <li key={field.id}>
@@ -25,7 +23,7 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
                 </li>;
             })}
         </ul>
-    </div>;
+    </PromptStructure>;
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {

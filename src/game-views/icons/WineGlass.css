@@ -1,13 +1,16 @@
 .WineGlass {
+    align-items: center;
     color: black;
     display: inline-flex;
     fill: #ddd;
     -webkit-filter:drop-shadow(0px 1px 1px rgba(0,0, 0, 0.6));
     filter: drop-shadow(0px 1px 0.1em rgba(0,0, 0, 0.6));
     flex-shrink: 0;
+    font-style: normal;
+    font-weight: 600;
     height: 1.6em;
+    justify-content: center;
     position: relative;
-    vertical-align: bottom;
     width: 1.6em;
 }
 .WineGlass--red {
@@ -26,16 +29,10 @@
 
 .WineGlass-svg {
     flex: 1 1 auto;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
 }
 .WineGlass--sparkling .WineGlass-svg {
     transform: scale(0.8, 1.1);
-}
-
-.WineGlass-value {
-    font-weight: 600;
-    left: 50%;
-    margin-left: -0.3em;
-    margin-top: -0.6em;
-    position: absolute;
-    top: 50%;
 }

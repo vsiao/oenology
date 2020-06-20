@@ -8,6 +8,8 @@ import { makeWine, GrapeSpec, WineIngredients } from "../../game-data/prompts/pr
 import { AppState } from "../../store/AppState";
 import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
+import PromptStructure from "./PromptStructure";
+import ChoiceButton from "./ChoiceButton";
 
 interface Props {
     upToN: number;
@@ -22,69 +24,81 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     const wine = wineFromGrapes(selectedGrapes);
     const wineValueReducer = (v: number, g: GrapeSpec) => v + g.value;
 
-    return <div className="MakeWinePrompt">
-        <div className="MakeWinePrompt-header">
-            Make up to {props.upToN} wine
-        </div>
-        <ul className="MakeWinePrompt-grapes">
-            {availableGrapes.map(grape => {
-                const isSelected = selectedGrapes.some(g => g === grape);
-                return <li key={`${grape.color}${grape.value}`}>
-                    <button
-                        className={cx("MakeWinePrompt-grapeButton", {
-                            "MakeWinePrompt-grapeButton--selected": isSelected
+    return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.upToN} wine`}>
+        <div className="MakeWinePrompt-grapeSelector">
+            {
+                availableGrapes.length === 0
+                    ? "Crush pad is empty"
+                    : <ul className="MakeWinePrompt-grapes">
+                        {availableGrapes.map(grape => {
+                            const isSelected = selectedGrapes.some(g => g === grape);
+                            return <li key={`${grape.color}${grape.value}`}>
+                                <button
+                                    className={cx("MakeWinePrompt-grapeButton", {
+                                        "MakeWinePrompt-grapeButton--selected": isSelected
+                                    })}
+                                    role="switch"
+                                    aria-checked={isSelected}
+                                    disabled={cart.length >= props.upToN}
+                                    onClick={() => setSelectedGrapes(
+                                        isSelected
+                                            ? selectedGrapes.filter(g => g !== grape)
+                                            : [...selectedGrapes, grape]
+                                    )}
+                                >
+                                    <Grape color={grape.color}>{grape.value}</Grape>
+                                </button>
+                            </li>;
                         })}
-                        role="switch"
-                        aria-checked={isSelected}
-                        disabled={cart.length >= props.upToN}
-                        onClick={() => setSelectedGrapes(
-                            isSelected
-                                ? selectedGrapes.filter(g => g !== grape)
-                                : [...selectedGrapes, grape]
-                        )}
-                    >
-                        <Grape color={grape.color}>{grape.value}</Grape>
-                    </button>
-                </li>;
-            })}
-        </ul>
-        <button
-            className="MakeWinePrompt-addToCart"
-            disabled={!wine}
-            onClick={wine
-                ? () => {
-                    setCart([...cart, wine]);
-                    setSelectedGrapes([]);
-                    setAvailableGrapes(
-                        availableGrapes.filter(g => wine.grapes.indexOf(g) < 0)
-                    );
-                }
-                : undefined
+                    </ul>
             }
-        >
-            Add {wine ? <WineGlass color={wine.type}>
-                {wine.grapes.reduce(wineValueReducer, 0)}
-            </WineGlass> : null} to cart
-        </button>
+            <ChoiceButton
+                className="MakeWinePrompt-addToCart"
+                disabled={!wine}
+                onClick={wine
+                    ? () => {
+                        setCart([...cart, wine]);
+                        setSelectedGrapes([]);
+                        setAvailableGrapes(
+                            availableGrapes.filter(g => wine.grapes.indexOf(g) < 0)
+                        );
+                    }
+                    : undefined
+                }
+            >
+                Add {wine ? <WineGlass color={wine.type}>
+                    {wine.grapes.reduce(wineValueReducer, 0)}
+                </WineGlass> : null} to cart
+            </ChoiceButton>
+        </div>
         <div className="MakeWinePrompt-cart">
-            <div className="MakeWinePrompt-header">Cart</div>
-            <ul className="MakeWinePrompt-wineList">
-                {cart.map(w => {
-                    const wineValue = w.grapes.reduce(wineValueReducer, 0);
-                    return <li key={`${w.type}${wineValue}`}>
-                        <WineGlass color={w.type}>{wineValue}</WineGlass>
-                    </li>;
-                })}
-            </ul>
-            <button
-                className="MakeWinePrompt-confirm"
+            {cart.length === 0
+                ? "Cart is empty"
+                : <ul className="MakeWinePrompt-wineList">
+                    {cart.map(w => {
+                        const wineValue = w.grapes.reduce(wineValueReducer, 0);
+                        return <li key={`${w.type}${wineValue}`}>
+                            <button
+                                className="MakeWinePrompt-removeWineButton"
+                                onClick={() => {
+                                    setCart(cart.filter(w2 => w !== w2));
+                                    setAvailableGrapes([...availableGrapes, ...w.grapes])
+                                }}
+                            >
+                                <WineGlass color={w.type}>{wineValue}</WineGlass>
+                            </button>
+                        </li>;
+                    })}
+                </ul>}
+            <ChoiceButton
+                className="MakeWinePrompt-makeWineButton"
                 disabled={cart.length === 0}
                 onClick={() => props.onConfirm(cart)}
             >
                 Make wine!
-            </button>
+            </ChoiceButton>
         </div>
-    </div>;
+    </PromptStructure>
 };
 
 const wineFromGrapes = (grapes: GrapeSpec[]): WineIngredients | null => {

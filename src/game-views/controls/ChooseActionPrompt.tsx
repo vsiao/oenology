@@ -5,6 +5,8 @@ import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
 import { ChooseActionPromptState } from "../../game-data/prompts/PromptState";
 import { chooseAction } from "../../game-data/prompts/promptActions";
+import PromptStructure from "./PromptStructure";
+import ChoiceButton from "./ChoiceButton";
 
 interface Props {
     prompt: ChooseActionPromptState;
@@ -13,24 +15,21 @@ interface Props {
 
 const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
     const { prompt } = props;
-    return <div className="ChooseActionPrompt">
-        <div className="ChooseActionPrompt-header">
-            {prompt.title}
-        </div>
+    return <PromptStructure title={prompt.title}>
         <ul className="ChooseActionPrompt-choices">
             {prompt.choices.map((choice, i) => {
                 return <li className="ChooseActionPrompt-choice" key={i}>
-                    <button
+                    <ChoiceButton
                         className="ChooseActionPrompt-choiceButton"
                         disabled={choice.disabledReason !== undefined}
                         onClick={() => props.onSelectChoice(choice.id, prompt.playerId)}
                     >
                         {choice.label}
-                    </button>
+                    </ChoiceButton>
                 </li>;
             })}
         </ul>
-    </div>;
+    </PromptStructure>;
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {

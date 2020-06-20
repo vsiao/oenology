@@ -1,14 +1,3 @@
-.BuildStructurePrompt-header {
-    align-items: center;
-    color: black;
-    display: flex;
-    font-size: 12px;
-    font-weight: 600;
-    height: 20px;
-    margin-bottom: 16px;
-    padding: 0 16px;
-    text-transform: uppercase;
-}
 .BuildStructurePrompt-choices {
     display: flex;
     flex-flow: row wrap;
@@ -16,21 +5,5 @@
 }
 
 .BuildStructurePrompt-choiceButton {
-    background: white;
-    border: 2px solid #ccc;
-    border-radius: .4em;
-    display: inline-block;
-    font-size: .8em;
-    height: 2.8em;
     margin: 6px;
-    padding: 0 16px;
-}
-.BuildStructurePrompt-choiceButton[disabled] {
-    background: #ddd;
-    border-color: #ccc;
-}
-.BuildStructurePrompt-choiceButton:enabled:hover {
-    border-color: black;
-    cursor: pointer;
-    transition: 150ms border-color;
 }
