@@ -20,6 +20,7 @@ import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
 import { VineId } from "../vineCards";
+import { WineSpec } from "../orderCards";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -87,9 +88,14 @@ export const makeWineFromGrapes = (
     const player = state.players[playerId];
 
     let { cellar, crushPad } = player;
+    const wines: WineSpec[] = [];
     wine.forEach(({ type, grapes }) => {
         const value = grapes.reduce((v, g) => v + g.value, 0);
         const newWineIdx = devaluedIndex(value, cellar[type]);
+        if (newWineIdx < 0) {
+            return;
+        }
+        wines.push({ color: type, value: newWineIdx + 1 });
         cellar = {
             ...cellar,
             [type]: cellar[type].map((w, i) => w || i === newWineIdx),
@@ -104,7 +110,10 @@ export const makeWineFromGrapes = (
         };
     });
 
-    return updatePlayer(state, player.id, { crushPad, cellar, });
+    return pushActivityLog(
+        { type: "makeWine", playerId: playerId, wines, },
+        updatePlayer(state, player.id, { crushPad, cellar, })
+    );
 };
 
 export const buildStructure = (state: GameState, structureId: StructureId): GameState => {

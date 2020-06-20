@@ -13,6 +13,7 @@ import Worker from "./icons/Worker";
 import Coins from "./icons/Coins";
 import Card from "./icons/Card";
 import { default as VP } from "./icons/VictoryPoints";
+import WineGlass from "./icons/WineGlass";
 
 interface Props {
     players: Record<string, PlayerState>;
@@ -53,7 +54,9 @@ const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
         case "harvest":
             return <>{player} harvested {renderYields(event.yields)}</>;
         case "makeWine":
-            return <>{player} made some wine</>; // TODO
+            return <>{player} made {
+                event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)
+            }</>; // TODO
         case "pass":
             return <>{player} passed</>;
         case "plant":
