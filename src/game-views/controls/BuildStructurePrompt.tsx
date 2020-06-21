@@ -28,13 +28,14 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
                 if (voucherFor && structure.cost > voucherFor) {
                     return null;
                 }
+                const disabledReason = structure.disabledReason ? structure.disabledReason(currentStructures) : "";
                 const hasBuilt = currentStructures[structureId as StructureId];
                 const cost = voucherFor ? 0 : structure.cost - discount;
                 const canAfford = !cost || cost <= currentCoins;
                 return <li className="BuildStructurePrompt-choice" key={structureId}>
                     <ChoiceButton
                         className="BuildStructurePrompt-choiceButton"
-                        disabled={hasBuilt || !canAfford}
+                        disabled={!!disabledReason || hasBuilt || !canAfford}
                         onClick={() => onSelectStructure(structureId as StructureId)}
                     >
                         {structure.name}{' '}
@@ -46,14 +47,14 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     return {
         currentCoins: state.game.players[ownProps.playerId].coins,
         currentStructures: state.game.players[ownProps.playerId].structures
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
     return {
         onSelectStructure: (structureId: StructureId) =>
             dispatch(buildStructure(structureId, ownProps.playerId)),
