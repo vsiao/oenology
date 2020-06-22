@@ -118,4 +118,5 @@ export interface Field {
     value: number;
     vines: VineId[];
     sold: boolean;
+    harvested: boolean;
 }

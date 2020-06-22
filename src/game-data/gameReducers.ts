@@ -105,9 +105,9 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         cardsInHand: [
         ],
         fields: {
-            field5: { id: "field5", value: 5, vines: [], sold: false },
-            field6: { id: "field6", value: 6, vines: [], sold: false },
-            field7: { id: "field7", value: 7, vines: [], sold: false },
+            field5: { id: "field5", value: 5, vines: [], sold: false, harvested: false },
+            field6: { id: "field6", value: 6, vines: [], sold: false, harvested: false },
+            field7: { id: "field7", value: 7, vines: [], sold: false, harvested: false },
         },
         crushPad: {
             red: [false, false, false, false, false, false, false, false, false],
