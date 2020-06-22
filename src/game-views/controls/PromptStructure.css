@@ -1,10 +1,17 @@
 .PromptStructure {
+    background: white;
+    border-top: 4px solid #282c34;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     font-size: 14px;
     height: 100%;
     padding-bottom: 16px;
+    pointer-events: all;
+    transition: 150ms transform ease-in-out;
+}
+.PromptStructure--collapsed {
+    transform: translateY(calc(100% - 30px));
 }
 
 .PromptStructure-header {
@@ -17,4 +24,23 @@
     margin-bottom: 16px;
     padding: 0 16px;
     text-transform: uppercase;
+}
+
+.PromptStructure-collapseButton {
+    background: transparent;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: -12px;
+    margin-right: 4px;
+    padding: 4px;
+    transition: 150ms transform;
+}
+.PromptStructure--collapsed .PromptStructure-collapseButton {
+    transform: rotate(180deg);
+}
+
+.PromptStructure-collapseIcon {
+    display: block;
+    height: 1em;
+    width: 1em;
 }

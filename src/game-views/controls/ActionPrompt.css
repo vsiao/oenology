@@ -1,9 +1,8 @@
 .ActionPrompt {
-    background: white;
-    border-top: 4px solid #282c34;
     box-sizing: border-box;
     grid-area: main;
     height: 100%;
+    pointer-events: none;
     position: absolute;
     width: 100%;
     z-index: 1;
