@@ -1,14 +1,14 @@
 .Grape {
     align-items: center;
     background: linear-gradient(-45deg, #feff9d 50%, #d80000 50%);
-    border: .04em solid black;
     border-radius: .8em;
     box-sizing: border-box;
     display: inline-flex;
+    filter: drop-shadow(0px 1px 0.1em rgba(0,0, 0, 0.6));
     font-weight: 600;
-    height: 1.6em;
+    height: 1.4em;
     justify-content: center;
-    width: 1.6em;
+    width: 1.4em;
 }
 .Grape + .Grape {
     margin-left: 0.4em;

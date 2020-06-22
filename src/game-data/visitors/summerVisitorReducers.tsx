@@ -417,7 +417,7 @@ export const summerVisitorReducers: Record<
                     case "SPONSOR_GAIN":
                         return endTurn(gainCoins(3, state));
                     case "SPONSOR_BOTH":
-                        return endTurn(gainCoins(3, drawCards(state, { vine: 2 })));
+                        return endTurn(gainCoins(3, drawCards(loseVP(1, state), { vine: 2 })));
                     default:
                         return state;
                 }

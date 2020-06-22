@@ -1,6 +1,9 @@
 .PromptStructure {
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
     font-size: 14px;
+    height: 100%;
     padding-bottom: 16px;
 }
 

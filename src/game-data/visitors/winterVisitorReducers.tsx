@@ -598,7 +598,7 @@ export const winterVisitorReducers: Record<
                 switch (action.choice) {
                     case "OENOLOGIST_AGE":
                         return endTurn(updatePlayer(state, player.id, {
-                            cellar: ageCellar(player.cellar, 2),
+                            cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
                     case "EONOLOGIST_UPGRADE":
                         return buildStructure(
@@ -782,7 +782,7 @@ export const winterVisitorReducers: Record<
                 switch (action.choice) {
                     case "UOENOLOGIST_AGE":
                         return endTurn(updatePlayer(state, player.id, {
-                            cellar: ageCellar(player.cellar, 2),
+                            cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
                     case "UEONOLOGIST_UPGRADE":
                         return buildStructure(

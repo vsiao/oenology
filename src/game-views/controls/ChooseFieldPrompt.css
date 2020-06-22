@@ -1,28 +1,33 @@
 .ChooseFieldPrompt-fields {
-    align-items: stretch;
     display: flex;
+    flex: 1 1 auto;
     padding: 0 16px;
 }
+
 .ChooseFieldPrompt-field {
-    background-color: #40a746;
-    display: flex;
-    flex-wrap: wrap;
+    background: green;
     margin-right: 16px;
-    padding: 16px;
+    max-width: 280px;
     transition: 100ms transform ease-out;
     transform: translateY(0);
-    width: 25%;
+    width: 30%;
 }
 .ChooseFieldPrompt-field:not(.ChooseFieldPrompt-field--disabled):hover {
     cursor: pointer;
     transform: translateY(-8px);
 }
-.ChooseFieldPrompt-field .VineCard {
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    height: 140px;
-    margin: 0 0.5em 0.5em 0;
-    width: 100px;
+
+.ChooseFieldPrompt-fieldHeader {
+    background: #ccc;
+    padding: 4px 8px;
 }
-.ChooseFieldPrompt-field .VineCard:hover {
-    bottom: 0;
+
+.ChooseFieldPrompt-vine {
+    background: #40a746;
+    border-radius: 4px;
+    display: flex;
+    /* font-weight: 600; */
+    justify-content: space-between;
+    margin: 8px;
+    padding: 8px;
 }

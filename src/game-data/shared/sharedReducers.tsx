@@ -342,7 +342,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                                     red: ageAll(playerState.crushPad.red),
                                     white: ageAll(playerState.crushPad.white),
                                 },
-                                cellar: ageCellar(playerState.cellar),
+                                cellar: ageCellar(playerState.cellar, playerState.structures),
                                 fields: newFieldsState
                             },
                         ];
@@ -357,17 +357,22 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     return startWorkerPlacementTurn(season, nextPlayerId, state);
 };
 
-export const ageCellar = (cellar: PlayerState["cellar"], n = 1): PlayerState["cellar"] => {
+export const ageCellar = (
+    cellar: PlayerState["cellar"],
+    structures: PlayerState["structures"],
+    n = 1
+): PlayerState["cellar"] => {
+    const valueCap = structures.largeCellar ? 9 : structures.mediumCellar ? 6 : 3;
     cellar = {
-        red: ageAll(cellar.red),
-        white: ageAll(cellar.white),
-        blush: ageAll(cellar.blush),
-        sparkling: ageAll(cellar.sparkling),
+        red: ageAll(cellar.red, valueCap),
+        white: ageAll(cellar.white, valueCap),
+        blush: ageAll(cellar.blush, valueCap),
+        sparkling: ageAll(cellar.sparkling, valueCap),
     };
     if (n <= 1) {
         return cellar;
     }
-    return ageCellar(cellar, n - 1);
+    return ageCellar(cellar, structures, n - 1);
 };
 
 const startWorkerPlacementTurn = (
@@ -387,20 +392,20 @@ const startWorkerPlacementTurn = (
     return state;
 };
 
-const ageAll = (tokens: TokenMap): TokenMap => {
+const ageAll = (tokens: TokenMap, valueCap: number = tokens.length): TokenMap => {
     let newTokenMap = new Array(9).fill(false) as TokenMap;
     for (let i = tokens.length - 1; i >= 0; --i) {
         if (!tokens[i]) {
             continue;
         }
-        newTokenMap = ageSingle(newTokenMap, i);
+        newTokenMap = ageSingle(newTokenMap, i, valueCap);
     }
     return newTokenMap;
 };
 
-export const ageSingle = (tokens: TokenMap, i: number): TokenMap => {
+export const ageSingle = (tokens: TokenMap, i: number, valueCap: number = tokens.length): TokenMap => {
     const newTokenMap = tokens.slice() as TokenMap;
-    if (i === tokens.length - 1 || newTokenMap[i + 1]) {
+    if (i === valueCap - 1 || newTokenMap[i + 1]) {
         // can't age
         newTokenMap[i] = true;
     } else {

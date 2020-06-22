@@ -111,7 +111,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     })}
                 </div>
                 <div className="SidebarPlayer-wines">
-                    {player.cellar.blush.map((hasWine, i) => {
+                    {player.cellar.sparkling.map((hasWine, i) => {
                         if (i < 6) {
                             return null;
                         }

@@ -2,12 +2,13 @@ import "./ChooseFieldPrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { FieldId, Field } from "../../game-data/GameState";
+import { FieldId, Field, GrapeColor } from "../../game-data/GameState";
 import { chooseField } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 import PromptStructure from "./PromptStructure";
-import VineCard from "../cards/VineCard";
 import { vineCards } from "../../game-data/vineCards";
+import Grape from "../icons/Grape";
+import Coins from "../icons/Coins";
 
 interface Props {
     fields: Field[];
@@ -19,7 +20,20 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
         <div className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
                 return <div className="ChooseFieldPrompt-field" key={field.id} onClick={() => props.chooseField(field.id)}>
-                    {field.vines.map(vine => <VineCard cardData={vineCards[vine]} />)}
+                    <div className="ChooseFieldPrompt-fieldHeader">
+                        <Coins>{field.value}</Coins>
+                    </div>
+                    {field.vines.map(vineId => {
+                        const { name, yields } = vineCards[vineId];
+                        return <div className="ChooseFieldPrompt-vine">
+                            {name}
+                            <div className="ChooseFieldPrompt-vineYields">
+                                {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
+                                    <Grape key={grapeColor} color={grapeColor}>{yields[grapeColor]}</Grape>
+                                )}
+                            </div>
+                        </div>;
+                    })}
                 </div>;
             })}
         </div>
