@@ -2,11 +2,9 @@ import { GameAction } from "../gameActions";
 import GameState from "../GameState";
 import {
     buildStructure,
-    discardWines,
     drawCards,
     endTurn,
     gainCoins,
-    gainResiduals,
     harvestField,
     makeWineFromGrapes,
     payCoins,
@@ -20,12 +18,12 @@ import {
     plantVineInField,
     updatePlayer,
     pushActivityLog,
+    fillOrder,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard, promptToChooseOrderCard, promptToFillOrder } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
-import { orderCards } from "../orderCards";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -160,10 +158,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
             ) {
                 return state;
             }
-            const { residualIncome, victoryPoints } = orderCards[state.currentTurn.pendingAction!.orderId!];
-            return endTurn(
-                gainResiduals(residualIncome, gainVP(victoryPoints, discardWines(state, action.wines)))
-            );
+            return endTurn(fillOrder(state.currentTurn.pendingAction!.orderId!, action.wines, state));
 
         case "MAKE_WINE":
             if (

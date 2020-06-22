@@ -14,6 +14,7 @@ import Coins from "./icons/Coins";
 import Card from "./icons/Card";
 import { default as VP } from "./icons/VictoryPoints";
 import WineGlass from "./icons/WineGlass";
+import Residuals from "./icons/Residuals";
 
 interface Props {
     players: Record<string, PlayerState>;
@@ -49,6 +50,8 @@ const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
             return <>{player} {event.delta < 0 ? "paid" : "gained"} <Coins>{Math.abs(event.delta)}</Coins></>;
         case "draw":
             return <>{player} drew {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
+        case "fill":
+            return <>{player} filled a {event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)} order</>;
         case "buySellField":
             return <>{player} {event.buy ? "bought" : "sold"} a field</>;
         case "harvest":
@@ -62,6 +65,8 @@ const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
         case "plant":
             const { name, yields } = vineCards[event.vineId];
             return <>{player} planted some <strong>{name}</strong> {renderYields(yields)}</>;
+        case "residuals":
+            return <>{player} {event.delta < 0 ? "lost" : "gained"} <Residuals>{Math.abs(event.delta)}</Residuals></>;
         case "trainWorker":
             return <>{player} trained a <Worker /></>;
         case "visitor":

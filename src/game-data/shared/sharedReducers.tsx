@@ -20,7 +20,7 @@ import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
 import { VineId } from "../vineCards";
-import { WineSpec } from "../orderCards";
+import { WineSpec, OrderId, orderCards } from "../orderCards";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -121,6 +121,16 @@ export const makeWineFromGrapes = (
         { type: "makeWine", playerId: playerId, wines, },
         updatePlayer(state, player.id, { crushPad, cellar, })
     );
+};
+
+export const fillOrder = (orderId: OrderId, wines: WineSpec[], state: GameState): GameState => {
+    const { residualIncome, victoryPoints } = orderCards[orderId];
+    return gainResiduals(residualIncome, gainVP(victoryPoints,
+        discardWines(
+            pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, wines }, state),
+            wines
+        )
+    ));
 };
 
 export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
@@ -493,7 +503,10 @@ const editResiduals = (
     playerId = state.currentTurn.playerId
 ) => {
     const playerState = state.players[playerId];
-    return updatePlayer(state, playerId, { residuals: playerState.residuals + numResiduals });
+    return pushActivityLog(
+        { type: "residuals", playerId, delta: numResiduals },
+        updatePlayer(state, playerId, { residuals: playerState.residuals + numResiduals })
+    );
 };
 export const gainResiduals = editResiduals;
 export const loseResiduals = (numResiduals: number, state: GameState, playerId = state.currentTurn.playerId) =>
