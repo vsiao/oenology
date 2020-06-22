@@ -1,12 +1,14 @@
 import { Coupon } from "../structures";
 import { CardId } from "../GameState";
+import { OrderId } from "../orderCards";
 
 export type PromptState =
     | ChooseActionPromptState
     | ChooseCardPromptState
+    | DiscardWinePromptState
+    | FillOrderPromptState
     | { type: "chooseField"; }
     | MakeWinePromptState
-    | ChooseWinePromptState
     | BuildStructurePromptState;
 
 export interface Choice {
@@ -27,14 +29,20 @@ export interface ChooseCardPromptState {
     cards: CardId[];
 }
 
+export interface DiscardWinePromptState {
+    type: "discardWine";
+    minValue: number;
+    limit: number;
+}
+
+export interface FillOrderPromptState {
+    type: "fillOrder";
+    orderIds: OrderId[];
+}
+
 export interface MakeWinePromptState {
     type: "makeWine";
     upToN: number;
-}
-
-export interface ChooseWinePromptState {
-    type: "chooseWine";
-    minValue: number;
 }
 
 export interface BuildStructurePromptState {

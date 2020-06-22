@@ -3,6 +3,13 @@
     flex-flow: row wrap;
     margin: -6px 10px -6px;
 }
-.ChooseCardPrompt-card {
+
+.ChooseCardPrompt-cardButton {
     margin: 4px;
+}
+.ChooseCardPrompt-cardButton:hover {
+    bottom: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: 100ms bottom ease-out;
 }

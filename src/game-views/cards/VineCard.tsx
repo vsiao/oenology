@@ -1,4 +1,3 @@
-import cx from "classnames";
 import * as React from "react";
 import { VineCardData } from "../../game-data/vineCards";
 import Grape from "../icons/Grape";
@@ -7,18 +6,11 @@ import "./VineCard.css";
 
 interface Props {
     cardData: VineCardData;
-    onClick: (() => void) | undefined;
 }
 
 const VineCard: React.FunctionComponent<Props> = props => {
     const { name, structures, yields } = props.cardData;
-    return <div
-        className={cx({
-            "VineCard": true,
-            "VineCard--interactive": props.onClick !== undefined,
-        })}
-        onClick={props.onClick}
-    >
+    return <div className="VineCard" >
         <div className="VineCard-name">{name}</div>
         <div className="VineCard-description">
             <div className="VineCard-structures">

@@ -9,6 +9,7 @@ import { CSSTransition } from "react-transition-group";
 import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
 import ChooseCardPrompt from "./ChooseCardPrompt";
+import ChooseWinePrompt from "./ChooseWinePrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -35,16 +36,19 @@ const ActionPrompt: React.FunctionComponent<Props> = props => {
 
 const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
     switch (prompt.type) {
+        case "buildStructure":
+            return <BuildStructurePrompt coupon={prompt.coupon} playerId={props.playerId} />;
         case "chooseAction":
             return <ChooseActionPrompt prompt={prompt} />;
         case "chooseCard":
             return <ChooseCardPrompt prompt={prompt} playerId={props.playerId} />;
         case "chooseField":
             return <ChooseFieldPrompt playerId={props.playerId} />;
+        case "discardWine":
+        case "fillOrder":
+            return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;
         case "makeWine":
             return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
-        case "buildStructure":
-            return <BuildStructurePrompt coupon={prompt.coupon} playerId={props.playerId} />;
         default:
             return JSON.stringify(prompt);
     }

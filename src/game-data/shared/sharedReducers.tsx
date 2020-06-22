@@ -26,8 +26,17 @@ export const pushActivityLog = (event: ActivityLogEvent, state: GameState): Game
     return { ...state, activityLog: [...state.activityLog, event], };
 };
 
-export const discardWine = (state: GameState, playerId: string, wine: unknown) => {
-    return state;
+export const discardWines = (state: GameState, wines: WineSpec[]) => {
+    const player = state.players[state.currentTurn.playerId];
+
+    let cellar = player.cellar;
+    wines.forEach(w => {
+        cellar = {
+            ...cellar,
+            [w.color]: cellar[w.color].map((hasWine, i) => hasWine && w.value !== i + 1),
+        };
+    })
+    return updatePlayer(state, state.currentTurn.playerId, { cellar });
 };
 
 export const devaluedIndex = (value: number, tokens: TokenMap) => {
@@ -382,6 +391,9 @@ const movePendingCardToDiscard = (state: GameState): GameState => {
         case "plantVine":
             const vineId = currentTurn.pendingAction.vineId!;
             return addToDiscard([{ type: "vine", id: vineId }], state);
+        case "fillOrder":
+            const orderId = currentTurn.pendingAction.orderId!;
+            return addToDiscard([{ type: "order", id: orderId }], state);
         default:
             return state;
     }

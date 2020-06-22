@@ -1,10 +1,10 @@
-import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
+import GameState, { PlayerColor, PlayerState, CardsByType, CardId } from "./GameState";
 import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { visitor } from "./visitors/visitorReducer";
 import { prompt } from "./prompts/promptReducers";
 import { vineCards, VineId } from "./vineCards";
-import { summerVisitorCards, SummerVisitorId, winterVisitorCards, WinterVisitorId } from "./visitors/visitorCards";
+import { summerVisitorCards, SummerVisitorId, winterVisitorCards, WinterVisitorId, visitorCards, VisitorId } from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { updatePlayer } from "./shared/sharedReducers";
 
@@ -13,10 +13,21 @@ export const game = (state: GameState | undefined, action: GameAction): GameStat
         return initGame();
     }
     switch (action.type) {
-        case "CHEAT_DRAW_VISITOR":
+        case "CHEAT_DRAW_CARD":
             const player = state.players[action.playerId];
+            let cardId: CardId | null = null;
+            if (orderCards.hasOwnProperty(action.id)) {
+                cardId = { type: "order", id: action.id as OrderId };
+            } else if (visitorCards.hasOwnProperty(action.id)) {
+                cardId = { type: "visitor", id: action.id as VisitorId };
+            } else if (vineCards.hasOwnProperty(action.id)) {
+                cardId = { type: "vine", id: action.id as VineId };
+            }
+            if (!cardId) {
+                return state;
+            }
             return updatePlayer(state, player.id, {
-                cardsInHand: [...player.cardsInHand, { type: "visitor", id: action.visitorId }],
+                cardsInHand: [...player.cardsInHand, cardId],
             });
     }
     return visitor(board(prompt(state, action), action), action);

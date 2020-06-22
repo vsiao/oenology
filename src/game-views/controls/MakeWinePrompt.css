@@ -10,11 +10,8 @@
 
 .MakeWinePrompt-grapeButton {
     background: none;
-    border: 0;
-    font-size: 1em;
-    margin: 0;
-    outline: 0;
-    padding: 0 8px 0 0;
+    margin-right: 8px;
+    outline: none;
 }
 .MakeWinePrompt-grapeButton:enabled {
     cursor: pointer;

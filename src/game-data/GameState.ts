@@ -67,7 +67,7 @@ export type WorkerPlacementTurnPendingAction =
     | { type: "buildStructure"; } // choose structure
     | { type: "harvestField"; } // choose field
     | { type: "makeWine"; } // choose grape
-    | { type: "fillOrder"; }; // choose order card
+    | { type: "fillOrder"; orderId?: OrderId; }; // choose order card
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";

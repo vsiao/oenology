@@ -6,8 +6,6 @@ import "./VisitorCard.css";
 interface Props {
     type: "summer" | "winter";
     cardData: VisitorCardData;
-    interactive: boolean;
-    onClick?: () => void;
 }
 
 const VisitorCard: React.FunctionComponent<Props> = props => {
@@ -15,10 +13,8 @@ const VisitorCard: React.FunctionComponent<Props> = props => {
     return <div
         className={cx({
             "VisitorCard": true,
-            "VisitorCard--interactive": props.interactive,
             [`VisitorCard--${props.type}`]: true,
         })}
-        onClick={props.onClick}
     >
         <div className="VisitorCard-name">{name}</div>
         <div className="VisitorCard-description">

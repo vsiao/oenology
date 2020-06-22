@@ -2,6 +2,7 @@ import GameState, { CardId } from "../GameState";
 import { GameAction } from "../gameActions";
 import { Choice, PromptState } from "./PromptState";
 import { Coupon } from "../structures";
+import { OrderId } from "../orderCards";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
@@ -57,6 +58,14 @@ export const promptToChooseCard = (
     return enqueueActionPrompt(state, { type: "chooseCard", title, cards });
 };
 
+export const promptToChooseOrderCard = (state: GameState): GameState => {
+    return promptToChooseCard(state, {
+        title: "Choose an order to fill",
+        cards: state.players[state.currentTurn.playerId].cardsInHand
+            .filter(card => card.type === "order"),
+    });
+};
+
 export const promptToChooseVineCard = (state: GameState): GameState => {
     return promptToChooseCard(state, {
         title: "Choose a vine",
@@ -72,11 +81,21 @@ export const promptToChooseField = (state: GameState): GameState => {
     return enqueueActionPrompt(state, { type: "chooseField" });
 };
 
-export const promptToChooseWine = (state: GameState, minValue = 1): GameState => {
+export const promptToFillOrder = (state: GameState, orderIds: OrderId[]): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseWine", minValue });
+    return enqueueActionPrompt(state, { type: "fillOrder", orderIds, });
+};
+
+export const promptToDiscardWine = (
+    state: GameState,
+    { minValue = 1, limit }: { minValue?: number; limit: number }
+): GameState => {
+    if (state.playerId !== state.currentTurn.playerId) {
+        return state;
+    }
+    return enqueueActionPrompt(state, { type: "discardWine", minValue, limit });
 };
 
 export const promptToMakeWine = (

@@ -77,7 +77,7 @@ const renderCard = (card: CardId, props: Props) => {
     switch (card.type) {
         case "vine":
             return <li key={card.id} className="PlayerMat-card">
-                <VineCard cardData={vineCards[card.id]} onClick={undefined} />
+                <VineCard cardData={vineCards[card.id]} />
             </li>;
 
         case "order":
@@ -88,11 +88,7 @@ const renderCard = (card: CardId, props: Props) => {
         case "visitor":
             const cardData = visitorCards[card.id];
             return <li key={card.id} className="PlayerMat-card">
-                <VisitorCard
-                    interactive={false}
-                    type={cardData.season}
-                    cardData={cardData}
-                />
+                <VisitorCard type={cardData.season} cardData={cardData} />
             </li>;
     }
 };

@@ -2,9 +2,11 @@ import { GameAction } from "../gameActions";
 import GameState from "../GameState";
 import {
     buildStructure,
+    discardWines,
     drawCards,
     endTurn,
     gainCoins,
+    gainResiduals,
     harvestField,
     makeWineFromGrapes,
     payCoins,
@@ -19,10 +21,11 @@ import {
     updatePlayer,
     pushActivityLog,
 } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard } from "../prompts/promptReducers";
+import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard, promptToChooseOrderCard, promptToFillOrder } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
+import { orderCards } from "../orderCards";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
@@ -136,9 +139,31 @@ export const board = (state: GameState, action: GameAction): GameState => {
                             )
                         )
                     );
+                case "fillOrder":
+                    if (action.card.type !== "order") {
+                        return state;
+                    }
+                    return promptToFillOrder(
+                        removeCardsFromHand(
+                            [action.card],
+                            setPendingAction({ type: "fillOrder", orderId: action.card.id }, state)
+                        ),
+                        [action.card.id]
+                    );
                 default:
                     return state;
             }
+        case "CHOOSE_WINE":
+            if (
+                state.currentTurn.type !== "workerPlacement" ||
+                state.currentTurn.pendingAction?.type !== "fillOrder"
+            ) {
+                return state;
+            }
+            const { residualIncome, victoryPoints } = orderCards[state.currentTurn.pendingAction!.orderId!];
+            return endTurn(
+                gainResiduals(residualIncome, gainVP(victoryPoints, discardWines(state, action.wines)))
+            );
 
         case "MAKE_WINE":
             if (
@@ -226,7 +251,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "drawVine":
                     return endTurn(drawCards(state, { vine: 1 }));
                 case "fillOrder":
-                    return state;
+                    return promptToChooseOrderCard(setPendingAction({ type: "fillOrder" }, state));
                 case "gainCoin":
                     return endTurn(gainCoins(1, state));
                 case "giveTour":

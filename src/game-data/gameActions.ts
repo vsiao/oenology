@@ -6,7 +6,6 @@ import {
     WinterVisitorId,
     summerVisitorCards,
     winterVisitorCards,
-    VisitorId,
 } from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
@@ -16,7 +15,7 @@ export type GameAction = (
     | StartGameAction
     | PromptAction
     | BoardAction
-    | CHEAT_DrawVisitorAction
+    | CHEAT_DrawCardAction
 ) & {
     // Every action should first be pushed to firebase to be
     // applied on other clients. Then, only on success do we
@@ -66,10 +65,10 @@ export const setWorkerType = (workerType: WorkerType): SetWorkerAction => {
     return { type: "SET_WORKER_TYPE", workerType };
 };
 
-export interface CHEAT_DrawVisitorAction extends Action<"CHEAT_DRAW_VISITOR"> {
-    visitorId: VisitorId;
+export interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {
+    id: string;
     playerId: string;
 }
-export const CHEAT_drawVisitor = (visitorId: VisitorId, playerId: string): CHEAT_DrawVisitorAction => {
-    return { type: "CHEAT_DRAW_VISITOR", visitorId, playerId, };
+export const CHEAT_drawCard = (id: string, playerId: string): CHEAT_DrawCardAction => {
+    return { type: "CHEAT_DRAW_CARD", id, playerId, };
 };

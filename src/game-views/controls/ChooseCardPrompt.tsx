@@ -25,7 +25,12 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
         <ul className="ChooseCardPrompt-cards">
             {prompt.cards.map((card, i) => {
                 return <li className="ChooseCardPrompt-card" key={card.id}>
-                    {renderCard(card, props)}
+                    <button
+                        className="ChooseCardPrompt-cardButton"
+                        onClick={ () => props.onSelectCard(card)}
+                    >
+                        {renderCard(card, props)}
+                    </button>
                 </li>;
             })}
         </ul>
@@ -33,22 +38,16 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
 };
 
 const renderCard = (card: CardId, props: Props) => {
-    const onClick = () => props.onSelectCard(card);
     switch (card.type) {
         case "vine":
-            return <VineCard cardData={vineCards[card.id]} onClick={onClick} />;
+            return <VineCard cardData={vineCards[card.id]} />;
 
         case "order":
             return <OrderCard cardData={orderCards[card.id]} />;
 
         case "visitor":
             const cardData = visitorCards[card.id];
-            return <VisitorCard
-                interactive={true}
-                type={cardData.season}
-                cardData={cardData}
-                onClick={onClick}
-            />;
+            return <VisitorCard type={cardData.season} cardData={cardData} />;
     }
 };
 

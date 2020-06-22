@@ -1,0 +1,32 @@
+.ChooseWinePrompt-wineSelector {
+    font-style: italic;
+    padding: 0 16px;
+}
+
+.ChooseWinePrompt-wines {
+    display: inline-flex;
+}
+
+.ChooseWinePrompt-wineButton {
+    background: none;
+    border-radius: 50%;
+    margin-right: 4px;
+    outline: none;
+    padding: 4px;
+}
+.ChooseWinePrompt-wineButton:enabled {
+    cursor: pointer;
+}
+.ChooseWinePrompt-wineButton:enabled:hover .WineGlass--red {
+    fill: #890000;
+}
+.ChooseWinePrompt-wineButton:enabled:hover .WineGlass--white {
+    fill: #f6d000;
+}
+.ChooseWinePrompt-wineButton--selected {
+    background: #61dafb;
+}
+
+.ChooseWinePrompt-submit {
+    margin-left: 12px;
+}

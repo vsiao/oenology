@@ -10,7 +10,7 @@ import {
     gainVP,
     endTurn,
     gainCoins,
-    discardWine,
+    discardWines,
     trainWorker,
     makeWineFromGrapes,
     payCoins,
@@ -25,7 +25,7 @@ import {
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor } from "../GameState";
 import {
     promptForAction,
-    promptToChooseWine,
+    promptToDiscardWine,
     promptToMakeWine,
     promptToChooseField,
     promptToBuildStructure,
@@ -263,7 +263,7 @@ export const winterVisitorReducers: Record<
                     case "JUDGE_DRAW":
                         return endTurn(drawCards(state, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
-                        return promptToChooseWine(state, /* minValue */ 4);
+                        return promptToDiscardWine(state, { minValue: 4, limit: 1 });
                     default:
                         return state;
                 }
@@ -531,10 +531,10 @@ export const winterVisitorReducers: Record<
     taster: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
-                return promptToChooseWine(state);
+                return promptToDiscardWine(state, { limit: 1 });
             case "CHOOSE_WINE":
-                const currentTurnPlayerId = state.currentTurn.playerId;
-                const stateAfterDiscard = discardWine(state, currentTurnPlayerId, action.wine);
+                const wine = action.wines[0];
+                const stateAfterDiscard = discardWines(state, [wine]);
 
                 const mostValuableWine = Object.values(stateAfterDiscard.players)
                     .map((player) =>
@@ -544,7 +544,7 @@ export const winterVisitorReducers: Record<
                     )
                     .reduce((v1, v2) => Math.max(v1, v2));
 
-                if (action.wine.value > mostValuableWine) {
+                if (wine.value > mostValuableWine) {
                     return endTurn(gainVP(2, stateAfterDiscard));
                 } else {
                     return endTurn(stateAfterDiscard);

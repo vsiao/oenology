@@ -9,12 +9,6 @@
     padding: 4px;
     width: 160px;
 }
-.VisitorCard--interactive:hover {
-    bottom: 4px;
-    cursor: pointer;
-    position: relative;
-    transition: 100ms bottom ease-out;
-}
 .VisitorCard--summer {
     background: goldenrod;
 }
