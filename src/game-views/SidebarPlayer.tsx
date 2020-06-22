@@ -19,6 +19,9 @@ interface Props {
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
     const { player } = props;
+    const playerStructures = player.structures;
+    const hasMediumCellar = playerStructures["mediumCellar"];
+    const hasLargeCellar = playerStructures["largeCellar"];
     return <div className={`SidebarPlayer SidebarPlayer--${player.color}`}>
         <div className="SidebarPlayer-header">
             <span className="SidebarPlayer-playerName">{player.id}</span>
@@ -37,7 +40,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             {Object.entries(structureAbbreviations).map(([structureId, structureAbbr]) => {
                 if (!structureAbbr) return null;
                 return <li key={structureId} className={cx("SidebarPlayer-structure", {
-                    "SidebarPlayer-structure--built": player.structures[structureId as StructureId]
+                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId]
                 })}>{structureAbbr}</li>;
             })}
         </ul>
@@ -73,7 +76,10 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     )}
                 </div>
             </div>
-            <div className="SidebarPlayer-cellar">
+            <div className={cx("SidebarPlayer-cellar", {
+                "SidebarPlayer-cellar--withMedium": hasMediumCellar,
+                "SidebarPlayer-cellar--withLarge": hasLargeCellar,
+            })}>
                 <div className="SidebarPlayer-wines">
                     {player.cellar.red.map((hasWine, i) =>
                         <div className="SidebarPlayer-wine" key={i}>

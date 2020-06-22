@@ -66,6 +66,7 @@
 }
 .SidebarPlayer-structure--built {
     color: #222;
+    font-weight: 600;
 }
 
 .SidebarPlayer-fields {
@@ -115,6 +116,31 @@
 
 .SidebarPlayer-cellar {
     box-shadow: inset 0 1px 0 0 #ccc;
+    position: relative;
+    z-index: 0;
+}
+.SidebarPlayer-cellar:before,
+.SidebarPlayer-cellar:after  {
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, #efefef 5px, #efefef 10px);
+    bottom: 0;
+    content: "";
+    position: absolute;
+    top: 1px;
+    z-index: -1;
+}
+.SidebarPlayer-cellar:before {
+    left: 34%;
+    right: 34%;
+}
+.SidebarPlayer-cellar:after {
+    left: 68%;
+    right: 0;
+}
+.SidebarPlayer-cellar--withMedium:before {
+    display: none;
+}
+.SidebarPlayer-cellar--withLarge:after {
+    display: none;
 }
 
 .SidebarPlayer-workers {

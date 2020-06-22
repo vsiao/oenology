@@ -84,8 +84,8 @@ export interface PlayerState {
     trainedWorkers: TrainedWorker[],
     cardsInHand: CardId[];
     fields: Record<FieldId, Field>;
-    crushPad: Record<"red" | "white", TokenMap>;
-    cellar: Record<"red" | "white" | "blush" | "sparkling", TokenMap>;
+    crushPad: Record<GrapeColor, TokenMap>;
+    cellar: Record<WineColor, TokenMap>;
     structures: Record<StructureId, boolean>;
 }
 
