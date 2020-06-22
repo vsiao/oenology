@@ -77,7 +77,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                 }
             >
                 Add {wine ? <WineGlass color={wine.type}>
-                    {wine.grapeValue}
+                    {wine.cellarValue}
                 </WineGlass> : null} to cart
             </ChoiceButton>
         </div>
