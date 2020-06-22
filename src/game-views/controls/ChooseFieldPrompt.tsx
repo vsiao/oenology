@@ -6,6 +6,8 @@ import { FieldId, Field } from "../../game-data/GameState";
 import { chooseField } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 import PromptStructure from "./PromptStructure";
+import VineCard from "../cards/VineCard";
+import { vineCards } from "../../game-data/vineCards";
 
 interface Props {
     fields: Field[];
@@ -14,25 +16,23 @@ interface Props {
 
 const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure title="Choose a field">
-        <ul className="ChooseFieldPrompt-fields">
+        <div className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
-                return <li key={field.id}>
-                    <button onClick={() => props.chooseField(field.id)}>
-                        {JSON.stringify(field)}
-                    </button>
-                </li>;
+                return <div className="ChooseFieldPrompt-field" key={field.id} onClick={() => props.chooseField(field.id)}>
+                    {field.vines.map(vine => <VineCard cardData={vineCards[vine]} />)}
+                </div>;
             })}
-        </ul>
+        </div>
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     return {
         fields: Object.values(state.game.players[ownProps.playerId].fields)
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string }) => {
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string; }) => {
     return { chooseField: (id: FieldId) => dispatch(chooseField(id, ownProps.playerId)) };
 };
 

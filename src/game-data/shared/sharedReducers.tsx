@@ -2,6 +2,7 @@ import * as React from "react";
 import GameState, {
     CardType,
     WakeUpPosition,
+    Field,
     FieldId,
     TokenMap,
     CardId,
@@ -68,7 +69,12 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const yields = fieldYields(player.fields[fieldId]);
     return pushActivityLog(
         { type: "harvest", playerId: player.id, yields },
-        placeGrapes(state, yields)
+        placeGrapes(updatePlayer(state, player.id, {
+            fields: {
+                ...player.fields,
+                [fieldId]: { ...player.fields[fieldId], harvested: true }
+            }
+        }), yields)
     );
 };
 
@@ -319,6 +325,10 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                 ) as unknown) as GameState["workerPlacements"],
                 players: Object.fromEntries(
                     Object.entries(state.players).map(([playerId, playerState]) => {
+                        const newFieldsState: Record<FieldId, Field> = { ...playerState.fields };
+                        (Object.keys(newFieldsState) as FieldId[]).forEach((fieldId) => {
+                            newFieldsState[fieldId].harvested = false;
+                        });
                         return [
                             playerId,
                             {
@@ -333,6 +343,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                                     white: ageAll(playerState.crushPad.white),
                                 },
                                 cellar: ageCellar(playerState.cellar),
+                                fields: newFieldsState
                             },
                         ];
                     })
