@@ -7,3 +7,7 @@ export const firebaseConfig = {
     messagingSenderId: "",
     appId: "",
 };
+
+export const sandboxConfig = {
+    gameId: "",
+};

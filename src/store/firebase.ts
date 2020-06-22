@@ -1,13 +1,13 @@
 import * as firebase from "firebase/app";
 import { take } from "redux-saga/effects";
 import { GameAction } from "../game-data/gameActions";
-import { firebaseConfig } from "./config";
+import { firebaseConfig, sandboxConfig } from "./config";
 
 import "firebase/database";
 
 firebase.initializeApp(firebaseConfig);
 
-const gameLogsRef = firebase.database().ref(`gameLogs/test`);
+const gameLogsRef = firebase.database().ref(`gameLogs/${sandboxConfig.gameId}`);
 
 export function* publishToFirebase() {
     while (true) {
