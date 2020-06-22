@@ -21,20 +21,33 @@ import {
     loseVP,
     harvestField,
     updatePlayer,
+    ageSingle,
+    removeCardsFromHand,
+    fillOrder,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap } from "../GameState";
 import {
     promptForAction,
-    promptToDiscardWine,
     promptToMakeWine,
     promptToChooseField,
     promptToBuildStructure,
+    promptToChooseWine,
+    promptToChooseOrderCard,
+    promptToFillOrder,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
-import { trainWorkerDisabledReason, needGrapesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
+import {
+    fillOrderDisabledReason,
+    harvestFieldDisabledReason,
+    moneyDisabledReason,
+    needGrapesDisabledReason,
+    trainWorkerDisabledReason,
+} from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
+import { OrderId } from "../orderCards";
+import { structures } from "../structures";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -263,12 +276,80 @@ export const winterVisitorReducers: Record<
                     case "JUDGE_DRAW":
                         return endTurn(drawCards(state, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
-                        return promptToDiscardWine(state, { minValue: 4, limit: 1 });
+                        return promptToChooseWine(state, { minValue: 4, limit: 1 });
                     default:
                         return state;
                 }
             case "CHOOSE_WINE":
                 return endTurn(gainVP(3, state)); // TODO
+            default:
+                return state;
+        }
+    },
+    masterVintner: (state, action, pendingAction) => {
+        const player = state.players[state.currentTurn.playerId];
+        const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
+        const cost = structures[upgradeCellar].cost - 2;
+        const vintnerAction = pendingAction as PlayVisitorPendingAction & {
+            orderId: OrderId;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "MVINTNER_UPGRADE",
+                                    label: <>Upgrade cellar at <Coins>2</Coins> discount</>,
+                                    disabledReason: player.structures.largeCellar
+                                        ? "Your cellar is fully upgraded."
+                                        : moneyDisabledReason(state, cost),
+                                },
+                                {
+                                    id: "MVINTNER_FILL",
+                                    label: <>Age 1 <WineGlass /> and fill 1 <Order /></>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(
+                            setPendingAction(
+                                { ...vintnerAction, orderId: action.card.id, },
+                                removeCardsFromHand([action.card], state)
+                            ),
+                            [action.card.id]
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MVINTNER_UPGRADE":
+                        return endTurn(buildStructure(payCoins(cost, state), upgradeCellar));
+                    case "MVINTNER_FILL":
+                        return promptToChooseWine(state, { limit: 1 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                if (!vintnerAction.orderId) {
+                    // Haven't started filling an order yet: age the chosen wine
+                    const wine = action.wines[0];
+                    const idx = wine.value - 1;
+                    return promptToChooseOrderCard(updatePlayer(state, player.id, {
+                        cellar: {
+                            ...player.cellar,
+                            [wine.color]: ageSingle(
+                                player.cellar[wine.color].map((w, i) => w && i !== idx) as TokenMap,
+                                idx
+                            )
+                        },
+                    }));
+                } else {
+                    return endTurn(fillOrder(vintnerAction.orderId, action.wines, state));
+                }
             default:
                 return state;
         }
@@ -531,7 +612,7 @@ export const winterVisitorReducers: Record<
     taster: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARD":
-                return promptToDiscardWine(state, { limit: 1 });
+                return promptToChooseWine(state, { limit: 1 });
             case "CHOOSE_WINE":
                 const wine = action.wines[0];
                 const stateAfterDiscard = discardWines(state, [wine]);

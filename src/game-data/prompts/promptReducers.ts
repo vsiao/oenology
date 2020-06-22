@@ -81,21 +81,21 @@ export const promptToChooseField = (state: GameState): GameState => {
     return enqueueActionPrompt(state, { type: "chooseField" });
 };
 
-export const promptToFillOrder = (state: GameState, orderIds: OrderId[]): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
-        return state;
-    }
-    return enqueueActionPrompt(state, { type: "fillOrder", orderIds, });
-};
-
-export const promptToDiscardWine = (
+export const promptToChooseWine = (
     state: GameState,
     { minValue = 1, limit }: { minValue?: number; limit: number }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "discardWine", minValue, limit });
+    return enqueueActionPrompt(state, { type: "chooseWine", minValue, limit });
+};
+
+export const promptToFillOrder = (state: GameState, orderIds: OrderId[]): GameState => {
+    if (state.playerId !== state.currentTurn.playerId) {
+        return state;
+    }
+    return enqueueActionPrompt(state, { type: "fillOrder", orderIds, });
 };
 
 export const promptToMakeWine = (

@@ -176,6 +176,10 @@ export const winterVisitorCards = {
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
     ),
+    masterVintner: winterVisitorCard(
+        "Master Vintner",
+        <>Upgrade your cellar to the next level at a <Coins>2</Coins> discount OR age 1 <WineGlass /> and fill 1 <Order />.</>
+    ),
     mentor: winterVisitorCard(
         "Mentor",
         <>All players may make up to 2 <WineGlass />. Draw 1 <Vine /> or 1 <SummerVisitor /> for each opponent who does this.</>

@@ -210,29 +210,43 @@ export const summerVisitorReducers: Record<
         }
     },
     // handyman: s => endTurn(s),
-    landscaper: (state, action) => {
+    landscaper: (state, action, pendingAction) => {
+        const landscaperAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
         switch (action.type) {
             case "CHOOSE_CARD":
-                return promptForAction(state, {
-                    choices: [
-                        { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
-                        {
-                            id: "LANDSCAPER_SWITCH",
-                            label: <>Switch 2 <Vine /> on your fields</>,
-                            disabledReason: "Not implemented yet", // TODO
-                        },
-                    ],
-                });
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
+                                {
+                                    id: "LANDSCAPER_SWITCH",
+                                    label: <>Switch 2 <Vine /> on your fields</>,
+                                    disabledReason: "Not implemented yet", // TODO
+                                },
+                            ],
+                        });
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...landscaperAction, vineId: action.card.id },
+                                removeCardsFromHand([action.card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "LANDSCAPER_DRAW_PLANT":
-                        // TODO prompt to pick vine to plant, or pass
-                        return endTurn(drawCards(state, { vine: 1 }));
+                        return promptToChooseVineCard(drawCards(state, { vine: 1 })); // TODO allow passing
                     case "LANDSCAPER_SWITCH":
                         return endTurn(state); // TODO
                     default:
                         return state;
                 }
+            case "CHOOSE_FIELD":
+                return endTurn(plantVineInField(landscaperAction.vineId, action.fieldId, state));
             default:
                 return state;
         }
@@ -559,7 +573,7 @@ export const summerVisitorReducers: Record<
                     : promptForAction(state, {
                         playerId: state.playerId!,
                         choices: [
-                            { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor />.</> },
+                            { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
                             { id: "VENDOR_PASS", label: <>Pass</> },
                         ],
                     });

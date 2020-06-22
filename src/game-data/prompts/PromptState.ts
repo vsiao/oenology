@@ -5,7 +5,7 @@ import { OrderId } from "../orderCards";
 export type PromptState =
     | ChooseActionPromptState
     | ChooseCardPromptState
-    | DiscardWinePromptState
+    | ChooseWinePromptState
     | FillOrderPromptState
     | { type: "chooseField"; }
     | MakeWinePromptState
@@ -29,8 +29,8 @@ export interface ChooseCardPromptState {
     cards: CardId[];
 }
 
-export interface DiscardWinePromptState {
-    type: "discardWine";
+export interface ChooseWinePromptState {
+    type: "chooseWine";
     minValue: number;
     limit: number;
 }

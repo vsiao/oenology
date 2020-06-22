@@ -4,8 +4,7 @@ import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icon
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState from "../GameState";
-import { visitorCards } from "../visitors/visitorCards";
-import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
+import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason } from "../shared/sharedSelectors";
 import { structures, StructureId } from "../structures";
 
 export interface BoardAction {
@@ -22,15 +21,7 @@ export const summerActions: BoardAction[] = [
     {
         type: "playSummerVisitor",
         title: <>Play <SummerVisitor /></>,
-        disabledReason: state => {
-            return state.players[state.currentTurn.playerId].cardsInHand
-                .some(card => {
-                    return card.type === "visitor" &&
-                        visitorCards[card.id].season === "summer";
-                })
-                ? undefined
-                : "You don't have any summer visitors.";
-        },
+        disabledReason: state => needCardOfTypeDisabledReason(state, "summerVisitor"),
     },
     {
         type: "buySell",
@@ -72,15 +63,7 @@ export const winterActions: BoardAction[] = [
     {
         type: "playWinterVisitor",
         title: <>Play <WinterVisitor /></>,
-        disabledReason: state => {
-            return state.players[state.currentTurn.playerId].cardsInHand
-                .some(card => {
-                    return card.type === "visitor" &&
-                        visitorCards[card.id].season === "winter";
-                })
-                ? undefined
-                : "You don't have any winter visitors.";
-        },
+        disabledReason: state => needCardOfTypeDisabledReason(state, "winterVisitor"),
     },
     {
         type: "drawOrder",
@@ -103,7 +86,8 @@ export const winterActions: BoardAction[] = [
     },
     {
         type: "fillOrder",
-        title: <>Fill <Order /></>
+        title: <>Fill <Order /></>,
+        disabledReason: fillOrderDisabledReason,
     }
 ];
 
