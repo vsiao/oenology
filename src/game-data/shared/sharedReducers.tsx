@@ -30,7 +30,7 @@ export const discardWine = (state: GameState, playerId: string, wine: unknown) =
     return state;
 };
 
-const devaluedIndex = (value: number, tokens: TokenMap) => {
+export const devaluedIndex = (value: number, tokens: TokenMap) => {
     for (value--; value >= 0; --value) {
         if (!tokens[value]) {
             return value;
@@ -65,7 +65,7 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
 
 export const placeGrapes = (
     state: GameState,
-    values: { red: number; white: number }
+    values: { red: number; white: number; }
 ): GameState => {
     const player = state.players[state.currentTurn.playerId];
 
@@ -513,4 +513,4 @@ export const updatePlayer = (state: GameState, playerId: string, updates: Partia
             },
         },
     };
-}
+};

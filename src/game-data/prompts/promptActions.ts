@@ -33,6 +33,8 @@ export interface GrapeSpec {
 export interface WineIngredients {
     type: WineColor;
     grapes: GrapeSpec[];
+    grapeValue: number;
+    cellarValue: number;
 }
 interface MakeWineAction extends Action<"MAKE_WINE"> {
     ingredients: WineIngredients[];

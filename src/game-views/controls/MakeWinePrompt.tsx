@@ -4,14 +4,19 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import cx from 'classnames';
 import { GameAction } from "../../game-data/gameActions";
+import { WineColor, TokenMap } from "../../game-data/GameState";
 import { makeWine, GrapeSpec, WineIngredients } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
+import { devaluedIndex } from "../../game-data/shared/sharedReducers";
+
 
 interface Props {
+    cellar: Record<WineColor, TokenMap>;
+    cellarLimit: number;
     upToN: number;
     grapes: GrapeSpec[];
     onConfirm: (ingredients: WineIngredients[]) => void;
@@ -20,9 +25,10 @@ interface Props {
 const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     const [availableGrapes, setAvailableGrapes] = React.useState(props.grapes);
     const [selectedGrapes, setSelectedGrapes] = React.useState<GrapeSpec[]>([]);
+    const [localCellar, setCellar] = React.useState(props.cellar);
     const [cart, setCart] = React.useState<WineIngredients[]>([]);
-    const wine = wineFromGrapes(selectedGrapes);
-    const wineValueReducer = (v: number, g: GrapeSpec) => v + g.value;
+
+    const wine = wineFromGrapes(selectedGrapes, localCellar, props.cellarLimit);
 
     return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.upToN} wine`}>
         <div className="MakeWinePrompt-grapeSelector">
@@ -54,7 +60,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
             }
             <ChoiceButton
                 className="MakeWinePrompt-addToCart"
-                disabled={!wine}
+                disabled={!wine || wine.cellarValue <= 0}
                 onClick={wine
                     ? () => {
                         setCart([...cart, wine]);
@@ -62,12 +68,16 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                         setAvailableGrapes(
                             availableGrapes.filter(g => wine.grapes.indexOf(g) < 0)
                         );
+                        setCellar({
+                            ...localCellar,
+                            [wine.type]: localCellar[wine.type].map((w, i) => w || i === wine.cellarValue - 1)
+                        });
                     }
                     : undefined
                 }
             >
                 Add {wine ? <WineGlass color={wine.type}>
-                    {wine.grapes.reduce(wineValueReducer, 0)}
+                    {wine.grapeValue}
                 </WineGlass> : null} to cart
             </ChoiceButton>
         </div>
@@ -76,16 +86,19 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                 ? "Cart is empty"
                 : <ul className="MakeWinePrompt-wineList">
                     {cart.map(w => {
-                        const wineValue = w.grapes.reduce(wineValueReducer, 0);
-                        return <li key={`${w.type}${wineValue}`}>
+                        return <li key={`${w.type}${w.cellarValue}`}>
                             <button
                                 className="MakeWinePrompt-removeWineButton"
                                 onClick={() => {
                                     setCart(cart.filter(w2 => w !== w2));
-                                    setAvailableGrapes([...availableGrapes, ...w.grapes])
+                                    setAvailableGrapes([...availableGrapes, ...w.grapes]);
+                                    setCellar({
+                                        ...localCellar,
+                                        [w.type]: localCellar[w.type].map((v, i) => i === w.cellarValue - 1 ? false : v)
+                                    });
                                 }}
                             >
-                                <WineGlass color={w.type}>{wineValue}</WineGlass>
+                                <WineGlass color={w.type}>{w.cellarValue}</WineGlass>
                             </button>
                         </li>;
                     })}
@@ -98,34 +111,53 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                 Make wine!
             </ChoiceButton>
         </div>
-    </PromptStructure>
+    </PromptStructure>;
 };
 
-const wineFromGrapes = (grapes: GrapeSpec[]): WineIngredients | null => {
+const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>, maxValue: number): WineIngredients | null => {
     const numRed = grapes.filter(g => g.color === "red").length;
     const totalValue = grapes.reduce((v, g) => v + g.value, 0);
+
+    let color: WineColor;
     if (grapes.length === 1) {
-        return { type: grapes[0].color, grapes };
+        color = grapes[0].color;
     } else if (grapes.length === 2 && numRed === 1 && totalValue >= 4) {
-        return { type: "blush", grapes };
+        color = "blush";
     } else if (grapes.length === 3 && numRed === 2 && totalValue >= 7) {
-        return { type: "sparkling", grapes };
+        color = "sparkling";
+    } else {
+        return null;
     }
-    return null;
+
+    return {
+        type: color,
+        grapes,
+        grapeValue: totalValue,
+        cellarValue: devaluedIndex(Math.min(totalValue, maxValue), cellar[color]) + 1
+    };
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { cellarLimit?: number, playerId: string; }) => {
+    const { cellarLimit, playerId } = ownProps;
     const grapes: GrapeSpec[] = [];
-    const { red, white } = state.game.players[ownProps.playerId].crushPad;
+    const currentPlayer = state.game.players[playerId];
+    const { red, white } = currentPlayer.crushPad;
     red.forEach((r, i) => {
         if (r) grapes.push({ color: "red", value: i + 1 });
     });
     white.forEach((w, i) => {
         if (w) grapes.push({ color: "white", value: i + 1 });
     });
-    return { grapes, playerId: ownProps.playerId };
+    const hasMediumCellar = currentPlayer.structures["mediumCellar"];
+    const hasLargeCellar = currentPlayer.structures["largeCellar"];
+    return {
+        cellar: currentPlayer.cellar,
+        cellarLimit: cellarLimit ? cellarLimit : hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3,
+        grapes,
+        playerId
+    };
 };
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
     return {
         onConfirm: (grapes: WineIngredients[]) =>
             dispatch(makeWine(grapes, ownProps.playerId)),
