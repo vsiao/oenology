@@ -176,9 +176,17 @@ export const winterVisitorCards = {
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
     ),
+    marketer: winterVisitorCard(
+        "Marketer",
+        <>Draw 2 <SummerVisitor /> and gain <Coins>1</Coins> OR fill 1 <Order /> and gain <VP>1</VP> extra.</>
+    ),
     masterVintner: winterVisitorCard(
         "Master Vintner",
         <>Upgrade your cellar to the next level at a <Coins>2</Coins> discount OR age 1 <WineGlass /> and fill 1 <Order />.</>
+    ),
+    merchant: winterVisitorCard(
+        "Merchant",
+        <>Pay <Coins>3</Coins> to place <Grape color="red">1</Grape> and <Grape color="white">1</Grape> on your crush pad OR fill 1 <Order /> and gain <VP>1</VP> extra.</>
     ),
     mentor: winterVisitorCard(
         "Mentor",

@@ -24,6 +24,7 @@ import {
     ageSingle,
     removeCardsFromHand,
     fillOrder,
+    placeGrapes,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap } from "../GameState";
 import {
@@ -48,6 +49,7 @@ import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
+import Grape from "../../game-views/icons/Grape";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -286,13 +288,57 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    marketer: (state, action, pendingAction) => {
+        const marketerAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "MARKETER_DRAW", label: <>Draw 2 <SummerVisitor /> and gain <Coins>1</Coins></>, },
+                                {
+                                    id: "MARKETER_FILL",
+                                    label: <>Fill 1 <Order /> and gain <VP>1</VP> extra</>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(
+                            setPendingAction(
+                                { ...marketerAction, orderId: action.card.id, },
+                                removeCardsFromHand([action.card], state)
+                            ),
+                            [action.card.id]
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MARKETER_DRAW":
+                        return endTurn(gainCoins(1, drawCards(state, { summerVisitor: 2 })));
+                    case "MARKETER_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endTurn(
+                    fillOrder(marketerAction.orderId, action.wines, state, /* bonusVP */ true)
+                );
+            default:
+                return state;
+        }
+    },
     masterVintner: (state, action, pendingAction) => {
         const player = state.players[state.currentTurn.playerId];
         const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
         const cost = structures[upgradeCellar].cost - 2;
-        const vintnerAction = pendingAction as PlayVisitorPendingAction & {
-            orderId: OrderId;
-        };
+        const vintnerAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
+
         switch (action.type) {
             case "CHOOSE_CARD":
                 switch (action.card.type) {
@@ -350,6 +396,55 @@ export const winterVisitorReducers: Record<
                 } else {
                     return endTurn(fillOrder(vintnerAction.orderId, action.wines, state));
                 }
+            default:
+                return state;
+        }
+    },
+    merchant: (state, action, pendingAction) => {
+        const merchantAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId };
+
+        switch (action.type) {
+            case "CHOOSE_CARD":
+                switch (action.card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "MERCHANT_PLACE",
+                                    label: <>Pay <Coins>3</Coins> to place <Grape color="red">1</Grape> and <Grape color="white">1</Grape></>,
+                                    disabledReason: moneyDisabledReason(state, 3),
+                                },
+                                {
+                                    id: "MERCHANT_FILL",
+                                    label: <>Fill 1 <Order /> and gain <VP>1</VP> extra</>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(
+                            setPendingAction(
+                                { ...merchantAction, orderId: action.card.id, },
+                                removeCardsFromHand([action.card], state)
+                            ),
+                            [action.card.id]
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MERCHANT_PLACE":
+                        return endTurn(placeGrapes(payCoins(3, state), { red: 1, white: 1 }));
+                    case "MERCHANT_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endTurn(
+                    fillOrder(merchantAction.orderId, action.wines, state, /* bonusVP */ true)
+                );
             default:
                 return state;
         }

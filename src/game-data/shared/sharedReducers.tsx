@@ -123,9 +123,14 @@ export const makeWineFromGrapes = (
     );
 };
 
-export const fillOrder = (orderId: OrderId, winesToUse: WineSpec[], state: GameState): GameState => {
+export const fillOrder = (
+    orderId: OrderId,
+    winesToUse: WineSpec[],
+    state: GameState,
+    bonusVP = false
+): GameState => {
     const { residualIncome, wines, victoryPoints } = orderCards[orderId];
-    return gainResiduals(residualIncome, gainVP(victoryPoints,
+    return gainResiduals(residualIncome, gainVP(victoryPoints + (bonusVP ? 1 : 0),
         discardWines(
             pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, wines }, state),
             winesToUse
