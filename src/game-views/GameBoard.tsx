@@ -35,26 +35,34 @@ const GameBoard: React.FunctionComponent<Props> = props => {
             )}
         </ol>
         <div className="GameBoard-summerActions">
-            {summerActions.map(action =>
-                <BoardPlacement
-                    key={action.type}
-                    onClick={canPlaceSummerWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
-                    title={action.title}
-                    placement={action}
-                    season="summer"
-                    workers={workerPlacements[action.type]}
-                />)}
+            <table className="GameBoard-actionsTable">
+                <tbody>
+                {summerActions.map(action =>
+                    <BoardPlacement
+                        key={action.type}
+                        onClick={canPlaceSummerWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
+                        title={action.title}
+                        placement={action}
+                        season="summer"
+                        workers={workerPlacements[action.type]}
+                    />)}
+                </tbody>
+            </table>
         </div>
         <div className="GameBoard-winterActions">
-            {winterActions.map(action =>
-                <BoardPlacement
-                    key={action.type}
-                    onClick={canPlaceWinterWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
-                    title={action.title}
-                    placement={action}
-                    season="winter"
-                    workers={workerPlacements[action.type]}
-                />)}
+            <table className="GameBoard-actionsTable">
+                <tbody>
+                {winterActions.map(action =>
+                    <BoardPlacement
+                        key={action.type}
+                        onClick={canPlaceWinterWorker ? () => onPlaceWorker(action.type, pendingWorkerType) : undefined}
+                        title={action.title}
+                        placement={action}
+                        season="winter"
+                        workers={workerPlacements[action.type]}
+                    />)}
+                </tbody>
+            </table>
         </div>
     </div>;
 };

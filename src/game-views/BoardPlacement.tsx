@@ -10,15 +10,17 @@ import { AppState } from "../store/AppState";
 interface Props {
     title: React.ReactNode;
     disabledReason: string | undefined;
-    onClick: (() => void) | undefined;
+    numSpots: number;
+    bonusDisplay: React.ReactNode;
     season: string;
     workers: BoardWorker[];
+    onClick: (() => void) | undefined;
 }
 
 const BoardPlacement: React.FunctionComponent<Props> = props => {
-    const { title, disabledReason, onClick, season, workers } = props;
+    const { title, disabledReason, numSpots, bonusDisplay, season, workers, onClick } = props;
     const interactive = onClick && !disabledReason;
-    return <div
+    return <tr
         className={cx({
             "BoardPlacement": true,
             "BoardPlacement--interactive": interactive,
@@ -26,22 +28,27 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
         })}
         onClick={interactive ? onClick : undefined}
     >
-        <div className="BoardPlacement-title">
+        {new Array(numSpots).fill(0).map((_, i) => {
+            const worker = workers[i];
+            return <td key={i} className="BoardPlacement-spotCell">
+                <div className="BoardPlacement-spot">
+                    {worker
+                        ? <Worker workerType={worker.type} color={worker.color} />
+                        : (i === 0 ? bonusDisplay : null)}
+                </div>
+            </td>;
+        })}
+        <td className="BoardPlacement-title">
             {title}
-        </div>
-        <ul className="BoardPlacement-spots">
-            {new Array(3).fill(0).map((_, i) => {
-                const worker = workers[i];
-                return <li key={i} className="BoardPlacement-spot">
-                    {worker && <Worker workerType={worker.type} color={worker.color} />}
-                </li>;
-            })}
-        </ul>
-    </div>;
+        </td>
+    </tr>;
 };
 
 const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction }) => {
+    const numSpots = Math.ceil(Object.keys(state.game.players).length / 2);
     return {
+        numSpots,
+        bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : null,
         disabledReason: ownProps.placement.disabledReason &&
             ownProps.placement.disabledReason(state.game),
     };

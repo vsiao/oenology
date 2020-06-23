@@ -1,32 +1,13 @@
-.BoardPlacement {
-    align-items: center;
-    box-sizing: border-box;
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
-    padding: 0 1em;
-}
 .BoardPlacement--interactive:hover {
     background: #eee;
     cursor: pointer;
 }
 .BoardPlacement + .BoardPlacement {
-    border-top: 1px solid #ccc;
+    box-shadow: 0 -1px #ccc;
 }
 
-.BoardPlacement-title {
-    font-weight: 600;
-    margin-left: 1em;
-    text-transform: uppercase;
-}
-
-.BoardPlacement-spots {
-    display: flex;
-    justify-content: space-between;
-    max-width: 150px;
-    padding: 4px 0;
-    width: 30%;
+.BoardPlacement-spotCell {
+    width: 50px;
 }
 
 .BoardPlacement-spot {
@@ -34,8 +15,15 @@
     border: 2px dashed #ccc;
     border-radius: 50%;
     display: inline-flex;
+    font-weight: 600;
+    height: 2em;
     justify-content: center;
-    height: 1.4em;
-    width: 2.2em;
-    padding: 4px 0;
+    margin: .5em 1em;
+    width: 2.8em;
+}
+
+.BoardPlacement-title {
+    font-weight: 600;
+    padding: .5em 1em;
+    text-transform: uppercase;
 }
