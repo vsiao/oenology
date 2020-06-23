@@ -22,6 +22,11 @@
     width: 2.8em;
 }
 
+.BoardPlacement-spot--taken {
+    background: #ddd;
+    border-color: #666;
+}
+
 .BoardPlacement-title {
     font-weight: 600;
     padding: .5em 1em;

@@ -31,7 +31,10 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
         {new Array(numSpots).fill(0).map((_, i) => {
             const worker = workers[i];
             return <td key={i} className="BoardPlacement-spotCell">
-                <div className="BoardPlacement-spot">
+                <div className={cx({
+                    "BoardPlacement-spot": true,
+                    "BoardPlacement-spot--taken": !!worker,
+                })}>
                     {worker
                         ? <Worker workerType={worker.type} color={worker.color} />
                         : (i === 0 ? bonusDisplay : null)}

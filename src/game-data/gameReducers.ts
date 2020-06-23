@@ -46,7 +46,7 @@ export const initGame = (
     return {
         currentTurn: {
             type: "workerPlacement",
-            playerId: "viny",
+            playerId: "stfy",
             pendingAction: null,
             season: "summer"
         },
@@ -60,14 +60,14 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
+            srir: initPlayer("srir", "blue"),
             // linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
-            // srir: initPlayer("srir", "blue"),
             // thedrick: initPlayer("thedrick", "red"),
         },
-        tableOrder: ["stfy", "viny"],
+        tableOrder: ["stfy", "viny", "srir"],
         grapeIndex: 1,
-        wakeUpOrder: [null, { playerId: "stfy" }, { playerId: "viny" }, null, null, null, null],
+        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, { playerId: "srir" }, null, null, null, null],
         workerPlacements: {
             drawVine: [],
             giveTour: [],

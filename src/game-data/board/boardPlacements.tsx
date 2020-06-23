@@ -50,11 +50,12 @@ export const summerActions: BoardAction[] = [
         title: "Build one structure",
         bonus: <Coins>1</Coins>,
         disabledReason: state => {
-            const player = state.players[state.currentTurn.playerId]
+            const player = state.players[state.currentTurn.playerId];
+            const isFirst = state.workerPlacements.buildStructure.length === 0;
             return Object.entries(player.structures)
                 .some(([id, built]) =>
-                    // TODO take into account bonus
-                    !built && structures[id as StructureId].cost <= player.coins
+                    !built && structures[id as StructureId].cost <=
+                        (player.coins + (isFirst ? 1 : 0))
                 )
                 ? undefined
                 : "You don't have any structures you can build.";
@@ -96,7 +97,10 @@ export const winterActions: BoardAction[] = [
         type: "trainWorker",
         title: <>Pay <Coins>4</Coins> to train <Worker /></>,
         bonus: <Coins>1</Coins>,
-        disabledReason: state => trainWorkerDisabledReason(state, 4),
+        disabledReason: state => {
+            const isFirst = state.workerPlacements.buildStructure.length === 0;
+            return trainWorkerDisabledReason(state, isFirst ? 3 : 4)
+        },
     },
     {
         type: "fillOrder",

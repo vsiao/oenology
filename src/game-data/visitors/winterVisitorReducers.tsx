@@ -44,6 +44,7 @@ import {
     moneyDisabledReason,
     needGrapesDisabledReason,
     trainWorkerDisabledReason,
+    needWineDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -584,7 +585,11 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
-                        { id: "OENOLOGIST_AGE", label: <>Age all <WineGlass /> in your cellar twice</>, },
+                        {
+                            id: "OENOLOGIST_AGE",
+                            label: <>Age all <WineGlass /> in your cellar twice</>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
                         {
                             id: "OENOLOGIST_UPGRADE",
                             label: <>Pay <Coins>3</Coins> to upgrade your cellar to the next level</>,
@@ -600,11 +605,11 @@ export const winterVisitorReducers: Record<
                         return endTurn(updatePlayer(state, player.id, {
                             cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
-                    case "EONOLOGIST_UPGRADE":
-                        return buildStructure(
+                    case "OENOLOGIST_UPGRADE":
+                        return endTurn(buildStructure(
                             payCoins(3, state),
                             player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
-                        );
+                        ));
                     default:
                         return state;
                 }
@@ -768,7 +773,10 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARD":
                 return promptForAction(state, {
                     choices: [
-                        { id: "UOENOLOGIST_AGE", label: <>Age all <WineGlass /> in your cellar twice</>, },
+                        {
+                            id: "UOENOLOGIST_AGE",
+                            label: <>Age all <WineGlass /> in your cellar twice</>,
+                        },
                         {
                             id: "UOENOLOGIST_UPGRADE",
                             label: <>Lose <VP>1</VP> to upgrade your cellar to the next level</>,
@@ -784,11 +792,11 @@ export const winterVisitorReducers: Record<
                         return endTurn(updatePlayer(state, player.id, {
                             cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
-                    case "UEONOLOGIST_UPGRADE":
-                        return buildStructure(
+                    case "UOENOLOGIST_UPGRADE":
+                        return endTurn(buildStructure(
                             loseVP(1, state),
                             player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
-                        );
+                        ));
                     default:
                         return state;
                 }

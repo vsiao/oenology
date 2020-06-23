@@ -463,7 +463,7 @@ export const summerVisitorReducers: Record<
                             gainCoins(2, payCoins(2, state, action.playerId)),
                             action.playerId
                         );
-                    case "BANKER_PASS":
+                    case "SWINDLER_PASS":
                         return maybeEndTurn(gainVP(1, state), action.playerId);
                     default:
                         return state;
