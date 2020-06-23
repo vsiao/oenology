@@ -1,7 +1,16 @@
-.ChooseActionPrompt-choices {
+.ChooseActionPrompt-body {
     display: flex;
+    padding: 0 16px;
+}
+
+.ChooseActionPrompt-contextCard {
+    margin-right: 16px;
+}
+
+.ChooseActionPrompt-choices {
+    display: inline-flex;
     flex-flow: row wrap;
-    margin: -6px 10px -6px;
+    margin: -6px;
 }
 
 .ChooseActionPrompt-choiceButton {

@@ -39,7 +39,12 @@ export const promptForAction = (
     if (state.playerId !== playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, choices });
+    const contextVisitor = state.currentTurn.type === "workerPlacement" &&
+        state.currentTurn.pendingAction !== null &&
+        state.currentTurn.pendingAction.type === "playVisitor"
+        ? state.currentTurn.pendingAction.visitorId
+        : undefined;
+    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, contextVisitor, choices });
 };
 
 export const promptToChooseCard = (

@@ -82,12 +82,12 @@ export const summerVisitorReducers: Record<
                 return currentTurnPlayerId === state.playerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
-                        choices: [
-                            { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
-                            { id: "BANKER_PASS", label: <>Pass</> },
-                        ],
-                    });
+                          playerId: state.playerId!,
+                          choices: [
+                              { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
+                              { id: "BANKER_PASS", label: <>Pass</> },
+                          ],
+                      });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BANKER_GAIN":
@@ -446,16 +446,16 @@ export const summerVisitorReducers: Record<
                 return currentTurnPlayerId === state.playerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
-                        choices: [
-                            {
-                                id: "SWINDLER_GIVE",
-                                label: <>Give {playerName} <Coins>2</Coins>.</>,
-                                disabledReason: moneyDisabledReason(state, 2, state.playerId!),
-                            },
-                            { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
-                        ],
-                    });
+                          playerId: state.playerId!,
+                          choices: [
+                              {
+                                  id: "SWINDLER_GIVE",
+                                  label: <>Give {playerName} <Coins>2</Coins>.</>,
+                                  disabledReason: moneyDisabledReason(state, 2, state.playerId!),
+                              },
+                              { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
+                          ],
+                      });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SWINDLER_GIVE":
@@ -571,12 +571,12 @@ export const summerVisitorReducers: Record<
                 return currentTurnPlayerId === state.playerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
-                        choices: [
-                            { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
-                            { id: "VENDOR_PASS", label: <>Pass</> },
-                        ],
-                    });
+                          playerId: state.playerId!,
+                          choices: [
+                              { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
+                              { id: "VENDOR_PASS", label: <>Pass</> },
+                          ],
+                      });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "VENDOR_DRAW":

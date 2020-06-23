@@ -86,9 +86,8 @@ const renderCard = (card: CardId, props: Props) => {
             </li>;
 
         case "visitor":
-            const cardData = visitorCards[card.id];
             return <li key={card.id} className="PlayerMat-card">
-                <VisitorCard type={cardData.season} cardData={cardData} />
+                <VisitorCard cardData={visitorCards[card.id]} />
             </li>;
     }
 };

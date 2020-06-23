@@ -1,11 +1,11 @@
 .ChooseCardPrompt-cards {
     display: flex;
     flex-flow: row wrap;
-    margin: -6px 10px -6px;
+    margin: 0 12px;
 }
 
 .ChooseCardPrompt-cardButton {
-    margin: 4px;
+    margin: 0 4px;
 }
 .ChooseCardPrompt-cardButton:hover {
     bottom: 4px;

@@ -4,17 +4,17 @@ import { VisitorCardData } from "../../game-data/visitors/visitorCards";
 import "./VisitorCard.css";
 
 interface Props {
-    type: "summer" | "winter";
+    className?: string;
     cardData: VisitorCardData;
 }
 
 const VisitorCard: React.FunctionComponent<Props> = props => {
-    const { name, description } = props.cardData;
+    const { name, description, season } = props.cardData;
     return <div
         className={cx({
             "VisitorCard": true,
-            [`VisitorCard--${props.type}`]: true,
-        })}
+            [`VisitorCard--${season}`]: true,
+        }, props.className)}
     >
         <div className="VisitorCard-name">{name}</div>
         <div className="VisitorCard-description">

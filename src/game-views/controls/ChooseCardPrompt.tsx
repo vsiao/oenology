@@ -46,8 +46,7 @@ const renderCard = (card: CardId, props: Props) => {
             return <OrderCard cardData={orderCards[card.id]} />;
 
         case "visitor":
-            const cardData = visitorCards[card.id];
-            return <VisitorCard type={cardData.season} cardData={cardData} />;
+            return <VisitorCard cardData={visitorCards[card.id]} />;
     }
 };
 

@@ -1,6 +1,7 @@
 import { Coupon } from "../structures";
 import { CardId } from "../GameState";
 import { OrderId } from "../orderCards";
+import { VisitorId } from "../visitors/visitorCards";
 
 export type PromptState =
     | ChooseActionPromptState
@@ -20,6 +21,7 @@ export interface ChooseActionPromptState {
     type: "chooseAction";
     title: string;
     playerId: string;
+    contextVisitor?: VisitorId;
     choices: Choice[];
 }
 
