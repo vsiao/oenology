@@ -334,10 +334,10 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                             {
                                 ...playerState,
                                 coins: playerState.coins + playerState.residuals,
-                                trainedWorkers: playerState.trainedWorkers.map((w) => ({
-                                    ...w,
-                                    available: true,
-                                })),
+                                tempWorker: undefined,
+                                workers: playerState.workers
+                                    .filter(w => !w.isTemp)
+                                    .map(w => ({ ...w, available: true })),
                                 crushPad: {
                                     red: ageAll(playerState.crushPad.red),
                                     white: ageAll(playerState.crushPad.white),
@@ -385,7 +385,7 @@ const startWorkerPlacementTurn = (
         currentTurn: { type: "workerPlacement", playerId, pendingAction: null, season },
     };
     const player = state.players[playerId];
-    if (player.trainedWorkers.filter((w) => w.available).length === 0) {
+    if (player.workers.every(w => !w.available)) {
         // player is out of workers, auto-pass them
         return passToNextSeason(state, player.id);
     }
@@ -543,10 +543,10 @@ export const trainWorker = (state: GameState, playerId = state.currentTurn.playe
     return pushActivityLog(
         { type: "trainWorker", playerId },
         updatePlayer(state, playerId, {
-            trainedWorkers: [
-                ...state.players[playerId].trainedWorkers,
+            workers: [
+                ...state.players[playerId].workers,
                 { type: "normal", available: false },
-            ]
+            ],
         })
     );
 };

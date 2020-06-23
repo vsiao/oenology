@@ -97,7 +97,7 @@ const initPlayer = (id: string, color: PlayerColor): PlayerState => {
         coins: 0,
         residuals: 0,
         victoryPoints: 0,
-        trainedWorkers: [
+        workers: [
             { type: "grande", available: true },
             { type: "normal", available: true },
             { type: "normal", available: true },

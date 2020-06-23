@@ -28,6 +28,9 @@
 .Worker--yellow {
     fill: gold;
 }
+.Worker--temp {
+    fill: #999;
+}
 .Worker--disabled {
     fill: white;
 }

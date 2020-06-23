@@ -58,7 +58,16 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "WAKE_UP_6":
                     return chooseWakeUpIndex(5, gainVP(1, state));
                 case "WAKE_UP_7":
-                    return chooseWakeUpIndex(6, state); // TODO
+                    const player = state.players[state.currentTurn.playerId];
+                    return chooseWakeUpIndex(
+                        6,
+                        updatePlayer(state, player.id, {
+                            workers: [
+                                ...player.workers,
+                                { type: "normal", available: true, isTemp: true }
+                            ],
+                        })
+                    );
                 default:
                     return state;
             }
@@ -197,9 +206,9 @@ export const board = (state: GameState, action: GameAction): GameState => {
 
         case "PLACE_WORKER": {
             const player = state.players[state.currentTurn.playerId];
-            const workerIndex = player.trainedWorkers.reduce(
-                (previousValue, trainedWorker, currentIndex) =>
-                    trainedWorker.available && trainedWorker.type === action.workerType
+            const workerIndex = player.workers.reduce(
+                (previousValue, worker, currentIndex) =>
+                    worker.available && worker.type === action.workerType
                         ? currentIndex
                         : previousValue,
                 null as number | null
@@ -209,7 +218,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
             }
             state = {
                 ...updatePlayer(state, player.id, {
-                    trainedWorkers: player.trainedWorkers.map(
+                    workers: player.workers.map(
                         (w, i) => i === workerIndex ? { ...w, available: false } : w
                     ),
                 }),
@@ -218,7 +227,8 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     [action.placement]: [...state.workerPlacements[action.placement], {
                         type: action.workerType,
                         playerId: state.currentTurn.playerId,
-                        color: player.color
+                        color: player.color,
+                        isTemp: player.workers[workerIndex].isTemp,
                     }],
                 },
             };

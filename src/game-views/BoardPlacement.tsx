@@ -36,7 +36,7 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                     "BoardPlacement-spot--taken": !!worker,
                 })}>
                     {worker
-                        ? <Worker workerType={worker.type} color={worker.color} />
+                        ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
                         : (i === 0 ? bonusDisplay : null)}
                 </div>
             </td>;

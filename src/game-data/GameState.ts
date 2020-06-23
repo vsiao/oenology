@@ -81,7 +81,7 @@ export interface PlayerState {
     coins: number;
     residuals: number;
     victoryPoints: number;
-    trainedWorkers: TrainedWorker[],
+    workers: Worker[];
     cardsInHand: CardId[];
     fields: Record<FieldId, Field>;
     crushPad: Record<GrapeColor, TokenMap>;
@@ -90,14 +90,16 @@ export interface PlayerState {
 }
 
 export type WorkerType = "grande" | "normal";
-export interface TrainedWorker {
+export interface Worker {
     type: WorkerType;
     available: boolean;
+    isTemp?: boolean;
 }
 export interface BoardWorker {
     type: WorkerType,
     playerId: string,
     color: PlayerColor;
+    isTemp?: boolean;
 }
 
 export type CardId =

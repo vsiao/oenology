@@ -645,7 +645,7 @@ export const winterVisitorReducers: Record<
                             id: "PROFESSOR_GAIN",
                             label: <>Gain <VP>2</VP> if you have a total of 6 <Worker /></>,
                             disabledReason:
-                                playerState.trainedWorkers.length < 6
+                                playerState.workers.length < 6
                                     ? "You don't have enough workers."
                                     : undefined,
                         },
@@ -826,7 +826,7 @@ export const winterVisitorReducers: Record<
                         return endTurn(trainWorker(loseVP(1, state)));
                     case "UTEACHER_GAIN":
                         const numOpponents = Object.values(state.players)
-                            .filter(p => p.trainedWorkers.length === 6).length;
+                            .filter(p => p.workers.length >= 6).length;
                         return endTurn(gainVP(numOpponents, state));
                     default:
                         return state;

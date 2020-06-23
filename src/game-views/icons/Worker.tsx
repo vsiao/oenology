@@ -7,16 +7,18 @@ interface Props {
     className?: string;
     workerType?: WorkerType;
     color?: PlayerColor;
+    isTemp?: boolean;
     disabled?: boolean;
 }
 
-const Worker: React.FunctionComponent<Props> = ({ workerType, color, disabled }) => {
+const Worker: React.FunctionComponent<Props> = ({ workerType, color, isTemp, disabled }) => {
     return <svg
         className={cx({
             "Worker": true,
             "Worker--disabled": disabled,
             [`Worker--${workerType}`]: workerType,
             [`Worker--${color}`]: color,
+            "Worker--temp": isTemp,
         })}
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"

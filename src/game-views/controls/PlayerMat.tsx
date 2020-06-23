@@ -25,24 +25,24 @@ interface Props {
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
     const { playerState, setPendingWorkerType } = props;
-    const trainedWorkers = playerState.trainedWorkers;
-    const defaultAvailableWorkerIndex = trainedWorkers.reduce(
-        (previousValue, trainedWorker, currentIndex) =>
-            trainedWorker.available ? currentIndex : previousValue,
+    const workers = playerState.workers;
+    const defaultAvailableWorkerIndex = workers.reduce(
+        (previousValue, worker, currentIndex) =>
+            worker.available ? currentIndex : previousValue,
         null as number | null
     );
     const [highlightedIndex, setHighlightedIndex] = React.useState(defaultAvailableWorkerIndex);
     React.useEffect(() => {
         if (
             (highlightedIndex === null && defaultAvailableWorkerIndex !== null) ||
-            (highlightedIndex !== null && !trainedWorkers[highlightedIndex].available)
+            (highlightedIndex !== null && !workers[highlightedIndex].available)
         ) {
             setHighlightedIndex(defaultAvailableWorkerIndex);
             if (defaultAvailableWorkerIndex !== null) {
-                setPendingWorkerType(trainedWorkers[defaultAvailableWorkerIndex].type);
+                setPendingWorkerType(workers[defaultAvailableWorkerIndex].type);
             }
         }
-    }, [highlightedIndex, defaultAvailableWorkerIndex, trainedWorkers, setPendingWorkerType]);
+    }, [highlightedIndex, defaultAvailableWorkerIndex, workers, setPendingWorkerType]);
 
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />
@@ -51,7 +51,7 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
-                {trainedWorkers.map((worker, i) =>
+                {workers.map((worker, i) =>
                     <li key={i} className={cx({
                         "PlayerMat-worker": true,
                         "PlayerMat-worker--grande": worker.type === "grande",
@@ -63,7 +63,12 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                             setHighlightedIndex(i);
                         } : undefined}
                     >
-                        <Worker workerType={worker.type} color={playerState.color} disabled={!worker.available} />
+                        <Worker
+                            workerType={worker.type}
+                            color={playerState.color}
+                            isTemp={worker.isTemp}
+                            disabled={!worker.available}
+                        />
                     </li>
                 )}
             </ul>
