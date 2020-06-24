@@ -6,29 +6,36 @@ import { Coupon, structures, StructureId } from "../structures";
 
 export const buildStructureDisabledReason = (
     state: GameState,
-    coupon?: Coupon
+    coupon: Coupon = { kind: "discount", amount: 0 }
 ) => {
-    const player = state.players[state.currentTurn.playerId];
-    return Object.entries(player.structures)
-        .some(([id, built]) => {
-            if (built) {
-                // already built; can't build again
-                return false;
-            }
-            const baseCost = structures[id as StructureId].cost;
-            if (!coupon) {
-                return baseCost <= player.coins;
-            }
-            switch (coupon.kind) {
-                case "discount":
-                    return (baseCost - coupon.amount) <= player.coins;
-                case "voucher":
-                    return baseCost <= coupon.upToCost;
-            }
-        })
+    return Object.keys(structures)
+        .some(id => structureDisabledReason(state, id as StructureId, coupon) === undefined)
         ? undefined
         : "You don't have any structures you can build.";
 };
+
+export const structureDisabledReason = (
+    state: GameState,
+    id: StructureId,
+    coupon: Coupon
+): string | undefined => {
+    const player = state.players[state.currentTurn.playerId];
+    if (player.structures[id]) {
+        return "Already built";
+    }
+    if (id === "largeCellar" && !player.structures.mediumCellar) {
+        return "Must build medium cellar first";
+    }
+    const baseCost = structures[id as StructureId].cost;
+    switch (coupon.kind) {
+        case "discount":
+            return moneyDisabledReason(state, baseCost - coupon.amount, player.id);
+        case "voucher":
+            return baseCost > coupon.upToCost
+                ? `Can only build structures up to ${coupon.upToCost}`
+                : undefined;
+    }
+}
 
 export const fieldYields = (field: Field): { red: number; white: number; } => {
     return {

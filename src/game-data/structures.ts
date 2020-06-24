@@ -3,7 +3,6 @@ export type StructureId = "trellis" | "irrigation" | "yoke" | "windmill" | "cott
 export interface StructureData {
     name: string;
     cost: number;
-    disabledReason?: (structures: Record<StructureId, boolean>) => string;
 }
 
 interface Discount {
@@ -50,7 +49,6 @@ export const structures: Record<StructureId, StructureData> = {
     largeCellar: {
         name: "Large Cellar",
         cost: 6,
-        disabledReason: (structures) => !structures["mediumCellar"] ? "Medium Cellar has not been built" : ""
     }
 };
 

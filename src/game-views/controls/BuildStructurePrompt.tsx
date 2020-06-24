@@ -9,37 +9,30 @@ import { AppState } from "../../store/AppState";
 import Coins from "../icons/Coins";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
+import { structureDisabledReason } from "../../game-data/shared/sharedSelectors";
 
 interface Props {
-    coupon?: Coupon,
-    currentCoins: number,
-    currentStructures: Record<StructureId, boolean>;
+    structureOptions: {
+        id: StructureId;
+        label: React.ReactNode;
+        disabledReason: string | undefined;
+    }[];
     onSelectStructure: (structureId: StructureId) => void;
 }
 
 const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
-    const { coupon, currentCoins, currentStructures, onSelectStructure } = props;
-    const voucherFor = coupon?.kind === "voucher" ? coupon.upToCost : 0;
-    const discount = coupon?.kind === "discount" ? coupon.amount : 0;
+    const { structureOptions, onSelectStructure } = props;
 
     return <PromptStructure title="Build a structure">
         <ul className="BuildStructurePrompt-choices">
-            {Object.entries(structures).map(([structureId, structure]) => {
-                if (voucherFor && structure.cost > voucherFor) {
-                    return null;
-                }
-                const disabledReason = structure.disabledReason ? structure.disabledReason(currentStructures) : "";
-                const hasBuilt = currentStructures[structureId as StructureId];
-                const cost = voucherFor ? 0 : structure.cost - discount;
-                const canAfford = !cost || cost <= currentCoins;
-                return <li className="BuildStructurePrompt-choice" key={structureId}>
+            {structureOptions.map(({ id, label, disabledReason }) => {
+                return <li className="BuildStructurePrompt-choice" key={id}>
                     <ChoiceButton
                         className="BuildStructurePrompt-choiceButton"
-                        disabled={!!disabledReason || hasBuilt || !canAfford}
-                        onClick={() => onSelectStructure(structureId as StructureId)}
+                        disabled={!!disabledReason}
+                        onClick={() => onSelectStructure(id)}
                     >
-                        {structure.name}{' '}
-                        <Coins>{structure.cost}</Coins>
+                        {label}
                     </ChoiceButton>
                 </li>;
             })}
@@ -47,10 +40,20 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
+const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId: string; }) => {
+    const coupon = ownProps.coupon || { kind: "discount" , amount: 0 };
     return {
-        currentCoins: state.game.players[ownProps.playerId].coins,
-        currentStructures: state.game.players[ownProps.playerId].structures
+        structureOptions: Object.entries(structures)
+            .filter(([id, structure]) => coupon.kind !== "voucher" || structure.cost <= coupon.upToCost)
+            .map(([id, structure]) => ({
+                id: id as StructureId,
+                label: <>{structure.name} {
+                    coupon.kind === "voucher"
+                        ? null
+                        : <Coins>{structure.cost - coupon.amount}</Coins>
+                }</>,
+                disabledReason: structureDisabledReason(state.game, id as StructureId, coupon)
+            })),
     };
 };
 

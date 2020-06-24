@@ -237,8 +237,10 @@ const placeWorkerOrPass = (state: GameState, action: GameAction): GameState => {
 
             switch (action.placement) {
                 case "buildStructure":
+                    const bonus = hasPlacementBonus && state.workerPlacements.buildStructure.length === 1;
                     return promptToBuildStructure(
-                        setPendingAction({ type: "buildStructure" }, state)
+                        setPendingAction({ type: "buildStructure" }, state),
+                        bonus ? { kind: "discount", amount: 1 } : undefined
                     );
                 case "buySell":
                     return promptForAction(setPendingAction({ type: "buySell" }, state), {

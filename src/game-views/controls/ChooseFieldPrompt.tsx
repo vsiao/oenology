@@ -19,13 +19,13 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure title="Choose a field">
         <div className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
-                return <div className="ChooseFieldPrompt-field" key={field.id} onClick={() => props.chooseField(field.id)}>
+                return <div key={field.id} className="ChooseFieldPrompt-field" onClick={() => props.chooseField(field.id)}>
                     <div className="ChooseFieldPrompt-fieldHeader">
                         <Coins>{field.value}</Coins>
                     </div>
                     {field.vines.map(vineId => {
                         const { name, yields } = vineCards[vineId];
-                        return <div className="ChooseFieldPrompt-vine">
+                        return <div key={vineId} className="ChooseFieldPrompt-vine">
                             {name}
                             <div className="ChooseFieldPrompt-vineYields">
                                 {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>

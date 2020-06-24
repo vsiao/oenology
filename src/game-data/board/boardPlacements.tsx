@@ -5,7 +5,6 @@ import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState from "../GameState";
 import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
-import { structures, StructureId } from "../structures";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import WineGlass from "../../game-views/icons/WineGlass";
 
