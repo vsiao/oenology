@@ -2,6 +2,33 @@ import GameState, { Field, CardType, WineColor } from "../GameState";
 import { vineCards } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
+import { Coupon, structures, StructureId } from "../structures";
+
+export const buildStructureDisabledReason = (
+    state: GameState,
+    coupon?: Coupon
+) => {
+    const player = state.players[state.currentTurn.playerId];
+    return Object.entries(player.structures)
+        .some(([id, built]) => {
+            if (built) {
+                // already built; can't build again
+                return false;
+            }
+            const baseCost = structures[id as StructureId].cost;
+            if (!coupon) {
+                return baseCost <= player.coins;
+            }
+            switch (coupon.kind) {
+                case "discount":
+                    return (baseCost - coupon.amount) <= player.coins;
+                case "voucher":
+                    return baseCost <= coupon.upToCost;
+            }
+        })
+        ? undefined
+        : "You don't have any structures you can build.";
+};
 
 export const fieldYields = (field: Field): { red: number; white: number; } => {
     return {

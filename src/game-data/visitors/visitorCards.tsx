@@ -34,6 +34,10 @@ export const summerVisitorCards = {
         "Agriculturist",
         <>Plant 1 <Vine />. Then, if you have at least 3 different types of <Vine /> planted on that field, gain <VP>2</VP>.</>
     ),
+    artisan: summerVisitorCard(
+        "Artisan",
+        <>Choose 1: Gain <Coins>3</Coins>, build a structure at a <Coins>1</Coins> discount, or plant up to 2 <Vine />.</>
+    ),
     banker: summerVisitorCard(
         "Banker",
         <>Gain <Coins>5</Coins>. Each opponent may lose <VP>1</VP> to gain <Coins>3</Coins>.</>

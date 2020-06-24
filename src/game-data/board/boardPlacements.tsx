@@ -4,7 +4,7 @@ import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icon
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState from "../GameState";
-import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason } from "../shared/sharedSelectors";
+import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
 import { structures, StructureId } from "../structures";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import WineGlass from "../../game-views/icons/WineGlass";
@@ -50,15 +50,11 @@ export const summerActions: BoardAction[] = [
         title: "Build one structure",
         bonus: <Coins>1</Coins>,
         disabledReason: state => {
-            const player = state.players[state.currentTurn.playerId];
             const isFirst = state.workerPlacements.buildStructure.length === 0;
-            return Object.entries(player.structures)
-                .some(([id, built]) =>
-                    !built && structures[id as StructureId].cost <=
-                        (player.coins + (isFirst ? 1 : 0))
-                )
-                ? undefined
-                : "You don't have any structures you can build.";
+            return buildStructureDisabledReason(
+                state,
+                isFirst ? { kind: "discount", amount: 1 } : undefined
+            );
         },
     },
     {
