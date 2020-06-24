@@ -12,9 +12,10 @@ export type PromptState =
     | MakeWinePromptState
     | BuildStructurePromptState;
 
-export interface Choice {
+export interface Choice<DataT = unknown> {
     id: string;
     label: React.ReactNode;
+    data?: DataT;
     disabledReason?: string;
 }
 export interface ChooseActionPromptState {

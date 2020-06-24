@@ -1,7 +1,6 @@
 import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
 import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
-import { visitor } from "./visitors/visitorReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, UNSHUFFLED_CARDS } from "./shared/cardReducers";
 
@@ -12,7 +11,7 @@ export const game = (state: GameState, action: GameAction): GameState => {
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
     }
-    return visitor(board(prompt(state, action), action), action);
+    return board(prompt(state, action), action);
 };
 
 export const initGame = (
@@ -36,14 +35,14 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
-            srir: initPlayer("srir", "blue"),
+            // srir: initPlayer("srir", "blue"),
             // linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
             // thedrick: initPlayer("thedrick", "red"),
         },
-        tableOrder: ["stfy", "viny", "srir"],
+        tableOrder: ["stfy", "viny"],
         grapeIndex: 1,
-        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, { playerId: "srir" }, null, null, null, null],
+        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, null, null, null, null, null],
         workerPlacements: {
             drawVine: [],
             giveTour: [],

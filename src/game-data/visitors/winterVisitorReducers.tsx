@@ -174,6 +174,7 @@ export const winterVisitorReducers: Record<
                 return promptForAction(
                     setPendingAction({ ...gspeakerAction, mainActions: Object.keys(state.players), }, state),
                     {
+                        playerId: state.playerId!,
                         choices: [
                             {
                                 id: "GSPEAKER_TRAIN",
@@ -261,7 +262,7 @@ export const winterVisitorReducers: Record<
                         {
                             id: "JUDGE_DISCARD",
                             label: <>Discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP></>,
-                            disabledReason: undefined // TODO
+                            disabledReason: needWineDisabledReason(state, 4)
                         },
                     ],
                 });
@@ -275,7 +276,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(gainVP(3, state)); // TODO
+                return endTurn(gainVP(3, discardWines(state, action.wines)));
             default:
                 return state;
         }

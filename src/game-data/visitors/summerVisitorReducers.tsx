@@ -19,7 +19,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder } from "../shared/turnReducers";
+import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData } from "../shared/turnReducers";
 import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -285,21 +285,14 @@ export const summerVisitorReducers: Record<
                 );
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case "WAKE_UP_1":
-                    case "WAKE_UP_2":
-                    case "WAKE_UP_3":
-                    case "WAKE_UP_4":
-                    case "WAKE_UP_DRAW_SUMMER":
-                    case "WAKE_UP_DRAW_WINTER":
-                    case "WAKE_UP_6":
-                    case "WAKE_UP_7":
-                        return passToNextSeason({
+                    case "WAKE_UP":
+                        return passToNextSeason(chooseWakeUp(action.data as WakeUpChoiceData, {
                             ...state,
                             // Clear the previous wake-up position
                             wakeUpOrder: state.wakeUpOrder.map(
                                 (pos, i) => i === organizerAction.currentWakeUpPos ? null : pos
                             ) as GameState["wakeUpOrder"],
-                        });
+                        }));
                     default:
                         return state;
                 }

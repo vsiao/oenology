@@ -24,7 +24,7 @@ const enqueueActionPrompt = (state: GameState, prompt: PromptState): GameState =
     return { ...state, actionPrompts: [...state.actionPrompts, prompt] };
 };
 
-export const promptForAction = (
+export const promptForAction = <DataT = undefined>(
     state: GameState,
     {
         title = "Choose an action",
@@ -33,7 +33,7 @@ export const promptForAction = (
     }: {
         title?: string;
         playerId?: string;
-        choices: Choice[];
+        choices: Choice<DataT>[];
     }
 ): GameState => {
     if (state.playerId !== playerId) {
@@ -44,7 +44,7 @@ export const promptForAction = (
         state.currentTurn.pendingAction.type === "playVisitor"
         ? state.currentTurn.pendingAction.visitorId
         : undefined;
-    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, contextVisitor, choices });
+    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, contextVisitor, choices, });
 };
 
 export const promptToChooseCard = (

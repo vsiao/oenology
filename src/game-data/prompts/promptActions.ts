@@ -2,6 +2,7 @@ import { Action } from "redux";
 import { FieldId, GrapeColor, WineColor, CardId } from "../GameState";
 import { StructureId } from "../structures";
 import { WineSpec } from "../orderCards";
+import { Choice } from "./PromptState";
 
 export type PromptAction =
     | ChooseAction
@@ -13,10 +14,16 @@ export type PromptAction =
 
 interface ChooseAction extends Action<"CHOOSE_ACTION"> {
     choice: string;
+    data?: unknown;
     playerId: string;
 }
-export const chooseAction = (choice: string, playerId: string): PromptAction => {
-    return { type: "CHOOSE_ACTION", choice, playerId };
+export const chooseAction = ({ id, data }: Choice, playerId: string): PromptAction => {
+    return {
+        type: "CHOOSE_ACTION",
+        choice: id,
+        ...(data ? { data } : null),
+        playerId
+    };
 };
 
 interface ChooseCardAction extends Action<"CHOOSE_CARD"> {

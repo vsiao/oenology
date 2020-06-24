@@ -1,9 +1,11 @@
 .ChooseActionPrompt-body {
+    align-items: flex-start;
     display: flex;
     padding: 0 16px;
 }
 
 .ChooseActionPrompt-contextCard {
+    flex-shrink: 0;
     margin-right: 16px;
 }
 

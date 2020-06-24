@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState from "../GameState";
+import GameState, { WorkerPlacementTurn } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -14,137 +14,112 @@ import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildSt
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
-import { endTurn, setPendingAction, chooseWakeUpIndex, promptToDrawWakeUpVisitor, passToNextSeason } from "../shared/turnReducers";
+import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
+import { visitor } from "../visitors/visitorReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
+    switch (state.currentTurn.type) {
+        case "papaSetUp":
+            return state;
+
+        case "wakeUpOrder": {
+            if (action.type === "CHOOSE_ACTION" && action.choice === "WAKE_UP") {
+                return endTurn(chooseWakeUp(action.data as WakeUpChoiceData, state));
+            }
+            return state;
+        }
+        case "workerPlacement":
+            return workerPlacement(state, action);
+
+        case "fallVisitor":
+            switch (action.type) {
+                case "CHOOSE_ACTION":
+                    switch (action.choice) {
+                        case "FALL_DRAW_SUMMER":
+                            return endTurn(drawCards(state, { summerVisitor: 1 }));
+                        case "FALL_DRAW_WINTER":
+                            return endTurn(drawCards(state, { winterVisitor: 1 }));
+                        default:
+                            return state;
+                    }
+                default:
+                    return state;
+            }
+    }
+};
+
+const workerPlacement = (state: GameState, action: GameAction): GameState => {
+    const currentTurn = state.currentTurn as WorkerPlacementTurn;
+    if (!currentTurn.pendingAction) {
+        // Player must either place a worker or pass
+        return placeWorkerOrPass(state, action);
+    }
+
+    const pendingAction = currentTurn.pendingAction;
     const hasPlacementBonus = Object.keys(state.players).length > 2;
 
-    switch (action.type) {
-        case "CHOOSE_ACTION":
+    switch (pendingAction.type) {
+        case "buildStructure": {
+            if (action.type !== "BUILD_STRUCTURE") {
+                return state;
+            }
+            const structure = structures[action.structureId];
+            const bonus = hasPlacementBonus && state.workerPlacements.buildStructure.length === 1;
+            return endTurn(
+                buildStructure(payCoins(structure.cost - (bonus ? 1 : 0), state), action.structureId)
+            );
+        }
+        case "buyField":
+        case "sellField": {
+            if (action.type !== "CHOOSE_FIELD") {
+                return state;
+            }
+            const playerId = state.currentTurn.playerId;
+            const player = state.players[state.currentTurn.playerId];
+            const field = player.fields[action.fieldId];
+
+            const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
+            state = updatePlayer(bonus ? gainVP(1, state) : state, player.id, {
+                fields: {
+                    ...player.fields,
+                    [field.id]: { ...field, sold: !field.sold },
+                },
+            });
+            return endTurn(
+                field.sold
+                    ? pushActivityLog(
+                            { type: "buySellField", buy: true, playerId },
+                            payCoins(field.value, state)
+                        )
+                    : gainCoins(
+                            field.value,
+                            pushActivityLog(
+                                { type: "buySellField", buy: false, playerId },
+                                state
+                            )
+                        )
+            );
+        }
+        case "buySell":
+            if (action.type !== "CHOOSE_ACTION") {
+                return state;
+            }
             switch (action.choice) {
-                case "FALL_DRAW_SUMMER":
-                    return endTurn(drawCards(state, { summerVisitor: 1 }));
-                case "FALL_DRAW_WINTER":
-                    return endTurn(drawCards(state, { winterVisitor: 1 }));
                 case "BOARD_BUY_FIELD":
                     return promptToChooseField(setPendingAction({ type: "buyField" }, state));
                 case "BOARD_SELL_FIELD":
                     return promptToChooseField(setPendingAction({ type: "sellField" }, state));
                 case "BOARD_SELL_GRAPES":
                     return endTurn(state); // TODO (+bonus)
-                case "WAKE_UP_1":
-                    return chooseWakeUpIndex(0, state);
-                case "WAKE_UP_2":
-                    return chooseWakeUpIndex(1, drawCards(state, { vine: 1 }));
-                case "WAKE_UP_3":
-                    return chooseWakeUpIndex(2, drawCards(state, { order: 1 }));
-                case "WAKE_UP_4":
-                    return chooseWakeUpIndex(3, gainCoins(1, state));
-                case "WAKE_UP_5":
-                    return promptToDrawWakeUpVisitor(state);
-                case "WAKE_UP_DRAW_SUMMER":
-                    return chooseWakeUpIndex(4, drawCards(state, { summerVisitor: 1 }));
-                case "WAKE_UP_DRAW_WINTER":
-                    return chooseWakeUpIndex(4, drawCards(state, { winterVisitor: 1 }));
-                case "WAKE_UP_6":
-                    return chooseWakeUpIndex(5, gainVP(1, state));
-                case "WAKE_UP_7":
-                    const player = state.players[state.currentTurn.playerId];
-                    return chooseWakeUpIndex(
-                        6,
-                        updatePlayer(state, player.id, {
-                            workers: [
-                                ...player.workers,
-                                { type: "normal", available: true, isTemp: true }
-                            ],
-                        })
-                    );
                 default:
                     return state;
             }
-        case "CHOOSE_FIELD": {
-            if (
-                state.currentTurn.type !== "workerPlacement" ||
-                state.currentTurn.pendingAction === null ||
-                state.currentTurn.pendingAction.type === "playVisitor"
-            ) {
-                return state;
-            }
-            const playerId = state.currentTurn.playerId;
-            const player = state.players[playerId];
-            const field = player.fields[action.fieldId];
-            const pendingAction = state.currentTurn.pendingAction!;
 
-            switch (pendingAction.type) {
-                case "buyField":
-                case "sellField":
-                    const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
-                    state = updatePlayer(bonus ? gainVP(1, state) : state, player.id, {
-                        fields: {
-                            ...player.fields,
-                            [field.id]: { ...field, sold: !field.sold },
-                        },
-                    });
-                    return endTurn(
-                        field.sold
-                            ? pushActivityLog(
-                                  { type: "buySellField", buy: true, playerId },
-                                  payCoins(field.value, state)
-                              )
-                            : gainCoins(
-                                  field.value,
-                                  pushActivityLog(
-                                      { type: "buySellField", buy: false, playerId },
-                                      state
-                                  )
-                              )
-                    );
-                case "plantVine":
-                    // TODO bonus maybe plant 2 vines
-                    return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
-                case "harvestField":
-                    // TODO bonus maybe harvest 2 fields
-                    return endTurn(harvestField(state, field.id));
-                default:
-                    return state;
-            }
-        }
-        case "CHOOSE_CARD":
-            if (state.currentTurn.type !== "workerPlacement") {
-                return state;
-            }
-            switch (state.currentTurn.pendingAction?.type) {
-                case "plantVine":
-                    if (action.card.type !== "vine") {
-                        return state;
-                    }
-                    return promptToChooseField(
-                        removeCardsFromHand(
-                            [action.card],
-                            setPendingAction({ type: "plantVine", vineId: action.card.id }, state)
-                        )
-                    );
-                case "playVisitor":
-                    if (
-                        action.card.type !== "visitor" ||
-                        state.currentTurn.pendingAction?.visitorId !== undefined
-                    ) {
-                        return state;
-                    }
-                    // Further card-specific logic is handled by the `visitor` reducer.
-                    return pushActivityLog(
-                        { type: "visitor", playerId: state.currentTurn.playerId, visitorId: action.card.id },
-                        removeCardsFromHand(
-                            [action.card],
-                            setPendingAction(
-                                { ...state.currentTurn.pendingAction, visitorId: action.card.id },
-                                state
-                            )
-                        )
-                    );
-                case "fillOrder":
+        case "fillOrder":
+            switch (action.type) {
+                case "CHOOSE_CARD":
                     if (action.card.type !== "order") {
                         return state;
                     }
@@ -155,46 +130,59 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         ),
                         [action.card.id]
                     );
+                case "CHOOSE_WINE":
+                    const orderId = pendingAction.orderId!
+                    const bonus = hasPlacementBonus && state.workerPlacements.fillOrder.length === 1;
+                    return endTurn(fillOrder(orderId, action.wines, state, /* bonusVP */ bonus));
                 default:
                     return state;
             }
-        case "CHOOSE_WINE": {
-            if (
-                state.currentTurn.type !== "workerPlacement" ||
-                state.currentTurn.pendingAction?.type !== "fillOrder"
-            ) {
+
+        case "harvestField":
+            if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            const orderId = state.currentTurn.pendingAction.orderId!
-            const bonus = hasPlacementBonus && state.workerPlacements.fillOrder.length === 1;
-            return endTurn(fillOrder(orderId, action.wines, state, /* bonusVP */ bonus));
-        }
-        case "MAKE_WINE":
-            if (
-                state.currentTurn.type !== "workerPlacement" ||
-                state.currentTurn.pendingAction?.type !== "makeWine"
-            ) {
+            // TODO bonus maybe harvest 2 fields
+            return endTurn(harvestField(state, action.fieldId));
+
+        case "makeWine":
+            if (action.type !== "MAKE_WINE") {
                 return state;
             }
             return endTurn(makeWineFromGrapes(state, action.ingredients));
 
-        case "BUILD_STRUCTURE": {
-            if (
-                state.currentTurn.type !== "workerPlacement" ||
-                state.currentTurn.pendingAction?.type !== "buildStructure"
-            ) {
-                return state;
+        case "plantVine":
+            switch (action.type) {
+                case "CHOOSE_CARD":
+                    if (action.card.type !== "vine") {
+                        return state;
+                    }
+                    return promptToChooseField(
+                        removeCardsFromHand(
+                            [action.card],
+                            setPendingAction({ type: "plantVine", vineId: action.card.id }, state)
+                        )
+                    );
+                case "CHOOSE_FIELD":
+                    // TODO bonus maybe plant 2 vines
+                    return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
+                default:
+                    return state;
             }
-            const structure = structures[action.structureId];
-            const bonus = hasPlacementBonus && state.workerPlacements.buildStructure.length === 1;
-            return endTurn(
-                buildStructure(payCoins(structure.cost - (bonus ? 1 : 0), state), action.structureId)
-            );
-        }
+
+        case "playVisitor":
+            return visitor(state, action);
+
+        case "sellGrapes":
+            return state;
+    }
+};
+
+const placeWorkerOrPass = (state: GameState, action: GameAction): GameState => {
+    const hasPlacementBonus = Object.keys(state.players).length > 2;
+
+    switch (action.type) {
         case "PASS":
-            if (state.currentTurn.type !== "workerPlacement") {
-                throw new Error("Unexpected state: can only pass a worker placement turn");
-            }
             return passToNextSeason(state);
 
         case "PLACE_WORKER": {

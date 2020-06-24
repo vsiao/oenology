@@ -53,8 +53,19 @@ export const allWines = (state: GameState, playerId = state.currentTurn.playerId
     return cellarWines;
 };
 
-export const needWineDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
-    return allWines(state, playerId).length > 0 ? undefined : "You don't have any wine";
+export const needWineDisabledReason = (
+    state: GameState,
+    minValue = 1,
+    playerId = state.currentTurn.playerId
+) => {
+    const wines = allWines(state, playerId);
+    if (wines.length === 0) {
+        return "You don't have any wine.";
+    }
+    if (wines.every(w => w.value < minValue)) {
+        return `You don't have any wines of value ${minValue} or more.`
+    }
+    return undefined;
 };
 
 export const canFillOrderWithWines = (orderId: OrderId, wines: WineSpec[]): false | WineSpec[] => {
@@ -73,7 +84,7 @@ export const canFillOrderWithWines = (orderId: OrderId, wines: WineSpec[]): fals
 };
 
 export const fillOrderDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
-    return needWineDisabledReason(state, playerId) ||
+    return needWineDisabledReason(state, 1, playerId) ||
         needCardOfTypeDisabledReason(state, "order", playerId) ||
         (state.players[playerId].cardsInHand.some(card => {
             return card.type === "order" &&

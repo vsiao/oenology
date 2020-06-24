@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
-import { ChooseActionPromptState } from "../../game-data/prompts/PromptState";
+import { ChooseActionPromptState, Choice } from "../../game-data/prompts/PromptState";
 import { chooseAction } from "../../game-data/prompts/promptActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
@@ -12,7 +12,7 @@ import { visitorCards } from "../../game-data/visitors/visitorCards";
 
 interface Props {
     prompt: ChooseActionPromptState;
-    onSelectChoice: (choice: string, playerId: string) => void;
+    onSelectChoice: (choice: Choice, playerId: string) => void;
 }
 
 const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
@@ -31,7 +31,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
                         <ChoiceButton
                             className="ChooseActionPrompt-choiceButton"
                             disabled={choice.disabledReason !== undefined}
-                            onClick={() => props.onSelectChoice(choice.id, prompt.playerId)}
+                            onClick={() => props.onSelectChoice(choice, prompt.playerId)}
                         >
                             {choice.label}
                         </ChoiceButton>
@@ -44,7 +44,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
-        onSelectChoice: (choice: string, playerId: string) => dispatch(chooseAction(choice, playerId))
+        onSelectChoice: (choice: Choice, playerId: string) => dispatch(chooseAction(choice, playerId))
     };
 }
 
