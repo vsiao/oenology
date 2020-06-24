@@ -24,7 +24,6 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
         className={cx({
             "BoardPlacement": true,
             "BoardPlacement--interactive": interactive,
-            [`BoardPlacement--${season}`]: true,
         })}
         onClick={interactive ? onClick : undefined}
     >
@@ -33,6 +32,7 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
             return <td key={i} className="BoardPlacement-spotCell">
                 <div className={cx({
                     "BoardPlacement-spot": true,
+                    [`BoardPlacement-spot--${season}`]: true,
                     "BoardPlacement-spot--taken": !!worker,
                 })}>
                     {worker
