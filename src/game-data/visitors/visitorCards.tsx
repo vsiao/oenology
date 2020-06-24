@@ -66,6 +66,10 @@ export const summerVisitorCards = {
     //     "Handyman",
     //     <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
     // ),
+    homesteader: summerVisitorCard(
+        "Homesteader",
+        <>Build 1 structure at a <Coins>3</Coins> discount OR plant up to 2 <Vine />. You may lose <VP>1</VP> to do both.</>
+    ),
     landscaper: summerVisitorCard(
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,

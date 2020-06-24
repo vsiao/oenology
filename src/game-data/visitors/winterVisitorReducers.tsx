@@ -684,7 +684,11 @@ export const winterVisitorReducers: Record<
                     case "SCHOLAR_TRAIN":
                         return endTurn(trainWorker(payCoins(3, state)));
                     case "SCHOLAR_BOTH":
-                        return endTurn(trainWorker(payCoins(3, drawCards(state, { order: 2 }))));
+                        return endTurn(
+                            trainWorker(payCoins(3,
+                                drawCards(loseVP(1, state), { order: 2 })
+                            ))
+                        );
                     default:
                         return state;
                 }

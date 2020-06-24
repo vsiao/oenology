@@ -24,10 +24,11 @@ export const visitor = (state: GameState, action: GameAction) => {
     let pendingAction = currentTurn.pendingAction;
     if (
         action.type === "CHOOSE_CARDS" &&
-        action.cards![0].type === "visitor" &&
+        action.cards &&
+        action.cards[0].type === "visitor" &&
         currentTurn.pendingAction.visitorId === undefined
     ) {
-        const card = action.cards![0];
+        const card = action.cards[0];
         pendingAction = { ...pendingAction, visitorId: card.id };
         state = pushActivityLog(
             { type: "visitor", playerId: currentTurn.playerId, visitorId: card.id },

@@ -50,6 +50,9 @@ export const loseVP = (numVP: number, state: GameState, playerId = state.current
     editVP(-numVP, state, playerId);
 
 const editCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) => {
+    if (numCoins === 0) {
+        return state;
+    }
     const playerState = state.players[playerId];
     return pushActivityLog(
         { type: "coins", playerId, delta: numCoins },
@@ -58,7 +61,7 @@ const editCoins = (numCoins: number, state: GameState, playerId = state.currentT
 };
 export const gainCoins = editCoins;
 export const payCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) =>
-    editCoins(-numCoins, state, playerId);
+    editCoins(-Math.max(0, numCoins), state, playerId);
 
 const editResiduals = (
     numResiduals: number,

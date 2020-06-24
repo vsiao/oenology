@@ -12,14 +12,14 @@ import {
     payCoins,
     plantVineInField,
 } from "../shared/sharedReducers";
-import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
+import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData } from "../shared/turnReducers";
+import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, movePendingCardToDiscard } from "../shared/turnReducers";
 import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -207,6 +207,90 @@ export const summerVisitorReducers: Record<
         }
     },
     // handyman: s => endTurn(s),
+    homesteader: (state, action,pendingAction) => {
+        const homesteaderAction = pendingAction as PlayVisitorPendingAction & {
+            doBoth: boolean;
+            vineId: VineId;
+            secondPlant: boolean;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (!action.cards) {
+                    return endTurn(state);
+                }
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "HOMESTEADER_BUILD",
+                                    label: <>Build 1 structure at a <Coins>3</Coins> discount</>,
+                                    disabledReason: undefined, // TODO
+                                },
+                                {
+                                    id: "HOMESTEADER_PLANT",
+                                    label: <>Plant up to 2 <Vine /></>,
+                                    disabledReason: plantVineDisabledReason(state),
+                                },
+                                {
+                                    id: "HOMESTEADER_BOTH",
+                                    label: <>Do both (lose <VP>1</VP>)</>,
+                                    disabledReason: undefined, // TODO
+                                },
+                            ],
+                        });
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...homesteaderAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HOMESTEADER_BUILD":
+                        return promptToBuildStructure(state, { kind: "discount", amount: 3 });
+                    case "HOMESTEADER_PLANT":
+                        return promptToChooseVineCard(state);
+                    case "HOMESTEADER_BOTH":
+                        return promptToBuildStructure(
+                            loseVP(1, setPendingAction({ ...homesteaderAction, doBoth: true }, state)),
+                            { kind: "discount", amount: 3 }
+                        );
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                const structure = structures[action.structureId];
+                state = buildStructure(payCoins(structure.cost - 3, state), action.structureId);
+
+                return homesteaderAction.doBoth
+                    ? promptToChooseVineCard(state)
+                    : endTurn(state);
+
+            case "CHOOSE_FIELD":
+                state = plantVineInField(homesteaderAction.vineId, action.fieldId, state)
+                const canPlantAgain = !homesteaderAction.secondPlant &&
+                    plantVineDisabledReason(state) === undefined;
+
+                return canPlantAgain
+                    ? promptToChooseVineCard(
+                          setPendingAction(
+                              { ...homesteaderAction, secondPlant: true },
+                              movePendingCardToDiscard(state)
+                          ),
+                          /* bonus */ true
+                      )
+                    : endTurn(state);
+
+            default:
+                return state;
+        }
+    },
     landscaper: (state, action, pendingAction) => {
         const landscaperAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
         switch (action.type) {
@@ -399,7 +483,7 @@ export const summerVisitorReducers: Record<
                     choices: [
                         { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
                         { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins></>, },
-                        { id: "SPONSOR_BOTH", label: <>Lose <VP>1</VP> to do both</>, },
+                        { id: "SPONSOR_BOTH", label: <>Do both (lose <VP>1</VP>)</>, },
                     ],
                 });
             case "CHOOSE_ACTION":
