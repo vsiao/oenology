@@ -4,27 +4,15 @@ import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
 import {
-    ageCellar,
     buildStructure,
-    drawCards,
     gainVP,
-    endTurn,
     gainCoins,
-    discardWines,
     trainWorker,
-    makeWineFromGrapes,
     payCoins,
-    discardCards,
-    setPendingAction,
     gainResiduals,
     loseResiduals,
     loseVP,
-    harvestField,
     updatePlayer,
-    ageSingle,
-    removeCardsFromHand,
-    fillOrder,
-    placeGrapes,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap } from "../GameState";
 import {
@@ -51,6 +39,9 @@ import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
+import { endTurn, setPendingAction } from "../shared/turnReducers";
+import { discardCards, drawCards, removeCardsFromHand } from "../shared/cardReducers";
+import { makeWineFromGrapes, harvestField, fillOrder, ageSingle, placeGrapes, ageCellar, discardWines } from "../shared/grapeWineReducers";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,

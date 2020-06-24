@@ -16,13 +16,6 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
         // Wait for action to be published to firebase before applying
         return state;
     }
-    switch (action.type) {
-        case "START_GAME":
-            return {
-                ...state,
-                game: initGame(state.playerId, action.shuffledCards)
-            };
-    }
     return {
         ...state,
         game: game(state.game, action),

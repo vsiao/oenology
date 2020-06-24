@@ -11,7 +11,7 @@ import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { devaluedIndex } from "../../game-data/shared/sharedReducers";
+import { devaluedIndex } from "../../game-data/shared/grapeWineReducers";
 
 
 interface Props {

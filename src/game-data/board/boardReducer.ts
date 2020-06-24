@@ -2,28 +2,21 @@ import { GameAction } from "../gameActions";
 import GameState from "../GameState";
 import {
     buildStructure,
-    drawCards,
-    endTurn,
     gainCoins,
-    harvestField,
-    makeWineFromGrapes,
     payCoins,
-    removeCardsFromHand,
-    setPendingAction,
     trainWorker,
-    passToNextSeason,
-    chooseWakeUpIndex,
     gainVP,
-    promptToDrawWakeUpVisitor,
     plantVineInField,
     updatePlayer,
     pushActivityLog,
-    fillOrder,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard, promptToChooseOrderCard, promptToFillOrder } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
+import { endTurn, setPendingAction, chooseWakeUpIndex, promptToDrawWakeUpVisitor, passToNextSeason } from "../shared/turnReducers";
+import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
+import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     const hasPlacementBonus = Object.keys(state.players).length > 2;

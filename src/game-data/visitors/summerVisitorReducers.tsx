@@ -6,20 +6,11 @@ import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import {
     buildStructure,
-    drawCards,
-    endTurn,
     gainCoins,
     gainVP,
-    harvestField,
     loseVP,
     payCoins,
-    placeGrapes,
-    promptForWakeUpOrder,
-    setPendingAction,
-    passToNextSeason,
-    removeCardsFromHand,
     plantVineInField,
-    makeWineFromGrapes
 } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
@@ -28,6 +19,9 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
+import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder } from "../shared/turnReducers";
+import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
+import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
