@@ -50,10 +50,10 @@ export const summerVisitorCards = {
         "Buyer",
         <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad OR discard 1 <Grape /> to gain <Coins>2</Coins> and <VP>1</VP>.</>
     ),
-    // contractor: summerVisitorCard(
-    //     "Contractor",
-    //     <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
-    // ),
+    contractor: summerVisitorCard(
+        "Contractor",
+        <>Choose 2: Gain <VP>1</VP>, build 1 structure, or plant 1 <Vine />.</>
+    ),
     cultivator: summerVisitorCard(
         "Cultivator",
         <>Plant 1 <Vine />. You may plant it on a field even if the total value of that field exceeds the max vine value.</>,

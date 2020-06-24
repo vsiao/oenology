@@ -226,7 +226,58 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // contractor: s => endTurn(s),
+    contractor: (state, action, pendingAction) => {
+        const contractorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "CONTRACTOR_GAIN", label: <>Gain <VP>1</VP></>, },
+                                {
+                                    id: "CONTRACTOR_BUILD",
+                                    label: <>Build 1 structure</>,
+                                    disabledReason: buildStructureDisabledReason(state),
+                                },
+                                {
+                                    id: "CONTRACTOR_PLANT",
+                                    label: <>Plant 1 <Vine /></>,
+                                    disabledReason: plantVineDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "vine":
+                        return promptToChooseField(
+                            setPendingAction(
+                                { ...contractorAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
+                            )
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CONTRACTOR_GAIN":
+                        return endTurn(gainVP(1, state));
+                    case "CONTRACTOR_BUILD":
+                        return promptToBuildStructure(state);
+                    case "CONTRACTOR_PLANT":
+                        return promptToChooseVineCard(state);
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                return endTurn(buildStructure(state, action.structureId));
+            case "CHOOSE_FIELD":
+                return endTurn(plantVineInField(contractorAction.vineId, action.fieldId, state));
+            default:
+                return state;
+        }
+    },
     cultivator: (state, action, pendingAction) => {
         const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
