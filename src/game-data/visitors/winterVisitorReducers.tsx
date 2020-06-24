@@ -51,7 +51,7 @@ export const winterVisitorReducers: Record<
         const player = state.players[state.currentTurn.playerId];
         const numCards = player.cardsInHand.length;
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "ASSESSOR_GAIN", label: <>Gain <Coins>1</Coins> for each card in your hand</>, },
@@ -77,7 +77,7 @@ export const winterVisitorReducers: Record<
     },
     bottler: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptToMakeWine(state, /* upToN */ 3);
             case "MAKE_WINE":
                 const wineByType: { [type in WineColor]?: boolean } = {};
@@ -90,7 +90,7 @@ export const winterVisitorReducers: Record<
     },
     crushExpert: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "CRUSHEX_GAIN", label: <>Gain <Coins>3</Coins> and draw 1 <Order /></>, },
@@ -118,7 +118,7 @@ export const winterVisitorReducers: Record<
     },
     crusher: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "CRUSHER_GAIN", label: <>Gain <Coins>3</Coins> and draw 1 <SummerVisitor /></>, },
@@ -148,7 +148,7 @@ export const winterVisitorReducers: Record<
     },
     designer: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptToBuildStructure(state);
             case "BUILD_STRUCTURE":
                 state = buildStructure(state, action.structureId);
@@ -170,7 +170,7 @@ export const winterVisitorReducers: Record<
             return mainActions.length === 0 ? endTurn(state2) : state2;
         };
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(
                     setPendingAction({ ...gspeakerAction, mainActions: Object.keys(state.players), }, state),
                     {
@@ -211,14 +211,14 @@ export const winterVisitorReducers: Record<
     },
     // governor: (state, action, pendingAction) => {
     //     switch (action.type) {
-    //         case "CHOOSE_CARD":
+    //         case "CHOOSE_CARDS":
     //         default:
     //             return state;
     //     }
     // },
     harvestExpert: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -255,7 +255,7 @@ export const winterVisitorReducers: Record<
     },
     judge: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "JUDGE_DRAW", label: <>Draw 2 <SummerVisitor /></>, },
@@ -285,8 +285,9 @@ export const winterVisitorReducers: Record<
         const marketerAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptForAction(state, {
                             choices: [
@@ -301,10 +302,10 @@ export const winterVisitorReducers: Record<
                     case "order":
                         return promptToFillOrder(
                             setPendingAction(
-                                { ...marketerAction, orderId: action.card.id, },
-                                removeCardsFromHand([action.card], state)
+                                { ...marketerAction, orderId: card.id, },
+                                removeCardsFromHand([card], state)
                             ),
-                            [action.card.id]
+                            [card.id]
                         );
                     default:
                         return state;
@@ -333,8 +334,9 @@ export const winterVisitorReducers: Record<
         const vintnerAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptForAction(state, {
                             choices: [
@@ -355,10 +357,10 @@ export const winterVisitorReducers: Record<
                     case "order":
                         return promptToFillOrder(
                             setPendingAction(
-                                { ...vintnerAction, orderId: action.card.id, },
-                                removeCardsFromHand([action.card], state)
+                                { ...vintnerAction, orderId: card.id, },
+                                removeCardsFromHand([card], state)
                             ),
-                            [action.card.id]
+                            [card.id]
                         );
                     default:
                         return state;
@@ -397,8 +399,9 @@ export const winterVisitorReducers: Record<
         const merchantAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptForAction(state, {
                             choices: [
@@ -417,10 +420,10 @@ export const winterVisitorReducers: Record<
                     case "order":
                         return promptToFillOrder(
                             setPendingAction(
-                                { ...merchantAction, orderId: action.card.id, },
-                                removeCardsFromHand([action.card], state)
+                                { ...merchantAction, orderId: card.id, },
+                                removeCardsFromHand([card], state)
                             ),
-                            [action.card.id]
+                            [card.id]
                         );
                     default:
                         return state;
@@ -462,7 +465,7 @@ export const winterVisitorReducers: Record<
         };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(
                     setPendingAction(
                         {
@@ -543,7 +546,7 @@ export const winterVisitorReducers: Record<
     },
     noble: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "NOBLE_GAIN", label: <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals></>, },
@@ -574,7 +577,7 @@ export const winterVisitorReducers: Record<
         const player = state.players[state.currentTurn.playerId];
 
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -611,7 +614,7 @@ export const winterVisitorReducers: Record<
     },
     politician: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 const { playerId } = state.currentTurn;
                 if (state.players[playerId].victoryPoints < 0) {
                     return endTurn(gainCoins(6, state));
@@ -624,7 +627,7 @@ export const winterVisitorReducers: Record<
     },
     professor: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 const playerState = state.players[state.currentTurn.playerId];
                 return promptForAction(state, {
                     choices: [
@@ -658,7 +661,7 @@ export const winterVisitorReducers: Record<
     },
     scholar: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "SCHOLAR_DRAW", label: <>Draw 2 <Order /></>, },
@@ -691,7 +694,7 @@ export const winterVisitorReducers: Record<
     },
     supervisor: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptToMakeWine(state, /* upToN */ 2);
             case "MAKE_WINE":
                 const numSparkling = action.ingredients
@@ -703,7 +706,7 @@ export const winterVisitorReducers: Record<
     },
     taster: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptToChooseWine(state, { limit: 1 });
             case "CHOOSE_WINE":
                 const wine = action.wines[0];
@@ -728,7 +731,7 @@ export const winterVisitorReducers: Record<
     },
     teacher: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -762,7 +765,7 @@ export const winterVisitorReducers: Record<
         const player = state.players[state.currentTurn.playerId];
 
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -798,7 +801,7 @@ export const winterVisitorReducers: Record<
     },
     uncertifiedTeacher: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {

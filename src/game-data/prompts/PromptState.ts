@@ -30,6 +30,7 @@ export interface ChooseCardPromptState {
     type: "chooseCard";
     title: string;
     cards: CardId[];
+    optional?: boolean;
 }
 
 export interface ChooseWinePromptState {

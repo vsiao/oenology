@@ -7,7 +7,7 @@ import { OrderId } from "../orderCards";
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
         case "CHOOSE_ACTION":
-        case "CHOOSE_CARD":
+        case "CHOOSE_CARDS":
         case "CHOOSE_FIELD":
         case "CHOOSE_WINE":
         case "MAKE_WINE":
@@ -52,15 +52,17 @@ export const promptToChooseCard = (
     {
         title = "Choose a card",
         cards,
+        optional,
     }: {
         title?: string;
         cards: CardId[];
+        optional?: boolean;
     }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseCard", title, cards });
+    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional });
 };
 
 export const promptToChooseOrderCard = (state: GameState): GameState => {
@@ -71,11 +73,12 @@ export const promptToChooseOrderCard = (state: GameState): GameState => {
     });
 };
 
-export const promptToChooseVineCard = (state: GameState): GameState => {
+export const promptToChooseVineCard = (state: GameState, bonus = false): GameState => {
     return promptToChooseCard(state, {
-        title: "Choose a vine",
+        title: `Choose ${bonus ? "another" : "a"} vine to plant`,
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(({ type }) => type === "vine"),
+        optional: bonus,
     });
 };
 

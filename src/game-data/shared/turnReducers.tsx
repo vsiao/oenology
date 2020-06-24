@@ -169,7 +169,7 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
     };
 };
 
-const movePendingCardToDiscard = (state: GameState): GameState => {
+export const movePendingCardToDiscard = (state: GameState): GameState => {
     const { currentTurn } = state;
     if (currentTurn.type !== "workerPlacement" || currentTurn.pendingAction === null) {
         return state;

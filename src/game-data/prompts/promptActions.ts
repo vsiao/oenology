@@ -6,7 +6,7 @@ import { Choice } from "./PromptState";
 
 export type PromptAction =
     | ChooseAction
-    | ChooseCardAction
+    | ChooseCardsAction
     | ChooseFieldAction
     | ChooseWineAction
     | BuildStructureAction
@@ -26,12 +26,12 @@ export const chooseAction = ({ id, data }: Choice, playerId: string): PromptActi
     };
 };
 
-interface ChooseCardAction extends Action<"CHOOSE_CARD"> {
-    card: CardId;
+interface ChooseCardsAction extends Action<"CHOOSE_CARDS"> {
+    cards?: CardId[];
     playerId: string;
 }
-export const chooseCard = (card: CardId, playerId: string): PromptAction => {
-    return { type: "CHOOSE_CARD", card, playerId };
+export const chooseCards = (cards: CardId[], playerId: string): PromptAction => {
+    return { type: "CHOOSE_CARDS", cards, playerId };
 };
 
 export interface GrapeSpec {

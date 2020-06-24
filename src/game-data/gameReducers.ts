@@ -35,14 +35,14 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
-            // srir: initPlayer("srir", "blue"),
+            srir: initPlayer("srir", "blue"),
             // linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
             // thedrick: initPlayer("thedrick", "red"),
         },
-        tableOrder: ["stfy", "viny"],
+        tableOrder: ["stfy", "viny", "srir"],
         grapeIndex: 1,
-        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, null, null, null, null, null],
+        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, { playerId: "srir" }, null, null, null, null],
         workerPlacements: {
             drawVine: [],
             giveTour: [],

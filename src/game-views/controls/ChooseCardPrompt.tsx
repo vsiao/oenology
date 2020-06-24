@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
 import { ChooseCardPromptState } from "../../game-data/prompts/PromptState";
-import { chooseCard } from "../../game-data/prompts/promptActions";
+import { chooseCards } from "../../game-data/prompts/promptActions";
 import { CardId } from "../../game-data/GameState";
 import { vineCards } from "../../game-data/vineCards";
 import { orderCards } from "../../game-data/orderCards";
@@ -13,10 +13,11 @@ import OrderCard from "../cards/OrderCard";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
 import VisitorCard from "../cards/VisitorCard";
 import PromptStructure from "./PromptStructure";
+import ChoiceButton from "./ChoiceButton";
 
 interface Props {
     prompt: ChooseCardPromptState;
-    onSelectCard: (card: CardId) => void;
+    onSelectCards: (cards: CardId[]) => void;
 }
 
 const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
@@ -27,12 +28,20 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
                 return <li className="ChooseCardPrompt-card" key={card.id}>
                     <button
                         className="ChooseCardPrompt-cardButton"
-                        onClick={ () => props.onSelectCard(card)}
+                        onClick={() => props.onSelectCards([card])}
                     >
                         {renderCard(card, props)}
                     </button>
                 </li>;
             })}
+            {prompt.optional
+                ? <ChoiceButton
+                      className="ChooseCardPrompt-pass"
+                      onClick={() => props.onSelectCards([])}
+                  >
+                      Pass
+                  </ChoiceButton>
+                : null}
         </ul>
     </PromptStructure>;
 };
@@ -52,7 +61,7 @@ const renderCard = (card: CardId, props: Props) => {
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
     return {
-        onSelectCard: (card: CardId) => dispatch(chooseCard(card, ownProps.playerId))
+        onSelectCards: (cards: CardId[]) => dispatch(chooseCards(cards, ownProps.playerId))
     };
 }
 

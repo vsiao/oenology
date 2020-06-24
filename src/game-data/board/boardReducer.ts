@@ -11,10 +11,10 @@ import {
     pushActivityLog,
 } from "../shared/sharedReducers";
 import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard, promptToChooseOrderCard, promptToFillOrder } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { visitorCards } from "../visitors/visitorCards";
-import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
+import { endTurn, movePendingCardToDiscard, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
@@ -119,16 +119,17 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
         case "fillOrder":
             switch (action.type) {
-                case "CHOOSE_CARD":
-                    if (action.card.type !== "order") {
+                case "CHOOSE_CARDS":
+                    const card = action.cards![0];
+                    if (card.type !== "order") {
                         return state;
                     }
                     return promptToFillOrder(
                         removeCardsFromHand(
-                            [action.card],
-                            setPendingAction({ type: "fillOrder", orderId: action.card.id }, state)
+                            [card],
+                            setPendingAction({ type: "fillOrder", orderId: card.id }, state)
                         ),
-                        [action.card.id]
+                        [card.id]
                     );
                 case "CHOOSE_WINE":
                     const orderId = pendingAction.orderId!
@@ -153,19 +154,39 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
         case "plantVine":
             switch (action.type) {
-                case "CHOOSE_CARD":
-                    if (action.card.type !== "vine") {
+                case "CHOOSE_CARDS":
+                    if (!action.cards) {
+                        // Passed on a bonus vine placement
+                        return endTurn(state);
+                    }
+                    const card = action.cards[0];
+                    if (card.type !== "vine") {
                         return state;
                     }
                     return promptToChooseField(
                         removeCardsFromHand(
-                            [action.card],
-                            setPendingAction({ type: "plantVine", vineId: action.card.id }, state)
+                            [card],
+                            setPendingAction({ ...pendingAction, vineId: card.id }, state)
                         )
                     );
                 case "CHOOSE_FIELD":
-                    // TODO bonus maybe plant 2 vines
-                    return endTurn(plantVineInField(pendingAction.vineId!, action.fieldId, state));
+                    state = plantVineInField(pendingAction.vineId!, action.fieldId, state);
+
+                    const bonus = hasPlacementBonus &&
+                        !pendingAction.bonusActivated &&
+                        state.workerPlacements.plantVine.length === 1 &&
+                        plantVineDisabledReason(state) === undefined;
+
+                    if (bonus) {
+                        return promptToChooseVineCard(
+                            setPendingAction(
+                                { type: "plantVine", bonusActivated: true },
+                                movePendingCardToDiscard(state)
+                            ),
+                            /* bonus */ true
+                        );
+                    }
+                    return endTurn(state);
                 default:
                     return state;
             }

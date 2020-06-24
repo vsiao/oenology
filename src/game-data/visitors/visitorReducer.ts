@@ -23,14 +23,15 @@ export const visitor = (state: GameState, action: GameAction) => {
 
     let pendingAction = currentTurn.pendingAction;
     if (
-        action.type === "CHOOSE_CARD" &&
-        action.card.type === "visitor" &&
+        action.type === "CHOOSE_CARDS" &&
+        action.cards![0].type === "visitor" &&
         currentTurn.pendingAction.visitorId === undefined
     ) {
-        pendingAction = { ...pendingAction, visitorId: action.card.id };
+        const card = action.cards![0];
+        pendingAction = { ...pendingAction, visitorId: card.id };
         state = pushActivityLog(
-            { type: "visitor", playerId: currentTurn.playerId, visitorId: action.card.id },
-            removeCardsFromHand([action.card], setPendingAction(pendingAction, state))
+            { type: "visitor", playerId: currentTurn.playerId, visitorId: card.id },
+            removeCardsFromHand([card], setPendingAction(pendingAction, state))
         );
     }
     return visitorReducers[pendingAction.visitorId!](state, action, pendingAction);

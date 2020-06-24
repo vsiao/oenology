@@ -31,15 +31,16 @@ export const summerVisitorReducers: Record<
         const agriculturistAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
                         return promptToChooseField(
                             setPendingAction(
-                                { ...agriculturistAction, vineId: action.card.id },
-                                removeCardsFromHand([action.card], state)
+                                { ...agriculturistAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
                             )
                         );
                     default:
@@ -67,7 +68,7 @@ export const summerVisitorReducers: Record<
             return mainActions.length === 0 ? endTurn(state2) : state2;
         };
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 const currentTurnPlayerId = state.currentTurn.playerId
                 state = setPendingAction({
                     ...bankerAction,
@@ -100,7 +101,7 @@ export const summerVisitorReducers: Record<
     },
     broker: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "BROKER_GAIN", label: <>Pay <Coins>9</Coins> to gain <VP>3</VP></>, },
@@ -122,7 +123,7 @@ export const summerVisitorReducers: Record<
     },
     buyer: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         {
@@ -155,15 +156,16 @@ export const summerVisitorReducers: Record<
         const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
                         return promptToChooseField(
                             setPendingAction(
-                                { ...cultivatorAction, vineId: action.card.id },
-                                removeCardsFromHand([action.card], state)
+                                { ...cultivatorAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
                             )
                         );
                     default:
@@ -180,15 +182,16 @@ export const summerVisitorReducers: Record<
         const growerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
                         return promptToChooseField(
                             setPendingAction(
-                                { ...growerAction, vineId: action.card.id },
-                                removeCardsFromHand([action.card], state)
+                                { ...growerAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
                             )
                         );
                     default:
@@ -207,8 +210,9 @@ export const summerVisitorReducers: Record<
     landscaper: (state, action, pendingAction) => {
         const landscaperAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptForAction(state, {
                             choices: [
@@ -223,8 +227,8 @@ export const summerVisitorReducers: Record<
                     case "vine":
                         return promptToChooseField(
                             setPendingAction(
-                                { ...landscaperAction, vineId: action.card.id },
-                                removeCardsFromHand([action.card], state)
+                                { ...landscaperAction, vineId: card.id },
+                                removeCardsFromHand([card], state)
                             )
                         );
                     default:
@@ -248,7 +252,7 @@ export const summerVisitorReducers: Record<
     // negotiator: s => endTurn(s),
     noviceGuide: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "NGUIDE_GAIN", label: <>Gain <Coins>3</Coins></>, },
@@ -274,7 +278,7 @@ export const summerVisitorReducers: Record<
         const organizerAction = pendingAction as PlayVisitorPendingAction & { currentWakeUpPos: number };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForWakeUpOrder(
                     setPendingAction({
                         ...organizerAction,
@@ -304,13 +308,14 @@ export const summerVisitorReducers: Record<
         const overseerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
         switch (action.type) {
-            case "CHOOSE_CARD":
-                switch (action.card.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
                     case "visitor":
                         return promptToBuildStructure(state);
                     case "vine":
                         return promptToChooseField(
-                            setPendingAction({ ...overseerAction, vineId: action.card.id }, state)
+                            setPendingAction({ ...overseerAction, vineId: card.id }, state)
                         );
                     default:
                         return state;
@@ -329,7 +334,7 @@ export const summerVisitorReducers: Record<
     },
     patron: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "PATRON_GAIN", label: <>Gain <Coins>4</Coins></> },
@@ -367,7 +372,7 @@ export const summerVisitorReducers: Record<
             }
         });
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "SURVEYOR_EMPTY", label: <>Gain <Coins>2</Coins> for each empty field you own</>, },
@@ -389,7 +394,7 @@ export const summerVisitorReducers: Record<
     },
     sponsor: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
@@ -423,7 +428,7 @@ export const summerVisitorReducers: Record<
             return mainActions.length === 0 ? endTurn(state2) : state2;
         };
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 const currentTurnPlayerId = state.currentTurn.playerId;
                 state = setPendingAction({
                     ...swindlerAction,
@@ -462,7 +467,7 @@ export const summerVisitorReducers: Record<
     },
     tourGuide: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "TOUR_GAIN_4", label: <>Gain <Coins>4</Coins></> },
@@ -490,7 +495,7 @@ export const summerVisitorReducers: Record<
     },
     uncertifiedArchitect: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "UARCHITECT_LOSE_1_VP", label: <>Lose <VP>1</VP> to build a <Coins>2</Coins> or <Coins>3</Coins> structure</> },
@@ -514,7 +519,7 @@ export const summerVisitorReducers: Record<
     },
     uncertifiedBroker: (state, action) => {
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
                         { id: "UBROKER_LOSE_VP", label: <>Lose <VP>3</VP> to gain <Coins>9</Coins></> },
@@ -549,7 +554,7 @@ export const summerVisitorReducers: Record<
             return mainActions.length === 0 ? endTurn(state2) : state2;
         };
         switch (action.type) {
-            case "CHOOSE_CARD":
+            case "CHOOSE_CARDS":
                 const currentTurnPlayerId = state.currentTurn.playerId
                 state = setPendingAction({
                     ...vendorAction,
