@@ -3,11 +3,12 @@ import { GameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, UNSHUFFLED_CARDS } from "./shared/cardReducers";
+import { promptForWakeUpOrder } from "./shared/turnReducers";
 
 export const game = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
         case "START_GAME":
-            return initGame(state.playerId, action.shuffledCards);
+            return promptForWakeUpOrder(initGame(state.playerId, action.shuffledCards));
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
     }
@@ -20,10 +21,8 @@ export const initGame = (
 ): GameState => {
     return {
         currentTurn: {
-            type: "workerPlacement",
+            type: "wakeUpOrder",
             playerId: "stfy",
-            pendingAction: null,
-            season: "summer"
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -35,14 +34,14 @@ export const initGame = (
         players: {
             stfy: initPlayer("stfy", "purple"),
             viny: initPlayer("viny", "orange"),
-            srir: initPlayer("srir", "blue"),
+            // srir: initPlayer("srir", "blue"),
             // linz: initPlayer("linz", "yellow"),
             // poofytoo: initPlayer("poofytoo", "green"),
             // thedrick: initPlayer("thedrick", "red"),
         },
-        tableOrder: ["stfy", "viny", "srir"],
-        grapeIndex: 1,
-        wakeUpOrder: [{ playerId: "stfy" }, { playerId: "viny" }, { playerId: "srir" }, null, null, null, null],
+        tableOrder: ["stfy", "viny"],
+        grapeIndex: 0,
+        wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
             drawVine: [],
             giveTour: [],
