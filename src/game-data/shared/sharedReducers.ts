@@ -5,6 +5,7 @@ import GameState, {
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
 import { VineId } from "../vineCards";
+import { addToDiscard } from "./cardReducers";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -16,12 +17,15 @@ export const plantVineInField = (vineId: VineId, fieldId: FieldId, state: GameSt
     const vines: VineId[] = [...field.vines, vineId];
     return pushActivityLog(
         { type: "plant", playerId: player.id, vineId },
-        updatePlayer(state, player.id, {
-            fields: {
-                ...player.fields,
-                [field.id]: { ...field, vines },
-            },
-        })
+        addToDiscard(
+            [{ type: "vine", id: vineId }],
+            updatePlayer(state, player.id, {
+                fields: {
+                    ...player.fields,
+                    [field.id]: { ...field, vines },
+                },
+            })
+        )
     );
 };
 

@@ -3,6 +3,7 @@ import { WineSpec, OrderId, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
 import { WineIngredients } from "../prompts/promptActions";
 import { fieldYields } from "./sharedSelectors";
+import { addToDiscard } from "./cardReducers";
 
 //
 // Shared `TokenMap` reducers for aging and auto-devaluation
@@ -134,9 +135,12 @@ export const fillOrder = (
 ): GameState => {
     const { residualIncome, wines, victoryPoints } = orderCards[orderId];
     return gainResiduals(residualIncome, gainVP(victoryPoints + (bonusVP ? 1 : 0),
-        discardWines(
-            pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, wines }, state),
-            winesToUse
+        addToDiscard(
+            [{ type: "order", id: orderId }],
+            discardWines(
+                pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, wines }, state),
+                winesToUse
+            )
         )
     ));
 };

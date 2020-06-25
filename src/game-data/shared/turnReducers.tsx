@@ -170,29 +170,9 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
     };
 };
 
-export const movePendingCardToDiscard = (state: GameState): GameState => {
-    const { currentTurn } = state;
-    if (currentTurn.type !== "workerPlacement" || currentTurn.pendingAction === null) {
-        return state;
-    }
-    switch (currentTurn.pendingAction.type) {
-        case "playVisitor":
-            const visitorId = currentTurn.pendingAction.visitorId!;
-            return addToDiscard([{ type: "visitor", id: visitorId }], state);
-        case "plantVine":
-            const vineId = currentTurn.pendingAction.vineId!;
-            return addToDiscard([{ type: "vine", id: vineId }], state);
-        case "fillOrder":
-            const orderId = currentTurn.pendingAction.orderId!;
-            return addToDiscard([{ type: "order", id: orderId }], state);
-        default:
-            return state;
-    }
-};
-
 const endWorkerPlacementTurn = (state: GameState): GameState => {
-    const { currentTurn, wakeUpOrder } = movePendingCardToDiscard(state);
-    const season = (state.currentTurn as WorkerPlacementTurn).season;
+    const { currentTurn, wakeUpOrder } = state;
+    const season = (currentTurn as WorkerPlacementTurn).season;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
     const activeWakeUpOrder = compactWakeUpOrder.filter((pos) => !pos.passed);
 
@@ -263,10 +243,11 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
  * visitors back-to-back.
  */
 export const endVisitor = (state: GameState): GameState => {
-    state = movePendingCardToDiscard(state);
-
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
     const pendingAction = currentTurn.pendingAction as PlayVisitorPendingAction;
+
+    state = addToDiscard([{ type: "visitor", id: pendingAction.visitorId! }], state);
+
     const hasCard = needCardOfTypeDisabledReason(
         state,
         currentTurn.season === "summer" ? "summerVisitor" : "winterVisitor"

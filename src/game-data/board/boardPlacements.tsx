@@ -31,6 +31,12 @@ export const summerActions: BoardAction[] = [
         disabledReason: state => needCardOfTypeDisabledReason(state, "summerVisitor"),
     },
     {
+        type: "giveTour",
+        title: <>Give tour to gain <Coins>2</Coins></>,
+        bonusLabel: <>Give tour to gain <Coins>3</Coins></>,
+        bonus: <Coins>1</Coins>,
+    },
+    {
         type: "buySell",
         title: "Sell grape(s) or buy/sell one field",
         bonusLabel: <>Sell grape(s) or buy/sell one field and gain <VP>1</VP></>,
@@ -42,12 +48,6 @@ export const summerActions: BoardAction[] = [
                     ? undefined
                     : "You don't have anything to buy or sell.";
         },
-    },
-    {
-        type: "giveTour",
-        title: <>Give tour to gain <Coins>2</Coins></>,
-        bonusLabel: <>Give tour to gain <Coins>3</Coins></>,
-        bonus: <Coins>1</Coins>,
     },
     {
         type: "buildStructure",
@@ -73,6 +73,12 @@ export const summerActions: BoardAction[] = [
 
 export const winterActions: BoardAction[] = [
     {
+        type: "drawOrder",
+        title: <>Draw <Order /></>,
+        bonusLabel: <>Draw 2 <Order /></>,
+        bonus: <Order />,
+    },
+    {
         type: "playWinterVisitor",
         title: <>Play <WinterVisitor /></>,
         bonusLabel: <>Play up to 2 <WinterVisitor /></>,
@@ -80,24 +86,11 @@ export const winterActions: BoardAction[] = [
         disabledReason: state => needCardOfTypeDisabledReason(state, "winterVisitor"),
     },
     {
-        type: "drawOrder",
-        title: <>Draw <Order /></>,
-        bonusLabel: <>Draw 2 <Order /></>,
-        bonus: <Order />,
-    },
-    {
         type: "harvestField",
         title: "Harvest one field",
         bonusLabel: <>Harvest up to 2 fields</>,
         bonus: <>+1</>,
         disabledReason: harvestFieldDisabledReason,
-    },
-    {
-        type: "makeWine",
-        title: <>Make up to 2 <WineGlass /></>,
-        bonusLabel: <>Make up to 3 <WineGlass /></>,
-        bonus: <>+1</>,
-        disabledReason: needGrapesDisabledReason,
     },
     {
         type: "trainWorker",
@@ -108,6 +101,13 @@ export const winterActions: BoardAction[] = [
             const isFirst = state.workerPlacements.trainWorker.length === 0;
             return trainWorkerDisabledReason(state, isFirst ? 3 : 4)
         },
+    },
+    {
+        type: "makeWine",
+        title: <>Make up to 2 <WineGlass /></>,
+        bonusLabel: <>Make up to 3 <WineGlass /></>,
+        bonus: <>+1</>,
+        disabledReason: needGrapesDisabledReason,
     },
     {
         type: "fillOrder",

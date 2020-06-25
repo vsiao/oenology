@@ -19,7 +19,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures, Coupon } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, movePendingCardToDiscard } from "../shared/turnReducers";
+import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData } from "../shared/turnReducers";
 import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -116,17 +116,14 @@ export const summerVisitorReducers: Record<
                 return endVisitor(buildStructure(payCoins(structure.cost - 1, state), action.structureId));
 
             case "CHOOSE_FIELD":
-                state = endVisitor(plantVineInField(artisanAction.vineId, action.fieldId, state));
+                state = plantVineInField(artisanAction.vineId, action.fieldId, state);
                 const canPlantAgain = !artisanAction.secondPlant &&
                     plantVineDisabledReason(state) === undefined;
 
                 return canPlantAgain
                     ? promptToChooseVineCard(
-                        setPendingAction(
-                            { ...artisanAction, secondPlant: true },
-                            movePendingCardToDiscard(state)
-                        ),
-                          /* bonus */ true
+                        setPendingAction({ ...artisanAction, secondPlant: true }, state),
+                        /* bonus */ true
                     )
                     : endVisitor(state);
 
@@ -414,11 +411,8 @@ export const summerVisitorReducers: Record<
 
                 return canPlantAgain
                     ? promptToChooseVineCard(
-                        setPendingAction(
-                            { ...homesteaderAction, secondPlant: true },
-                            movePendingCardToDiscard(state)
-                        ),
-                          /* bonus */ true
+                        setPendingAction({ ...homesteaderAction, secondPlant: true }, state),
+                        /* bonus */ true
                     )
                     : endVisitor(state);
 

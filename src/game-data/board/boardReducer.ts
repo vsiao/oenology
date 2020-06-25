@@ -22,7 +22,7 @@ import {
 } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
-import { endTurn, movePendingCardToDiscard, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
+import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
@@ -188,10 +188,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
                     if (bonus) {
                         return promptToChooseVineCard(
-                            setPendingAction(
-                                { type: "plantVine", bonusActivated: true },
-                                movePendingCardToDiscard(state)
-                            ),
+                            setPendingAction({ type: "plantVine", bonusActivated: true }, state),
                             /* bonus */ true
                         );
                     }
