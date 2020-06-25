@@ -2,6 +2,7 @@ import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleWare from "redux-saga";
 import { publishToFirebase, subscribeToFirebase } from "./firebase";
 import { appReducer } from "./appReducers";
+import { sandboxConfig } from "./config";
 
 const sagaMiddleware = createSagaMiddleWare();
 const store = createStore(
@@ -11,11 +12,13 @@ const store = createStore(
     )
 );
 
-sagaMiddleware.run(publishToFirebase);
+const gameId = sandboxConfig.gameId;
+
+sagaMiddleware.run(publishToFirebase, gameId);
 const unsubscribe = store.subscribe(() => {
     // Wait for playerId to be initialized before applying game logs
     if (store.getState().playerId) {
-        subscribeToFirebase(action => store.dispatch(action));
+        subscribeToFirebase(gameId, action => store.dispatch(action));
         unsubscribe();
     }
 });

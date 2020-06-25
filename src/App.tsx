@@ -23,8 +23,8 @@ const App: React.FunctionComponent<Props> = props => {
         <div className="App">
             <header className="App-header">
                 oenology
-                <button onClick={props.startGame}>New Game</button>
                 <input type="text"
+                    className="App-cheatBox"
                     value={drawCardInputValue}
                     onChange={e => setDrawCardInputValue(e.target.value)}
                     onKeyDown={e => {
@@ -34,6 +34,9 @@ const App: React.FunctionComponent<Props> = props => {
                         }
                     }}
                 />
+                <button className="App-newGame" onClick={props.startGame}>
+                    New Game
+                </button>
             </header>
             <OenologyGame currentPlayerId={props.currentPlayerId} />
             {props.currentPlayerId === null
