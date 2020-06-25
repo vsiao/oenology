@@ -192,6 +192,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                                 { type: "plantVine", bonusActivated: true },
                                 movePendingCardToDiscard(state)
                             ),
+                            /* requireStructures */ true,
                             /* bonus */ true
                         );
                     }

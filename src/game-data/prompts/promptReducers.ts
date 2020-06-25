@@ -54,16 +54,18 @@ export const promptToChooseCard = (
         title = "Choose a card",
         cards,
         optional,
+        requireStructures
     }: {
         title?: string;
         cards: CardId[];
         optional?: boolean;
+        requireStructures?: boolean;
     }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional });
+    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional, requireStructures });
 };
 
 export const promptToChooseOrderCard = (state: GameState): GameState => {
@@ -74,12 +76,13 @@ export const promptToChooseOrderCard = (state: GameState): GameState => {
     });
 };
 
-export const promptToChooseVineCard = (state: GameState, bonus = false): GameState => {
+export const promptToChooseVineCard = (state: GameState, requireStructures = true, bonus = false): GameState => {
     return promptToChooseCard(state, {
         title: `Choose ${bonus ? "another" : "a"} vine to plant`,
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(({ type }) => type === "vine"),
         optional: bonus,
+        requireStructures
     });
 };
 
