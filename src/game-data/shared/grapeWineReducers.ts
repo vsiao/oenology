@@ -1,4 +1,4 @@
-import GameState, { PlayerState, TokenMap, FieldId } from "../GameState";
+import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn } from "../GameState";
 import { WineSpec, OrderId, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
 import { WineIngredients } from "../prompts/promptActions";
@@ -128,11 +128,14 @@ export const makeWineFromGrapes = (
 };
 
 export const fillOrder = (
-    orderId: OrderId,
     winesToUse: WineSpec[],
     state: GameState,
     bonusVP = false
 ): GameState => {
+    const orderId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).orderId as OrderId;
+    if (!orderId) {
+        throw new Error("Unexpected state: should've chosen an order before filling");
+    }
     const { residualIncome, wines, victoryPoints } = orderCards[orderId];
     return gainResiduals(residualIncome, gainVP(victoryPoints + (bonusVP ? 1 : 0),
         addToDiscard(

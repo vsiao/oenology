@@ -1,6 +1,7 @@
 import GameState, {
     FieldId,
     PlayerState,
+    WorkerPlacementTurn,
 } from "../GameState";
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
@@ -11,7 +12,11 @@ export const pushActivityLog = (event: ActivityLogEvent, state: GameState): Game
     return { ...state, activityLog: [...state.activityLog, event], };
 };
 
-export const plantVineInField = (vineId: VineId, fieldId: FieldId, state: GameState): GameState => {
+export const plantVineInField = (fieldId: FieldId, state: GameState): GameState => {
+    const vineId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).vineId as VineId;
+    if (!vineId) {
+        throw new Error("Unexpected state: should've chosen a vine before planting");
+    }
     const player = state.players[state.currentTurn.playerId];
     const field = player.fields[fieldId];
     const vines: VineId[] = [...field.vines, vineId];

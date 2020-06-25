@@ -19,11 +19,12 @@ import {
     promptToChooseVisitor,
     promptToFillOrder,
     promptToMakeWine,
+    promptToPlant,
 } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
-import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
+import { drawCards } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 
@@ -132,17 +133,10 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     if (card.type !== "order") {
                         return state;
                     }
-                    return promptToFillOrder(
-                        removeCardsFromHand(
-                            [card],
-                            setPendingAction({ type: "fillOrder", orderId: card.id }, state)
-                        ),
-                        [card.id]
-                    );
+                    return promptToFillOrder(state, card.id);
                 case "CHOOSE_WINE":
-                    const orderId = pendingAction.orderId!;
                     const bonus = hasPlacementBonus && state.workerPlacements.fillOrder.length === 1;
-                    return endTurn(fillOrder(orderId, action.wines, state, /* bonusVP */ bonus));
+                    return endTurn(fillOrder(action.wines, state, /* bonusVP */ bonus));
                 default:
                     return state;
             }
@@ -171,15 +165,10 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     if (card.type !== "vine") {
                         return state;
                     }
-                    return promptToChooseField(
-                        removeCardsFromHand(
-                            [card],
-                            setPendingAction({ ...pendingAction, vineId: card.id }, state)
-                        ),
-                        "plant"
-                    );
+                    return promptToPlant(state, card.id);
+
                 case "CHOOSE_FIELD":
-                    state = plantVineInField(pendingAction.vineId!, action.fieldId, state);
+                    state = plantVineInField(action.fieldId, state);
 
                     const bonus = hasPlacementBonus &&
                         !pendingAction.bonusActivated &&

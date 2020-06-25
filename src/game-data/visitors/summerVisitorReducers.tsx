@@ -1,7 +1,7 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState, { PlayVisitorPendingAction } from "../GameState";
-import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard, promptToMakeWine } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard, promptToMakeWine, promptToPlant } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import {
@@ -20,16 +20,14 @@ import { maxStructureCost, structures, Coupon } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
 import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData } from "../shared/turnReducers";
-import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
+import { drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
-    agriculturist: (state, action, pendingAction) => {
-        const agriculturistAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId; };
-
+    agriculturist: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -37,18 +35,12 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...agriculturistAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                state = plantVineInField(agriculturistAction.vineId, action.fieldId, state);
+                state = plantVineInField(action.fieldId, state);
                 const vinesById: { [vineId in VineId]?: boolean } = {};
                 state.players[state.currentTurn.playerId].fields[action.fieldId].vines.forEach(
                     v => vinesById[v] = true
@@ -60,7 +52,6 @@ export const summerVisitorReducers: Record<
     },
     artisan: (state, action, pendingAction) => {
         const artisanAction = pendingAction as PlayVisitorPendingAction & {
-            vineId: VineId;
             secondPlant: boolean;
         };
         const buildCoupon: Coupon = { kind: "discount", amount: 1 };
@@ -90,13 +81,7 @@ export const summerVisitorReducers: Record<
                             ],
                         });
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...artisanAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -116,7 +101,7 @@ export const summerVisitorReducers: Record<
                 return endVisitor(buildStructure(payCoins(structure.cost - 1, state), action.structureId));
 
             case "CHOOSE_FIELD":
-                state = plantVineInField(artisanAction.vineId, action.fieldId, state);
+                state = plantVineInField(action.fieldId, state);
                 const canPlantAgain = !artisanAction.secondPlant &&
                     plantVineDisabledReason(state) === undefined;
 
@@ -225,9 +210,7 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    contractor: (state, action, pendingAction) => {
-        const contractorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId; };
-
+    contractor: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -249,13 +232,7 @@ export const summerVisitorReducers: Record<
                             ],
                         });
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...contractorAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -273,14 +250,12 @@ export const summerVisitorReducers: Record<
             case "BUILD_STRUCTURE":
                 return endVisitor(buildStructure(state, action.structureId));
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(contractorAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(action.fieldId, state));
             default:
                 return state;
         }
     },
-    cultivator: (state, action, pendingAction) => {
-        const cultivatorAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId; };
-
+    cultivator: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -288,26 +263,18 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...cultivatorAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(cultivatorAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(action.fieldId, state));
             default:
                 return state;
         }
     },
     // entertainer: s => endVisitor(s),
-    grower: (state, action, pendingAction) => {
-        const growerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId; };
-
+    grower: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -315,18 +282,12 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...growerAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                state = plantVineInField(growerAction.vineId, action.fieldId, state);
+                state = plantVineInField(action.fieldId, state);
                 const numVinesPlanted = Object.values(state.players[state.currentTurn.playerId].fields)
                     .reduce((numVines, field) => numVines + field.vines.length, 0);
                 return endVisitor(numVinesPlanted >= 6 ? gainVP(2, state) : state);
@@ -338,7 +299,6 @@ export const summerVisitorReducers: Record<
     homesteader: (state, action, pendingAction) => {
         const homesteaderAction = pendingAction as PlayVisitorPendingAction & {
             doBoth: boolean;
-            vineId: VineId;
             secondPlant: boolean;
         };
         const buildCoupon: Coupon = { kind: "discount", amount: 3 };
@@ -372,13 +332,7 @@ export const summerVisitorReducers: Record<
                             ],
                         });
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...homesteaderAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -405,7 +359,7 @@ export const summerVisitorReducers: Record<
                     : endVisitor(state);
 
             case "CHOOSE_FIELD":
-                state = plantVineInField(homesteaderAction.vineId, action.fieldId, state);
+                state = plantVineInField(action.fieldId, state);
                 const canPlantAgain = !homesteaderAction.secondPlant &&
                     plantVineDisabledReason(state) === undefined;
 
@@ -420,8 +374,7 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    landscaper: (state, action, pendingAction) => {
-        const landscaperAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId; };
+    landscaper: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -438,13 +391,7 @@ export const summerVisitorReducers: Record<
                             ],
                         });
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction(
-                                { ...landscaperAction, vineId: card.id },
-                                removeCardsFromHand([card], state)
-                            ),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -458,7 +405,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(landscaperAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(action.fieldId, state));
             default:
                 return state;
         }
@@ -528,10 +475,7 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToBuildStructure(state);
                     case "vine":
-                        return promptToChooseField(
-                            setPendingAction({ ...overseerAction, vineId: card.id }, state),
-                            "plant"
-                        );
+                        return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -540,7 +484,7 @@ export const summerVisitorReducers: Record<
                     buildStructure(payCoins(structures[action.structureId].cost, state), action.structureId)
                 );
             case "CHOOSE_FIELD":
-                state = plantVineInField(overseerAction.vineId, action.fieldId, state);
+                state = plantVineInField(action.fieldId, state);
                 const { red, white } = vineCards[overseerAction.vineId].yields;
                 return endVisitor((red || 0) + (white || 0) === 4 ? gainVP(1, state) : state);
             default:

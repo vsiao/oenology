@@ -40,7 +40,7 @@ import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
 import { endVisitor, setPendingAction } from "../shared/turnReducers";
-import { discardCards, drawCards, removeCardsFromHand } from "../shared/cardReducers";
+import { discardCards, drawCards } from "../shared/cardReducers";
 import { makeWineFromGrapes, harvestField, fillOrder, ageSingle, placeGrapes, ageCellar, discardWines } from "../shared/grapeWineReducers";
 
 export const winterVisitorReducers: Record<
@@ -281,9 +281,7 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    marketer: (state, action, pendingAction) => {
-        const marketerAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
-
+    marketer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -300,13 +298,7 @@ export const winterVisitorReducers: Record<
                             ],
                         });
                     case "order":
-                        return promptToFillOrder(
-                            setPendingAction(
-                                { ...marketerAction, orderId: card.id, },
-                                removeCardsFromHand([card], state)
-                            ),
-                            [card.id]
-                        );
+                        return promptToFillOrder(state, card.id);
                     default:
                         return state;
                 }
@@ -320,9 +312,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endVisitor(
-                    fillOrder(marketerAction.orderId, action.wines, state, /* bonusVP */ true)
-                );
+                return endVisitor(fillOrder(action.wines, state, /* bonusVP */ true));
             default:
                 return state;
         }
@@ -355,13 +345,7 @@ export const winterVisitorReducers: Record<
                             ],
                         });
                     case "order":
-                        return promptToFillOrder(
-                            setPendingAction(
-                                { ...vintnerAction, orderId: card.id, },
-                                removeCardsFromHand([card], state)
-                            ),
-                            [card.id]
-                        );
+                        return promptToFillOrder(state, card.id);
                     default:
                         return state;
                 }
@@ -389,15 +373,13 @@ export const winterVisitorReducers: Record<
                         },
                     }));
                 } else {
-                    return endVisitor(fillOrder(vintnerAction.orderId, action.wines, state));
+                    return endVisitor(fillOrder(action.wines, state));
                 }
             default:
                 return state;
         }
     },
-    merchant: (state, action, pendingAction) => {
-        const merchantAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
-
+    merchant: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -418,13 +400,7 @@ export const winterVisitorReducers: Record<
                             ],
                         });
                     case "order":
-                        return promptToFillOrder(
-                            setPendingAction(
-                                { ...merchantAction, orderId: card.id, },
-                                removeCardsFromHand([card], state)
-                            ),
-                            [card.id]
-                        );
+                        return promptToFillOrder(state, card.id);
                     default:
                         return state;
                 }
@@ -438,9 +414,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endVisitor(
-                    fillOrder(merchantAction.orderId, action.wines, state, /* bonusVP */ true)
-                );
+                return endVisitor(fillOrder(action.wines, state, /* bonusVP */ true));
             default:
                 return state;
         }

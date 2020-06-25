@@ -1,9 +1,12 @@
-import GameState, { CardId } from "../GameState";
+import GameState, { CardId, WorkerPlacementTurn } from "../GameState";
 import { GameAction } from "../gameActions";
 import { Choice, PromptState, ChooseFieldPurpose } from "./PromptState";
 import { Coupon } from "../structures";
 import { OrderId } from "../orderCards";
 import { visitorCards } from "../visitors/visitorCards";
+import { removeCardsFromHand } from "../shared/cardReducers";
+import { VineId } from "../vineCards";
+import { setPendingAction } from "../shared/turnReducers";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
@@ -98,6 +101,17 @@ export const promptToChooseVisitor = (
     });
 };
 
+export const promptToPlant = (state: GameState, vineId: VineId) => {
+    state = removeCardsFromHand(
+        [{ type: "vine", id: vineId }],
+        setPendingAction({
+            ...(state.currentTurn as WorkerPlacementTurn).pendingAction!,
+            vineId,
+        }, state),
+    );
+    return promptToChooseField(state, "plant");
+};
+
 export const promptToChooseField = (state: GameState, purpose: ChooseFieldPurpose): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
@@ -115,11 +129,18 @@ export const promptToChooseWine = (
     return enqueueActionPrompt(state, { type: "chooseWine", minValue, limit });
 };
 
-export const promptToFillOrder = (state: GameState, orderIds: OrderId[]): GameState => {
+export const promptToFillOrder = (state: GameState, orderId: OrderId): GameState => {
+    state = removeCardsFromHand(
+        [{ type: "order", id: orderId }],
+        setPendingAction({
+            ...(state.currentTurn as WorkerPlacementTurn).pendingAction!,
+            orderId,
+        }, state),
+    );
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "fillOrder", orderIds, });
+    return enqueueActionPrompt(state, { type: "fillOrder", orderIds: [orderId], });
 };
 
 export const promptToMakeWine = (
