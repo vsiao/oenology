@@ -239,7 +239,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "HEXPERT_HARVEST":
-                        return promptToChooseField(state);
+                        return promptToChooseField(state, "harvest");
                     case "HEXPERT_DRAW":
                         return endTurn(drawCards(state, { vine: 1 }));
                     case "HEXPERT_BUILD":
@@ -396,7 +396,7 @@ export const winterVisitorReducers: Record<
         }
     },
     merchant: (state, action, pendingAction) => {
-        const merchantAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId };
+        const merchantAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
 
         switch (action.type) {
             case "CHOOSE_CARDS":

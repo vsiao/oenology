@@ -90,16 +90,16 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             return endTurn(
                 field.sold
                     ? pushActivityLog(
-                            { type: "buySellField", buy: true, playerId },
-                            payCoins(field.value, state)
-                        )
+                        { type: "buySellField", buy: true, playerId },
+                        payCoins(field.value, state)
+                    )
                     : gainCoins(
-                            field.value,
-                            pushActivityLog(
-                                { type: "buySellField", buy: false, playerId },
-                                state
-                            )
+                        field.value,
+                        pushActivityLog(
+                            { type: "buySellField", buy: false, playerId },
+                            state
                         )
+                    )
             );
         }
         case "buySell":
@@ -108,9 +108,9 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             }
             switch (action.choice) {
                 case "BOARD_BUY_FIELD":
-                    return promptToChooseField(setPendingAction({ type: "buyField" }, state));
+                    return promptToChooseField(setPendingAction({ type: "buyField" }, state), "buy");
                 case "BOARD_SELL_FIELD":
-                    return promptToChooseField(setPendingAction({ type: "sellField" }, state));
+                    return promptToChooseField(setPendingAction({ type: "sellField" }, state), "sell");
                 case "BOARD_SELL_GRAPES":
                     return endTurn(state); // TODO (+bonus)
                 default:
@@ -132,7 +132,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                         [card.id]
                     );
                 case "CHOOSE_WINE":
-                    const orderId = pendingAction.orderId!
+                    const orderId = pendingAction.orderId!;
                     const bonus = hasPlacementBonus && state.workerPlacements.fillOrder.length === 1;
                     return endTurn(fillOrder(orderId, action.wines, state, /* bonusVP */ bonus));
                 default:
@@ -167,7 +167,8 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                         removeCardsFromHand(
                             [card],
                             setPendingAction({ ...pendingAction, vineId: card.id }, state)
-                        )
+                        ),
+                        "plant"
                     );
                 case "CHOOSE_FIELD":
                     state = plantVineInField(pendingAction.vineId!, action.fieldId, state);
@@ -282,7 +283,7 @@ const placeWorkerOrPass = (state: GameState, action: GameAction): GameState => {
                     return endTurn(gainCoins(bonus ? 3 : 2, state));
                 }
                 case "harvestField":
-                    return promptToChooseField(setPendingAction({ type: "harvestField" }, state));
+                    return promptToChooseField(setPendingAction({ type: "harvestField" }, state), "harvest");
                 case "makeWine": {
                     const bonus = hasPlacementBonus && state.workerPlacements.makeWine.length === 1;
                     return promptToMakeWine(
