@@ -43,7 +43,7 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
         case "chooseCard":
             return <ChooseCardPrompt prompt={prompt} playerId={props.playerId} />;
         case "chooseField":
-            return <ChooseFieldPrompt playerId={props.playerId} />;
+            return <ChooseFieldPrompt purpose={prompt.purpose} playerId={props.playerId} />;
         case "chooseWine":
         case "fillOrder":
             return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;

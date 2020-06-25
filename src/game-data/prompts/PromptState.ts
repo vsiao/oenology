@@ -8,7 +8,7 @@ export type PromptState =
     | ChooseCardPromptState
     | ChooseWinePromptState
     | FillOrderPromptState
-    | { type: "chooseField"; }
+    | ChooseFieldPromptState
     | MakeWinePromptState
     | BuildStructurePromptState;
 
@@ -42,6 +42,12 @@ export interface ChooseWinePromptState {
 export interface FillOrderPromptState {
     type: "fillOrder";
     orderIds: OrderId[];
+}
+
+export type ChooseFieldPurpose = "harvest" | "plant" | "buy" | "sell";
+export interface ChooseFieldPromptState {
+    type: "chooseField";
+    purpose: ChooseFieldPurpose;
 }
 
 export interface MakeWinePromptState {

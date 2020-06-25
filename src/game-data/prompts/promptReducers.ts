@@ -1,6 +1,6 @@
 import GameState, { CardId } from "../GameState";
 import { GameAction } from "../gameActions";
-import { Choice, PromptState } from "./PromptState";
+import { Choice, PromptState, ChooseFieldPurpose } from "./PromptState";
 import { Coupon } from "../structures";
 import { OrderId } from "../orderCards";
 import { visitorCards } from "../visitors/visitorCards";
@@ -97,16 +97,16 @@ export const promptToChooseVisitor = (
     });
 };
 
-export const promptToChooseField = (state: GameState): GameState => {
+export const promptToChooseField = (state: GameState, purpose: ChooseFieldPurpose): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseField" });
+    return enqueueActionPrompt(state, { type: "chooseField", purpose });
 };
 
 export const promptToChooseWine = (
     state: GameState,
-    { minValue = 1, limit }: { minValue?: number; limit: number }
+    { minValue = 1, limit }: { minValue?: number; limit: number; }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
