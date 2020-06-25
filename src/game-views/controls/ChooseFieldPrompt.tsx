@@ -2,15 +2,18 @@ import "./ChooseFieldPrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
+import cx from 'classnames';
 import { FieldId, Field, GrapeColor } from "../../game-data/GameState";
 import { chooseField } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
+import { ChooseFieldPurpose } from "../../game-data/prompts/PromptState";
 import PromptStructure from "./PromptStructure";
 import { vineCards } from "../../game-data/vineCards";
 import Grape from "../icons/Grape";
 import Coins from "../icons/Coins";
 
 interface Props {
+    purpose: ChooseFieldPurpose;
     fields: Field[];
     chooseField: (id: FieldId) => void;
 }
@@ -19,7 +22,12 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure title="Choose a field">
         <div className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
-                return <div key={field.id} className="ChooseFieldPrompt-field" onClick={() => props.chooseField(field.id)}>
+                const isDisabled = isFieldDisabled(props.purpose, field);
+                return <div key={field.id}
+                    className={cx("ChooseFieldPrompt-field", {
+                        "ChooseFieldPrompt-field--disabled": isDisabled
+                    })}
+                    onClick={isDisabled ? undefined : () => props.chooseField(field.id)}>
                     <div className="ChooseFieldPrompt-fieldHeader">
                         <Coins>{field.value}</Coins>
                     </div>
@@ -51,3 +59,18 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string; })
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChooseFieldPrompt);
+
+function isFieldDisabled(purpose: ChooseFieldPurpose, field: Field): boolean {
+    switch (purpose) {
+        case "buy":
+            return !field.sold;
+        case "sell":
+            return field.sold || field.vines.length > 0;
+        case "harvest":
+            return field.harvested || !field.vines.length;
+        case "plant":
+            // TODO: check vine value & structures
+            // There are also visitors that let you plant despite these
+            return field.sold;
+    }
+}
