@@ -1,8 +1,7 @@
 import "./PlayerMat.css";
 import * as React from "react";
 import { connect } from "react-redux";
-import cx from "classnames";
-import { CardId, CurrentTurn, PlayerState, WorkerType } from "../../game-data/GameState";
+import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
@@ -19,30 +18,11 @@ import ActionPrompt from "./ActionPrompt";
 interface Props {
     currentTurn: CurrentTurn;
     playerState: PlayerState;
-    pendingWorkerType: WorkerType;
-    setPendingWorkerType: (workerType: WorkerType) => void;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { playerState, setPendingWorkerType } = props;
+    const { playerState } = props;
     const workers = playerState.workers;
-    const defaultAvailableWorkerIndex = workers.reduce(
-        (previousValue, worker, currentIndex) =>
-            worker.available ? currentIndex : previousValue,
-        null as number | null
-    );
-    const [highlightedIndex, setHighlightedIndex] = React.useState(defaultAvailableWorkerIndex);
-    React.useEffect(() => {
-        if (
-            (highlightedIndex === null && defaultAvailableWorkerIndex !== null) ||
-            (highlightedIndex !== null && !workers[highlightedIndex].available)
-        ) {
-            setHighlightedIndex(defaultAvailableWorkerIndex);
-            if (defaultAvailableWorkerIndex !== null) {
-                setPendingWorkerType(workers[defaultAvailableWorkerIndex].type);
-            }
-        }
-    }, [highlightedIndex, defaultAvailableWorkerIndex, workers, setPendingWorkerType]);
 
     return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
         <ActionPrompt />
@@ -52,17 +32,7 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
             <ul className="PlayerMat-workers">
                 {workers.map((worker, i) =>
-                    <li key={i} className={cx({
-                        "PlayerMat-worker": true,
-                        "PlayerMat-worker--grande": worker.type === "grande",
-                        "PlayerMat-worker--available": worker.available,
-                        "PlayerMat-worker--highlighted": highlightedIndex !== null && highlightedIndex === i
-                    })}
-                        onClick={worker.available ? () => {
-                            setPendingWorkerType(worker.type);
-                            setHighlightedIndex(i);
-                        } : undefined}
-                    >
+                    <li key={i} className="PlayerMat-worker" >
                         <Worker
                             workerType={worker.type}
                             color={playerState.color}

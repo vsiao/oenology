@@ -26,14 +26,7 @@
     border-radius: 1em;
     display: inline-flex;
     justify-content: center;
-    height: 2em;
-    width: 2em;
-}
-.PlayerMat-worker--grande {
     margin-right: 4px;
-}
-.PlayerMat-worker--available {
-    cursor: pointer;
 }
 .PlayerMat-worker--highlighted {
     background: white;

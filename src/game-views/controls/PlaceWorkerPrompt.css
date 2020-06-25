@@ -1,0 +1,40 @@
+.PlaceWorkerPrompt-body {
+    padding: 0 16px;
+}
+
+.PlaceWorkerPrompt-workerTypeSelector {
+    align-items: center;
+    display: flex;
+    margin-bottom: 1em;
+}
+
+.PlaceWorkerPrompt-workerTypeButton {
+    align-items: center;
+    background: none;
+    border-radius: 1.2em;
+    display: flex;
+    height: 2.4em;
+    justify-content: center;
+    min-width: 2.4em;
+    outline: none;
+    padding: 0 .2em;
+}
+.PlaceWorkerPrompt-workerTypeButton:enabled {
+    cursor: pointer;
+}
+.PlaceWorkerPrompt-workerTypeButton + .PlaceWorkerPrompt-workerTypeButton {
+    margin-left: .4em;
+}
+.PlaceWorkerPrompt-workerTypeButton--selected {
+    background: #61dafb;
+}
+
+.PlaceWorkerPrompt-choices {
+    display: flex;
+    flex-flow: row wrap;
+    margin: -6px;
+}
+
+.PlaceWorkerPrompt-choiceButton {
+    margin: 6px;
+}

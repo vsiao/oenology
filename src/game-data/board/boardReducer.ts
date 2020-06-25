@@ -62,7 +62,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
     if (!currentTurn.pendingAction) {
         // Player must either place a worker or pass
-        return placeWorkerOrPass(state, action);
+        return placeWorker(state, action);
     }
 
     const pendingAction = currentTurn.pendingAction;
@@ -208,14 +208,14 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
     }
 };
 
-const placeWorkerOrPass = (state: GameState, action: GameAction): GameState => {
+const placeWorker = (state: GameState, action: GameAction): GameState => {
     const hasPlacementBonus = Object.keys(state.players).length > 2;
 
     switch (action.type) {
-        case "PASS":
-            return passToNextSeason(state);
-
         case "PLACE_WORKER": {
+            if (!action.placement) {
+                return passToNextSeason(state);
+            }
             const player = state.players[state.currentTurn.playerId];
             const workerIndex = player.workers.reduce(
                 (previousValue, worker, currentIndex) =>

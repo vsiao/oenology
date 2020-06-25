@@ -10,6 +10,7 @@ import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
 import ChooseCardPrompt from "./ChooseCardPrompt";
 import ChooseWinePrompt from "./ChooseWinePrompt";
+import PlaceWorkerPrompt from "./PlaceWorkerPrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -49,6 +50,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
             return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;
         case "makeWine":
             return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
+        case "placeWorker":
+            return <PlaceWorkerPrompt playerId={props.playerId} />;
         default:
             return JSON.stringify(prompt);
     }

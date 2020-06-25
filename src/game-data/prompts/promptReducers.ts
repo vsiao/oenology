@@ -12,6 +12,7 @@ export const prompt = (state: GameState, action: GameAction) => {
         case "CHOOSE_FIELD":
         case "CHOOSE_WINE":
         case "MAKE_WINE":
+        case "PLACE_WORKER":
         case "BUILD_STRUCTURE":
             return action.playerId === state.playerId
                 ? { ...state, actionPrompts: state.actionPrompts.slice(1) }
@@ -130,6 +131,13 @@ export const promptToMakeWine = (
         return state;
     }
     return enqueueActionPrompt(state, { type: "makeWine", upToN });
+};
+
+export const promptToPlaceWorker = (state: GameState) => {
+    if (state.playerId !== state.currentTurn.playerId) {
+        return state;
+    }
+    return enqueueActionPrompt(state, { type: "placeWorker" });
 };
 
 export const promptToBuildStructure = (state: GameState, coupon?: Coupon): GameState => {

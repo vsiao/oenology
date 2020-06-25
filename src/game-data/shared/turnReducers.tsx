@@ -2,7 +2,7 @@ import * as React from "react";
 import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, FieldId, Field, WakeUpPosition, PlayVisitorPendingAction } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { pushActivityLog, updatePlayer, gainVP, gainCoins } from "./sharedReducers";
-import { promptForAction, promptToChooseVisitor } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseVisitor, promptToPlaceWorker } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
@@ -138,7 +138,7 @@ const startWorkerPlacementTurn = (
         // player is out of workers, auto-pass them
         return passToNextSeason(state, player.id);
     }
-    return state;
+    return promptToPlaceWorker(state);
 };
 
 export const passToNextSeason = (

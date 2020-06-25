@@ -10,6 +10,7 @@ export type PromptState =
     | FillOrderPromptState
     | ChooseFieldPromptState
     | MakeWinePromptState
+    | PlaceWorkerPromptState
     | BuildStructurePromptState;
 
 export interface Choice<DataT = unknown> {
@@ -53,6 +54,10 @@ export interface ChooseFieldPromptState {
 export interface MakeWinePromptState {
     type: "makeWine";
     upToN: number;
+}
+
+export interface PlaceWorkerPromptState {
+    type: "placeWorker";
 }
 
 export interface BuildStructurePromptState {

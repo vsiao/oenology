@@ -9,24 +9,15 @@ import { AppState } from "../store/AppState";
 
 interface Props {
     title: React.ReactNode;
-    disabledReason: string | undefined;
     numSpots: number;
     bonusDisplay: React.ReactNode;
     season: string;
     workers: BoardWorker[];
-    onClick: (() => void) | undefined;
 }
 
 const BoardPlacement: React.FunctionComponent<Props> = props => {
-    const { title, disabledReason, numSpots, bonusDisplay, season, workers, onClick } = props;
-    const interactive = onClick && !disabledReason;
-    return <tr
-        className={cx({
-            "BoardPlacement": true,
-            "BoardPlacement--interactive": interactive,
-        })}
-        onClick={interactive ? onClick : undefined}
-    >
+    const { title, numSpots, bonusDisplay, season, workers } = props;
+    return <tr className="BoardPlacement">
         {new Array(numSpots).fill(0).map((_, i) => {
             const worker = workers[i];
             return <td key={i} className="BoardPlacement-spotCell">
@@ -52,8 +43,6 @@ const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction }) 
     return {
         numSpots,
         bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : null,
-        disabledReason: ownProps.placement.disabledReason &&
-            ownProps.placement.disabledReason(state.game),
     };
 }
 

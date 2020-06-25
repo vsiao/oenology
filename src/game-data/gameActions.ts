@@ -58,13 +58,6 @@ const inPlaceShuffle = (cards: unknown[]) => {
     }
 };
 
-export interface SetWorkerAction extends Action<"SET_WORKER_TYPE"> {
-    workerType: WorkerType;
-}
-export const setWorkerType = (workerType: WorkerType): SetWorkerAction => {
-    return { type: "SET_WORKER_TYPE", workerType };
-};
-
 export interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {
     id: string;
     playerId: string;

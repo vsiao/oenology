@@ -3,12 +3,6 @@ import { WorkerType } from "../GameState";
 
 export type BoardAction =
     | PlaceWorkerAction
-    | PassAction;
-
-interface PassAction extends Action<"PASS"> { }
-export const pass = (): PassAction => {
-    return { type: "PASS" };
-};
 
 export type WorkerPlacement =
     | "drawVine"
@@ -27,9 +21,14 @@ export type WorkerPlacement =
     | "yoke";
 
 interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
-    placement: WorkerPlacement;
+    placement: WorkerPlacement | null; // null means pass
     workerType: WorkerType;
+    playerId: string;
 }
-export const placeWorker = (placement: WorkerPlacement, workerType: WorkerType): PlaceWorkerAction => {
-    return { type: "PLACE_WORKER", placement, workerType };
+export const placeWorker = (
+    placement: WorkerPlacement | null,
+    workerType: WorkerType,
+    playerId: string
+): PlaceWorkerAction => {
+    return { type: "PLACE_WORKER", placement, workerType, playerId };
 };

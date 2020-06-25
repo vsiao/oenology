@@ -7,18 +7,3 @@
     width: 100%;
     z-index: 1;
 }
-
-.ActionPrompt-enter {
-    transform: translateY(100%);
-}
-.ActionPrompt-enter-active {
-    transform: translateY(0);
-    transition: 200ms transform cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ActionPrompt-exit {
-    transform: translateY(0);
-}
-.ActionPrompt-exit-active {
-    transform: translateY(100%);
-    transition: 200ms transform ease-in;
-}

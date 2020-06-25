@@ -5,14 +5,10 @@ import { AppState } from "../store/AppState";
 import { CurrentTurn, WorkerPlacementTurnPendingAction } from "../game-data/GameState";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
-import { Dispatch } from "redux";
-import { GameAction } from "../game-data/gameActions";
-import { pass } from "../game-data/board/boardActions";
 
 interface Props {
     currentTurn: CurrentTurn;
     playerId: string | null;
-    passTurn: () => void;
 }
 
 const StatusBanner: React.FunctionComponent<Props> = props => {
@@ -21,7 +17,7 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const renderStatus = ({ currentTurn, playerId, passTurn }: Props) => {
+const renderStatus = ({ currentTurn, playerId }: Props) => {
     const playerName = <strong>{currentTurn.playerId}</strong>;
     switch (currentTurn.type) {
         case "wakeUpOrder":
@@ -39,7 +35,6 @@ const renderStatus = ({ currentTurn, playerId, passTurn }: Props) => {
             const isCurrentPlayerTurn = currentTurn.playerId === playerId;
             return <span>
                 It's {isCurrentPlayerTurn ? "your" : <>{playerName}'s</>} turn.
-                {isCurrentPlayerTurn ? <>&nbsp;<button onClick={passTurn}>Pass</button></> : null}
             </span>;
         default:
             return JSON.stringify(currentTurn);
@@ -87,8 +82,4 @@ const mapStateToProps = (state: AppState) => {
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
-    return { passTurn: () => dispatch(pass()) };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(StatusBanner);
+export default connect(mapStateToProps)(StatusBanner);
