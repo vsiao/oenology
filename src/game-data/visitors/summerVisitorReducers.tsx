@@ -108,7 +108,7 @@ export const summerVisitorReducers: Record<
                 return canPlantAgain
                     ? promptToChooseVineCard(
                         setPendingAction({ ...artisanAction, secondPlant: true }, state),
-                        /* bonus */ true
+                        { optional: true }
                     )
                     : endVisitor(state);
 
@@ -327,7 +327,8 @@ export const summerVisitorReducers: Record<
                                 {
                                     id: "HOMESTEADER_BOTH",
                                     label: <>Do both (lose <VP>1</VP>)</>,
-                                    disabledReason: undefined, // TODO
+                                    disabledReason: plantVineDisabledReason(state) ||
+                                        buildStructureDisabledReason(state, buildCoupon),
                                 },
                             ],
                         });
@@ -366,7 +367,7 @@ export const summerVisitorReducers: Record<
                 return canPlantAgain
                     ? promptToChooseVineCard(
                         setPendingAction({ ...homesteaderAction, secondPlant: true }, state),
-                        /* bonus */ true
+                        { optional: true }
                     )
                     : endVisitor(state);
 
@@ -398,7 +399,10 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "LANDSCAPER_DRAW_PLANT":
-                        return promptToChooseVineCard(drawCards(state, { vine: 1 })); // TODO allow passing
+                        return promptToChooseVineCard(
+                            drawCards(state, { vine: 1 }),
+                            { optional: true }
+                        );
                     case "LANDSCAPER_SWITCH":
                         return endVisitor(state); // TODO
                     default:

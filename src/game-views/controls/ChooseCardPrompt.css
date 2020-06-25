@@ -7,7 +7,11 @@
 .ChooseCardPrompt-cardButton {
     margin: 0 4px;
 }
-.ChooseCardPrompt-cardButton:hover {
+.ChooseCardPrompt-cardButton:disabled {
+    color: inherit;
+    opacity: 0.7;
+}
+.ChooseCardPrompt-cardButton:not(:disabled):hover {
     bottom: 4px;
     cursor: pointer;
     position: relative;

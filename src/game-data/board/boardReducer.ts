@@ -178,7 +178,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     if (bonus) {
                         return promptToChooseVineCard(
                             setPendingAction({ type: "plantVine", bonusActivated: true }, state),
-                            /* bonus */ true
+                            { optional: true }
                         );
                     }
                     return endTurn(state);

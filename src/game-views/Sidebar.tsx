@@ -59,7 +59,7 @@ const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
         case "makeWine":
             return <>{player} made {
                 event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)
-            }</>; // TODO
+            }</>;
         case "pass":
             return <>{player} passed</>;
         case "plant":
