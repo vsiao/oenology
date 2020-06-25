@@ -55,6 +55,7 @@ export interface WorkerPlacementTurn {
 
 export interface PlayVisitorPendingAction {
     type: "playVisitor";
+    canPlayAdditionalVisitor: boolean;
     visitorId?: VisitorId;
 }
 export type WorkerPlacementTurnPendingAction =

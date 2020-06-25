@@ -10,10 +10,18 @@ import {
     updatePlayer,
     pushActivityLog,
 } from "../shared/sharedReducers";
-import { promptToChooseField, promptForAction, promptToMakeWine, promptToBuildStructure, promptToChooseCard, promptToChooseVineCard, promptToChooseOrderCard, promptToFillOrder } from "../prompts/promptReducers";
+import {
+    promptForAction,
+    promptToBuildStructure,
+    promptToChooseField,
+    promptToChooseOrderCard,
+    promptToChooseVineCard,
+    promptToChooseVisitor,
+    promptToFillOrder,
+    promptToMakeWine,
+} from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
-import { visitorCards } from "../visitors/visitorCards";
 import { endTurn, movePendingCardToDiscard, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards, removeCardsFromHand } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
@@ -292,15 +300,22 @@ const placeWorkerOrPass = (state: GameState, action: GameAction): GameState => {
                 }
                 case "plantVine":
                     return promptToChooseVineCard(setPendingAction({ type: "plantVine" }, state));
-                case "playSummerVisitor":
-                case "playWinterVisitor":
-                    return promptToChooseCard(setPendingAction({ type: "playVisitor" }, state), {
-                        title: "Choose a visitor",
-                        cards: state.players[state.currentTurn.playerId].cardsInHand
-                            .filter(card => card.type === "visitor" &&
-                                visitorCards[card.id].season ===
-                                (action.placement === "playSummerVisitor" ? "summer" : "winter"))
-                    });
+                case "playSummerVisitor": {
+                    const canPlayAdditionalVisitor = hasPlacementBonus &&
+                        state.workerPlacements.playSummerVisitor.length === 1;
+                    return promptToChooseVisitor(
+                        "summer",
+                        setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor }, state)
+                    );
+                }
+                case "playWinterVisitor": {
+                    const canPlayAdditionalVisitor = hasPlacementBonus &&
+                        state.workerPlacements.playWinterVisitor.length === 1;
+                    return promptToChooseVisitor(
+                        "winter",
+                        setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor }, state)
+                    );
+                }
                 case "trainWorker": {
                     const bonus = hasPlacementBonus && state.workerPlacements.trainWorker.length === 1;
                     return endTurn(trainWorker(payCoins(bonus ? 3 : 4, state)));

@@ -3,6 +3,7 @@ import { GameAction } from "../gameActions";
 import { Choice, PromptState } from "./PromptState";
 import { Coupon } from "../structures";
 import { OrderId } from "../orderCards";
+import { visitorCards } from "../visitors/visitorCards";
 
 export const prompt = (state: GameState, action: GameAction) => {
     switch (action.type) {
@@ -78,6 +79,20 @@ export const promptToChooseVineCard = (state: GameState, bonus = false): GameSta
         title: `Choose ${bonus ? "another" : "a"} vine to plant`,
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(({ type }) => type === "vine"),
+        optional: bonus,
+    });
+};
+
+export const promptToChooseVisitor = (
+    season: "summer" | "winter",
+    state: GameState,
+    bonus = false
+): GameState => {
+    return promptToChooseCard(state, {
+        title: `Choose ${bonus ? "another" : "a"} visitor`,
+        cards: state.players[state.currentTurn.playerId].cardsInHand
+            .filter(card => card.type === "visitor" &&
+                visitorCards[card.id].season === season),
         optional: bonus,
     });
 };

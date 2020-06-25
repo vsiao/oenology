@@ -19,7 +19,7 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures, Coupon } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endTurn, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, movePendingCardToDiscard } from "../shared/turnReducers";
+import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, movePendingCardToDiscard } from "../shared/turnReducers";
 import { removeCardsFromHand, drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -52,7 +52,7 @@ export const summerVisitorReducers: Record<
                 state.players[state.currentTurn.playerId].fields[action.fieldId].vines.forEach(
                     v => vinesById[v] = true
                 );
-                return endTurn(Object.keys(vinesById).length >= 3 ? gainVP(2, state) : state);
+                return endVisitor(Object.keys(vinesById).length >= 3 ? gainVP(2, state) : state);
             default:
                 return state;
         }
@@ -68,7 +68,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 if (!action.cards) {
                     // pass on second plant
-                    return endTurn(state);
+                    return endVisitor(state);
                 }
                 const card = action.cards![0];
                 switch (card.type) {
@@ -101,7 +101,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "ARTISAN_GAIN":
-                        return endTurn(gainCoins(3, state));
+                        return endVisitor(gainCoins(3, state));
                     case "ARTISAN_BUILD":
                         return promptToBuildStructure(state, buildCoupon);
                     case "ARTISAN_PLANT":
@@ -111,10 +111,10 @@ export const summerVisitorReducers: Record<
                 }
             case "BUILD_STRUCTURE":
                 const structure = structures[action.structureId];
-                return endTurn(buildStructure(payCoins(structure.cost - 1, state), action.structureId));
+                return endVisitor(buildStructure(payCoins(structure.cost - 1, state), action.structureId));
 
             case "CHOOSE_FIELD":
-                state = endTurn(plantVineInField(artisanAction.vineId, action.fieldId, state));
+                state = endVisitor(plantVineInField(artisanAction.vineId, action.fieldId, state));
                 const canPlantAgain = !artisanAction.secondPlant &&
                     plantVineDisabledReason(state) === undefined;
 
@@ -126,7 +126,7 @@ export const summerVisitorReducers: Record<
                           ),
                           /* bonus */ true
                       )
-                    : endTurn(state);
+                    : endVisitor(state);
 
             default:
                 return state;
@@ -137,10 +137,10 @@ export const summerVisitorReducers: Record<
             // list of players who have yet to decide whether to lose VP / gain coins
             mainActions: string[];
         };
-        const maybeEndTurn = (state2: GameState, playerId: string) => {
+        const maybeEndVisitor = (state2: GameState, playerId: string) => {
             const mainActions = bankerAction.mainActions.filter(id => id !== playerId);
             state2 = setPendingAction({ ...bankerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endTurn(state2) : state2;
+            return mainActions.length === 0 ? endVisitor(state2) : state2;
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -161,12 +161,12 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BANKER_GAIN":
-                        return maybeEndTurn(
+                        return maybeEndVisitor(
                             gainCoins(3, loseVP(1, state, action.playerId), action.playerId),
                             action.playerId
                         );
                     case "BANKER_PASS":
-                        return maybeEndTurn(state, action.playerId);
+                        return maybeEndVisitor(state, action.playerId);
                     default:
                         return state;
                 }
@@ -186,9 +186,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BROKER_GAIN":
-                        return endTurn(gainVP(3, payCoins(9, state)));
+                        return endVisitor(gainVP(3, payCoins(9, state)));
                     case "BROKER_LOSE":
-                        return endTurn(gainCoins(6, loseVP(2, state)));
+                        return endVisitor(gainCoins(6, loseVP(2, state)));
                     default:
                         return state;
                 }
@@ -216,9 +216,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BUYER_PLACE":
-                        return endTurn(payCoins(2, placeGrapes(state, { red: 1, white: 1 })));
+                        return endVisitor(payCoins(2, placeGrapes(state, { red: 1, white: 1 })));
                     case "BUYER_DISCARD":
-                        return endTurn(state); // TODO
+                        return endVisitor(state); // TODO
                     default:
                         return state;
                 }
@@ -262,7 +262,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "CONTRACTOR_GAIN":
-                        return endTurn(gainVP(1, state));
+                        return endVisitor(gainVP(1, state));
                     case "CONTRACTOR_BUILD":
                         return promptToBuildStructure(state);
                     case "CONTRACTOR_PLANT":
@@ -271,9 +271,9 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "BUILD_STRUCTURE":
-                return endTurn(buildStructure(state, action.structureId));
+                return endVisitor(buildStructure(state, action.structureId));
             case "CHOOSE_FIELD":
-                return endTurn(plantVineInField(contractorAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(contractorAction.vineId, action.fieldId, state));
             default:
                 return state;
         }
@@ -298,12 +298,12 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endTurn(plantVineInField(cultivatorAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(cultivatorAction.vineId, action.fieldId, state));
             default:
                 return state;
         }
     },
-    // entertainer: s => endTurn(s),
+    // entertainer: s => endVisitor(s),
     grower: (state, action, pendingAction) => {
         const growerAction = pendingAction as PlayVisitorPendingAction & { vineId: VineId };
 
@@ -327,12 +327,12 @@ export const summerVisitorReducers: Record<
                 state = plantVineInField(growerAction.vineId, action.fieldId, state);
                 const numVinesPlanted = Object.values(state.players[state.currentTurn.playerId].fields)
                     .reduce((numVines, field) => numVines + field.vines.length, 0)
-                return endTurn(numVinesPlanted >= 6 ? gainVP(2, state) : state);
+                return endVisitor(numVinesPlanted >= 6 ? gainVP(2, state) : state);
             default:
                 return state;
         }
     },
-    // handyman: s => endTurn(s),
+    // handyman: s => endVisitor(s),
     homesteader: (state, action,pendingAction) => {
         const homesteaderAction = pendingAction as PlayVisitorPendingAction & {
             doBoth: boolean;
@@ -345,7 +345,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 if (!action.cards) {
                     // pass on second plant
-                    return endTurn(state);
+                    return endVisitor(state);
                 }
                 const card = action.cards![0];
                 switch (card.type) {
@@ -399,7 +399,7 @@ export const summerVisitorReducers: Record<
 
                 return homesteaderAction.doBoth
                     ? promptToChooseVineCard(state)
-                    : endTurn(state);
+                    : endVisitor(state);
 
             case "CHOOSE_FIELD":
                 state = plantVineInField(homesteaderAction.vineId, action.fieldId, state)
@@ -414,7 +414,7 @@ export const summerVisitorReducers: Record<
                           ),
                           /* bonus */ true
                       )
-                    : endTurn(state);
+                    : endVisitor(state);
 
             default:
                 return state;
@@ -452,17 +452,17 @@ export const summerVisitorReducers: Record<
                     case "LANDSCAPER_DRAW_PLANT":
                         return promptToChooseVineCard(drawCards(state, { vine: 1 })); // TODO allow passing
                     case "LANDSCAPER_SWITCH":
-                        return endTurn(state); // TODO
+                        return endVisitor(state); // TODO
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endTurn(plantVineInField(landscaperAction.vineId, action.fieldId, state));
+                return endVisitor(plantVineInField(landscaperAction.vineId, action.fieldId, state));
             default:
                 return state;
         }
     },
-    // negotiator: s => endTurn(s),
+    // negotiator: s => endVisitor(s),
     noviceGuide: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -475,14 +475,14 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "NGUIDE_GAIN":
-                        return endTurn(gainCoins(3, state));
+                        return endVisitor(gainCoins(3, state));
                     case "NGUIDE_MAKE":
                         return promptToMakeWine(state, /* upToN */ 2);
                     default:
                         return state;
                 }
             case "MAKE_WINE":
-                return endTurn(makeWineFromGrapes(state, action.ingredients));
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -540,7 +540,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_FIELD":
                 state = plantVineInField(overseerAction.vineId, action.fieldId, state);
                 const { red, white } = vineCards[overseerAction.vineId].yields;
-                return endTurn((red || 0) + (white || 0) === 4 ? gainVP(1, state) : state);
+                return endVisitor((red || 0) + (white || 0) === 4 ? gainVP(1, state) : state);
             default:
                 return state;
         }
@@ -557,9 +557,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PATRON_GAIN":
-                        return endTurn(gainCoins(4, state));
+                        return endVisitor(gainCoins(4, state));
                     case "PATRON_DRAW":
-                        return endTurn(drawCards(state, { order: 1, winterVisitor: 1, }));
+                        return endVisitor(drawCards(state, { order: 1, winterVisitor: 1, }));
                     default:
                         return state;
                 }
@@ -567,9 +567,9 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // planner: s => endTurn(s),
-    // planter: s => endTurn(s),
-    // producer: s => endTurn(s),
+    // planner: s => endVisitor(s),
+    // planter: s => endVisitor(s),
+    // producer: s => endVisitor(s),
     surveyor: (state, action) => {
         const fields = Object.values(state.players[state.currentTurn.playerId].fields);
         let numEmptyAndOwned = 0;
@@ -595,9 +595,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SURVEYOR_EMPTY":
-                        return endTurn(gainCoins(numEmptyAndOwned, state));
+                        return endVisitor(gainCoins(numEmptyAndOwned, state));
                     case "SURVEYOR_PLANTED":
-                        return endTurn(gainVP(numPlantedAndOwned, state));
+                        return endVisitor(gainVP(numPlantedAndOwned, state));
                     default:
                         return state;
                 }
@@ -618,11 +618,11 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SPONSOR_DRAW":
-                        return endTurn(drawCards(state, { vine: 2 }));
+                        return endVisitor(drawCards(state, { vine: 2 }));
                     case "SPONSOR_GAIN":
-                        return endTurn(gainCoins(3, state));
+                        return endVisitor(gainCoins(3, state));
                     case "SPONSOR_BOTH":
-                        return endTurn(gainCoins(3, drawCards(loseVP(1, state), { vine: 2 })));
+                        return endVisitor(gainCoins(3, drawCards(loseVP(1, state), { vine: 2 })));
                     default:
                         return state;
                 }
@@ -635,10 +635,10 @@ export const summerVisitorReducers: Record<
             // list of players who have yet to decide whether to give coins
             mainActions: string[];
         };
-        const maybeEndTurn = (state2: GameState, playerId: string) => {
+        const maybeEndVisitor = (state2: GameState, playerId: string) => {
             const mainActions = swindlerAction.mainActions.filter(id => id !== playerId);
             state2 = setPendingAction({ ...swindlerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endTurn(state2) : state2;
+            return mainActions.length === 0 ? endVisitor(state2) : state2;
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -664,12 +664,12 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SWINDLER_GIVE":
-                        return maybeEndTurn(
+                        return maybeEndVisitor(
                             gainCoins(2, payCoins(2, state, action.playerId)),
                             action.playerId
                         );
                     case "SWINDLER_PASS":
-                        return maybeEndTurn(gainVP(1, state), action.playerId);
+                        return maybeEndVisitor(gainVP(1, state), action.playerId);
                     default:
                         return state;
                 }
@@ -694,14 +694,14 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "TOUR_GAIN_4":
-                        return endTurn(gainCoins(4, state));
+                        return endVisitor(gainCoins(4, state));
                     case "TOUR_HARVEST":
                         return promptToChooseField(state);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endTurn(harvestField(state, action.fieldId));
+                return endVisitor(harvestField(state, action.fieldId));
             default:
                 return state;
         }
@@ -725,7 +725,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "BUILD_STRUCTURE":
-                return endTurn(buildStructure(state, action.structureId));
+                return endVisitor(buildStructure(state, action.structureId));
             default:
                 return state;
         }
@@ -746,9 +746,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UBROKER_LOSE_VP":
-                        return endTurn(gainCoins(9, loseVP(3, state)));
+                        return endVisitor(gainCoins(9, loseVP(3, state)));
                     case "UBROKER_GAIN_VP":
-                        return endTurn(gainVP(2, payCoins(6, state)));
+                        return endVisitor(gainVP(2, payCoins(6, state)));
                     default:
                         return state;
                 }
@@ -761,10 +761,10 @@ export const summerVisitorReducers: Record<
             // list of players who have yet to decide whether to draw
             mainActions: string[]
         };
-        const maybeEndTurn = (state2: GameState, playerId: string) => {
+        const maybeEndVisitor = (state2: GameState, playerId: string) => {
             const mainActions = vendorAction.mainActions.filter(id => id !== playerId);
             state2 = setPendingAction({ ...vendorAction, mainActions }, state2);
-            return mainActions.length === 0 ? endTurn(state2) : state2;
+            return mainActions.length === 0 ? endVisitor(state2) : state2;
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -785,12 +785,12 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "VENDOR_DRAW":
-                        return maybeEndTurn(
+                        return maybeEndVisitor(
                             drawCards(state, { summerVisitor: 1 }, action.playerId),
                             action.playerId
                         );
                     case "VENDOR_PASS":
-                        return maybeEndTurn(state, action.playerId);
+                        return maybeEndVisitor(state, action.playerId);
                     default:
                         return state;
                 }
@@ -799,5 +799,5 @@ export const summerVisitorReducers: Record<
         }
 
     },
-    // volunteerCrew: s => endTurn(s),
+    // volunteerCrew: s => endVisitor(s),
 };

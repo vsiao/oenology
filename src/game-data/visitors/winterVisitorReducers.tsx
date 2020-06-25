@@ -39,7 +39,7 @@ import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
-import { endTurn, setPendingAction } from "../shared/turnReducers";
+import { endVisitor, setPendingAction } from "../shared/turnReducers";
 import { discardCards, drawCards, removeCardsFromHand } from "../shared/cardReducers";
 import { makeWineFromGrapes, harvestField, fillOrder, ageSingle, placeGrapes, ageCellar, discardWines } from "../shared/grapeWineReducers";
 
@@ -65,9 +65,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "ASSESSOR_GAIN":
-                        return endTurn(gainCoins(numCards, state));
+                        return endVisitor(gainCoins(numCards, state));
                     case "ASSESSOR_DISCARD":
-                        return endTurn(gainVP(2, discardCards(player.cardsInHand, state)));
+                        return endVisitor(gainVP(2, discardCards(player.cardsInHand, state)));
                     default:
                         return state;
                 }
@@ -83,7 +83,7 @@ export const winterVisitorReducers: Record<
                 const wineByType: { [type in WineColor]?: boolean } = {};
                 action.ingredients.forEach(w => wineByType[w.type] = true);
                 const numTypes = Object.keys(wineByType).length;
-                return endTurn(gainVP(numTypes, makeWineFromGrapes(state, action.ingredients)));
+                return endVisitor(gainVP(numTypes, makeWineFromGrapes(state, action.ingredients)));
             default:
                 return state;
         }
@@ -104,14 +104,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "CRUSHEX_GAIN":
-                        return endTurn(drawCards(gainCoins(3, state), { order: 1 }));
+                        return endVisitor(drawCards(gainCoins(3, state), { order: 1 }));
                     case "CRUSHEX_MAKE":
                         return promptToMakeWine(state, /* upToN */ 3);
                     default:
                         return state;
                 }
             case "MAKE_WINE":
-                return endTurn(makeWineFromGrapes(state, action.ingredients));
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -132,16 +132,16 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "CRUSHER_GAIN":
-                        return endTurn(gainCoins(3, drawCards(state, { summerVisitor: 1 })));
+                        return endVisitor(gainCoins(3, drawCards(state, { summerVisitor: 1 })));
                     case "CRUSHER_DRAW":
-                        return endTurn(
+                        return endVisitor(
                             promptToMakeWine(drawCards(state, { order: 1 }), /* upToN */ 2)
                         );
                     default:
                         return state;
                 }
             case "MAKE_WINE":
-                return endTurn(makeWineFromGrapes(state, action.ingredients));
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -154,7 +154,7 @@ export const winterVisitorReducers: Record<
                 state = buildStructure(state, action.structureId);
                 const numBuilt = Object.values(state.players[state.currentTurn.playerId].structures)
                     .filter(built => built).length;
-                return endTurn(numBuilt >= 6 ? gainVP(2, state) : state);
+                return endVisitor(numBuilt >= 6 ? gainVP(2, state) : state);
             default:
                 return state;
         }
@@ -167,7 +167,7 @@ export const winterVisitorReducers: Record<
         const endMainAction = (state2: GameState, playerId: string) => {
             const mainActions = gspeakerAction.mainActions.filter((id) => id !== playerId);
             state2 = setPendingAction({ ...gspeakerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endTurn(state2) : state2;
+            return mainActions.length === 0 ? endVisitor(state2) : state2;
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -241,14 +241,14 @@ export const winterVisitorReducers: Record<
                     case "HEXPERT_HARVEST":
                         return promptToChooseField(state);
                     case "HEXPERT_DRAW":
-                        return endTurn(drawCards(state, { vine: 1 }));
+                        return endVisitor(drawCards(state, { vine: 1 }));
                     case "HEXPERT_BUILD":
-                        return endTurn(buildStructure(payCoins(1, state), "yoke"));
+                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endTurn(harvestField(state, action.fieldId));
+                return endVisitor(harvestField(state, action.fieldId));
             default:
                 return state;
         }
@@ -269,14 +269,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "JUDGE_DRAW":
-                        return endTurn(drawCards(state, { summerVisitor: 2 }));
+                        return endVisitor(drawCards(state, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
                         return promptToChooseWine(state, { minValue: 4, limit: 1 });
                     default:
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(gainVP(3, discardWines(state, action.wines)));
+                return endVisitor(gainVP(3, discardWines(state, action.wines)));
             default:
                 return state;
         }
@@ -313,14 +313,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "MARKETER_DRAW":
-                        return endTurn(gainCoins(1, drawCards(state, { summerVisitor: 2 })));
+                        return endVisitor(gainCoins(1, drawCards(state, { summerVisitor: 2 })));
                     case "MARKETER_FILL":
                         return promptToChooseOrderCard(state);
                     default:
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(
+                return endVisitor(
                     fillOrder(marketerAction.orderId, action.wines, state, /* bonusVP */ true)
                 );
             default:
@@ -368,7 +368,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "MVINTNER_UPGRADE":
-                        return endTurn(buildStructure(payCoins(cost, state), upgradeCellar));
+                        return endVisitor(buildStructure(payCoins(cost, state), upgradeCellar));
                     case "MVINTNER_FILL":
                         return promptToChooseWine(state, { limit: 1 });
                     default:
@@ -389,7 +389,7 @@ export const winterVisitorReducers: Record<
                         },
                     }));
                 } else {
-                    return endTurn(fillOrder(vintnerAction.orderId, action.wines, state));
+                    return endVisitor(fillOrder(vintnerAction.orderId, action.wines, state));
                 }
             default:
                 return state;
@@ -431,14 +431,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "MERCHANT_PLACE":
-                        return endTurn(placeGrapes(payCoins(3, state), { red: 1, white: 1 }));
+                        return endVisitor(placeGrapes(payCoins(3, state), { red: 1, white: 1 }));
                     case "MERCHANT_FILL":
                         return promptToChooseOrderCard(state);
                     default:
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(
+                return endVisitor(
                     fillOrder(merchantAction.orderId, action.wines, state, /* bonusVP */ true)
                 );
             default:
@@ -454,14 +454,14 @@ export const winterVisitorReducers: Record<
             reactions: number;
         }
         const mentorAction = pendingAction as MentorPendingAction;
-        const maybeEndTurn = (state2: GameState) => {
+        const maybeEndVisitor = (state2: GameState) => {
             const { mainActions, reactions } = (state2.currentTurn as WorkerPlacementTurn)
                 .pendingAction as MentorPendingAction;
-            return mainActions.length === 0 && reactions === 0 ? endTurn(state2) : state2;
+            return mainActions.length === 0 && reactions === 0 ? endVisitor(state2) : state2;
         };
         const endMainAction = (state2: GameState, playerId: string) => {
             const mainActions = mentorAction.mainActions.filter((id) => id !== playerId);
-            return maybeEndTurn(setPendingAction({ ...mentorAction, mainActions }, state2));
+            return maybeEndVisitor(setPendingAction({ ...mentorAction, mainActions }, state2));
         };
 
         switch (action.type) {
@@ -521,7 +521,7 @@ export const winterVisitorReducers: Record<
 
                     case "MENTOR_DRAW_VINE":
                     case "MENTOR_DRAW_VISITOR":
-                        return maybeEndTurn(
+                        return maybeEndVisitor(
                             drawCards(
                                 setPendingAction(
                                     { ...mentorAction, reactions: mentorAction.reactions - 1 },
@@ -563,9 +563,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "NOBLE_GAIN":
-                        return endTurn(gainResiduals(1, payCoins(1, state)));
+                        return endVisitor(gainResiduals(1, payCoins(1, state)));
                     case "NOBLE_LOSE":
-                        return endTurn(gainVP(2, loseResiduals(2, state)));
+                        return endVisitor(gainVP(2, loseResiduals(2, state)));
                     default:
                         return state;
                 }
@@ -597,11 +597,11 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "OENOLOGIST_AGE":
-                        return endTurn(updatePlayer(state, player.id, {
+                        return endVisitor(updatePlayer(state, player.id, {
                             cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
                     case "OENOLOGIST_UPGRADE":
-                        return endTurn(buildStructure(
+                        return endVisitor(buildStructure(
                             payCoins(3, state),
                             player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
                         ));
@@ -617,9 +617,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 const { playerId } = state.currentTurn;
                 if (state.players[playerId].victoryPoints < 0) {
-                    return endTurn(gainCoins(6, state));
+                    return endVisitor(gainCoins(6, state));
                 } else {
-                    return endTurn(drawCards(state, { vine: 1, summerVisitor: 1, order: 1 }));
+                    return endVisitor(drawCards(state, { vine: 1, summerVisitor: 1, order: 1 }));
                 }
             default:
                 return state;
@@ -649,9 +649,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROFESSOR_TRAIN":
-                        return endTurn(trainWorker(payCoins(2, state)));
+                        return endVisitor(trainWorker(payCoins(2, state)));
                     case "PROFESSOR_GAIN":
-                        return endTurn(gainVP(2, state));
+                        return endVisitor(gainVP(2, state));
                     default:
                         return state;
                 }
@@ -680,11 +680,11 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SCHOLAR_DRAW":
-                        return endTurn(drawCards(state, { order: 2 }));
+                        return endVisitor(drawCards(state, { order: 2 }));
                     case "SCHOLAR_TRAIN":
-                        return endTurn(trainWorker(payCoins(3, state)));
+                        return endVisitor(trainWorker(payCoins(3, state)));
                     case "SCHOLAR_BOTH":
-                        return endTurn(
+                        return endVisitor(
                             trainWorker(payCoins(3,
                                 drawCards(loseVP(1, state), { order: 2 })
                             ))
@@ -703,7 +703,7 @@ export const winterVisitorReducers: Record<
             case "MAKE_WINE":
                 const numSparkling = action.ingredients
                     .filter(({ type }) => type === "sparkling").length;
-                return endTurn(gainVP(numSparkling, makeWineFromGrapes(state, action.ingredients)));
+                return endVisitor(gainVP(numSparkling, makeWineFromGrapes(state, action.ingredients)));
             default:
                 return state;
         }
@@ -725,9 +725,9 @@ export const winterVisitorReducers: Record<
                     .reduce((v1, v2) => Math.max(v1, v2));
 
                 if (wine.value > mostValuableWine) {
-                    return endTurn(gainVP(2, stateAfterDiscard));
+                    return endVisitor(gainVP(2, stateAfterDiscard));
                 } else {
-                    return endTurn(stateAfterDiscard);
+                    return endVisitor(stateAfterDiscard);
                 }
             default:
                 return state;
@@ -755,12 +755,12 @@ export const winterVisitorReducers: Record<
                     case "TEACHER_MAKE":
                         return promptToMakeWine(state, /* upToN */ 2);
                     case "TEACHER_TRAIN":
-                        return endTurn(trainWorker(payCoins(2, state)));
+                        return endVisitor(trainWorker(payCoins(2, state)));
                     default:
                         return state;
                 }
             case "MAKE_WINE":
-                return endTurn(makeWineFromGrapes(state, action.ingredients));
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -788,11 +788,11 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UOENOLOGIST_AGE":
-                        return endTurn(updatePlayer(state, player.id, {
+                        return endVisitor(updatePlayer(state, player.id, {
                             cellar: ageCellar(player.cellar, player.structures, 2),
                         }));
                     case "UOENOLOGIST_UPGRADE":
-                        return endTurn(buildStructure(
+                        return endVisitor(buildStructure(
                             loseVP(1, state),
                             player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
                         ));
@@ -822,11 +822,11 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UTEACHER_LOSE":
-                        return endTurn(trainWorker(loseVP(1, state)));
+                        return endVisitor(trainWorker(loseVP(1, state)));
                     case "UTEACHER_GAIN":
                         const numOpponents = Object.values(state.players)
                             .filter(p => p.workers.length >= 6).length;
-                        return endTurn(gainVP(numOpponents, state));
+                        return endVisitor(gainVP(numOpponents, state));
                     default:
                         return state;
                 }

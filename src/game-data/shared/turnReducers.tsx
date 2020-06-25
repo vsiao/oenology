@@ -1,13 +1,14 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, FieldId, Field, WakeUpPosition } from "../GameState";
+import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, FieldId, Field, WakeUpPosition, PlayVisitorPendingAction } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { pushActivityLog, updatePlayer, gainVP, gainCoins } from "./sharedReducers";
-import { promptForAction } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseVisitor } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
+import { needCardOfTypeDisabledReason } from "./sharedSelectors";
 
 export const endTurn = (state: GameState): GameState => {
     switch (state.currentTurn.type) {
@@ -254,6 +255,30 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
 
     return startWorkerPlacementTurn(season, nextPlayerId, state);
+};
+
+/**
+ * Called when a visitor's action is finished resolving. Ending a visitor
+ * is not necessarily the end of a turn because we may be playing multiple
+ * visitors back-to-back.
+ */
+export const endVisitor = (state: GameState): GameState => {
+    state = movePendingCardToDiscard(state);
+
+    const currentTurn = state.currentTurn as WorkerPlacementTurn;
+    const pendingAction = currentTurn.pendingAction as PlayVisitorPendingAction;
+    const hasCard = needCardOfTypeDisabledReason(
+        state,
+        currentTurn.season === "summer" ? "summerVisitor" : "winterVisitor"
+    ) === undefined;
+    if (pendingAction.canPlayAdditionalVisitor && hasCard) {
+        return promptToChooseVisitor(
+            currentTurn.season,
+            setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor: false }, state),
+            /* bonus */ true
+        );
+    }
+    return endTurn(state);
 };
 
 //
