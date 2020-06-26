@@ -1,6 +1,7 @@
 import './App.css';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { Dispatch } from 'redux';
 import { startGame, CHEAT_drawCard } from './game-data/gameActions';
 import OenologyGame from './game-views/OenologyGame';
@@ -19,7 +20,7 @@ interface Props {
 
 const App: React.FunctionComponent<Props> = props => {
     const [drawCardInputValue, setDrawCardInputValue] = useState("");
-    return (
+    return <BrowserRouter>
         <div className="App">
             <header className="App-header">
                 oenology
@@ -38,20 +39,24 @@ const App: React.FunctionComponent<Props> = props => {
                     New Game
                 </button>
             </header>
-            <OenologyGame currentPlayerId={props.currentPlayerId} />
-            {props.currentPlayerId === null
-                ? <div className="App-modal">
-                    <div className="App-dialog">
-                        Who are you? {props.playerIds.map(playerId =>
-                            <ChoiceButton key={playerId} onClick={() => props.onSelectPlayerId(playerId)}>
-                                {playerId}
-                            </ChoiceButton>
-                        )}
-                    </div>
-                </div>
-                : null}
+            <Switch>
+                <Route path="/game/:gameId">
+                    <OenologyGame currentPlayerId={props.currentPlayerId} />
+                    {props.currentPlayerId === null
+                        ? <div className="App-modal">
+                            <div className="App-dialog">
+                                Who are you? {props.playerIds.map(playerId =>
+                                    <ChoiceButton key={playerId} onClick={() => props.onSelectPlayerId(playerId)}>
+                                        {playerId}
+                                    </ChoiceButton>
+                                )}
+                            </div>
+                        </div>
+                        : null}
+                </Route>
+            </Switch>
         </div>
-    );
+    </BrowserRouter>;
 };
 
 const mapStateToProps = (state: AppState) => {
