@@ -36,13 +36,17 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <Coins className="SidebarPlayer-coins">{player.coins}</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">{player.victoryPoints}</VictoryPoints>
         </div>
-        <ul className="SidebarPlayer-structures">
-            {Object.entries(structureAbbreviations).map(([structureId, structureAbbr]) => {
-                if (!structureAbbr) return null;
-                return <li key={structureId} className={cx("SidebarPlayer-structure", {
-                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId]
-                })}>{structureAbbr}</li>;
-            })}
+        <ul className="SidebarPlayer-workers">
+            {player.workers.map((worker, i) =>
+                <li key={i} className="SidebarPlayer-worker">
+                    <Worker
+                        workerType={worker.type}
+                        color={player.color}
+                        isTemp={worker.isTemp}
+                        disabled={!worker.available}
+                    />
+                </li>
+            )}
         </ul>
         <ul className="SidebarPlayer-fields">
             {Object.values(player.fields).map(field => {
@@ -124,17 +128,13 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 </div>
             </div>
         </div>
-        <ul className="SidebarPlayer-workers">
-            {player.workers.map((worker, i) =>
-                <li key={i} className="SidebarPlayer-worker">
-                    <Worker
-                        workerType={worker.type}
-                        color={player.color}
-                        isTemp={worker.isTemp}
-                        disabled={!worker.available}
-                    />
-                </li>
-            )}
+        <ul className="SidebarPlayer-structures">
+            {Object.entries(structureAbbreviations).map(([structureId, structureAbbr]) => {
+                if (!structureAbbr) return null;
+                return <li key={structureId} className={cx("SidebarPlayer-structure", {
+                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId]
+                })}>{structureAbbr}</li>;
+            })}
         </ul>
     </div>;
 };

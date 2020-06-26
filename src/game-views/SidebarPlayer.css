@@ -52,21 +52,17 @@
     margin-left: 4px;
 }
 
-.SidebarPlayer-structures {
-    vertical-align: top;
+.SidebarPlayer-workers {
     display: inline-block;
+    vertical-align: top;
 }
-.SidebarPlayer-structure {
+.SidebarPlayer-worker {
     align-items: center;
-    color: #aaa;
     display: flex;
+    font-weight: 600;
     height: 24px;
     justify-content: center;
     width: 24px;
-}
-.SidebarPlayer-structure--built {
-    color: #222;
-    font-weight: 600;
 }
 
 .SidebarPlayer-fields {
@@ -149,15 +145,19 @@
     display: none;
 }
 
-.SidebarPlayer-workers {
-    display: inline-block;
+.SidebarPlayer-structures {
     vertical-align: top;
+    display: inline-block;
 }
-.SidebarPlayer-worker {
+.SidebarPlayer-structure {
     align-items: center;
+    color: #aaa;
     display: flex;
-    font-weight: 600;
     height: 24px;
     justify-content: center;
     width: 24px;
+}
+.SidebarPlayer-structure--built {
+    color: #222;
+    font-weight: 600;
 }
