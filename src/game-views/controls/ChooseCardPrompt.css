@@ -1,12 +1,13 @@
 .ChooseCardPrompt-cards {
     display: flex;
     flex-flow: row wrap;
-    margin: 0 12px;
+    margin: 0 1.6em;
 }
 
-.ChooseCardPrompt-cardButton {
-    margin: 0 4px;
+.ChooseCardPrompt-card + .ChooseCardPrompt-card {
+    margin-left: 1em;
 }
+
 .ChooseCardPrompt-cardButton:disabled {
     color: inherit;
     opacity: 0.7;

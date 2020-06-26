@@ -1,17 +1,16 @@
 .PromptStructure {
     background: white;
-    border-top: 4px solid #282c34;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    font-size: 14px;
+    font-size: 1em;
     height: 100%;
     padding-bottom: 16px;
     pointer-events: all;
     transition: 150ms transform ease-in-out;
 }
 .PromptStructure--collapsed {
-    transform: translateY(calc(100% - 30px));
+    transform: translateY(calc(100% - 2.2em));
 }
 .ActionPrompt-enter .PromptStructure {
     transform: translateY(100%);
@@ -30,27 +29,36 @@
 
 .PromptStructure-header {
     align-items: center;
-    color: black;
+    background: #282c34;
+    color: white;
+    cursor: pointer;
     display: flex;
-    font-size: 12px;
+    fill: white;
+    font-size: 1em;
     font-weight: 600;
-    height: 20px;
+    height: 2.4em;
     margin-bottom: 16px;
-    padding: 0 16px;
+    padding: 0 1.6em;
     text-transform: uppercase;
 }
 
-.PromptStructure-collapseButton {
-    background: transparent;
-    cursor: pointer;
-    font-weight: 600;
-    margin-left: -12px;
-    margin-right: 4px;
-    padding: 4px;
+.PromptStructure-collapseIcon {
+    animation: .5s ease-in-out PromptStructure-collapseIconBounce infinite alternate;
+    margin-right: 1em;
     transition: 150ms transform;
 }
-.PromptStructure--collapsed .PromptStructure-collapseButton {
+.PromptStructure--collapsed .PromptStructure-collapseIcon {
+    animation: none;
     transform: rotate(180deg);
+}
+
+@keyframes PromptStructure-collapseIconBounce {
+    0% {
+        transform: translateY(10%);
+    }
+    100% {
+        transform: translateY(-10%);
+    }
 }
 
 .PromptStructure-collapseIcon {

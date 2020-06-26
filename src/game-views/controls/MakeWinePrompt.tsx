@@ -121,19 +121,25 @@ const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>
     let color: WineColor;
     if (grapes.length === 1) {
         color = grapes[0].color;
-    } else if (grapes.length === 2 && numRed === 1 && totalValue >= 4) {
+    } else if (grapes.length === 2 && numRed === 1) {
         color = "blush";
-    } else if (grapes.length === 3 && numRed === 2 && totalValue >= 7) {
+    } else if (grapes.length === 3 && numRed === 2) {
         color = "sparkling";
     } else {
         return null;
     }
-
+    const cellarValue = devaluedIndex(Math.min(totalValue, maxValue), cellar[color]) + 1;
+    if (
+        (color === "blush" && cellarValue < 4) ||
+        (color === "sparkling" && cellarValue < 7)
+    ) {
+        return null;
+    }
     return {
         type: color,
         grapes,
         grapeValue: totalValue,
-        cellarValue: devaluedIndex(Math.min(totalValue, maxValue), cellar[color]) + 1
+        cellarValue,
     };
 };
 

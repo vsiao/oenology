@@ -24,24 +24,29 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
             {props.fields.map(field => {
                 const isDisabled = isFieldDisabled(props.purpose, field);
                 return <div key={field.id}
-                    className={cx("ChooseFieldPrompt-field", {
+                    className={cx({
+                        "ChooseFieldPrompt-field": true,
+                        "ChooseFieldPrompt-field--sold": field.sold,
                         "ChooseFieldPrompt-field--disabled": isDisabled
                     })}
-                    onClick={isDisabled ? undefined : () => props.chooseField(field.id)}>
-                    <div className="ChooseFieldPrompt-fieldHeader">
+                    onClick={isDisabled ? undefined : () => props.chooseField(field.id)}
+                >
+                    <ul className="ChooseFieldPrompt-vines">
+                        {field.vines.map(vineId => {
+                            const { name, yields } = vineCards[vineId];
+                            return <li key={vineId} className="ChooseFieldPrompt-vine">
+                                {name}
+                                <div className="ChooseFieldPrompt-vineYields">
+                                    {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
+                                        <Grape key={grapeColor} color={grapeColor}>{yields[grapeColor]}</Grape>
+                                    )}
+                                </div>
+                            </li>;
+                        })}
+                    </ul>
+                    <div className="ChooseFieldPrompt-fieldFooter">
                         <Coins>{field.value}</Coins>
                     </div>
-                    {field.vines.map(vineId => {
-                        const { name, yields } = vineCards[vineId];
-                        return <div key={vineId} className="ChooseFieldPrompt-vine">
-                            {name}
-                            <div className="ChooseFieldPrompt-vineYields">
-                                {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
-                                    <Grape key={grapeColor} color={grapeColor}>{yields[grapeColor]}</Grape>
-                                )}
-                            </div>
-                        </div>;
-                    })}
                 </div>;
             })}
         </div>

@@ -1,6 +1,6 @@
 .MakeWinePrompt-grapeSelector {
     font-style: italic;
-    padding: 0 16px;
+    padding: 0 1.6em;
 }
 
 .MakeWinePrompt-grapes,
@@ -40,7 +40,7 @@
     border-radius: 4px;
     display: inline-flex;
     font-style: italic;
-    margin: 16px;
+    margin: 1em 1.6em;
     padding: 8px 8px 8px 12px;
 }
 
