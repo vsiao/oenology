@@ -21,7 +21,7 @@ import {
     promptToMakeWine,
     promptToPlant,
 } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason, harvestFieldDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards } from "../shared/cardReducers";
@@ -145,8 +145,20 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            // TODO bonus maybe harvest 2 fields
-            return endTurn(harvestField(state, action.fieldId));
+            state = harvestField(state, action.fieldId)
+
+            const bonus = hasPlacementBonus &&
+                !pendingAction.bonusActivated &&
+                state.workerPlacements.harvestField.length === 1 &&
+                harvestFieldDisabledReason(state) === undefined;
+
+            if (bonus) {
+                return promptToChooseField(
+                    setPendingAction({ ...pendingAction, bonusActivated: true }, state),
+                    "harvest"
+                );
+            }
+            return endTurn(state);
 
         case "makeWine":
             if (action.type !== "MAKE_WINE") {
