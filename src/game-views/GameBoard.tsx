@@ -2,11 +2,10 @@ import "./GameBoard.css";
 import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
-import { WorkerPlacement } from "../game-data/board/boardActions";
 import { summerActions, winterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
-import { BoardWorker, PlayerColor, CurrentTurn } from "../game-data/GameState";
+import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement } from "../game-data/GameState";
 import Rooster from "./icons/Rooster";
 
 type Season = "spring" | "summer" | "fall" | "winter";

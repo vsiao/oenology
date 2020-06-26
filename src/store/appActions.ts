@@ -1,23 +1,38 @@
 import { Action } from "redux";
 import { GameAction } from "../game-data/gameActions";
+import { User } from "./AppState";
 
 export type AppAction =
-    | SetPlayerIdAction
+    | SetCurrentUserIdAction
+    | GameStatusAction
+    | UpdateUserAction
     | JoinGameAction
-    | GameAction & { localOnly?: false };
+    | GameAction;
 
-interface SetPlayerIdAction extends Action<"SET_PLAYER_ID"> {
-    playerId: string;
-    localOnly: true;
+interface SetCurrentUserIdAction extends Action<"SET_CURRENT_USER_ID"> {
+    userId: string;
 }
-export const setPlayerId = (playerId: string): SetPlayerIdAction => {
-    return { type: "SET_PLAYER_ID", playerId, localOnly: true };
+export const setCurrentUserId = (userId: string): AppAction => {
+    return { type: "SET_CURRENT_USER_ID", userId };
 };
 
 export interface JoinGameAction extends Action<"JOIN_GAME"> {
     gameId: string;
-    localOnly: true;
 }
-export const joinGame = (gameId: string): JoinGameAction => {
-    return { type: "JOIN_GAME", gameId, localOnly: true };
+export const joinGame = (gameId: string): AppAction => {
+    return { type: "JOIN_GAME", gameId };
+};
+
+export interface GameStatusAction extends Action<"GAME_STATUS"> {
+    status: string;
+}
+export const gameStatus = (status: string): AppAction => {
+    return { type: "GAME_STATUS", status };
+};
+
+export interface UpdateUserAction extends Action<"UPDATE_USER"> {
+    user: User;
+}
+export const setUser = (user: User): AppAction => {
+    return { type: "UPDATE_USER", user };
 };

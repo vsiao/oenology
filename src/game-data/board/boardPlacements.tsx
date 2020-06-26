@@ -1,9 +1,8 @@
 import * as React from "react";
-import { WorkerPlacement } from "./boardActions";
 import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import GameState from "../GameState";
+import GameState, { WorkerPlacement } from "../GameState";
 import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import WineGlass from "../../game-views/icons/WineGlass";

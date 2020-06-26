@@ -10,7 +10,6 @@ import { connect } from "react-redux";
 import { joinGame } from "../store/appActions";
 
 interface Props {
-    currentPlayerId: string | null;
     joinGame: (gameId: string) => void;
 }
 
@@ -23,7 +22,7 @@ const OenologyGame: React.FunctionComponent<Props> = props => {
         <Sidebar />
         <StatusBanner />
         <GameBoard />
-        {props.currentPlayerId ? <PlayerMat playerId={props.currentPlayerId} /> : null}
+        <PlayerMat />
     </div>;
 };
 

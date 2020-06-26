@@ -8,6 +8,7 @@ import { visitorCards } from "../game-data/visitors/visitorCards";
 
 interface Props {
     currentTurn: CurrentTurn;
+    playerNames: Record<string, string>;
     playerId: string | null;
 }
 
@@ -17,8 +18,8 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const renderStatus = ({ currentTurn, playerId }: Props) => {
-    const playerName = <strong>{currentTurn.playerId}</strong>;
+const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
+    const playerName = <strong>{playerNames[currentTurn.playerId]}</strong>;
     switch (currentTurn.type) {
         case "wakeUpOrder":
             return <span>{playerName} is picking their wake-up position.</span>;
@@ -78,7 +79,11 @@ const renderPendingActionStatus = (
 const mapStateToProps = (state: AppState) => {
     return {
         currentTurn: state.game.currentTurn,
-        playerId: state.playerId,
+        playerNames: Object.fromEntries(
+            Object.keys(state.game.players)
+                .map(playerId => [playerId, state.room.users[playerId].name])
+        ),
+        playerId: state.game.playerId,
     };
 };
 

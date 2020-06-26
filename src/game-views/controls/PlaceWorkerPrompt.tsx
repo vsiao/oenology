@@ -6,11 +6,11 @@ import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { WorkerPlacement, placeWorker } from "../../game-data/board/boardActions";
-import { WorkerType, Worker, PlayerColor, WorkerPlacementTurn } from "../../game-data/GameState";
+import { WorkerType, Worker, PlayerColor, WorkerPlacementTurn, WorkerPlacement } from "../../game-data/GameState";
 import { AppState } from "../../store/AppState";
 import WorkerIcon from "../icons/Worker";
 import { summerActions, winterActions } from "../../game-data/board/boardPlacements";
+import { placeWorker } from "../../game-data/prompts/promptActions";
 
 interface Props {
     color: PlayerColor;

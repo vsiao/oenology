@@ -18,6 +18,7 @@ import Residuals from "./icons/Residuals";
 
 interface Props {
     players: Record<string, PlayerState>;
+    playerNameById: Record<string, string>;
     activityLog: ActivityLog;
 }
 
@@ -25,24 +26,31 @@ const Sidebar: React.FunctionComponent<Props> = props => {
     return <div className="Sidebar">
         <div className="Sidebar-players">
             {Object.values(props.players).map(player => {
-                return <SidebarPlayer key={player.id} player={player} />;
+                return <SidebarPlayer
+                    key={player.id}
+                    player={player}
+                    playerName={props.playerNameById[player.id]}
+                />;
             })}
         </div>
         <div className="Sidebar-activityLog">
             <div className="Sidebar-activityLogContents">
                 {props.activityLog.map((event, i) => {
-                    return <div key={i}>{renderActivity(event)}</div>;
+                    return <div key={i}>{renderActivity(event, props.playerNameById)}</div>;
                 })}
             </div>
         </div>
     </div>;
 };
 
-const renderActivity = (event: ActivityLogEvent): React.ReactNode => {
+const renderActivity = (
+    event: ActivityLogEvent,
+    playerNameById: Record<string, string>
+): React.ReactNode => {
     if (event.type === "season") {
         return <div className="Sidebar-seasonSeparator">{event.season}</div>;
     }
-    const player = <strong>{event.playerId}</strong>;
+    const player = <strong>{playerNameById[event.playerId]}</strong>;
     switch (event.type) {
         case "build":
             return <>{player} built the <strong>{structures[event.structureId].name}</strong></>;
@@ -88,6 +96,9 @@ const renderYields = ({ red, white }: VineYields): React.ReactNode => {
 const mapStateToProps = (state: AppState) => {
     return {
         players: state.game.players,
+        playerNameById: Object.fromEntries(
+            Object.entries(state.room.users).map(([id, user]) => [id, user.name])
+        ),
         activityLog: state.game.activityLog,
     };
 };

@@ -7,22 +7,15 @@ import { visitorCards } from "../visitors/visitorCards";
 import { removeCardsFromHand } from "../shared/cardReducers";
 import { VineId } from "../vineCards";
 import { setPendingAction } from "../shared/turnReducers";
+import { isPromptAction } from "./promptActions";
 
 export const prompt = (state: GameState, action: GameAction) => {
-    switch (action.type) {
-        case "CHOOSE_ACTION":
-        case "CHOOSE_CARDS":
-        case "CHOOSE_FIELD":
-        case "CHOOSE_WINE":
-        case "MAKE_WINE":
-        case "PLACE_WORKER":
-        case "BUILD_STRUCTURE":
-            return action.playerId === state.playerId
-                ? { ...state, actionPrompts: state.actionPrompts.slice(1) }
-                : state;
-        default:
-            return state;
+    if (isPromptAction(action)) {
+        return action.playerId === state.playerId
+            ? { ...state, actionPrompts: state.actionPrompts.slice(1) }
+            : state;
     }
+    return state;
 };
 
 const enqueueActionPrompt = (state: GameState, prompt: PromptState): GameState => {

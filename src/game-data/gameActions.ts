@@ -1,5 +1,4 @@
-import { PromptAction } from "./prompts/promptActions";
-import { BoardAction } from "./board/boardActions";
+import { PromptAction, isPromptAction } from "./prompts/promptActions";
 import { Action } from "redux";
 import {
     SummerVisitorId,
@@ -9,12 +8,11 @@ import {
 } from "./visitors/visitorCards";
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
-import { CardsByType } from "./GameState";
+import { CardsByType, PlayerColor } from "./GameState";
 
 export type GameAction = (
     | StartGameAction
     | PromptAction
-    | BoardAction
     | CHEAT_DrawCardAction
 ) & {
     // Every action should first be pushed to firebase to be
@@ -23,10 +21,21 @@ export type GameAction = (
     published?: true;
 };
 
-interface StartGameAction extends Action<"START_GAME"> {
+export const isGameAction = (action: Action): action is GameAction => {
+    switch (action.type) {
+        case "START_GAME":
+        case "CHEAT_DRAW_CARD":
+            return true;
+        default:
+            return isPromptAction(action);
+    }
+};
+
+export interface StartGameAction extends Action<"START_GAME"> {
+    players: [string, PlayerColor][];
     shuffledCards: CardsByType;
 }
-export const startGame = (): StartGameAction => {
+export const startGame = (players: [string, PlayerColor][]): StartGameAction => {
     const vineIds = Object.keys(vineCards) as VineId[];
     const summerIds = Object.keys(summerVisitorCards) as SummerVisitorId[];
     const orderIds = Object.keys(orderCards) as OrderId[];
@@ -39,6 +48,7 @@ export const startGame = (): StartGameAction => {
 
     return {
         type: "START_GAME",
+        players,
         shuffledCards: {
             vine: vineIds,
             summerVisitor: summerIds,

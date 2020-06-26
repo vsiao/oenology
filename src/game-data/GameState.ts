@@ -3,7 +3,6 @@ import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
-import { WorkerPlacement } from "./board/boardActions";
 import { ActivityLog } from "./ActivityLog";
 
 export default interface GameState {
@@ -69,6 +68,22 @@ export type WorkerPlacementTurnPendingAction =
     | { type: "harvestField"; bonusActivated?: true } // choose field
     | { type: "makeWine"; } // choose grape
     | { type: "fillOrder"; orderId?: OrderId; }; // choose order card
+
+export type WorkerPlacement =
+    | "drawVine"
+    | "giveTour"
+    | "buildStructure"
+    | "playSummerVisitor"
+    | "buySell"
+    | "plantVine"
+    | "drawOrder"
+    | "harvestField"
+    | "trainWorker"
+    | "playWinterVisitor"
+    | "makeWine"
+    | "fillOrder"
+    | "gainCoin"
+    | "yoke";
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";

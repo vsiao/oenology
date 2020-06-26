@@ -1,14 +1,16 @@
 import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
-import { GameAction } from "./gameActions";
+import { GameAction, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, UNSHUFFLED_CARDS } from "./shared/cardReducers";
 import { promptForWakeUpOrder } from "./shared/turnReducers";
 
-export const game = (state: GameState, action: GameAction): GameState => {
+export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     switch (action.type) {
         case "START_GAME":
-            return promptForWakeUpOrder(initGame(state.playerId, action.shuffledCards));
+            return promptForWakeUpOrder(
+                initGame(userId, action.players, action.shuffledCards)
+            );
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
     }
@@ -16,13 +18,14 @@ export const game = (state: GameState, action: GameAction): GameState => {
 };
 
 export const initGame = (
-    playerId: string | null = null,
+    userId: string | null = null,
+    players: StartGameAction["players"] = [],
     shuffledCards: CardsByType = UNSHUFFLED_CARDS
 ): GameState => {
     return {
         currentTurn: {
             type: "wakeUpOrder",
-            playerId: "stfy",
+            playerId: players.length === 0 ? "" : players[0][0],
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -31,15 +34,10 @@ export const initGame = (
             order: [],
             winterVisitor: [],
         },
-        players: {
-            stfy: initPlayer("stfy", "purple"),
-            viny: initPlayer("viny", "orange"),
-            // srir: initPlayer("srir", "blue"),
-            // linz: initPlayer("linz", "yellow"),
-            // poofytoo: initPlayer("poofytoo", "green"),
-            // thedrick: initPlayer("thedrick", "red"),
-        },
-        tableOrder: ["stfy", "viny"],
+        players: Object.fromEntries(
+            players.map(([id, color]) => [id, initPlayer(id, color)])
+        ),
+        tableOrder: players.map(([id, _]) => id),
         grapeIndex: 0,
         wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
@@ -59,7 +57,7 @@ export const initGame = (
             yoke: []
         },
         activityLog: [],
-        playerId,
+        playerId: players.some(([id, _]) => id === userId) ? userId : null,
         actionPrompts: [],
     };
 };

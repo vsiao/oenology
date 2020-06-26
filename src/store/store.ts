@@ -1,9 +1,14 @@
 import { createStore, applyMiddleware, compose } from "redux";
 import createSagaMiddleWare from "redux-saga";
-import { publishToFirebase, subscribeToFirebase } from "./firebase";
+import {
+    publishGameLog,
+    subscribeToRoom,
+    subscribeToGameLog,
+    signIn,
+} from "./firebase";
 import { JoinGameAction } from "./appActions";
 import { appReducer } from "./appReducers";
-import { all, call, take, takeEvery, select } from "redux-saga/effects";
+import { call, take, fork, actionChannel } from "redux-saga/effects";
 
 const sagaMiddleware = createSagaMiddleWare();
 const store = createStore(
@@ -14,20 +19,20 @@ const store = createStore(
 );
 
 sagaMiddleware.run(function* () {
-    yield takeEvery("JOIN_GAME", gameSaga);
+    // First, start a buffer for join game requests
+    const joinGameChannel = yield actionChannel("JOIN_GAME");
+
+    // Then wait for firebase authentication to complete
+    const userId = (yield call(signIn)) as unknown as string;
+
+    const joinGameAction = (yield take(joinGameChannel)) as unknown as JoinGameAction;
+    yield call(gameSaga, joinGameAction, userId);
 });
 
-function* gameSaga(action: JoinGameAction) {
-    let playerId = yield select(state => state.playerId);
-    while (!playerId) {
-        // Wait for playerId to be initialized before joining
-        yield take("SET_PLAYER_ID");
-        playerId = yield select(state => state.playerId);
-    }
-    yield all([
-        call(subscribeToFirebase, action.gameId),
-        call(publishToFirebase, action.gameId),
-    ]);
+function* gameSaga(action: JoinGameAction, userId: string) {
+    yield fork(subscribeToRoom, action.gameId, userId);
+    yield fork(subscribeToGameLog, action.gameId);
+    yield fork(publishGameLog, action.gameId);
 }
 
 export default store;

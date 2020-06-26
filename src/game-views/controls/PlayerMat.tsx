@@ -1,4 +1,5 @@
 import "./PlayerMat.css";
+import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
@@ -17,34 +18,35 @@ import ActionPrompt from "./ActionPrompt";
 
 interface Props {
     currentTurn: CurrentTurn;
-    playerState: PlayerState;
+    playerState: PlayerState | undefined;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
     const { playerState } = props;
-    const workers = playerState.workers;
 
-    return <div className={`PlayerMat PlayerMat--${playerState.color}`}>
+    return <div className={cx("PlayerMat", playerState && `PlayerMat--${playerState.color}`)}>
         <ActionPrompt />
         <div className="PlayerMat-header">
-            <Residuals className="PlayerMat-residualPayments">0</Residuals>
-            <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
-            <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
-            <ul className="PlayerMat-workers">
-                {workers.map((worker, i) =>
-                    <li key={i} className="PlayerMat-worker" >
-                        <Worker
-                            workerType={worker.type}
-                            color={playerState.color}
-                            isTemp={worker.isTemp}
-                            disabled={!worker.available}
-                        />
-                    </li>
-                )}
-            </ul>
+            {playerState && <>
+                <Residuals className="PlayerMat-residualPayments">0</Residuals>
+                <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
+                <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
+                <ul className="PlayerMat-workers">
+                    {playerState.workers.map((worker, i) =>
+                        <li key={i} className="PlayerMat-worker" >
+                            <Worker
+                                workerType={worker.type}
+                                color={playerState.color}
+                                isTemp={worker.isTemp}
+                                disabled={!worker.available}
+                            />
+                        </li>
+                    )}
+                </ul>
+            </>}
         </div>
         <ul className="PlayerMat-cards">
-            {playerState.cardsInHand.map(card => renderCard(card, props))}
+            {playerState && playerState.cardsInHand.map(card => renderCard(card, props))}
         </ul>
     </div>;
 };
@@ -67,10 +69,11 @@ const renderCard = (card: CardId, props: Props) => {
     }
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
+const mapStateToProps = (state: AppState) => {
+    const playerId = state.game.playerId;
     return {
         currentTurn: state.game.currentTurn,
-        playerState: state.game.players[ownProps.playerId]
+        playerState: playerId ? state.game.players[playerId] : undefined,
     };
 };
 
