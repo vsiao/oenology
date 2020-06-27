@@ -133,10 +133,10 @@ export const summerVisitorReducers: Record<
                     ...bankerAction,
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
                 }, gainCoins(5, state));
-                return currentTurnPlayerId === state.playerId
+                return state.playerId === null || state.playerId === currentTurnPlayerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
+                        playerId: state.playerId,
                         choices: [
                             { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
                             { id: "BANKER_PASS", label: <>Pass</> },
@@ -602,15 +602,15 @@ export const summerVisitorReducers: Record<
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
                 }, state);
                 const playerName = <strong>{state.currentTurn.playerId}</strong>;
-                return currentTurnPlayerId === state.playerId
+                return state.playerId === null || state.playerId === currentTurnPlayerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
+                        playerId: state.playerId,
                         choices: [
                             {
                                 id: "SWINDLER_GIVE",
                                 label: <>Give {playerName} <Coins>2</Coins>.</>,
-                                disabledReason: moneyDisabledReason(state, 2, state.playerId!),
+                                disabledReason: moneyDisabledReason(state, 2, state.playerId),
                             },
                             { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
                         ],
@@ -727,10 +727,10 @@ export const summerVisitorReducers: Record<
                     ...vendorAction,
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
                 }, drawCards(state, { vine: 1, order: 1, winterVisitor: 1, }));
-                return currentTurnPlayerId === state.playerId
+                return state.playerId === null || state.playerId === currentTurnPlayerId
                     ? state
                     : promptForAction(state, {
-                        playerId: state.playerId!,
+                        playerId: state.playerId,
                         choices: [
                             { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
                             { id: "VENDOR_PASS", label: <>Pass</> },

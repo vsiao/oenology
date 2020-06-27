@@ -171,10 +171,17 @@ export const winterVisitorReducers: Record<
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
+                state = setPendingAction(
+                    { ...gspeakerAction, mainActions: Object.keys(state.players), },
+                    state
+                );
+                if (state.playerId === null) {
+                    return state;
+                }
                 return promptForAction(
-                    setPendingAction({ ...gspeakerAction, mainActions: Object.keys(state.players), }, state),
+                    state,
                     {
-                        playerId: state.playerId!,
+                        playerId: state.playerId,
                         choices: [
                             {
                                 id: "GSPEAKER_TRAIN",
@@ -440,17 +447,17 @@ export const winterVisitorReducers: Record<
 
         switch (action.type) {
             case "CHOOSE_CARDS":
+                state = setPendingAction(
+                    { ...mentorAction, mainActions: Object.keys(state.players), reactions: 0, },
+                    state
+                );
+                if (state.playerId === null) {
+                    return state;
+                }
                 return promptForAction(
-                    setPendingAction(
-                        {
-                            ...mentorAction,
-                            mainActions: Object.keys(state.players),
-                            reactions: 0,
-                        },
-                        state
-                    ),
+                    state,
                     {
-                        playerId: state.playerId!,
+                        playerId: state.playerId,
                         choices: [
                             {
                                 id: "MENTOR_MAKE",
@@ -465,7 +472,7 @@ export const winterVisitorReducers: Record<
                                             : null}
                                     </>
                                 ),
-                                disabledReason: needGrapesDisabledReason(state, state.playerId!),
+                                disabledReason: needGrapesDisabledReason(state, state.playerId),
                             },
                             { id: "MENTOR_PASS", label: <>Pass</>, },
                         ],
