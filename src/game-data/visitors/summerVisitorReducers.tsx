@@ -12,14 +12,14 @@ import {
     payCoins,
     plantVineInField,
 } from "../shared/sharedReducers";
-import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason, plantVineDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
+import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures, Coupon } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData } from "../shared/turnReducers";
+import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, endTurn } from "../shared/turnReducers";
 import { drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -76,7 +76,7 @@ export const summerVisitorReducers: Record<
                                 {
                                     id: "ARTISAN_PLANT",
                                     label: <>Plant up to 2 <Vine /></>,
-                                    disabledReason: plantVineDisabledReason(state),
+                                    disabledReason: plantVinesDisabledReason(state),
                                 },
                             ],
                         });
@@ -103,7 +103,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fieldId, state);
                 const canPlantAgain = !artisanAction.secondPlant &&
-                    plantVineDisabledReason(state) === undefined;
+                    plantVinesDisabledReason(state) === undefined;
 
                 return canPlantAgain
                     ? promptToChooseVineCard(
@@ -227,7 +227,7 @@ export const summerVisitorReducers: Record<
                                 {
                                     id: "CONTRACTOR_PLANT",
                                     label: <>Plant 1 <Vine /></>,
-                                    disabledReason: plantVineDisabledReason(state),
+                                    disabledReason: plantVinesDisabledReason(state),
                                 },
                             ],
                         });
@@ -322,13 +322,14 @@ export const summerVisitorReducers: Record<
                                 {
                                     id: "HOMESTEADER_PLANT",
                                     label: <>Plant up to 2 <Vine /></>,
-                                    disabledReason: plantVineDisabledReason(state),
+                                    disabledReason: plantVinesDisabledReason(state),
                                 },
                                 {
                                     id: "HOMESTEADER_BOTH",
                                     label: <>Do both (lose <VP>1</VP>)</>,
-                                    disabledReason: plantVineDisabledReason(state) ||
-                                        buildStructureDisabledReason(state, buildCoupon),
+                                    // Don't check if planting is possible yet because
+                                    // building a structure may change that
+                                    disabledReason: buildStructureDisabledReason(state, buildCoupon),
                                 },
                             ],
                         });
@@ -345,7 +346,7 @@ export const summerVisitorReducers: Record<
                         return promptToChooseVineCard(state);
                     case "HOMESTEADER_BOTH":
                         return promptToBuildStructure(
-                            loseVP(1, setPendingAction({ ...homesteaderAction, doBoth: true }, state)),
+                            setPendingAction({ ...homesteaderAction, doBoth: true }, state),
                             buildCoupon
                         );
                     default:
@@ -355,14 +356,14 @@ export const summerVisitorReducers: Record<
                 const structure = structures[action.structureId];
                 state = buildStructure(payCoins(structure.cost - 3, state), action.structureId);
 
-                return homesteaderAction.doBoth
-                    ? promptToChooseVineCard(state)
+                return homesteaderAction.doBoth && plantVinesDisabledReason(state) === undefined
+                    ? promptToChooseVineCard(loseVP(1, state))
                     : endVisitor(state);
 
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fieldId, state);
                 const canPlantAgain = !homesteaderAction.secondPlant &&
-                    plantVineDisabledReason(state) === undefined;
+                    plantVinesDisabledReason(state) === undefined;
 
                 return canPlantAgain
                     ? promptToChooseVineCard(
@@ -378,6 +379,9 @@ export const summerVisitorReducers: Record<
     landscaper: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
+                if (!action.cards) {
+                    return endTurn(state); // pass on optional vine planting
+                }
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":

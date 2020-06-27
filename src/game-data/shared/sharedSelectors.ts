@@ -1,5 +1,5 @@
 import GameState, { Field, CardType, WineColor } from "../GameState";
-import { vineCards } from "../vineCards";
+import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
 import { Coupon, structures, StructureId } from "../structures";
@@ -50,18 +50,27 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
     };
 };
 
-export const plantVineDisabledReason = (state: GameState) => {
+export const plantVineDisabledReason = (state: GameState, vineId: VineId) => {
     const player = state.players[state.currentTurn.playerId];
     const fields = Object.values(player.fields);
+
+    if (!vineCards[vineId].structures.every(s => player.structures[s])) {
+        return "You haven't built the required structures.";
+    }
+    const hasOpenField = fields.some(field => {
+        const { red, white } = fieldYields({
+            ...field,
+            vines: [...field.vines, vineId],
+        });
+        return !field.sold && red + white <= field.value;
+    });
+    return hasOpenField ? undefined : "You can't plant this on any of your fields.";
+};
+
+export const plantVinesDisabledReason = (state: GameState) => {
+    const player = state.players[state.currentTurn.playerId];
     return player.cardsInHand.some(card => {
-        return card.type === "vine" &&
-            fields.some(field => {
-                const { red, white } = fieldYields({
-                    ...field,
-                    vines: [...field.vines, card.id],
-                });
-                return red + white <= field.value;
-            });
+        return card.type === "vine" && plantVineDisabledReason(state, card.id) === undefined;
     })
         ? undefined
         : "You don't have any vines you can plant.";

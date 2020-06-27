@@ -21,7 +21,7 @@ import {
     promptToMakeWine,
     promptToPlant,
 } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason, plantVineDisabledReason, harvestFieldDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards } from "../shared/cardReducers";
@@ -185,7 +185,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     const bonus = hasPlacementBonus &&
                         !pendingAction.bonusActivated &&
                         state.workerPlacements.plantVine.length === 1 &&
-                        plantVineDisabledReason(state) === undefined;
+                        plantVinesDisabledReason(state) === undefined;
 
                     if (bonus) {
                         return promptToChooseVineCard(

@@ -1,7 +1,14 @@
 .ChooseFieldPrompt-fields {
     display: flex;
     flex: 1 1 auto;
-    padding: 0 1.6em;
+    overflow-y: auto;
+    padding: 1em 1.6em;
+}
+.ChooseFieldPrompt-fields::after {
+    content: "";
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.6em;
 }
 
 .ChooseFieldPrompt-field {
@@ -10,6 +17,7 @@
     display: flex;
     flex-direction: column;
     margin-right: .4em;
+    min-width: 160px;
     max-width: 240px;
     transition: 100ms transform ease-out;
     transform: translateY(0);

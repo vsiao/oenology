@@ -8,7 +8,7 @@ export type VineYields = {
 };
 export interface VineCardData {
     name: string;
-    structures: Array<string>,
+    structures: Array<StructureId>,
     yields: VineYields;
 }
 

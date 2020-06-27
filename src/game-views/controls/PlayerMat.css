@@ -36,13 +36,13 @@
     display: flex;
     min-height: 240px;
     overflow-x: auto;
-    padding: 8px 1.6em 12px;
+    padding: 8px 1.6em 1em;
 }
 .PlayerMat-cards::after {
     content: "";
     display: inline-block;
     flex-shrink: 0;
-    width: 16px;
+    width: 1.6em;
 }
 .PlayerMat-card + .PlayerMat-card {
     margin-left: 16px;

@@ -1,7 +1,7 @@
 .BuildStructurePrompt-choices {
     display: flex;
     flex-flow: row wrap;
-    margin: -6px 10px -6px;
+    margin: calc(-6px + 1em) calc(-6px + 1.6em) calc(-6px + 1em);
 }
 
 .BuildStructurePrompt-choiceButton {

@@ -3,7 +3,7 @@ import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icon
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState, { WorkerPlacement } from "../GameState";
-import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVineDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
+import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVinesDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import WineGlass from "../../game-views/icons/WineGlass";
 
@@ -66,7 +66,7 @@ export const summerActions: BoardAction[] = [
         title: <>Plant <Vine /></>,
         bonusLabel: <>Plant up to 2 <Vine /></>,
         bonus: <Vine />,
-        disabledReason: plantVineDisabledReason,
+        disabledReason: plantVinesDisabledReason,
     }
 ];
 

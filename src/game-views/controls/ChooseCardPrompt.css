@@ -1,7 +1,13 @@
 .ChooseCardPrompt-cards {
     display: flex;
-    flex-flow: row wrap;
-    margin: 0 1.6em;
+    overflow-x: auto;
+    padding: 1em 1.6em;
+}
+.ChooseCardPrompt-cards::after {
+    content: "";
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.6em;
 }
 
 .ChooseCardPrompt-card + .ChooseCardPrompt-card {

@@ -5,7 +5,6 @@
     flex-direction: column;
     font-size: 1em;
     height: 100%;
-    padding-bottom: 16px;
     pointer-events: all;
     transition: 150ms transform ease-in-out;
 }
@@ -34,10 +33,10 @@
     cursor: pointer;
     display: flex;
     fill: white;
+    flex-shrink: 0;
     font-size: 1em;
     font-weight: 600;
     height: 2.4em;
-    margin-bottom: 16px;
     padding: 0 1.6em;
     text-transform: uppercase;
 }
