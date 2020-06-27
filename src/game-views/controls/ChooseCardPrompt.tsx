@@ -77,7 +77,7 @@ const mapStateToProps = (
             return {
                 id: card,
                 disabledReason: prompt.requireStructures && card.type === "vine"
-                    ? plantVineDisabledReason(state.game, card.id)
+                    ? plantVineDisabledReason(state.game!, card.id)
                     : undefined,
             };
         }),

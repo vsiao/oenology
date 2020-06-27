@@ -59,8 +59,8 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
 
 const mapStateToProps = (state: AppState) => {
     return {
-        actionPrompt: state.game.actionPrompts[0],
-        playerId: state.game.playerId!,
+        actionPrompt: state.game!.actionPrompts[0],
+        playerId: state.game!.playerId!,
     };
 };
 

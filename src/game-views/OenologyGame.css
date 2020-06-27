@@ -1,9 +1,8 @@
 .OenologyGame {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: 32px minmax(0, 2fr) auto;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: 1fr 320px;
     grid-template-areas:
-        "banner sidebar"
         "main sidebar"
         "bottom sidebar";
     flex: 1 1 auto;

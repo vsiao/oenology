@@ -52,7 +52,7 @@ const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId:
                         ? null
                         : <Coins>{structure.cost - coupon.amount}</Coins>
                 }</>,
-                disabledReason: structureDisabledReason(state.game, id as StructureId, coupon)
+                disabledReason: structureDisabledReason(state.game!, id as StructureId, coupon)
             })),
     };
 };

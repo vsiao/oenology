@@ -77,13 +77,14 @@ const renderPendingActionStatus = (
 }
 
 const mapStateToProps = (state: AppState) => {
+    const game = state.game!;
     return {
-        currentTurn: state.game.currentTurn,
+        currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(
-            Object.keys(state.game.players)
+            Object.keys(game.players)
                 .map(playerId => [playerId, state.room.users[playerId].name])
         ),
-        playerId: state.game.playerId,
+        playerId: game.playerId,
     };
 };
 

@@ -4,6 +4,7 @@ import { User } from "./AppState";
 
 export type AppAction =
     | SetCurrentUserIdAction
+    | SetCurrentUserNameAction
     | GameStatusAction
     | UpdateUserAction
     | JoinGameAction
@@ -14,6 +15,13 @@ interface SetCurrentUserIdAction extends Action<"SET_CURRENT_USER_ID"> {
 }
 export const setCurrentUserId = (userId: string): AppAction => {
     return { type: "SET_CURRENT_USER_ID", userId };
+};
+
+export interface SetCurrentUserNameAction extends Action<"SET_CURRENT_USER_NAME"> {
+    name: string;
+}
+export const setCurrentUserName = (name: string): AppAction => {
+    return { type: "SET_CURRENT_USER_NAME", name };
 };
 
 export interface JoinGameAction extends Action<"JOIN_GAME"> {

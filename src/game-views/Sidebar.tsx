@@ -93,13 +93,18 @@ const renderYields = ({ red, white }: VineYields): React.ReactNode => {
     </>;
 }
 
-const mapStateToProps = (state: AppState) => {
+const mapStateToProps = (state: AppState): {
+    players: Record<string, PlayerState>;
+    playerNameById: Record<string, string>;
+    activityLog: ActivityLog;
+} => {
+    const game = state.game!;
     return {
-        players: state.game.players,
+        players: game.players,
         playerNameById: Object.fromEntries(
             Object.entries(state.room.users).map(([id, user]) => [id, user.name])
         ),
-        activityLog: state.game.activityLog,
+        activityLog: game.activityLog,
     };
 };
 export default connect(mapStateToProps)(Sidebar);

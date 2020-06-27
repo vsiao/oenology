@@ -2,10 +2,10 @@ import "firebase/auth";
 import "firebase/database";
 import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
-import { take, put, call } from "redux-saga/effects";
+import { take, put, call, fork, throttle } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
 import { isGameAction } from "../game-data/gameActions";
-import { gameStatus, setUser, setCurrentUserId } from "./appActions";
+import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction } from "./appActions";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -20,7 +20,18 @@ export function* signIn() {
     return userId;
 }
 
+function publishUserName(gameId: string, userId: string, action: SetCurrentUserNameAction) {
+    const nameRef = firebase.database().ref(`rooms/${gameId}/users/${userId}/name`);
+    nameRef.set(action.name);
+}
+
+function* throttledPublishUserName(gameId: string, userId: string) {
+    yield throttle(1000, "SET_CURRENT_USER_NAME", publishUserName, gameId, userId);
+}
+
 export function* subscribeToRoom(gameId: string, userId: string) {
+    yield fork(throttledPublishUserName, gameId, userId);
+
     const firebaseEventChannel = eventChannel(emit => {
         const roomRef = firebase.database().ref(`rooms/${gameId}`);
 

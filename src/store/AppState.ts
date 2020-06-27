@@ -3,12 +3,12 @@ import GameState from "../game-data/GameState";
 export interface AppState {
     userId: string | null;
     room: RoomState;
-    game: GameState;
+    game: GameState | null;
 }
 
 interface RoomState {
     gameId: string | null;
-    status?: string;
+    status?: string | null;
     users: Record<string, User>;
 }
 

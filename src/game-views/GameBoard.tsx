@@ -7,6 +7,7 @@ import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
 import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement } from "../game-data/GameState";
 import Rooster from "./icons/Rooster";
+import StatusBanner from "./StatusBanner";
 
 type Season = "spring" | "summer" | "fall" | "winter";
 interface Props {
@@ -37,6 +38,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
     }, [season, summerRef, winterRef]);
 
     return <div className="GameBoard">
+        <StatusBanner />
         <ol className="GameBoard-wakeUpOrder">
             {props.wakeUpOrder.map((pos, i) =>
                 <li key={i} className={cx({
@@ -92,9 +94,9 @@ const GameBoard: React.FunctionComponent<Props> = props => {
 };
 
 const mapStateToProps = (state: AppState) => {
-    const { currentTurn, wakeUpOrder, workerPlacements, players } = state.game;
+    const { currentTurn, wakeUpOrder, workerPlacements, players } = state.game!;
     return {
-        season: seasonFromCurrenTurn(currentTurn),
+        season: seasonFromCurrentTurn(currentTurn),
         wakeUpOrder: wakeUpOrder.map(pos => {
             return !pos ? null : {
                 current: pos.playerId === currentTurn.playerId,
@@ -106,7 +108,7 @@ const mapStateToProps = (state: AppState) => {
     };
 };
 
-const seasonFromCurrenTurn = (currentTurn: CurrentTurn): Season => {
+const seasonFromCurrentTurn = (currentTurn: CurrentTurn): Season => {
     switch (currentTurn.type) {
         case "papaSetUp":
         case "wakeUpOrder":

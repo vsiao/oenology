@@ -55,7 +55,7 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     return {
-        fields: Object.values(state.game.players[ownProps.playerId].fields)
+        fields: Object.values(state.game!.players[ownProps.playerId].fields)
     };
 };
 

@@ -2,7 +2,7 @@ import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
 import { GameAction, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
-import { CHEAT_drawCard, UNSHUFFLED_CARDS } from "./shared/cardReducers";
+import { CHEAT_drawCard } from "./shared/cardReducers";
 import { promptForWakeUpOrder } from "./shared/turnReducers";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
@@ -18,9 +18,9 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
 };
 
 export const initGame = (
-    userId: string | null = null,
-    players: StartGameAction["players"] = [],
-    shuffledCards: CardsByType = UNSHUFFLED_CARDS
+    userId: string,
+    players: StartGameAction["players"],
+    shuffledCards: CardsByType
 ): GameState => {
     return {
         currentTurn: {

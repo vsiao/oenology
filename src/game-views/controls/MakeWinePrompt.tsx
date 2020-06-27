@@ -146,7 +146,7 @@ const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>
 const mapStateToProps = (state: AppState, ownProps: { cellarLimit?: number, playerId: string; }) => {
     const { cellarLimit, playerId } = ownProps;
     const grapes: GrapeSpec[] = [];
-    const currentPlayer = state.game.players[playerId];
+    const currentPlayer = state.game!.players[playerId];
     const { red, white } = currentPlayer.crushPad;
     red.forEach((r, i) => {
         if (r) grapes.push({ color: "red", value: i + 1 });

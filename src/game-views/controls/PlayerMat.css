@@ -2,6 +2,7 @@
     background: #ddd;
     display: flex;
     flex-direction: column;
+    min-width: 1px;
     position: relative;
 }
 

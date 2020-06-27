@@ -1,8 +1,10 @@
 .GameBoard {
     display: grid;
     grid-template-areas:
+        "banner banner"
         "order actions";
     grid-template-columns: auto 4fr;
+    grid-template-rows: 2em 1fr;
     overflow: auto;
 }
 

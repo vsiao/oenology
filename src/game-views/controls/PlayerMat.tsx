@@ -2,7 +2,7 @@ import "./PlayerMat.css";
 import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
-import { CardId, CurrentTurn, PlayerState } from "../../game-data/GameState";
+import { CardId, PlayerState } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
@@ -17,7 +17,6 @@ import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 
 interface Props {
-    currentTurn: CurrentTurn;
     playerState: PlayerState | undefined;
 }
 
@@ -70,10 +69,9 @@ const renderCard = (card: CardId, props: Props) => {
 };
 
 const mapStateToProps = (state: AppState) => {
-    const playerId = state.game.playerId;
+    const game = state.game!;
     return {
-        currentTurn: state.game.currentTurn,
-        playerState: playerId ? state.game.players[playerId] : undefined,
+        playerState: game.playerId ? game.players[game.playerId] : undefined,
     };
 };
 

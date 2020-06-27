@@ -1,0 +1,50 @@
+.Lobby-main {
+    align-items: center;
+    display: flex;
+    grid-area: main;
+    justify-content: center;
+}
+
+.Lobby-nameLabel {
+    color: #333;
+    font-size: .8em;
+    font-weight: 600;
+}
+
+.Lobby-nameInput {
+    border: 0;
+    border-bottom: 1px solid #aaa;
+    display: block;
+    font-size: 2em;
+    margin-top: .2em;
+    outline: none;
+    width: 8em;
+}
+
+.Lobby-controls {
+    border-top: 1px solid #ddd;
+    grid-area: bottom;
+}
+
+.Lobby-sidebar {
+    background: #ddd;
+    font-size: .8em;
+    grid-area: sidebar;
+}
+
+.Lobby-usersHeader {
+    padding: 0 1em;
+}
+
+.Lobby-user {
+    align-items: center;
+    display: flex;
+    font-weight: 600;
+    height: 2em;
+    padding: 0 1em;
+}
+
+.Lobby-startGame {
+    margin: 1em;
+}
+

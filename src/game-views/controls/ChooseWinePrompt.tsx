@@ -82,7 +82,7 @@ const isDisabled = (prompt: ChooseWinePromptState | FillOrderPromptState, select
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
-    return { cellarWines: allWines(state.game, ownProps.playerId) };
+    return { cellarWines: allWines(state.game!, ownProps.playerId) };
 };
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
     return {

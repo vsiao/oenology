@@ -77,22 +77,23 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
-    const numPlayers = Object.keys(state.game.players).length;
-    const player = state.game.players[ownProps.playerId];
+    const game = state.game!;
+    const numPlayers = Object.keys(game.players).length;
+    const player = game.players[ownProps.playerId];
 
     return {
         color: player.color,
         workers: player.workers,
         placements: [
-            ...((state.game.currentTurn as WorkerPlacementTurn).season === "summer"
+            ...((game.currentTurn as WorkerPlacementTurn).season === "summer"
                 ? summerActions
                 : winterActions)
                 .map(action => ({
                     type: action.type,
-                    label: numPlayers > 2 && state.game.workerPlacements[action.type].length === 0
+                    label: numPlayers > 2 && game.workerPlacements[action.type].length === 0
                         ? action.bonusLabel
                         : action.title,
-                    disabledReason: action.disabledReason && action.disabledReason(state.game),
+                    disabledReason: action.disabledReason && action.disabledReason(game),
                 })),
             {
                 type: null,
