@@ -182,7 +182,10 @@ export const buyFieldDisabledReason = (state: GameState): string | undefined => 
 
 export const harvestFieldDisabledReason = (state: GameState): string | undefined => {
     const playerState = state.players[state.currentTurn.playerId];
-    if (Object.values(playerState.fields).every(field => field.sold || field.vines.length === 0)) {
+    if (
+        Object.values(playerState.fields)
+            .every(field => field.sold || field.vines.length === 0 || field.harvested)
+    ) {
         return "You don't have any fields to harvest.";
     };
     return undefined;
