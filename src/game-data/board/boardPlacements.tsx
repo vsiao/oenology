@@ -41,9 +41,10 @@ export const summerActions: BoardAction[] = [
         bonusLabel: <>Sell grape(s) or buy/sell one field and gain <VP>1</VP></>,
         bonus: <VP>1</VP>,
         disabledReason: state => {
+            const player = state.players[state.currentTurn.playerId];
             return hasGrapes(state) ||
-                Object.values(state.players[state.currentTurn.playerId].fields)
-                    .some(f => f.sold || f.vines.length === 0)
+                Object.values(player.fields)
+                    .some(f => (f.sold && player.coins >= f.value) || f.vines.length === 0)
                     ? undefined
                     : "You don't have anything to buy or sell.";
         },

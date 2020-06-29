@@ -50,24 +50,51 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
     };
 };
 
-export const plantVineDisabledReason = (state: GameState, vineId: VineId) => {
+/**
+ * Determines if a specific vine can be planted in a specific field
+ */
+export const plantVineInFieldDisabledReason = (
+    vineId: VineId,
+    field: Field,
+    bypassFieldLimit = false
+): string | undefined => {
+    if (field.sold) {
+        return "You don't own this field.";
+    }
+    if (bypassFieldLimit) {
+        return undefined;
+    }
+    const { red, white } = fieldYields({
+        ...field,
+        vines: [...field.vines, vineId],
+    });
+    return red + white > field.value ? "Planting here would exceed the field's value" : undefined;
+};
+
+/**
+ * Determines if a specific vine can be planted in *any* field
+ */
+export const plantVineDisabledReason = (
+    state: GameState,
+    vineId: VineId,
+    bypassFieldLimit = false
+) => {
     const player = state.players[state.currentTurn.playerId];
     const fields = Object.values(player.fields);
 
     if (!vineCards[vineId].structures.every(s => player.structures[s])) {
         return "You haven't built the required structures.";
     }
-    const hasOpenField = fields.some(field => {
-        const { red, white } = fieldYields({
-            ...field,
-            vines: [...field.vines, vineId],
-        });
-        return !field.sold && red + white <= field.value;
-    });
+    const hasOpenField = fields.some(
+        field => !plantVineInFieldDisabledReason(vineId, field, bypassFieldLimit)
+    );
     return hasOpenField ? undefined : "You can't plant this on any of your fields.";
 };
 
-export const plantVinesDisabledReason = (state: GameState) => {
+/**
+ * Determines if *any* vine can be planted in *any* field
+ */
+export const plantVinesDisabledReason = (state: GameState, ) => {
     const player = state.players[state.currentTurn.playerId];
     return player.cardsInHand.some(card => {
         return card.type === "vine" && plantVineDisabledReason(state, card.id) === undefined;

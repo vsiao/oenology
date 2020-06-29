@@ -1,7 +1,14 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
 import GameState, { PlayVisitorPendingAction } from "../GameState";
-import { promptForAction, promptToChooseField, promptToBuildStructure, promptToChooseVineCard, promptToMakeWine, promptToPlant } from "../prompts/promptReducers";
+import {
+    promptForAction,
+    promptToBuildStructure,
+    promptToChooseVineCard,
+    promptToHarvest,
+    promptToMakeWine,
+    promptToPlant,
+} from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
 import {
@@ -12,14 +19,28 @@ import {
     payCoins,
     plantVineInField,
 } from "../shared/sharedReducers";
-import { harvestFieldDisabledReason, moneyDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
+import {
+    buildStructureDisabledReason,
+    harvestFieldDisabledReason,
+    moneyDisabledReason,
+    needGrapesDisabledReason,
+    plantVinesDisabledReason,
+} from "../shared/sharedSelectors";
 import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures, Coupon } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
-import { setPendingAction, endVisitor, passToNextSeason, promptForWakeUpOrder, chooseWakeUp, WakeUpChoiceData, endTurn } from "../shared/turnReducers";
+import {
+    WakeUpChoiceData,
+    chooseWakeUp,
+    endTurn,
+    endVisitor,
+    passToNextSeason,
+    promptForWakeUpOrder,
+    setPendingAction,
+} from "../shared/turnReducers";
 import { drawCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
@@ -263,7 +284,7 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToChooseVineCard(state);
                     case "vine":
-                        return promptToPlant(state, card.id);
+                        return promptToPlant(state, card.id, /* bypassFieldLimit */ true);
                     default:
                         return state;
                 }
@@ -650,7 +671,7 @@ export const summerVisitorReducers: Record<
                     case "TOUR_GAIN_4":
                         return endVisitor(gainCoins(4, state));
                     case "TOUR_HARVEST":
-                        return promptToChooseField(state, "harvest");
+                        return promptToHarvest(state);
                     default:
                         return state;
                 }

@@ -1,7 +1,8 @@
 import { Coupon } from "../structures";
-import { CardId } from "../GameState";
+import { CardId, FieldId } from "../GameState";
 import { OrderId } from "../orderCards";
 import { VisitorId } from "../visitors/visitorCards";
+import { VineId } from "../vineCards";
 
 export type PromptState =
     | ChooseActionPromptState
@@ -46,10 +47,9 @@ export interface FillOrderPromptState {
     orderIds: OrderId[];
 }
 
-export type ChooseFieldPurpose = "harvest" | "plant" | "buy" | "sell";
 export interface ChooseFieldPromptState {
     type: "chooseField";
-    purpose: ChooseFieldPurpose;
+    disabledReasons: Record<FieldId, string | undefined>;
 }
 
 export interface MakeWinePromptState {

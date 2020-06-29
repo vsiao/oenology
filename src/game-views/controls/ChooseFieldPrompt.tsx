@@ -6,15 +6,15 @@ import cx from 'classnames';
 import { FieldId, Field, GrapeColor } from "../../game-data/GameState";
 import { chooseField } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
-import { ChooseFieldPurpose } from "../../game-data/prompts/PromptState";
+import { ChooseFieldPromptState } from "../../game-data/prompts/PromptState";
 import PromptStructure from "./PromptStructure";
 import { vineCards } from "../../game-data/vineCards";
 import Grape from "../icons/Grape";
 import Coins from "../icons/Coins";
 
 interface Props {
-    purpose: ChooseFieldPurpose;
-    fields: Field[];
+    prompt: ChooseFieldPromptState;
+    fields: (Field & { disabledReason: string | undefined })[];
     chooseField: (id: FieldId) => void;
 }
 
@@ -22,7 +22,7 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure title="Choose a field">
         <div className="ChooseFieldPrompt-fields">
             {props.fields.map(field => {
-                const isDisabled = isFieldDisabled(props.purpose, field);
+                const isDisabled = field.disabledReason !== undefined;
                 return <div key={field.id}
                     className={cx({
                         "ChooseFieldPrompt-field": true,
@@ -53,9 +53,14 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
+const mapStateToProps = (
+    state: AppState,
+    { prompt, playerId }: { prompt: ChooseFieldPromptState; playerId: string; }
+) => {
     return {
-        fields: Object.values(state.game!.players[ownProps.playerId].fields)
+        fields: Object.values(state.game!.players[playerId].fields).map(
+            f => ({ ...f, disabledReason: prompt.disabledReasons[f.id] })
+        ),
     };
 };
 
@@ -64,18 +69,3 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string; })
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ChooseFieldPrompt);
-
-function isFieldDisabled(purpose: ChooseFieldPurpose, field: Field): boolean {
-    switch (purpose) {
-        case "buy":
-            return !field.sold;
-        case "sell":
-            return field.sold || field.vines.length > 0;
-        case "harvest":
-            return field.harvested || !field.vines.length;
-        case "plant":
-            // TODO: check vine value & structures
-            // There are also visitors that let you plant despite these
-            return field.sold;
-    }
-}

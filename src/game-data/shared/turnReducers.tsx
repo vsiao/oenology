@@ -174,7 +174,6 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     const { currentTurn, wakeUpOrder } = state;
     const season = (currentTurn as WorkerPlacementTurn).season;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
-    const activeWakeUpOrder = compactWakeUpOrder.filter((pos) => !pos.passed);
 
     if (compactWakeUpOrder.every((p) => p.passed)) {
         // If everyone passed, it's the end of the season
@@ -231,6 +230,8 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
             }));
         }
     }
+    const activeWakeUpOrder = compactWakeUpOrder
+        .filter((pos) => pos.playerId === currentTurn.playerId || !pos.passed);
     const i = activeWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
     const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
 

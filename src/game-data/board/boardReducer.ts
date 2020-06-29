@@ -20,8 +20,9 @@ import {
     promptToFillOrder,
     promptToMakeWine,
     promptToPlant,
+    promptToHarvest,
 } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
 import { drawCards } from "../shared/cardReducers";
@@ -117,9 +118,27 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             }
             switch (action.choice) {
                 case "BOARD_BUY_FIELD":
-                    return promptToChooseField(setPendingAction({ type: "buyField" }, state), "buy");
+                    return promptToChooseField(
+                        setPendingAction({ type: "buyField" }, state),
+                        field => {
+                            if (!field.sold) {
+                                return "You already own this field.";
+                            }
+                            return moneyDisabledReason(state, field.value);
+                        }
+                    );
                 case "BOARD_SELL_FIELD":
-                    return promptToChooseField(setPendingAction({ type: "sellField" }, state), "sell");
+                    return promptToChooseField(
+                        setPendingAction({ type: "sellField" }, state),
+                        field => {
+                            if (field.sold) {
+                                return "You already sold this field.";
+                            }
+                            return field.vines.length > 0
+                                ? "You can't sell a field with vines on it."
+                                : undefined;
+                        }
+                    );
                 case "BOARD_SELL_GRAPES":
                     return endTurn(state); // TODO (+bonus)
                 default:
@@ -153,9 +172,8 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 harvestFieldDisabledReason(state) === undefined;
 
             if (bonus) {
-                return promptToChooseField(
-                    setPendingAction({ ...pendingAction, bonusActivated: true }, state),
-                    "harvest"
+                return promptToHarvest(
+                    setPendingAction({ ...pendingAction, bonusActivated: true }, state)
                 );
             }
             return endTurn(state);
@@ -289,7 +307,7 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     return endTurn(gainCoins(bonus ? 3 : 2, state));
                 }
                 case "harvestField":
-                    return promptToChooseField(setPendingAction({ type: "harvestField" }, state), "harvest");
+                    return promptToHarvest(setPendingAction({ type: "harvestField" }, state));
                 case "makeWine": {
                     const bonus = hasPlacementBonus && state.workerPlacements.makeWine.length === 1;
                     return promptToMakeWine(

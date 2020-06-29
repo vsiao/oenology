@@ -1,6 +1,6 @@
-import GameState, { CardId, WorkerPlacementTurn } from "../GameState";
+import GameState, { CardId, WorkerPlacementTurn, Field } from "../GameState";
 import { GameAction } from "../gameActions";
-import { Choice, PromptState, ChooseFieldPurpose } from "./PromptState";
+import { Choice, PromptState } from "./PromptState";
 import { Coupon } from "../structures";
 import { OrderId } from "../orderCards";
 import { visitorCards } from "../visitors/visitorCards";
@@ -8,6 +8,7 @@ import { removeCardsFromHand } from "../shared/cardReducers";
 import { VineId } from "../vineCards";
 import { setPendingAction } from "../shared/turnReducers";
 import { isPromptAction } from "./promptActions";
+import { plantVineInFieldDisabledReason } from "../shared/sharedSelectors";
 
 export const prompt = (state: GameState, action: GameAction) => {
     if (isPromptAction(action)) {
@@ -103,7 +104,7 @@ export const promptToChooseVisitor = (
     });
 };
 
-export const promptToPlant = (state: GameState, vineId: VineId) => {
+export const promptToPlant = (state: GameState, vineId: VineId, bypassFieldLimit = false) => {
     state = removeCardsFromHand(
         [{ type: "vine", id: vineId }],
         setPendingAction({
@@ -111,14 +112,38 @@ export const promptToPlant = (state: GameState, vineId: VineId) => {
             vineId,
         }, state),
     );
-    return promptToChooseField(state, "plant");
+    return promptToChooseField(state, field => {
+        return plantVineInFieldDisabledReason(vineId, field, bypassFieldLimit);
+    });
 };
 
-export const promptToChooseField = (state: GameState, purpose: ChooseFieldPurpose): GameState => {
+export const promptToHarvest = (state: GameState): GameState => {
+    return promptToChooseField(state, field => {
+        if (field.harvested) {
+            return "You harvested this field already.";
+        }
+        return field.vines.length === 0
+            ? "There's nothing here to harvest."
+            : undefined;
+    });
+};
+
+export const promptToChooseField = (
+    state: GameState,
+    disabledReason: (field: Field) => string | undefined
+): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseField", purpose });
+    const fields = state.players[state.currentTurn.playerId].fields;
+    return enqueueActionPrompt(state, {
+        type: "chooseField",
+        disabledReasons: {
+            field5: disabledReason(fields.field5),
+            field6: disabledReason(fields.field6),
+            field7: disabledReason(fields.field7),
+        },
+    });
 };
 
 export const promptToChooseWine = (

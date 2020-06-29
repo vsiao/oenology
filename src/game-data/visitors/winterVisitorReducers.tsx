@@ -18,11 +18,11 @@ import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, To
 import {
     promptForAction,
     promptToMakeWine,
-    promptToChooseField,
     promptToBuildStructure,
     promptToChooseWine,
     promptToChooseOrderCard,
     promptToFillOrder,
+    promptToHarvest,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
@@ -41,7 +41,15 @@ import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
 import { endVisitor, setPendingAction } from "../shared/turnReducers";
 import { discardCards, drawCards } from "../shared/cardReducers";
-import { makeWineFromGrapes, harvestField, fillOrder, ageSingle, placeGrapes, ageCellar, discardWines } from "../shared/grapeWineReducers";
+import {
+    ageCellar,
+    ageSingle,
+    discardWines,
+    fillOrder,
+    harvestField,
+    makeWineFromGrapes,
+    placeGrapes,
+} from "../shared/grapeWineReducers";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -246,7 +254,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "HEXPERT_HARVEST":
-                        return promptToChooseField(state, "harvest");
+                        return promptToHarvest(state);
                     case "HEXPERT_DRAW":
                         return endVisitor(drawCards(state, { vine: 1 }));
                     case "HEXPERT_BUILD":
