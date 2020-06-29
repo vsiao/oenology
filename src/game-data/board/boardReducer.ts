@@ -284,7 +284,7 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                                 id: "BOARD_SELL_FIELD",
                                 label: "Sell a field",
                                 disabledReason: Object.values(state.players[player.id].fields)
-                                    .every(fields => fields.sold)
+                                    .every(fields => fields.sold || fields.vines.length > 0)
                                     ? "You don't have any fields to sell."
                                     : undefined,
                             },

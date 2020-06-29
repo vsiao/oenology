@@ -14,37 +14,30 @@ import { visitorCards } from "../../game-data/visitors/visitorCards";
 import VisitorCard from "../cards/VisitorCard";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { AppState } from "../../store/AppState";
-import { plantVineDisabledReason } from "../../game-data/shared/sharedSelectors";
 
 interface Props {
-    title: string;
-    optional: boolean;
-    cards: {
-        id: CardId;
-        disabledReason?: string | undefined
-    }[];
+    prompt: ChooseCardPromptState;
     onSelectCards: (cards: CardId[]) => void;
 }
 
-const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
-    return <PromptStructure title={props.title}>
+const ChooseCardPrompt: React.FunctionComponent<Props> = ({ prompt, onSelectCards }) => {
+    return <PromptStructure title={prompt.title}>
         <ul className="ChooseCardPrompt-cards">
-            {props.cards.map((card, i) => {
+            {prompt.cards.map((card, i) => {
                 return <li className="ChooseCardPrompt-card" key={card.id.id}>
                     <button
                         className="ChooseCardPrompt-cardButton"
                         disabled={!!card.disabledReason}
-                        onClick={() => props.onSelectCards([card.id])}
+                        onClick={() => onSelectCards([card.id])}
                     >
-                        {renderCard(card.id, props)}
+                        {renderCard(card.id)}
                     </button>
                 </li>;
             })}
-            {props.optional
+            {prompt.optional
                 ? <ChoiceButton
                     className="ChooseCardPrompt-pass"
-                    onClick={() => props.onSelectCards([])}
+                    onClick={() => onSelectCards([])}
                 >
                     Pass
                   </ChoiceButton>
@@ -53,7 +46,7 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const renderCard = (card: CardId, props: Props) => {
+const renderCard = (card: CardId) => {
     switch (card.type) {
         case "vine":
             return <VineCard cardData={vineCards[card.id]} />;
@@ -66,28 +59,10 @@ const renderCard = (card: CardId, props: Props) => {
     }
 };
 
-const mapStateToProps = (
-    state: AppState,
-    { prompt }: { playerId: string; prompt: ChooseCardPromptState }
-) => {
-    return {
-        title: prompt.title,
-        optional: !!prompt.optional,
-        cards: prompt.cards.map(card => {
-            return {
-                id: card,
-                disabledReason: prompt.requireStructures && card.type === "vine"
-                    ? plantVineDisabledReason(state.game!, card.id)
-                    : undefined,
-            };
-        }),
-    };
-};
-
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
     return {
         onSelectCards: (cards: CardId[]) => dispatch(chooseCards(cards, ownProps.playerId)),
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ChooseCardPrompt);
+export default connect(null, mapDispatchToProps)(ChooseCardPrompt);

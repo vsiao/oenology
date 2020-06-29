@@ -282,7 +282,7 @@ export const summerVisitorReducers: Record<
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        return promptToChooseVineCard(state);
+                        return promptToChooseVineCard(state, { bypassFieldLimit: true });
                     case "vine":
                         return promptToPlant(state, card.id, /* bypassFieldLimit */ true);
                     default:

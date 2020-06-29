@@ -31,9 +31,11 @@ export interface ChooseActionPromptState {
 export interface ChooseCardPromptState {
     type: "chooseCard";
     title: string;
-    cards: CardId[];
+    cards: {
+        id: CardId;
+        disabledReason: string | undefined;
+    }[];
     optional?: boolean;
-    requireStructures?: boolean;
 }
 
 export interface ChooseWinePromptState {

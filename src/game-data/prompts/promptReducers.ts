@@ -8,7 +8,7 @@ import { removeCardsFromHand } from "../shared/cardReducers";
 import { VineId } from "../vineCards";
 import { setPendingAction } from "../shared/turnReducers";
 import { isPromptAction } from "./promptActions";
-import { plantVineInFieldDisabledReason } from "../shared/sharedSelectors";
+import { plantVineInFieldDisabledReason, canFillOrderWithWines, allWines, plantVineDisabledReason } from "../shared/sharedSelectors";
 
 export const prompt = (state: GameState, action: GameAction) => {
     if (isPromptAction(action)) {
@@ -52,55 +52,79 @@ export const promptToChooseCard = (
         title = "Choose a card",
         cards,
         optional,
-        requireStructures
     }: {
         title?: string;
-        cards: CardId[];
+        cards: {
+            id: CardId;
+            disabledReason: string | undefined;
+        }[];
         optional?: boolean;
-        requireStructures?: boolean;
     }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional, requireStructures });
+    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional });
 };
 
 export const promptToChooseOrderCard = (state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
     return promptToChooseCard(state, {
         title: "Choose an order to fill",
-        cards: state.players[state.currentTurn.playerId].cardsInHand
-            .filter(card => card.type === "order"),
+        cards: player.cardsInHand
+            .filter(card => card.type === "order")
+            .map(id => ({
+                id,
+                disabledReason:
+                    canFillOrderWithWines(id.id as OrderId, allWines(state, player.id))
+                        ? undefined
+                        : "You can't fill this order."
+            })),
     });
 };
 
 export const promptToChooseVineCard = (
     state: GameState,
-    { requireStructures = true, optional = false }: {
-        requireStructures?: boolean;
+    {
+        bypassFieldLimit = false,
+        bypassStructures = false,
+        optional = false,
+    }: {
+        bypassFieldLimit?: boolean;
+        bypassStructures?: boolean;
         optional?: boolean;
     } = {}
 ): GameState => {
     return promptToChooseCard(state, {
         title: `Choose vine to plant`,
         cards: state.players[state.currentTurn.playerId].cardsInHand
-            .filter(({ type }) => type === "vine"),
+            .filter(({ type }) => type === "vine")
+            .map(id => ({
+                id,
+                disabledReason: plantVineDisabledReason(state, id.id as VineId, {
+                    bypassFieldLimit,
+                    bypassStructures,
+                }),
+            })),
         optional,
-        requireStructures
     });
 };
 
 export const promptToChooseVisitor = (
     season: "summer" | "winter",
     state: GameState,
-    bonus = false
+    optional = false
 ): GameState => {
     return promptToChooseCard(state, {
-        title: `Choose ${bonus ? "another" : "a"} visitor`,
+        title: `Choose ${optional ? "another" : "a"} visitor`,
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(card => card.type === "visitor" &&
-                visitorCards[card.id].season === season),
-        optional: bonus,
+                visitorCards[card.id].season === season)
+            .map(id => ({
+                id,
+                disabledReason: undefined, // TODO
+            })),
+        optional,
     });
 };
 

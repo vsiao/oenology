@@ -51,7 +51,8 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
 };
 
 /**
- * Determines if a specific vine can be planted in a specific field
+ * Determines if a specific vine can be planted in a specific field.
+ * Assumes that the vine itself is plantable (ie. does not check structures)
  */
 export const plantVineInFieldDisabledReason = (
     vineId: VineId,
@@ -77,12 +78,15 @@ export const plantVineInFieldDisabledReason = (
 export const plantVineDisabledReason = (
     state: GameState,
     vineId: VineId,
-    bypassFieldLimit = false
+    { bypassFieldLimit = false, bypassStructures = false, }: {
+        bypassFieldLimit?: boolean;
+        bypassStructures?: boolean;
+    } = {}
 ) => {
     const player = state.players[state.currentTurn.playerId];
     const fields = Object.values(player.fields);
 
-    if (!vineCards[vineId].structures.every(s => player.structures[s])) {
+    if (!bypassStructures && !vineCards[vineId].structures.every(s => player.structures[s])) {
         return "You haven't built the required structures.";
     }
     const hasOpenField = fields.some(
@@ -94,10 +98,16 @@ export const plantVineDisabledReason = (
 /**
  * Determines if *any* vine can be planted in *any* field
  */
-export const plantVinesDisabledReason = (state: GameState, ) => {
+export const plantVinesDisabledReason = (
+    state: GameState,
+    opts: {
+        bypassFieldLimit?: boolean;
+        bypassStructures?: boolean;
+    } = {}
+) => {
     const player = state.players[state.currentTurn.playerId];
     return player.cardsInHand.some(card => {
-        return card.type === "vine" && plantVineDisabledReason(state, card.id) === undefined;
+        return card.type === "vine" && plantVineDisabledReason(state, card.id, opts) === undefined;
     })
         ? undefined
         : "You don't have any vines you can plant.";
