@@ -19,6 +19,7 @@ interface Props {
         type: WorkerPlacement | null;
         label: React.ReactNode;
         disabledReason: string | undefined;
+        hasSpace: boolean;
     }[];
     onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) => void;
 }
@@ -61,10 +62,12 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
             </div>
             <ul className="PlaceWorkerPrompt-choices">
                 {props.placements.map((placement, i) => {
+                    const requiresGrande = !placement.hasSpace && selectedWorkerType !== "grande";
+                    const disabled = !!placement.disabledReason || requiresGrande;
                     return <li className="PlaceWorkerPrompt-choice" key={i}>
                         <ChoiceButton
                             className="PlaceWorkerPrompt-choiceButton"
-                            disabled={!!placement.disabledReason}
+                            disabled={disabled}
                             onClick={() => props.onPlaceWorker(placement.type, selectedWorkerType)}
                         >
                             {placement.label}
@@ -76,10 +79,12 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
+const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     const game = state.game!;
     const numPlayers = Object.keys(game.players).length;
+    const numSpots = Math.ceil(numPlayers / 2);
     const player = game.players[ownProps.playerId];
+    const workerPlacements = game.workerPlacements;
 
     return {
         color: player.color,
@@ -94,21 +99,23 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string }) => {
                         ? action.bonusLabel
                         : action.title,
                     disabledReason: action.disabledReason && action.disabledReason(game),
+                    hasSpace: workerPlacements[action.type].length < numSpots
                 })),
             {
                 type: null,
                 label: "Pass",
                 disabledReason: undefined,
+                hasSpace: true,
             },
         ],
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string }) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
     return {
         onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) =>
             dispatch(placeWorker(placement, workerType, ownProps.playerId))
     };
-}
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlaceWorkerPrompt);

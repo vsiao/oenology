@@ -30,6 +30,12 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                         ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
                         : (i === 0 ? bonusDisplay : null)}
                 </div>
+                {i === numSpots - 1 && workers.length > numSpots && (
+                    <div className="BoardPlacement-overflow">
+                        {workers.slice(numSpots).map((w, i) => (
+                            <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} />
+                        ))}
+                    </div>)}
             </td>;
         })}
         <td className="BoardPlacement-title">
@@ -38,12 +44,12 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
     </tr>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction }) => {
-    const numSpots = Math.ceil(Object.keys(state.game!.players).length / 2)
+const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction; }) => {
+    const numSpots = Math.ceil(Object.keys(state.game!.players).length / 2);
     return {
         numSpots,
         bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : null,
     };
-}
+};
 
 export default connect(mapStateToProps)(BoardPlacement);

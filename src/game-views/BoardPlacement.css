@@ -7,6 +7,7 @@
 }
 
 .BoardPlacement-spotCell {
+    position: relative;
     text-align: center;
     width: 80px;
 }
@@ -33,6 +34,16 @@
     background: #ddd;
     border-color: #ddd;
     border-style: solid;;
+}
+
+.BoardPlacement-overflow {
+    left: 64px;
+    position: absolute;
+    top: 10px;
+    white-space: nowrap;
+}
+.BoardPlacement-overflow .Worker {
+    margin-left: -23px;
 }
 
 .BoardPlacement-title {
