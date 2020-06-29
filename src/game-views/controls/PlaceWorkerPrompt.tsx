@@ -25,11 +25,14 @@ interface Props {
 }
 
 const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
-    const [selectedWorkerType, setWorkerType] = React.useState<WorkerType>(
+    const defaultWorkerType = 
         props.workers.filter(({ type }) => type === "normal").some(w => w.available)
             ? "normal"
-            : "grande"
-    );
+            : "grande";
+    const [selectedWorkerType, setWorkerType] = React.useState<WorkerType>(defaultWorkerType);
+    if (props.workers.filter(({ type }) => type === selectedWorkerType).every(w => !w.available)) {
+        setWorkerType(defaultWorkerType);
+    }
     return <PromptStructure title="Place a worker">
         <div className="PlaceWorkerPrompt-body">
             <div className="PlaceWorkerPrompt-workerTypeSelector">
