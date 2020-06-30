@@ -22,10 +22,8 @@
     display: flex;
     fill: #ddd;
     flex-direction: column-reverse;
-    font-size: .8em;
     justify-content: flex-end;
     line-height: 2em;
-    max-width: 290px;
     padding: 8px;
 }
 

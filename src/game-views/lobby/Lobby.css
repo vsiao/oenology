@@ -7,7 +7,6 @@
 
 .Lobby-nameLabel {
     color: #333;
-    font-size: .8em;
     font-weight: 600;
 }
 
@@ -28,7 +27,6 @@
 
 .Lobby-sidebar {
     background: #ddd;
-    font-size: .8em;
     grid-area: sidebar;
 }
 

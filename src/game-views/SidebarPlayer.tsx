@@ -11,7 +11,7 @@ import Grape from "./icons/Grape";
 import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
-import { structureAbbreviations, StructureId } from "../game-data/structures";
+import { StructureId, structures } from "../game-data/structures";
 
 interface Props {
     player: PlayerState;
@@ -130,11 +130,13 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             </div>
         </div>
         <ul className="SidebarPlayer-structures">
-            {Object.entries(structureAbbreviations).map(([structureId, structureAbbr]) => {
-                if (!structureAbbr) return null;
+            {Object.entries(structures).map(([structureId, structure]) => {
+                if (structureId === "mediumCellar" || structureId === "largeCellar") {
+                    return null;
+                }
                 return <li key={structureId} className={cx("SidebarPlayer-structure", {
                     "SidebarPlayer-structure--built": playerStructures[structureId as StructureId]
-                })}>{structureAbbr}</li>;
+                })}>{structure.name}</li>;
             })}
         </ul>
     </div>;

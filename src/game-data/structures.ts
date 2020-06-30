@@ -58,14 +58,3 @@ export const maxStructureCost = Object.values(structures).reduce((max, structure
     }
     return max;
 }, 0);
-
-export const structureAbbreviations: Record<StructureId, string> = {
-    trellis: 'Tr',
-    irrigation: 'Irr',
-    yoke: 'Yo',
-    windmill: 'Wi',
-    cottage: 'Co',
-    tastingRoom: 'Ta',
-    mediumCellar: '',
-    largeCellar: ''
-};
