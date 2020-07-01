@@ -2,6 +2,7 @@
     box-sizing: border-box;
     grid-area: main;
     height: 100%;
+    overflow: hidden;
     pointer-events: none;
     position: absolute;
     width: 100%;

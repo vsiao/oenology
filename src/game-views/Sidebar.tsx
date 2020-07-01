@@ -1,3 +1,4 @@
+import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { PlayerState } from "../game-data/GameState";
@@ -35,11 +36,33 @@ const Sidebar: React.FunctionComponent<Props> = props => {
         </div>
         <div className="Sidebar-activityLog">
             <div className="Sidebar-activityLogContents">
-                {props.activityLog.map((event, i) => {
-                    return <div key={i}>{renderActivity(event, props.playerNameById)}</div>;
-                })}
+                {props.activityLog.map((event, i) =>
+                    <ActivityLogItem key={i} event={event} playerNameById={props.playerNameById} />
+                )}
             </div>
         </div>
+    </div>;
+};
+
+const ActivityLogItem: React.FunctionComponent<{
+    event: ActivityLogEvent;
+    playerNameById: Record<string, string>;
+}> = ({ event, playerNameById }) => {
+    const [isMounted, setIsMounted] = React.useState(false);
+    const nodeRef = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+        // Force a reflow so that the adding a new class on next render will trigger a transition
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+        nodeRef.current && nodeRef.current.scrollTop;
+        setIsMounted(true);
+    }, []);
+
+    return <div ref={nodeRef} className={cx({
+        "Sidebar-activityLogItem": true,
+        "Sidebar-activityLogItem--enter": isMounted,
+        "Sidebar-activityLogItem--seasonSeparator": event.type === "season",
+    })}>
+        {renderActivity(event, playerNameById)}
     </div>;
 };
 

@@ -8,3 +8,9 @@
     flex: 1 1 auto;
     min-height: 1px;
 }
+
+@media (min-width: 1750px) {
+    .OenologyGame {
+        grid-template-columns: 1fr 900px;
+    }
+}
