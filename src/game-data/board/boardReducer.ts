@@ -47,10 +47,16 @@ export const board = (state: GameState, action: GameAction): GameState => {
             switch (action.type) {
                 case "CHOOSE_ACTION":
                     switch (action.choice) {
+                        case "FALL_DRAW_BOTH":
+                            return endTurn(drawCards(state, { summerVisitor: 1, winterVisitor: 1 }));
                         case "FALL_DRAW_SUMMER":
                             return endTurn(drawCards(state, { summerVisitor: 1 }));
+                        case "FALL_DRAW_SUMMER_2":
+                            return endTurn(drawCards(state, { summerVisitor: 2 }));
                         case "FALL_DRAW_WINTER":
                             return endTurn(drawCards(state, { winterVisitor: 1 }));
+                        case "FALL_DRAW_WINTER_2":
+                            return endTurn(drawCards(state, { winterVisitor: 2 }));
                         default:
                             return state;
                     }

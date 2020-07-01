@@ -178,17 +178,16 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     if (compactWakeUpOrder.every((p) => p.passed)) {
         // If everyone passed, it's the end of the season
         if (season === "summer") {
-            return pushActivityLog({ type: "season", season: "Fall" }, promptToDrawFallVisitor({
-                ...state,
-                // preserve wake-up order; just reset "passed" state
-                wakeUpOrder: wakeUpOrder.map((pos) => {
-                    return pos === null ? null : { ...pos, passed: false };
-                }) as GameState["wakeUpOrder"],
-                currentTurn: {
-                    type: "fallVisitor",
-                    playerId: compactWakeUpOrder[0].playerId,
-                },
-            }));
+            return pushActivityLog(
+                { type: "season", season: "Fall" },
+                startFallVisitorTurn(compactWakeUpOrder[0].playerId, {
+                    ...state,
+                    // preserve wake-up order; just reset "passed" state
+                    wakeUpOrder: wakeUpOrder.map((pos) => {
+                        return pos === null ? null : { ...pos, passed: false };
+                    }) as GameState["wakeUpOrder"],
+                })
+            );
         } else {
             // End of year
             // TODO discard too many cards
@@ -267,6 +266,25 @@ export const endVisitor = (state: GameState): GameState => {
 // Fall visitor turns
 // ----------------------------------------------------------------------------
 
+const startFallVisitorTurn = (playerId: string, state: GameState): GameState => {
+    const canDrawTwo = state.players[playerId].structures.cottage;
+    return promptForAction({
+        ...state,
+        currentTurn: { type: "fallVisitor", playerId, },
+    }, {
+        choices: canDrawTwo
+            ? [
+                { id: "FALL_DRAW_SUMMER_2", label: <>Draw 2 <SummerVisitor /></>, },
+                { id: "FALL_DRAW_WINTER_2", label: <>Draw 2 <WinterVisitor /></>, },
+                { id: "FALL_DRAW_BOTH", label: <>Draw 1 <SummerVisitor /> and 1 <WinterVisitor /></>, },
+            ]
+            : [
+                { id: "FALL_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></>, },
+                { id: "FALL_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></>, },
+            ],
+    });
+};
+
 const endFallVisitorTurn = (state: GameState): GameState => {
     const { currentTurn, wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
@@ -282,21 +300,7 @@ const endFallVisitorTurn = (state: GameState): GameState => {
     } else {
         const nextPlayerId =
             compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
-        return promptToDrawFallVisitor({
-            ...state,
-            currentTurn: {
-                ...state.currentTurn,
-                playerId: nextPlayerId,
-            },
-        });
+        return startFallVisitorTurn(nextPlayerId, state);
     }
 };
 
-const promptToDrawFallVisitor = (state: GameState) => {
-    return promptForAction(state, {
-        choices: [
-            { id: "FALL_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></>, },
-            { id: "FALL_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></>, },
-        ],
-    });
-};
