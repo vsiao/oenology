@@ -25,7 +25,7 @@ import {
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
-import { drawCards } from "../shared/cardReducers";
+import { drawCards, discardCards } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 
@@ -60,6 +60,14 @@ export const board = (state: GameState, action: GameAction): GameState => {
                         default:
                             return state;
                     }
+                default:
+                    return state;
+            }
+
+        case "endOfYearDiscard":
+            switch (action.type) {
+                case "CHOOSE_CARDS":
+                    return endTurn(discardCards(action.cards!, state));
                 default:
                     return state;
             }

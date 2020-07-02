@@ -1,8 +1,8 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, FieldId, Field, WakeUpPosition, PlayVisitorPendingAction } from "../GameState";
+import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { pushActivityLog, updatePlayer, gainVP, gainCoins } from "./sharedReducers";
-import { promptForAction, promptToChooseVisitor, promptToPlaceWorker } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
@@ -23,6 +23,9 @@ export const endTurn = (state: GameState): GameState => {
 
         case "fallVisitor":
             return endFallVisitorTurn(state);
+
+        case "endOfYearDiscard":
+            return endEOYDiscardTurn(state);
     }
 };
 
@@ -190,43 +193,41 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
             );
         } else {
             // End of year
-            // TODO discard too many cards
-            const tableOrder = state.tableOrder;
-            const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
-            return pushActivityLog({ type: "season", season: "Spring" }, promptForWakeUpOrder({
+            return startEOYDiscardTurn(compactWakeUpOrder[0].playerId, {
                 ...state,
-                grapeIndex,
-                currentTurn: { type: "wakeUpOrder", playerId: tableOrder[grapeIndex] },
-                wakeUpOrder: wakeUpOrder.map((pos) => null) as GameState["wakeUpOrder"],
                 workerPlacements: (Object.fromEntries(
                     Object.entries(state.workerPlacements).map(([placement]) => [placement, []])
                 ) as unknown) as GameState["workerPlacements"],
                 players: Object.fromEntries(
                     Object.entries(state.players).map(([playerId, playerState]) => {
-                        const newFieldsState: Record<FieldId, Field> = { ...playerState.fields };
-                        (Object.keys(newFieldsState) as FieldId[]).forEach((fieldId) => {
-                            newFieldsState[fieldId].harvested = false;
-                        });
                         return [
                             playerId,
                             {
                                 ...playerState,
+                                // Collect residual payments
                                 coins: playerState.coins + playerState.residuals,
+                                // Retrieve workers
                                 tempWorker: undefined,
                                 workers: playerState.workers
                                     .filter(w => !w.isTemp)
                                     .map(w => ({ ...w, available: true })),
+                                // Age grape and wine tokens
                                 crushPad: {
                                     red: ageAll(playerState.crushPad.red),
                                     white: ageAll(playerState.crushPad.white),
                                 },
                                 cellar: ageCellar(playerState.cellar, playerState.structures),
-                                fields: newFieldsState
+                                // Reset field harvested state
+                                fields: {
+                                    field5: { ...playerState.fields.field5, harvested: false },
+                                    field6: { ...playerState.fields.field6, harvested: false },
+                                    field7: { ...playerState.fields.field7, harvested: false },
+                                },
                             },
                         ];
                     })
                 ),
-            }));
+            });
         }
     }
     const activeWakeUpOrder = compactWakeUpOrder
@@ -303,4 +304,50 @@ const endFallVisitorTurn = (state: GameState): GameState => {
         return startFallVisitorTurn(nextPlayerId, state);
     }
 };
+
+//
+// End-of-year discard turns
+// ----------------------------------------------------------------------------
+
+const END_OF_YEAR_HAND_LIMIT = 7;
+const startEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
+    state = {
+        ...state,
+        currentTurn: { type: "endOfYearDiscard", playerId },
+    };
+    const cards = state.players[playerId].cardsInHand;
+    if (cards.length <= END_OF_YEAR_HAND_LIMIT) {
+        return endEOYDiscardTurn(state);
+    }
+    return promptToChooseCard(state, {
+        title: "Discard down to 7 cards",
+        cards: cards.map(id => ({ id, disabledReason: undefined })),
+        numCards: cards.length - END_OF_YEAR_HAND_LIMIT,
+    })
+};
+
+const endEOYDiscardTurn = (state: GameState): GameState => {
+    const { currentTurn, wakeUpOrder } = state;
+    const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
+    const i = compactWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
+
+    if (i === compactWakeUpOrder.length - 1) {
+        // Begin a new year
+        const tableOrder = state.tableOrder;
+        const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
+        return pushActivityLog(
+            { type: "season", season: "Spring" },
+            promptForWakeUpOrder({
+                ...state,
+                grapeIndex,
+                currentTurn: { type: "wakeUpOrder", playerId: tableOrder[grapeIndex] },
+                wakeUpOrder: wakeUpOrder.map((pos) => null) as GameState["wakeUpOrder"],
+            })
+        );
+    } else {
+        const nextPlayerId =
+            compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
+        return startEOYDiscardTurn(nextPlayerId, state);
+    }
+}
 

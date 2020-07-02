@@ -570,7 +570,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SURVEYOR_EMPTY":
-                        return endVisitor(gainCoins(numEmptyAndOwned, state));
+                        return endVisitor(gainCoins(2 * numEmptyAndOwned, state));
                     case "SURVEYOR_PLANTED":
                         return endVisitor(gainVP(numPlantedAndOwned, state));
                     default:

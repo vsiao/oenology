@@ -39,7 +39,8 @@ export type CurrentTurn =
     | { type: "papaSetUp"; playerId: string; }
     | { type: "wakeUpOrder"; playerId: string; }
     | WorkerPlacementTurn
-    | { type: "fallVisitor"; playerId: string; };
+    | { type: "fallVisitor"; playerId: string; }
+    | { type: "endOfYearDiscard"; playerId: string; };
 
 export interface WorkerPlacementTurn {
     type: "workerPlacement";

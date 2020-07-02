@@ -50,27 +50,32 @@ export const promptToChooseCard = (
     state: GameState,
     {
         title = "Choose a card",
+        style = "selector",
         cards,
         optional,
+        numCards = 1,
     }: {
         title?: string;
+        style?: "selector" | "oneClick",
         cards: {
             id: CardId;
             disabledReason: string | undefined;
         }[];
         optional?: boolean;
+        numCards?: number;
     }
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseCard", title, cards, optional });
+    return enqueueActionPrompt(state, { type: "chooseCard", title, style, cards, optional, numCards });
 };
 
 export const promptToChooseOrderCard = (state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
     return promptToChooseCard(state, {
         title: "Choose an order to fill",
+        style: "oneClick",
         cards: player.cardsInHand
             .filter(card => card.type === "order")
             .map(id => ({
@@ -97,6 +102,7 @@ export const promptToChooseVineCard = (
 ): GameState => {
     return promptToChooseCard(state, {
         title: `Choose vine to plant`,
+        style: "oneClick",
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(({ type }) => type === "vine")
             .map(id => ({
@@ -117,6 +123,7 @@ export const promptToChooseVisitor = (
 ): GameState => {
     return promptToChooseCard(state, {
         title: `Choose ${optional ? "another" : "a"} visitor`,
+        style: "oneClick",
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(card => card.type === "visitor" &&
                 visitorCards[card.id].season === season)
@@ -124,7 +131,7 @@ export const promptToChooseVisitor = (
                 id,
                 disabledReason: undefined, // TODO
             })),
-        optional,
+        optional: true,
     });
 };
 

@@ -117,6 +117,8 @@ const seasonFromCurrentTurn = (currentTurn: CurrentTurn): Season => {
             return currentTurn.season;
         case "fallVisitor":
             return "fall";
+        case "endOfYearDiscard":
+            return "winter";
     }
 };
 

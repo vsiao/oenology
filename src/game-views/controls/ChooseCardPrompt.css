@@ -1,7 +1,7 @@
-.ChooseCardPrompt-cards {
-    display: flex;
+.ChooseCardPrompt-body {
+    flex: 1 1 auto;
     overflow-x: auto;
-    padding: 1em 1.6em;
+    padding: 1em 1.6em 0;
 }
 .ChooseCardPrompt-cards::after {
     content: "";
@@ -10,21 +10,39 @@
     width: 1.6em;
 }
 
+.ChooseCardPrompt-cards {
+    display: inline-flex;
+}
+
 .ChooseCardPrompt-card + .ChooseCardPrompt-card {
     margin-left: 1em;
 }
 
+.ChooseCardPrompt-cardButton {
+    background: transparent;
+    border-radius: 2px;
+    outline: none;
+}
 .ChooseCardPrompt-cardButton:disabled {
     color: inherit;
     opacity: 0.7;
 }
-.ChooseCardPrompt-cardButton:not(:disabled):hover {
-    bottom: 4px;
+.ChooseCardPrompt-cardButton:enabled {
     cursor: pointer;
-    position: relative;
-    transition: 100ms bottom ease-out;
+}
+.ChooseCardPrompt-cardButton--oneClick:enabled:hover {
+    transition: 100ms transform ease-out;
+    transform: translateY(-4px);
+}
+.ChooseCardPrompt-cardButton--selected {
+    background: #61dafb;
+    box-shadow: 0 0 0 6px #61dafb;
 }
 
-.ChooseCardPrompt-pass {
-    margin-left: 8px;
+.ChooseCardPrompt-pass,
+.ChooseCardPrompt-confirmMulti {
+    bottom: 2em;
+    box-shadow: 0 0 .5em rgba(0, 0, 0, .3);
+    position: absolute;
+    right: 2em;
 }

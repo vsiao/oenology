@@ -31,11 +31,13 @@ export interface ChooseActionPromptState {
 export interface ChooseCardPromptState {
     type: "chooseCard";
     title: string;
+    style: "selector" | "oneClick";
     cards: {
         id: CardId;
         disabledReason: string | undefined;
     }[];
     optional?: boolean;
+    numCards: number;
 }
 
 export interface ChooseWinePromptState {
