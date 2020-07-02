@@ -1,7 +1,7 @@
 import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
-import { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
+import Card, { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
 import Grape from "../../game-views/icons/Grape";
 import WineGlass from "../../game-views/icons/WineGlass";
@@ -37,6 +37,10 @@ export const summerVisitorCards = {
     artisan: summerVisitorCard(
         "Artisan",
         <>Choose 1: Gain <Coins>3</Coins>, build a structure at a <Coins>1</Coins> discount, or plant up to 2 <Vine />.</>
+    ),
+    auctioneer: summerVisitorCard(
+        "Auctioneer",
+        <>Discard 2 <Card /> to gain <Coins>4</Coins> OR discard 4 <Card /> to gain <VP>3</VP>.</>
     ),
     banker: summerVisitorCard(
         "Banker",
@@ -97,6 +101,10 @@ export const summerVisitorCards = {
     patron: summerVisitorCard(
         "Patron",
         <>Gain <Coins>4</Coins> OR draw 1 <Order />  and 1 <WinterVisitor />.</>
+    ),
+    peddler: summerVisitorCard(
+        "Peddler",
+        <>Discard 2 <Card /> to draw 1 of each type of card.</>
     ),
     // planner: summervisitorcard(
     //     "planner",

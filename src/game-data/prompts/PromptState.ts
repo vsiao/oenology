@@ -34,7 +34,7 @@ export interface ChooseCardPromptState {
     style: "selector" | "oneClick";
     cards: {
         id: CardId;
-        disabledReason: string | undefined;
+        disabledReason?: string | undefined;
     }[];
     optional?: boolean;
     numCards: number;

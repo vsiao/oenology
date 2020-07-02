@@ -59,7 +59,7 @@ export const promptToChooseCard = (
         style?: "selector" | "oneClick",
         cards: {
             id: CardId;
-            disabledReason: string | undefined;
+            disabledReason?: string | undefined;
         }[];
         optional?: boolean;
         numCards?: number;
@@ -131,7 +131,7 @@ export const promptToChooseVisitor = (
                 id,
                 disabledReason: undefined, // TODO
             })),
-        optional: true,
+        optional,
     });
 };
 

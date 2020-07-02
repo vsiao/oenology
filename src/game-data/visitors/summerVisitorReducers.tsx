@@ -8,6 +8,7 @@ import {
     promptToHarvest,
     promptToMakeWine,
     promptToPlant,
+    promptToChooseCard,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
@@ -26,7 +27,7 @@ import {
     needGrapesDisabledReason,
     plantVinesDisabledReason,
 } from "../shared/sharedSelectors";
-import { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
+import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import { maxStructureCost, structures, Coupon } from "../structures";
@@ -41,7 +42,7 @@ import {
     promptForWakeUpOrder,
     setPendingAction,
 } from "../shared/turnReducers";
-import { drawCards } from "../shared/cardReducers";
+import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField } from "../shared/grapeWineReducers";
 
 export const summerVisitorReducers: Record<
@@ -133,6 +134,59 @@ export const summerVisitorReducers: Record<
                     )
                     : endVisitor(state);
 
+            default:
+                return state;
+        }
+    },
+    auctioneer: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                switch (action.cards!.length) {
+                    case 1:
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "AUCTIONEER_2",
+                                    label: <>Discard 2 <Card /> to gain <Coins>4</Coins></>,
+                                    disabledReason: player.cardsInHand.length < 2
+                                        ? "You don't have enough cards."
+                                        : undefined,
+                                },
+                                {
+                                    id: "AUCTIONEER_4",
+                                    label: <>Discard 4 <Card /> to gain <VP>3</VP></>,
+                                    disabledReason: player.cardsInHand.length < 4
+                                        ? "You don't have enough cards."
+                                        : undefined,
+                                },
+                            ],
+                        });
+                    case 2:
+                        return endTurn(gainCoins(4, discardCards(action.cards!, state)));
+                    case 4:
+                        return endTurn(gainVP(3, discardCards(action.cards!, state)));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "AUCTIONEER_2":
+                        return promptToChooseCard(state, {
+                            title: "Discard 2 cards",
+                            cards: player.cardsInHand.map(id => ({ id })),
+                            numCards: 2,
+                        });
+                    case "AUCTIONEER_4":
+                        return promptToChooseCard(state, {
+                            title: "Discard 4 cards",
+                            cards: player.cardsInHand.map(id => ({ id })),
+                            numCards: 4,
+                        });
+                    default:
+                        return state;
+                }
             default:
                 return state;
         }
@@ -537,6 +591,29 @@ export const summerVisitorReducers: Record<
                         return endVisitor(drawCards(state, { order: 1, winterVisitor: 1, }));
                     default:
                         return state;
+                }
+            default:
+                return state;
+        }
+    },
+    peddler: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.cards!.length === 1) {
+                    return promptToChooseCard(state, {
+                        title: "Discard 2 cards",
+                        cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),
+                        numCards: 2,
+                    });
+                } else {
+                    return endTurn(
+                        drawCards(discardCards(action.cards!, state), {
+                            vine: 1,
+                            summerVisitor: 1,
+                            order: 1,
+                            winterVisitor: 1
+                        })
+                    );
                 }
             default:
                 return state;

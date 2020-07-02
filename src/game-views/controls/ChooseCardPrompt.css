@@ -3,12 +3,6 @@
     overflow-x: auto;
     padding: 1em 1.6em 0;
 }
-.ChooseCardPrompt-cards::after {
-    content: "";
-    display: inline-block;
-    flex-shrink: 0;
-    width: 1.6em;
-}
 
 .ChooseCardPrompt-cards {
     display: inline-flex;

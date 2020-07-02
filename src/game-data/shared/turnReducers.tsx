@@ -321,7 +321,7 @@ const startEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
     }
     return promptToChooseCard(state, {
         title: "Discard down to 7 cards",
-        cards: cards.map(id => ({ id, disabledReason: undefined })),
+        cards: cards.map(id => ({ id })),
         numCards: cards.length - END_OF_YEAR_HAND_LIMIT,
     })
 };
