@@ -17,7 +17,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     return board(prompt(state, action), action);
 };
 
-export const initGame = (
+const initGame = (
     userId: string,
     players: StartGameAction["players"],
     shuffledCards: CardsByType
@@ -25,7 +25,7 @@ export const initGame = (
     return {
         currentTurn: {
             type: "wakeUpOrder",
-            playerId: players.length === 0 ? "" : players[0][0],
+            playerId: players.length === 0 ? "" : players[0].id,
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -35,9 +35,9 @@ export const initGame = (
             winterVisitor: [],
         },
         players: Object.fromEntries(
-            players.map(([id, color]) => [id, initPlayer(id, color)])
+            players.map(({ id, name, color }) => [id, initPlayer(id, name, color)])
         ),
-        tableOrder: players.map(([id, _]) => id),
+        tableOrder: players.map(({ id }) => id),
         grapeIndex: 0,
         wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
@@ -57,14 +57,15 @@ export const initGame = (
             yoke: []
         },
         activityLog: [],
-        playerId: players.some(([id, _]) => id === userId) ? userId : null,
+        playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };
 };
 
-const initPlayer = (id: string, color: PlayerColor): PlayerState => {
+const initPlayer = (id: string, name: string, color: PlayerColor): PlayerState => {
     return {
         id,
+        name,
         color,
         coins: 0,
         residuals: 0,

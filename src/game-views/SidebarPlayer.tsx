@@ -15,17 +15,16 @@ import { StructureId, structures } from "../game-data/structures";
 
 interface Props {
     player: PlayerState;
-    playerName: string;
 }
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
-    const { player, playerName } = props;
+    const { player } = props;
     const playerStructures = player.structures;
     const hasMediumCellar = playerStructures["mediumCellar"];
     const hasLargeCellar = playerStructures["largeCellar"];
     return <div className={`SidebarPlayer SidebarPlayer--${player.color}`}>
         <div className="SidebarPlayer-header">
-            <span className="SidebarPlayer-playerName">{playerName}</span>
+            <span className="SidebarPlayer-playerName">{player.name}</span>
             <ul className="SidebarPlayer-cards">
                 {player.cardsInHand.map(card =>
                     <li key={card.id} className="SidebarPlayer-card">

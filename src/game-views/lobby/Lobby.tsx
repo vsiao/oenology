@@ -13,7 +13,7 @@ interface Props {
     users: Record<string, User>;
     gameStatus: string | null | undefined;
     setName: (name: string) => void;
-    startGame: (playerIds: string[]) => void;
+    startGame: (players: User[]) => void;
 }
 
 const Lobby: React.FunctionComponent<Props> = ({
@@ -56,7 +56,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                     <ChoiceButton
                         className="Lobby-startGame"
                         onClick={() =>
-                            startGame(Object.values(users).map(u => u.id))}
+                            startGame(Object.values(users))}
                     >
                         Start Game
                     </ChoiceButton>
@@ -88,11 +88,15 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
     ];
     return {
         setName: (name: string) => dispatch(setCurrentUserName(name)),
-        startGame: (userIds: string[]) => {
-            if (userIds.length > 6) {
+        startGame: (users: User[]) => {
+            if (users.length > 6) {
                 throw new Error("Can't have more than 6 players");
             }
-            dispatch(startGame(userIds.map((id, i) => [id, colors[i]])));
+            dispatch(
+                startGame(
+                    users.map(({ id, name }, i) => ({ id, name, color: colors[i] }))
+                )
+            );
         },
     };
 }

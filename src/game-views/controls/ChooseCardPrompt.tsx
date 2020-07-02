@@ -58,7 +58,7 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = ({ prompt, onSelectCard
             {prompt.style === "selector"
                 ? <ChoiceButton
                     className="ChooseCardPrompt-confirmMulti"
-                    disabled={selectedCards.length < prompt.numCards}
+                    disabled={selectedCards.length !== prompt.numCards}
                     onClick={() => onSelectCards(selectedCards)}
                 >
                     Confirm ({selectedCards.length} card{selectedCards.length !== 1 ? "s" : ""})

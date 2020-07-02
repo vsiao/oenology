@@ -27,11 +27,7 @@ const Sidebar: React.FunctionComponent<Props> = props => {
     return <div className="Sidebar">
         <div className="Sidebar-players">
             {Object.values(props.players).map(player => {
-                return <SidebarPlayer
-                    key={player.id}
-                    player={player}
-                    playerName={props.playerNameById[player.id]}
-                />;
+                return <SidebarPlayer key={player.id} player={player} />;
             })}
         </div>
         <div className="Sidebar-activityLog">

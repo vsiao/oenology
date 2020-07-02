@@ -94,6 +94,7 @@ export type WineColor = "red" | "white" | "blush" | "sparkling";
 
 export interface PlayerState {
     id: string;
+    name: string;
     color: PlayerColor;
     coins: number;
     residuals: number;

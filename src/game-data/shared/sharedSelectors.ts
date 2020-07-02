@@ -170,7 +170,17 @@ export const fillOrderDisabledReason = (state: GameState, playerId = state.curre
             return card.type === "order" &&
                 canFillOrderWithWines(card.id, allWines(state, playerId));
         }) ? undefined : "You can't fill any of your orders.");
+};
 
+export const numCardsDisabledReason = (
+    state: GameState,
+    numCards: number,
+    playerId = state.currentTurn.playerId
+) => {
+    const player = state.players[playerId];
+    return player.cardsInHand.length < numCards
+        ? "You don't have enough cards."
+        : undefined;
 };
 
 export const needCardOfTypeDisabledReason = (

@@ -2,7 +2,7 @@ import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
+import Card, { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
 import {
     buildStructure,
     gainVP,
@@ -23,6 +23,7 @@ import {
     promptToChooseOrderCard,
     promptToFillOrder,
     promptToHarvest,
+    promptToChooseCard,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
@@ -33,14 +34,15 @@ import {
     needGrapesDisabledReason,
     trainWorkerDisabledReason,
     needWineDisabledReason,
+    numCardsDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
-import { endVisitor, setPendingAction } from "../shared/turnReducers";
-import { discardCards, drawCards } from "../shared/cardReducers";
+import { endVisitor, setPendingAction, endTurn } from "../shared/turnReducers";
+import { discardCards, drawCards, removeCardsFromHand, addCardsToHand } from "../shared/cardReducers";
 import {
     ageCellar,
     ageSingle,
@@ -186,6 +188,8 @@ export const winterVisitorReducers: Record<
                 if (state.playerId === null) {
                     return state;
                 }
+                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
+
                 return promptForAction(
                     state,
                     {
@@ -196,7 +200,7 @@ export const winterVisitorReducers: Record<
                                 label: <>
                                     Pay <Coins>1</Coins> to train 1 <Worker />
                                     {state.playerId !== state.currentTurn.playerId
-                                        ? <>(<strong>{state.currentTurn.playerId}</strong> gains <VP>1</VP>)</>
+                                        ? <>({playerName} gains <VP>1</VP>)</>
                                         : null}
                                 </>,
                                 disabledReason: trainWorkerDisabledReason(state, 1),
@@ -462,6 +466,8 @@ export const winterVisitorReducers: Record<
                 if (state.playerId === null) {
                     return state;
                 }
+                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
+
                 return promptForAction(
                     state,
                     {
@@ -473,10 +479,7 @@ export const winterVisitorReducers: Record<
                                     <>
                                         Make up to 2 <WineGlass />
                                         {state.playerId !== state.currentTurn.playerId
-                                            ? <>
-                                                (<strong>{state.currentTurn.playerId}</strong> draws
-                                                  1 <Vine /> or 1 <SummerVisitor />)
-                                            </>
+                                            ? <>({playerName} draws 1 <Vine /> or 1 <SummerVisitor />)</>
                                             : null}
                                     </>
                                 ),
@@ -641,6 +644,57 @@ export const winterVisitorReducers: Record<
                         return endVisitor(trainWorker(payCoins(2, state)));
                     case "PROFESSOR_GAIN":
                         return endVisitor(gainVP(2, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    queen: (state, action) => {
+        const { tableOrder } = state;
+        const i = tableOrder.indexOf(state.currentTurn.playerId);
+        const playerId = tableOrder[(i + tableOrder.length - 1) % tableOrder.length];
+        const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const cards = action.cards!;
+                if (cards.length === 1) {
+                    return promptForAction(state, {
+                        playerId,
+                        choices: [
+                            { id: "QUEEN_LOSE", label: <>Lose <VP>1</VP></>, },
+                            {
+                                id: "QUEEN_GIVE",
+                                label: <>Give {playerName} 2 <Card /></>,
+                                disabledReason: numCardsDisabledReason(state, 2, playerId),
+                            },
+                            {
+                                id: "QUEEN_PAY",
+                                label: <>Pay {playerName} <Coins>3</Coins></>,
+                                disabledReason: moneyDisabledReason(state, 3, playerId),
+                            },
+                        ],
+                    });
+                } else {
+                    return endTurn(
+                        addCardsToHand(cards, removeCardsFromHand(cards, state, playerId))
+                    );
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "QUEEN_LOSE":
+                        return endTurn(loseVP(1, state, playerId));
+                    case "QUEEN_GIVE":
+                        return promptToChooseCard(state, {
+                            title: <span>Give 2 cards to {playerName}</span>,
+                            cards: state.players[playerId].cardsInHand.map(id => ({ id })),
+                            numCards: 2,
+                            playerId,
+                        });
+                    case "QUEEN_PAY":
+                        return endTurn(gainCoins(3, payCoins(3, state, playerId)));
                     default:
                         return state;
                 }

@@ -47,16 +47,28 @@ export const drawCards = (
                 ? (visitorCards[card.id].season === "summer" ? "summerVisitor" : "winterVisitor")
                 : card.type),
         },
-        updatePlayer(
+        addCardsToHand(
+            drawnCards,
             { ...state, drawPiles: { vine, summerVisitor, order, winterVisitor }, },
             playerId,
-            { cardsInHand: [...state.players[playerId].cardsInHand, ...drawnCards], }
         )
     );
 };
 
 export const discardCards = (cards: CardId[], state: GameState): GameState => {
     return addToDiscard(cards, removeCardsFromHand(cards, state));
+};
+
+export const addCardsToHand = (
+    cards: CardId[],
+    state: GameState,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    return updatePlayer(
+        state,
+        playerId,
+        { cardsInHand: [...state.players[playerId].cardsInHand, ...cards], }
+    );
 };
 
 /**
@@ -66,8 +78,12 @@ export const discardCards = (cards: CardId[], state: GameState): GameState => {
  * itself), but before the card reaches discard (so that visitors who pick up from
  * the discard can work properly).
  */
-export const removeCardsFromHand = (cards: CardId[], state: GameState): GameState => {
-    const player = state.players[state.currentTurn.playerId];
+export const removeCardsFromHand = (
+    cards: CardId[],
+    state: GameState,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    const player = state.players[playerId];
     return updatePlayer(state, player.id, {
         cardsInHand: player.cardsInHand.filter(({ id }) =>
             cards.every((card) => card.id !== id)

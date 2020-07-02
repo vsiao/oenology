@@ -54,8 +54,9 @@ export const promptToChooseCard = (
         cards,
         optional,
         numCards = 1,
+        playerId = state.currentTurn.playerId,
     }: {
-        title?: string;
+        title?: React.ReactNode;
         style?: "selector" | "oneClick",
         cards: {
             id: CardId;
@@ -63,9 +64,10 @@ export const promptToChooseCard = (
         }[];
         optional?: boolean;
         numCards?: number;
+        playerId?: string;
     }
 ): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
+    if (state.playerId !== playerId) {
         return state;
     }
     return enqueueActionPrompt(state, { type: "chooseCard", title, style, cards, optional, numCards });

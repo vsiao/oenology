@@ -26,6 +26,7 @@ import {
     moneyDisabledReason,
     needGrapesDisabledReason,
     plantVinesDisabledReason,
+    numCardsDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -150,16 +151,12 @@ export const summerVisitorReducers: Record<
                                 {
                                     id: "AUCTIONEER_2",
                                     label: <>Discard 2 <Card /> to gain <Coins>4</Coins></>,
-                                    disabledReason: player.cardsInHand.length < 2
-                                        ? "You don't have enough cards."
-                                        : undefined,
+                                    disabledReason: numCardsDisabledReason(state, 2),
                                 },
                                 {
                                     id: "AUCTIONEER_4",
                                     label: <>Discard 4 <Card /> to gain <VP>3</VP></>,
-                                    disabledReason: player.cardsInHand.length < 4
-                                        ? "You don't have enough cards."
-                                        : undefined,
+                                    disabledReason: numCardsDisabledReason(state, 4),
                                 },
                             ],
                         });
@@ -699,7 +696,7 @@ export const summerVisitorReducers: Record<
                     ...swindlerAction,
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
                 }, state);
-                const playerName = <strong>{state.currentTurn.playerId}</strong>;
+                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
                 return state.playerId === null || state.playerId === currentTurnPlayerId
                     ? state
                     : promptForAction(state, {

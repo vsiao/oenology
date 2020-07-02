@@ -31,11 +31,16 @@ export const isGameAction = (action: Action): action is GameAction => {
     }
 };
 
+interface PlayerInit {
+    id: string;
+    name: string;
+    color: PlayerColor;
+}
 export interface StartGameAction extends Action<"START_GAME"> {
-    players: [string, PlayerColor][];
+    players: PlayerInit[];
     shuffledCards: CardsByType;
 }
-export const startGame = (players: [string, PlayerColor][]): StartGameAction => {
+export const startGame = (players: PlayerInit[]): StartGameAction => {
     const vineIds = Object.keys(vineCards) as VineId[];
     const summerIds = Object.keys(summerVisitorCards) as SummerVisitorId[];
     const orderIds = Object.keys(orderCards) as OrderId[];

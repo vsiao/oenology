@@ -224,10 +224,10 @@ export const winterVisitorCards = {
         "Professor",
         <>Pay <Coins>2</Coins> to train 1 <Worker /> OR gain <VP>2</VP> if you have a total of 6 <Worker />.</>,
     ),
-    // queen: winterVisitorCard(
-    //     "Queen",
-    //     <>The player on your right must choose 1: lose <VP>1</VP>, give you 2 <Card />, or pay you <Coins>3</Coins>.</>
-    // ),
+    queen: winterVisitorCard(
+        "Queen",
+        <>The player on your right must choose 1: lose <VP>1</VP>, give you 2 <Card />, or pay you <Coins>3</Coins>.</>
+    ),
     scholar: winterVisitorCard(
         "Scholar",
         <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train <Worker />. You may lose <VP>1</VP> to do both.</>

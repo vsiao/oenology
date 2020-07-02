@@ -30,7 +30,7 @@ export interface ChooseActionPromptState {
 
 export interface ChooseCardPromptState {
     type: "chooseCard";
-    title: string;
+    title: React.ReactNode;
     style: "selector" | "oneClick";
     cards: {
         id: CardId;
