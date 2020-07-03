@@ -31,8 +31,9 @@
     background: #ccc;
     border-radius: 0.2em;
     display: inline-block;
-    margin-right: 0.5em;
-    padding: 0.1em 0.4em;
+    font-size: 14px;
+    margin: 0 6px 4px 0;
+    padding: 0 6px;
 }
 .VineCard-yield {
     text-align: center;

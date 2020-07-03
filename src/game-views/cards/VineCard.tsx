@@ -15,7 +15,7 @@ const VineCard: React.FunctionComponent<Props> = props => {
         <div className="VineCard-description">
             <div className="VineCard-structures">
                 {structures.map(s =>
-                    <div key={s} className="VineCard-structure">{truncateStructure(s)}</div>)}
+                    <div key={s} className="VineCard-structure">{capitalize(s)}</div>)}
             </div>
             <div className="VineCard-yield">
                 {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
@@ -25,8 +25,8 @@ const VineCard: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-function truncateStructure(s: string) {
-    return s[0].toUpperCase() + s[1];
+function capitalize(s: string) {
+    return s[0].toUpperCase() + s.slice(1);
 }
 
 export default VineCard;
