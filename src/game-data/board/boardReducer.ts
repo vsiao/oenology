@@ -10,6 +10,7 @@ import {
     updatePlayer,
     pushActivityLog,
     markStructureUsed,
+    uprootVineFromField,
 } from "../shared/sharedReducers";
 import {
     promptForAction,
@@ -22,6 +23,7 @@ import {
     promptToMakeWine,
     promptToPlant,
     promptToHarvest,
+    promptToUproot
 } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
@@ -196,6 +198,12 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             }
             return endTurn(state);
 
+        case "uproot":
+            if (action.type !== "CHOOSE_VINE") {
+                return state;
+            }
+            return endTurn(uprootVineFromField(action.vineId, action.fieldId, state));
+
         case "makeWine":
             if (action.type !== "MAKE_WINE") {
                 return state;
@@ -360,7 +368,7 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                 case "yokeHarvest":
                     return promptToHarvest(setPendingAction({ type: "harvestField" }, markStructureUsed("yoke", state)));
                 case "yokeUproot":
-                    return state;
+                    return promptToUproot(setPendingAction({ type: "uproot" }, markStructureUsed("yoke", state)));
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const exhaustivenessCheck: never = action.placement;
