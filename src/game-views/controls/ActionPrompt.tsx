@@ -5,7 +5,7 @@ import { PromptState } from "../../game-data/prompts/PromptState";
 import ChooseActionPrompt from "./ChooseActionPrompt";
 import ChooseFieldPrompt from "./ChooseFieldPrompt";
 import { AppState } from "../../store/AppState";
-import { CSSTransition } from "react-transition-group";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
 import ChooseCardPrompt from "./ChooseCardPrompt";
@@ -18,24 +18,23 @@ interface Props {
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
-    const nodeRef = React.useRef<HTMLDivElement>(null);
-    return <CSSTransition
-        in={props.actionPrompt !== undefined}
-        timeout={200}
-        classNames="ActionPrompt"
-        nodeRef={nodeRef}
-        mountOnEnter
-        unmountOnExit
-    >
-        <div ref={nodeRef} className="ActionPrompt">
-            {props.actionPrompt === undefined
-                ? null
-                : renderPrompt(props.actionPrompt, props)}
-        </div>
-    </CSSTransition>;
+    return <TransitionGroup className="ActionPrompt">
+        {props.actionPrompt === undefined
+            ? null
+            : <CSSTransition
+                key={props.actionPrompt.type}
+                timeout={300}
+                classNames="PromptStructure"
+            >
+                {renderPrompt(props.actionPrompt, props)}
+            </CSSTransition>}
+    </TransitionGroup>;
 };
 
-const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
+const renderPrompt = (
+    prompt: PromptState,
+    props: Props,
+): React.ReactNode => {
     switch (prompt.type) {
         case "buildStructure":
             return <BuildStructurePrompt coupon={prompt.coupon} playerId={props.playerId} />;
@@ -52,8 +51,6 @@ const renderPrompt = (prompt: Exclude<PromptState, null>, props: Props) => {
             return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
         case "placeWorker":
             return <PlaceWorkerPrompt playerId={props.playerId} />;
-        default:
-            return JSON.stringify(prompt);
     }
 };
 

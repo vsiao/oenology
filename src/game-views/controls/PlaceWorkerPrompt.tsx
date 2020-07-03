@@ -6,11 +6,11 @@ import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { WorkerType, Worker, PlayerColor, WorkerPlacementTurn, WorkerPlacement } from "../../game-data/GameState";
-import { AppState } from "../../store/AppState";
+import { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
 import WorkerIcon from "../icons/Worker";
 import { summerActions, winterActions } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
+import { AppState } from "../../store/AppState";
 
 interface Props {
     color: PlayerColor;
@@ -21,18 +21,24 @@ interface Props {
         disabledReason: string | undefined;
         hasSpace: boolean;
     }[];
+    defaultWorkerType: WorkerType;
     onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) => void;
 }
 
-const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
-    const defaultWorkerType = 
-        props.workers.filter(({ type }) => type === "normal").some(w => w.available)
-            ? "normal"
-            : "grande";
+const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
+    color,
+    workers,
+    placements,
+    defaultWorkerType,
+    onPlaceWorker
+}) => {
     const [selectedWorkerType, setWorkerType] = React.useState<WorkerType>(defaultWorkerType);
-    if (props.workers.filter(({ type }) => type === selectedWorkerType).every(w => !w.available)) {
-        setWorkerType(defaultWorkerType);
-    }
+    React.useEffect(() => {
+        if (workers.filter(({ type }) => type === selectedWorkerType).every(w => !w.available)) {
+            setWorkerType(defaultWorkerType);
+        }
+    }, [workers, selectedWorkerType, setWorkerType, defaultWorkerType]);
+
     return <PromptStructure title="Place a worker">
         <div className="PlaceWorkerPrompt-body">
             <div className="PlaceWorkerPrompt-workerTypeSelector">
@@ -45,17 +51,17 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
                                 workerType === selectedWorkerType,
                         })}
                         disabled={
-                            props.workers
+                            workers
                                 .filter(({ type }) => type === workerType)
                                 .every(w => !w.available)
                         }
                         onClick={() => setWorkerType(workerType)}>
-                        {props.workers.filter(({ type }) => type === workerType)
+                        {workers.filter(({ type }) => type === workerType)
                             .map((w, i) =>
                                 <WorkerIcon
                                     key={i}
                                     workerType={w.type}
-                                    color={props.color}
+                                    color={color}
                                     disabled={!w.available}
                                     isTemp={w.isTemp}
                                 />
@@ -64,14 +70,14 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
                 )}
             </div>
             <ul className="PlaceWorkerPrompt-choices">
-                {props.placements.map((placement, i) => {
+                {placements.map((placement, i) => {
                     const requiresGrande = !placement.hasSpace && selectedWorkerType !== "grande";
                     const disabled = !!placement.disabledReason || requiresGrande;
                     return <li className="PlaceWorkerPrompt-choice" key={i}>
                         <ChoiceButton
                             className="PlaceWorkerPrompt-choiceButton"
                             disabled={disabled}
-                            onClick={() => props.onPlaceWorker(placement.type, selectedWorkerType)}
+                            onClick={() => onPlaceWorker(placement.type, selectedWorkerType)}
                         >
                             {placement.label}
                         </ChoiceButton>
@@ -111,6 +117,10 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
                 hasSpace: true,
             },
         ],
+        defaultWorkerType:
+            player.workers.filter(({ type }) => type === "normal").some(w => w.available)
+                ? "normal" as const
+                : "grande" as const,
     };
 };
 

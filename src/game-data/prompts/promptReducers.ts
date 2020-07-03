@@ -112,7 +112,7 @@ export const promptToChooseVineCard = (
     } = {}
 ): GameState => {
     return promptToChooseCard(state, {
-        title: `Choose vine to plant`,
+        title: `Plant a vine`,
         style: "oneClick",
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(({ type }) => type === "vine")
@@ -133,7 +133,7 @@ export const promptToChooseVisitor = (
     optional = false
 ): GameState => {
     return promptToChooseCard(state, {
-        title: `Choose ${optional ? "another" : "a"} visitor`,
+        title: `Play ${optional ? "another" : "a"} visitor`,
         style: "oneClick",
         cards: state.players[state.currentTurn.playerId].cardsInHand
             .filter(card => card.type === "visitor" &&

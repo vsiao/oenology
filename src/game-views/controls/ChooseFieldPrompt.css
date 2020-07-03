@@ -4,24 +4,18 @@
     overflow-y: auto;
     padding: 1em 1.6em;
 }
-.ChooseFieldPrompt-fields::after {
-    content: "";
-    display: inline-block;
-    flex-shrink: 0;
-    width: 1.6em;
-}
 
 .ChooseFieldPrompt-field {
     background: #40a746;
     border-radius: .2em;
     display: flex;
     flex-direction: column;
+    height: 240px;
     margin-right: .4em;
     min-width: 160px;
-    max-width: 240px;
+    width: 240px;
     transition: 100ms transform ease-out;
     transform: translateY(0);
-    width: 30%;
 }
 .ChooseFieldPrompt-field--sold::before {
     background: white;
