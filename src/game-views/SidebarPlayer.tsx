@@ -133,10 +133,14 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 if (structureId === "mediumCellar" || structureId === "largeCellar") {
                     return null;
                 }
+                const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
                 return <li key={structureId} className={cx("SidebarPlayer-structure", {
                     "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
-                    "SidebarPlayer-structure--used": playerStructures[structureId as StructureId] === StructureState.Used
-                })}>{structure.name}</li>;
+                    "SidebarPlayer-structure--used": isUsed
+                })}>
+                    {structure.name}&nbsp;
+                    {structureId === "yoke" && isUsed && <Worker color={player.color} />}
+                </li>;
             })}
         </ul>
     </div>;

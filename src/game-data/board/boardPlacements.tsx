@@ -3,15 +3,15 @@ import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icon
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState, { WorkerPlacement } from "../GameState";
-import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVinesDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
+import { hasGrapes, needGrapesDisabledReason, trainWorkerDisabledReason, harvestFieldDisabledReason, plantVinesDisabledReason, needCardOfTypeDisabledReason, fillOrderDisabledReason, buildStructureDisabledReason, structureUsedDisabledReason, uprootDisabledReason } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import WineGlass from "../../game-views/icons/WineGlass";
 
 export interface BoardAction {
     type: WorkerPlacement,
     title: React.ReactNode,
-    bonus: React.ReactNode; // displayed on game board
-    bonusLabel: React.ReactNode; // displayed in place worker prompt
+    bonus?: React.ReactNode; // displayed on game board
+    bonusLabel?: React.ReactNode; // displayed in place worker prompt
     disabledReason?: (state: GameState) => string | undefined;
 }
 
@@ -45,8 +45,8 @@ export const summerActions: BoardAction[] = [
             return hasGrapes(state) ||
                 Object.values(player.fields)
                     .some(f => (f.sold && player.coins >= f.value) || f.vines.length === 0)
-                    ? undefined
-                    : "You don't have anything to buy or sell.";
+                ? undefined
+                : "You don't have anything to buy or sell.";
         },
     },
     {
@@ -101,7 +101,7 @@ export const winterActions: BoardAction[] = [
         disabledReason: state => {
             const hasBonus = Object.keys(state.players).length > 2;
             const isFirst = state.workerPlacements.trainWorker.length === 0;
-            return trainWorkerDisabledReason(state, hasBonus && isFirst ? 3 : 4)
+            return trainWorkerDisabledReason(state, hasBonus && isFirst ? 3 : 4);
         },
     },
     {
@@ -117,5 +117,18 @@ export const winterActions: BoardAction[] = [
         bonusLabel: <>Fill <Order /> and gain <VP>1</VP> extra</>,
         bonus: <VP>1</VP>,
         disabledReason: fillOrderDisabledReason,
+    }
+];
+
+export const yearRoundActions: BoardAction[] = [
+    {
+        type: "yokeHarvest",
+        title: "Yoke: Harvest one field",
+        disabledReason: state => structureUsedDisabledReason(state, "yoke") || harvestFieldDisabledReason(state),
+    },
+    {
+        type: "yokeUproot",
+        title: "Yoke: Uproot",
+        disabledReason: state => structureUsedDisabledReason(state, "yoke") || uprootDisabledReason(state)
     }
 ];

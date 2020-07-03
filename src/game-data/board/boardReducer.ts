@@ -354,7 +354,9 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     const bonus = hasPlacementBonus && state.workerPlacements.trainWorker.length === 1;
                     return endTurn(trainWorker(payCoins(bonus ? 3 : 4, state)));
                 }
-                case "yoke":
+                case "yokeHarvest":
+                    return promptToHarvest(setPendingAction({ type: "harvestField" }, markStructureUsed("yoke", state)));
+                case "yokeUproot":
                     return state;
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars

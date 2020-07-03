@@ -9,7 +9,7 @@ import ChoiceButton from "./ChoiceButton";
 import { WorkerType, Worker, PlayerColor, WorkerPlacementTurn, WorkerPlacement } from "../../game-data/GameState";
 import { AppState } from "../../store/AppState";
 import WorkerIcon from "../icons/Worker";
-import { summerActions, winterActions } from "../../game-data/board/boardPlacements";
+import { summerActions, winterActions, yearRoundActions } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 
 interface Props {
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const PlaceWorkerPrompt: React.FunctionComponent<Props> = props => {
-    const defaultWorkerType = 
+    const defaultWorkerType =
         props.workers.filter(({ type }) => type === "normal").some(w => w.available)
             ? "normal"
             : "grande";
@@ -87,22 +87,19 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     const numPlayers = Object.keys(game.players).length;
     const numSpots = Math.ceil(numPlayers / 2);
     const player = game.players[ownProps.playerId];
-    const workerPlacements = game.workerPlacements;
-
     return {
         color: player.color,
         workers: player.workers,
         placements: [
             ...((game.currentTurn as WorkerPlacementTurn).season === "summer"
-                ? summerActions
-                : winterActions)
-                .map(action => ({
+                ? summerActions : winterActions).concat(yearRoundActions).map(action => ({
                     type: action.type,
                     label: numPlayers > 2 && game.workerPlacements[action.type].length === 0
                         ? action.bonusLabel
                         : action.title,
                     disabledReason: action.disabledReason && action.disabledReason(game),
-                    hasSpace: workerPlacements[action.type].length < numSpots
+                    hasSpace: action.type === "yokeHarvest" || action.type === "yokeUproot" ||
+                        game.workerPlacements[action.type].length < numSpots
                 })),
             {
                 type: null,
