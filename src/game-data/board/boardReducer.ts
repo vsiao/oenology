@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn } from "../GameState";
+import GameState, { WorkerPlacementTurn, StructureState } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -9,6 +9,7 @@ import {
     plantVineInField,
     updatePlayer,
     pushActivityLog,
+    markStructureUsed,
 } from "../shared/sharedReducers";
 import {
     promptForAction,
@@ -178,7 +179,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            state = harvestField(state, action.fieldId)
+            state = harvestField(state, action.fieldId);
 
             const bonus = hasPlacementBonus &&
                 !pendingAction.bonusActivated &&
@@ -318,6 +319,11 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     return endTurn(gainCoins(1, state));
                 case "giveTour": {
                     const bonus = hasPlacementBonus && state.workerPlacements.giveTour.length === 1;
+                    const tastingAvailable = player.structures["tastingRoom"] === StructureState.Built;
+                    const hasWine = Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
+                    if (tastingAvailable && hasWine) {
+                        return endTurn(markStructureUsed("tastingRoom", gainVP(1, gainCoins(bonus ? 3 : 2, state))));
+                    }
                     return endTurn(gainCoins(bonus ? 3 : 2, state));
                 }
                 case "harvestField":

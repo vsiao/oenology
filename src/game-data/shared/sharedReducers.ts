@@ -26,14 +26,11 @@ export const plantVineInField = (fieldId: FieldId, state: GameState): GameState 
         { type: "plant", playerId: player.id, vineId },
         addToDiscard(
             [{ type: "vine", id: vineId }],
-            updatePlayer(windmillAvailable ? gainVP(1, state) : state, player.id, {
+            updatePlayer(windmillAvailable ? markStructureUsed("windmill", gainVP(1, state)) : state,
+                player.id, {
                 fields: {
                     ...player.fields,
                     [field.id]: { ...field, vines },
-                },
-                structures: {
-                    ...player.structures,
-                    windmill: windmillAvailable ? StructureState.Used : player.structures["windmill"]
                 }
             })
         )
@@ -103,6 +100,17 @@ export const trainWorker = (state: GameState, playerId = state.currentTurn.playe
             ],
         })
     );
+};
+
+export const markStructureUsed = (structureId: StructureId, state: GameState, playerId = state.currentTurn.playerId): GameState => {
+    const player = state.players[playerId];
+
+    return updatePlayer(state, playerId, {
+        structures: {
+            ...player.structures,
+            [structureId]: StructureState.Used,
+        },
+    });
 };
 
 export const updatePlayer = (state: GameState, playerId: string, updates: Partial<PlayerState>): GameState => {
