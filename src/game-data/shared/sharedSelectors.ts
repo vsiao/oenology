@@ -1,4 +1,4 @@
-import GameState, { Field, CardType, WineColor } from "../GameState";
+import GameState, { Field, CardType, WineColor, StructureState } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
@@ -34,6 +34,20 @@ export const structureDisabledReason = (
             return baseCost > coupon.upToCost
                 ? `Can only build structures up to ${coupon.upToCost}`
                 : undefined;
+    }
+};
+
+export const structureUsedDisabledReason = (
+    state: GameState,
+    id: StructureId,
+    playerId = state.currentTurn.playerId
+): string | undefined => {
+    const player = state.players[playerId];
+    switch (player.structures[id]) {
+        case StructureState.Used:
+            return "You’ve already used this structure this year";
+        case StructureState.Unbuilt:
+            return "You haven’t built this structure yet";
     }
 };
 
@@ -234,6 +248,17 @@ export const harvestFieldDisabledReason = (state: GameState): string | undefined
             .every(field => field.sold || field.vines.length === 0 || field.harvested)
     ) {
         return "You don't have any fields to harvest.";
+    };
+    return undefined;
+};
+
+export const uprootDisabledReason = (state: GameState): string | undefined => {
+    const playerState = state.players[state.currentTurn.playerId];
+    if (
+        Object.values(playerState.fields)
+            .every(field => field.sold || field.vines.length === 0)
+    ) {
+        return "You don't have any vines to uproot.";
     };
     return undefined;
 };
