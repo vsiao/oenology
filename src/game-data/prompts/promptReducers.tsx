@@ -1,3 +1,4 @@
+import * as React from "react";
 import GameState, { CardId, WorkerPlacementTurn, Field } from "../GameState";
 import { GameAction } from "../gameActions";
 import { Choice, PromptState } from "./PromptState";
@@ -23,7 +24,7 @@ const enqueueActionPrompt = (state: GameState, prompt: PromptState): GameState =
     return { ...state, actionPrompts: [...state.actionPrompts, prompt] };
 };
 
-export const promptForAction = <DataT = undefined>(
+export const promptForAction = <DataT extends unknown = undefined>(
     state: GameState,
     {
         title = "Choose an action",
@@ -48,7 +49,14 @@ export const promptForAction = <DataT = undefined>(
     return enqueueActionPrompt(state, {
         type: "chooseAction",
         title,
-        description,
+        description: contextVisitor
+            ? <p>
+                {state.currentTurn.playerId === state.playerId
+                    ? "You"
+                    : <strong>{state.players[state.currentTurn.playerId].name}</strong>
+                } played the <strong>{visitorCards[contextVisitor].name}</strong>.
+            </p>
+            : description,
         playerId,
         contextVisitor,
         choices,

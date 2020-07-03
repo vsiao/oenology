@@ -1,4 +1,18 @@
+.MakeWinePrompt {
+    min-width: 360px;
+}
+
+.MakeWinePrompt-hints {
+    margin: .5em 1.6em;
+}
+
+.MakeWinePrompt-formula {
+    font-size: .8em;
+}
+
 .MakeWinePrompt-grapeSelector {
+    border-bottom: 1px solid #ccc;
+    border-top: 1px solid #ccc;
     font-style: italic;
     padding: 1em 1.6em;
 }
@@ -8,9 +22,11 @@
     display: inline-flex;
 }
 
+.MakeWinePrompt-grape + .MakeWinePrompt-grape {
+    margin-left: .5em;
+}
 .MakeWinePrompt-grapeButton {
     background: none;
-    margin-right: 8px;
     outline: none;
 }
 .MakeWinePrompt-grapeButton:enabled {
@@ -31,24 +47,24 @@
 }
 
 .MakeWinePrompt-addToCart {
-    margin-left: 12px;
+    margin-left: 1em;
 }
 
 .MakeWinePrompt-cart {
     align-items: center;
-    background: #eee;
-    border-radius: 4px;
     display: inline-flex;
     font-style: italic;
-    margin: 1em 1.6em;
-    padding: 8px 8px 8px 12px;
+    padding: 1em 1.6em;
 }
 
+.MakeWinePrompt-wine + .MakeWinePrompt-wine {
+    margin-left: .5em;
+}
 .MakeWinePrompt-removeWineButton {
+    background: none;
     border: 0;
     cursor: pointer;
     font-size: 1em;
-    margin: 0 4px;
     padding: 0;
     position: relative;
 }
