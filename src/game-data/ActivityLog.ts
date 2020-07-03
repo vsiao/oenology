@@ -19,6 +19,7 @@ export type ActivityLogEvent =
     | ResidualsEvent
     | SeasonEvent
     | TrainWorkerEvent
+    | UprootEvent
     | VisitorEvent
     | VPChangeEvent;
 
@@ -63,6 +64,9 @@ interface SeasonEvent {
     season: string;
 }
 interface TrainWorkerEvent extends LogEvent<"trainWorker"> { }
+interface UprootEvent extends LogEvent<"uproot"> {
+    vineId: VineId;
+}
 interface VPChangeEvent extends LogEvent<"vp"> {
     delta: number;
 }

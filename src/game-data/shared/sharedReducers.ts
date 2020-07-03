@@ -7,7 +7,7 @@ import GameState, {
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
 import { VineId } from "../vineCards";
-import { addToDiscard } from "./cardReducers";
+import { addToDiscard, addCardsToHand } from "./cardReducers";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -28,6 +28,30 @@ export const plantVineInField = (fieldId: FieldId, state: GameState): GameState 
             [{ type: "vine", id: vineId }],
             updatePlayer(windmillAvailable ? markStructureUsed("windmill", gainVP(1, state)) : state,
                 player.id, {
+                fields: {
+                    ...player.fields,
+                    [field.id]: { ...field, vines },
+                }
+            })
+        )
+    );
+};
+
+export const uprootVineFromField = (vineId: VineId, fieldId: FieldId, state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const field = player.fields[fieldId];
+    const vines = [...field.vines];
+    const vineIndex = vines.indexOf(vineId);
+    if (vineIndex === -1) {
+        throw new Error("Unxpected state: vine not found in field");
+    }
+    vines.splice(vineIndex, 1);
+
+    return pushActivityLog(
+        { type: "uproot", playerId: player.id, vineId },
+        addCardsToHand(
+            [{ type: "vine", id: vineId }],
+            updatePlayer(state, player.id, {
                 fields: {
                     ...player.fields,
                     [field.id]: { ...field, vines },

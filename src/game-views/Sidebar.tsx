@@ -90,8 +90,9 @@ const renderActivity = (
         case "pass":
             return <>{player} passed</>;
         case "plant":
+        case "uproot":
             const { name, yields } = vineCards[event.vineId];
-            return <>{player} planted some <strong>{name}</strong> {renderYields(yields)}</>;
+            return <>{player} {event.type === "plant" ? "planted" : "uprooted"} some <strong>{name}</strong> {renderYields(yields)}</>;
         case "residuals":
             return <>{player} {event.delta < 0 ? "lost" : "gained"} <Residuals>{Math.abs(event.delta)}</Residuals></>;
         case "trainWorker":
@@ -103,14 +104,14 @@ const renderActivity = (
         default:
             return JSON.stringify(event);
     }
-}
+};
 
 const renderYields = ({ red, white }: VineYields): React.ReactNode => {
     return <>
         {red ? <Grape color="red">{red}</Grape> : null}
         {white ? <Grape color="white">{white}</Grape> : null}
     </>;
-}
+};
 
 const mapStateToProps = (state: AppState): {
     players: Record<string, PlayerState>;
