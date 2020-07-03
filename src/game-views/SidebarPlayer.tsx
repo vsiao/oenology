@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -134,7 +134,8 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     return null;
                 }
                 return <li key={structureId} className={cx("SidebarPlayer-structure", {
-                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId]
+                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
+                    "SidebarPlayer-structure--used": playerStructures[structureId as StructureId] === StructureState.Used
                 })}>{structure.name}</li>;
             })}
         </ul>

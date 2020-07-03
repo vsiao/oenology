@@ -35,7 +35,7 @@ export const structureDisabledReason = (
                 ? `Can only build structures up to ${coupon.upToCost}`
                 : undefined;
     }
-}
+};
 
 export const fieldYields = (field: Field): { red: number; white: number; } => {
     return {
@@ -86,7 +86,7 @@ export const plantVineDisabledReason = (
     const player = state.players[state.currentTurn.playerId];
     const fields = Object.values(player.fields);
 
-    if (!bypassStructures && !vineCards[vineId].structures.every(s => player.structures[s])) {
+    if (!bypassStructures && !vineCards[vineId].structures.every(s => !!player.structures[s])) {
         return "You haven't built the required structures.";
     }
     const hasOpenField = fields.some(
@@ -128,7 +128,7 @@ export const allWines = (state: GameState, playerId = state.currentTurn.playerId
             if (hasToken) {
                 cellarWines.push({ color: color as WineColor, value: i + 1 });
             }
-        })
+        });
     });
     return cellarWines;
 };
@@ -143,7 +143,7 @@ export const needWineDisabledReason = (
         return "You don't have any wine.";
     }
     if (wines.every(w => w.value < minValue)) {
-        return `You don't have any wines of value ${minValue} or more.`
+        return `You don't have any wines of value ${minValue} or more.`;
     }
     return undefined;
 };

@@ -1,4 +1,4 @@
-import GameState, { PlayerColor, PlayerState, CardsByType } from "./GameState";
+import GameState, { PlayerColor, PlayerState, CardsByType, StructureState } from "./GameState";
 import { GameAction, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
@@ -93,14 +93,14 @@ const initPlayer = (id: string, name: string, color: PlayerColor): PlayerState =
             sparkling: [false, false, false, false, false, false, false, false, false],
         },
         structures: {
-            trellis: false,
-            irrigation: false,
-            yoke: false,
-            windmill: false,
-            cottage: false,
-            tastingRoom: false,
-            mediumCellar: false,
-            largeCellar: false
+            trellis: StructureState.Unbuilt,
+            irrigation: StructureState.Unbuilt,
+            yoke: StructureState.Unbuilt,
+            windmill: StructureState.Unbuilt,
+            cottage: StructureState.Unbuilt,
+            tastingRoom: StructureState.Unbuilt,
+            mediumCellar: StructureState.Unbuilt,
+            largeCellar: StructureState.Unbuilt
         }
     };
 };

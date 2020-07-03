@@ -158,3 +158,6 @@
     color: #222;
     font-weight: 600;
 }
+.SidebarPlayer-structure--used {
+    text-decoration: line-through;
+}
