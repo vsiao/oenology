@@ -319,12 +319,9 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     return endTurn(gainCoins(1, state));
                 case "giveTour": {
                     const bonus = hasPlacementBonus && state.workerPlacements.giveTour.length === 1;
-                    const tastingAvailable = player.structures["tastingRoom"] === StructureState.Built;
-                    const hasWine = Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
-                    if (tastingAvailable && hasWine) {
-                        return endTurn(markStructureUsed("tastingRoom", gainVP(1, gainCoins(bonus ? 3 : 2, state))));
-                    }
-                    return endTurn(gainCoins(bonus ? 3 : 2, state));
+                    const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
+                        Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
+                    return endTurn(gainCoins(bonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
                 }
                 case "harvestField":
                     return promptToHarvest(setPendingAction({ type: "harvestField" }, state));
