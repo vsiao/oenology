@@ -4,6 +4,7 @@ import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { ActivityLog } from "./ActivityLog";
+import { MamaId, PapaId } from "./mamasAndPapas";
 
 export default interface GameState {
     // shared state
@@ -36,7 +37,7 @@ export interface WakeUpPosition {
 }
 
 export type CurrentTurn =
-    | { type: "papaSetUp"; playerId: string; }
+    | { type: "mamaPapa"; playerId: string; }
     | { type: "wakeUpOrder"; playerId: string; }
     | WorkerPlacementTurn
     | { type: "fallVisitor"; playerId: string; }
@@ -110,6 +111,8 @@ export interface PlayerState {
     crushPad: Record<GrapeColor, TokenMap>;
     cellar: Record<WineColor, TokenMap>;
     structures: Record<StructureId, StructureState>;
+    mama: MamaId;
+    papa: PapaId;
 }
 
 export type WorkerType = "grande" | "normal";

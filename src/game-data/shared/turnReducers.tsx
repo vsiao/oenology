@@ -1,19 +1,21 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction, StructureState, PlayerState } from "../GameState";
+import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction, StructureState, PlayerState, CardType } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
-import { pushActivityLog, updatePlayer, gainVP, gainCoins } from "./sharedReducers";
+import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
-import { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
+import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason } from "./sharedSelectors";
+import { papaCards, mamaCards } from "../mamasAndPapas";
+import { StructureId, structures } from "../structures";
 
 export const endTurn = (state: GameState): GameState => {
     switch (state.currentTurn.type) {
-        case "papaSetUp":
-            return state;
+        case "mamaPapa":
+            return endMamaPapaTurn(state);
 
         case "wakeUpOrder":
             return endWakeUpTurn(state);
@@ -30,8 +32,92 @@ export const endTurn = (state: GameState): GameState => {
 };
 
 //
+// Set-up turns
+// ----------------------------------------------------------------------------
+
+export const startMamaPapaTurn = (playerId: string, state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const mama = mamaCards[player.mama];
+    const papa = papaCards[player.papa];
+
+    return promptForAction({ ...state, currentTurn: { type: "mamaPapa", playerId }, }, {
+        title: "Choose your inheritance",
+        description: <>
+            <p>
+                Mama <strong>{mama.name}</strong>:
+                    Draw {Object.entries(mama.cards).map(([type, num]) =>
+                        new Array<CardType>(num || 0).fill(type as CardType).map((t, i) =>
+                            <Card key={i} type={t} />
+                        ))}
+                    {mama.coins ? <>and gain <Coins>{mama.coins}</Coins>.</> : null}
+            </p>
+            <p>
+                Papa <strong>{papa.name}</strong>:
+                    Gain <Coins>{papa.coins}</Coins> and choose 1:
+            </p>
+        </>,
+        choices: [
+            { id: "PAPA_A", label: renderPapaChoice(papa.choiceA), },
+            { id: "PAPA_B", label: <>Gain <Coins>{papa.choiceB}</Coins></>, },
+        ],
+    });
+};
+
+export const chooseMamaPapa = (choice: string, state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const mama = mamaCards[player.mama];
+    const papa = papaCards[player.papa];
+
+    state = drawCards(gainCoins(mama.coins, state), mama.cards);
+    switch (choice) {
+        case "PAPA_A":
+            state = gainCoins(papa.coins, state);
+            switch (papa.choiceA) {
+                case "victoryPoint":
+                    return gainVP(1, state);
+                case "worker":
+                    return trainWorker(state);
+                default:
+                    return buildStructure(state, papa.choiceA);
+            }
+        case "PAPA_B":
+            return gainCoins(papa.coins + papa.choiceB, state);
+        default:
+            return state;
+    }
+};
+
+const renderPapaChoice = (choice: StructureId | "victoryPoint" | "worker"): React.ReactNode => {
+    switch (choice) {
+        case "victoryPoint":
+            return <>Gain <VictoryPoints>1</VictoryPoints></>;
+        case "worker":
+            return <>Train 1 <Worker /></>;
+        default:
+            return <>Build <strong>{structures[choice].name}</strong></>;
+    }
+}
+
+export const endMamaPapaTurn = (state: GameState): GameState => {
+    const { tableOrder } = state;
+    const nextIndex = (tableOrder.indexOf(state.currentTurn.playerId) + 1) % tableOrder.length;
+
+    if (nextIndex === 0) {
+        return startWakeUpTurn(state.tableOrder[0], state);
+    }
+    return startMamaPapaTurn(tableOrder[nextIndex], state);
+};
+
+//
 // Wake-up turns
 // ----------------------------------------------------------------------------
+
+export const startWakeUpTurn = (playerId: string, state: GameState): GameState => {
+    return promptForWakeUpOrder({
+        ...state,
+        currentTurn: { type: "wakeUpOrder", playerId, },
+    });
+};
 
 export const chooseWakeUp = ({ idx, visitor }: WakeUpChoiceData, state: GameState): GameState => {
     const playerId = state.currentTurn.playerId;
@@ -82,13 +168,7 @@ export const endWakeUpTurn = (state: GameState): GameState => {
             pushActivityLog({ type: "season", season: "Summer" }, state)
         );
     }
-    return promptForWakeUpOrder({
-        ...state,
-        currentTurn: {
-            type: "wakeUpOrder",
-            playerId: tableOrder[nextWakeUpIndex],
-        },
-    });
+    return startWakeUpTurn(tableOrder[nextWakeUpIndex], state);
 };
 
 export interface WakeUpChoiceData {
@@ -278,6 +358,7 @@ const startFallVisitorTurn = (playerId: string, state: GameState): GameState => 
         ...state,
         currentTurn: { type: "fallVisitor", playerId, },
     }, {
+        description: <p><em>Fall season: Draw 1 Visitor card (2 with Cottage).</em></p>,
         choices: canDrawTwo
             ? [
                 { id: "FALL_DRAW_SUMMER_2", label: <>Draw 2 <SummerVisitor /></>, },

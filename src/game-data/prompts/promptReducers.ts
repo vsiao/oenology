@@ -27,10 +27,12 @@ export const promptForAction = <DataT = undefined>(
     state: GameState,
     {
         title = "Choose an action",
+        description = null,
         playerId = state.currentTurn.playerId,
         choices,
     }: {
         title?: string;
+        description?: React.ReactNode;
         playerId?: string;
         choices: Choice<DataT>[];
     }
@@ -43,7 +45,14 @@ export const promptForAction = <DataT = undefined>(
         state.currentTurn.pendingAction.type === "playVisitor"
         ? state.currentTurn.pendingAction.visitorId
         : undefined;
-    return enqueueActionPrompt(state, { type: "chooseAction", title, playerId, contextVisitor, choices, });
+    return enqueueActionPrompt(state, {
+        type: "chooseAction",
+        title,
+        description,
+        playerId,
+        contextVisitor,
+        choices,
+    });
 };
 
 export const promptToChooseCard = (

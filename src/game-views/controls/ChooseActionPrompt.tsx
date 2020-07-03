@@ -18,6 +18,11 @@ interface Props {
 const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
     const { prompt } = props;
     return <PromptStructure title={prompt.title}>
+        {prompt.description
+            ? <div className="ChooseActionPrompt-description">
+                {prompt.description}
+            </div>
+            :  null}
         <div className="ChooseActionPrompt-body">
             {prompt.contextVisitor
                 ? <VisitorCard

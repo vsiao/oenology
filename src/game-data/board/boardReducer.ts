@@ -24,14 +24,17 @@ import {
 } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
-import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData } from "../shared/turnReducers";
+import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData, chooseMamaPapa } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
-        case "papaSetUp":
+        case "mamaPapa":
+            if (action.type === "CHOOSE_ACTION") {
+                return endTurn(chooseMamaPapa(action.choice, state));
+            }
             return state;
 
         case "wakeUpOrder": {

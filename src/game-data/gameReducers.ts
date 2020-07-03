@@ -1,14 +1,15 @@
-import GameState, { PlayerColor, PlayerState, CardsByType, StructureState } from "./GameState";
-import { GameAction, StartGameAction } from "./gameActions";
+import GameState, { PlayerState, CardsByType, StructureState } from "./GameState";
+import { GameAction, PlayerInit } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard } from "./shared/cardReducers";
-import { promptForWakeUpOrder } from "./shared/turnReducers";
+import { startMamaPapaTurn } from "./shared/turnReducers";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     switch (action.type) {
         case "START_GAME":
-            return promptForWakeUpOrder(
+            return startMamaPapaTurn(
+                action.players[0].id,
                 initGame(userId, action.players, action.shuffledCards)
             );
         case "CHEAT_DRAW_CARD":
@@ -19,13 +20,13 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
 
 const initGame = (
     userId: string,
-    players: StartGameAction["players"],
+    players: PlayerInit[],
     shuffledCards: CardsByType
 ): GameState => {
     return {
         currentTurn: {
-            type: "wakeUpOrder",
-            playerId: players.length === 0 ? "" : players[0].id,
+            type: "mamaPapa",
+            playerId: players[0].id,
         },
         drawPiles: shuffledCards,
         discardPiles: {
@@ -35,7 +36,7 @@ const initGame = (
             winterVisitor: [],
         },
         players: Object.fromEntries(
-            players.map(({ id, name, color }) => [id, initPlayer(id, name, color)])
+            players.map(player => [player.id, initPlayer(player)])
         ),
         tableOrder: players.map(({ id }) => id),
         grapeIndex: 0,
@@ -62,7 +63,7 @@ const initGame = (
     };
 };
 
-const initPlayer = (id: string, name: string, color: PlayerColor): PlayerState => {
+const initPlayer = ({ id, name, color, mama, papa }: PlayerInit): PlayerState => {
     return {
         id,
         name,
@@ -101,6 +102,8 @@ const initPlayer = (id: string, name: string, color: PlayerColor): PlayerState =
             tastingRoom: StructureState.Unbuilt,
             mediumCellar: StructureState.Unbuilt,
             largeCellar: StructureState.Unbuilt
-        }
+        },
+        mama,
+        papa,
     };
 };

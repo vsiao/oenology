@@ -110,7 +110,7 @@ const mapStateToProps = (state: AppState) => {
 
 const seasonFromCurrentTurn = (currentTurn: CurrentTurn): Season => {
     switch (currentTurn.type) {
-        case "papaSetUp":
+        case "mamaPapa":
         case "wakeUpOrder":
             return "spring";
         case "workerPlacement":

@@ -9,6 +9,7 @@ import {
 import { orderCards, OrderId } from "./orderCards";
 import { VineId, vineCards } from "./vineCards";
 import { CardsByType, PlayerColor } from "./GameState";
+import { MamaId, PapaId, mamaCards, papaCards } from "./mamasAndPapas";
 
 export type GameAction = (
     | StartGameAction
@@ -31,29 +32,35 @@ export const isGameAction = (action: Action): action is GameAction => {
     }
 };
 
-interface PlayerInit {
+export interface PlayerInit {
     id: string;
     name: string;
     color: PlayerColor;
+    mama: MamaId;
+    papa: PapaId;
 }
 export interface StartGameAction extends Action<"START_GAME"> {
     players: PlayerInit[];
     shuffledCards: CardsByType;
 }
-export const startGame = (players: PlayerInit[]): StartGameAction => {
+export const startGame = (players: Omit<PlayerInit, "mama" | "papa">[]): StartGameAction => {
     const vineIds = Object.keys(vineCards) as VineId[];
     const summerIds = Object.keys(summerVisitorCards) as SummerVisitorId[];
     const orderIds = Object.keys(orderCards) as OrderId[];
     const winterIds = Object.keys(winterVisitorCards) as WinterVisitorId[];
+    const mamaIds = Object.keys(mamaCards) as MamaId[];
+    const papaIds = Object.keys(papaCards) as PapaId[];
 
     inPlaceShuffle(vineIds);
     inPlaceShuffle(summerIds);
     inPlaceShuffle(orderIds);
     inPlaceShuffle(winterIds);
+    inPlaceShuffle(mamaIds);
+    inPlaceShuffle(papaIds);
 
     return {
         type: "START_GAME",
-        players,
+        players: players.map((p, i) => ({ ...p, mama: mamaIds[i], papa: papaIds[i] })),
         shuffledCards: {
             vine: vineIds,
             summerVisitor: summerIds,

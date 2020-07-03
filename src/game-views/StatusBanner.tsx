@@ -21,6 +21,8 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
 const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
     const playerName = <strong>{playerNames[currentTurn.playerId]}</strong>;
     switch (currentTurn.type) {
+        case "mamaPapa":
+            return <span>{playerName} is choosing their mama and papa.</span>;
         case "wakeUpOrder":
             return <span>{playerName} is picking their wake-up position.</span>;
         case "fallVisitor":
@@ -39,8 +41,6 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
             </span>;
         case "endOfYearDiscard":
             return <span>{playerName} is discarding cards.</span>;
-        default:
-            return JSON.stringify(currentTurn);
     }
 };
 

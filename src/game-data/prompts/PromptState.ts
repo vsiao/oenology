@@ -23,6 +23,7 @@ export interface Choice<DataT = unknown> {
 export interface ChooseActionPromptState {
     type: "chooseAction";
     title: string;
+    description: React.ReactNode;
     playerId: string;
     contextVisitor?: VisitorId;
     choices: Choice[];
