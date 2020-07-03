@@ -195,7 +195,7 @@ export const promptForWakeUpOrder = (state: GameState) => {
                 label: <>5: Draw <WinterVisitor /></>,
             },
             { id: "WAKE_UP", data: { idx: 5 }, label: <>6: Gain <VictoryPoints>1</VictoryPoints></>, },
-            { id: "WAKE_UP", data: { idx: 6 }, label: <>7: <Worker /> this year</>, },
+            { id: "WAKE_UP", data: { idx: 6 }, label: <>7: <Worker isTemp /> for this year</>, },
         ].map(choice =>
             state.wakeUpOrder[choice.data.idx]
                 ? { ...choice, disabledReason: `Taken by ${state.wakeUpOrder[choice.data.idx]!.playerId}` }

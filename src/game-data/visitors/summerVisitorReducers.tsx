@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -282,36 +282,70 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    contractor: (state, action) => {
+    contractor: (state, action, pendingAction) => {
+        type ChoiceId = "CONTRACTOR_GAIN" | "CONTRACTOR_BUILD" | "CONTRACTOR_PLANT";
+        interface ContractorAction extends PlayVisitorPendingAction {
+            usedChoices: { [K in ChoiceId]?: true };
+        }
+        const promptContractorAction = (state2: GameState, contractorAction: ContractorAction): GameState => {
+            return promptForAction(
+                state2,
+                {
+                    choices: [
+                        { id: "CONTRACTOR_GAIN", label: <>Gain <VP>1</VP></>, },
+                        {
+                            id: "CONTRACTOR_BUILD",
+                            label: <>Build 1 structure</>,
+                            disabledReason: buildStructureDisabledReason(state2),
+                        },
+                        {
+                            id: "CONTRACTOR_PLANT",
+                            label: <>Plant 1 <Vine /></>,
+                            disabledReason: plantVinesDisabledReason(state2),
+                        },
+                    ].filter(choice => !contractorAction.usedChoices[choice.id as ChoiceId]),
+                }
+            );
+        };
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const contractorAction =
+                (state2.currentTurn as WorkerPlacementTurn).pendingAction as ContractorAction;
+
+            return Object.keys(contractorAction.usedChoices).length === 2
+                ? endVisitor(state2)
+                : promptContractorAction(state2, contractorAction);
+        };
+
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        return promptForAction(state, {
-                            choices: [
-                                { id: "CONTRACTOR_GAIN", label: <>Gain <VP>1</VP></>, },
-                                {
-                                    id: "CONTRACTOR_BUILD",
-                                    label: <>Build 1 structure</>,
-                                    disabledReason: buildStructureDisabledReason(state),
-                                },
-                                {
-                                    id: "CONTRACTOR_PLANT",
-                                    label: <>Plant 1 <Vine /></>,
-                                    disabledReason: plantVinesDisabledReason(state),
-                                },
-                            ],
-                        });
+                        const contractorAction: ContractorAction = {
+                            ...pendingAction,
+                            usedChoices: {},
+                        };
+                        return promptContractorAction(
+                            setPendingAction(contractorAction, state),
+                            contractorAction
+                        );
                     case "vine":
                         return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_ACTION":
+                const contractorAction = pendingAction as ContractorAction;
+                state = setPendingAction({
+                    ...contractorAction,
+                    usedChoices: {
+                        ...contractorAction.usedChoices,
+                        [action.choice]: true
+                    },
+                }, state);
                 switch (action.choice) {
                     case "CONTRACTOR_GAIN":
-                        return endVisitor(gainVP(1, state));
+                        return maybeEndVisitor(gainVP(1, state));
                     case "CONTRACTOR_BUILD":
                         return promptToBuildStructure(state);
                     case "CONTRACTOR_PLANT":
@@ -320,9 +354,12 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "BUILD_STRUCTURE":
-                return endVisitor(buildStructure(state, action.structureId));
+                const structure = structures[action.structureId];
+                return maybeEndVisitor(
+                    buildStructure(payCoins(structure.cost, state), action.structureId)
+                );
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(action.fieldId, state));
+                return maybeEndVisitor(plantVineInField(action.fieldId, state));
             default:
                 return state;
         }

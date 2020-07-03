@@ -31,6 +31,12 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     const wine = wineFromGrapes(selectedGrapes, localCellar, props.cellarLimit);
 
     return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.upToN} wine`}>
+        <div className="MakeWinePrompt-hints">
+            <p className="MakeWinePrompt-formula"><Grape color="red" /> = <WineGlass color="red" /></p>
+            <p className="MakeWinePrompt-formula"><Grape color="white" /> = <WineGlass color="white" /></p>
+            <p className="MakeWinePrompt-formula"><Grape color="red" /><span> + </span><Grape color="white" /> = <WineGlass color="blush" /></p>
+            <p className="MakeWinePrompt-formula"><Grape color="red" /><span> + </span><Grape color="red" /><span> + </span><Grape color="white" /> = <WineGlass color="sparkling" /></p>
+        </div>
         <div className="MakeWinePrompt-grapeSelector">
             {
                 availableGrapes.length === 0
@@ -38,7 +44,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                     : <ul className="MakeWinePrompt-grapes">
                         {availableGrapes.map(grape => {
                             const isSelected = selectedGrapes.some(g => g === grape);
-                            return <li key={`${grape.color}${grape.value}`}>
+                            return <li key={`${grape.color}${grape.value}`} className="MakeWinePrompt-grape">
                                 <button
                                     className={cx("MakeWinePrompt-grapeButton", {
                                         "MakeWinePrompt-grapeButton--selected": isSelected
@@ -86,7 +92,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                 ? "Cart is empty"
                 : <ul className="MakeWinePrompt-wineList">
                     {cart.map(w => {
-                        return <li key={`${w.type}${w.cellarValue}`}>
+                        return <li key={`${w.type}${w.cellarValue}`} className="MakeWinePrompt-wine">
                             <button
                                 className="MakeWinePrompt-removeWineButton"
                                 onClick={() => {
