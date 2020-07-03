@@ -2,6 +2,7 @@ import GameState, {
     FieldId,
     PlayerState,
     WorkerPlacementTurn,
+    StructureState,
 } from "../GameState";
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
@@ -19,16 +20,21 @@ export const plantVineInField = (fieldId: FieldId, state: GameState): GameState 
     }
     const player = state.players[state.currentTurn.playerId];
     const field = player.fields[fieldId];
+    const windmillAvailable = player.structures["windmill"] === StructureState.Built;
     const vines: VineId[] = [...field.vines, vineId];
     return pushActivityLog(
         { type: "plant", playerId: player.id, vineId },
         addToDiscard(
             [{ type: "vine", id: vineId }],
-            updatePlayer(state, player.id, {
+            updatePlayer(windmillAvailable ? gainVP(1, state) : state, player.id, {
                 fields: {
                     ...player.fields,
                     [field.id]: { ...field, vines },
                 },
+                structures: {
+                    ...player.structures,
+                    windmill: windmillAvailable ? StructureState.Used : player.structures["windmill"]
+                }
             })
         )
     );
@@ -41,7 +47,7 @@ export const buildStructure = (state: GameState, structureId: StructureId): Game
         updatePlayer(state, player.id, {
             structures: {
                 ...player.structures,
-                [structureId]: true,
+                [structureId]: StructureState.Built,
             },
         })
     );

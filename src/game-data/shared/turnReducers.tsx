@@ -1,5 +1,5 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction } from "../GameState";
+import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction, StructureState, PlayerState } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { pushActivityLog, updatePlayer, gainVP, gainCoins } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard } from "../prompts/promptReducers";
@@ -223,6 +223,11 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                                     field6: { ...playerState.fields.field6, harvested: false },
                                     field7: { ...playerState.fields.field7, harvested: false },
                                 },
+                                structures: Object.fromEntries(
+                                    Object.entries(playerState.structures).map(([structure, structureState]) => (
+                                        [structure, structureState === StructureState.Unbuilt ? structureState : StructureState.Built]
+                                    ))
+                                ) as PlayerState["structures"]
                             },
                         ];
                     })
@@ -323,7 +328,7 @@ const startEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
         title: "Discard down to 7 cards",
         cards: cards.map(id => ({ id })),
         numCards: cards.length - END_OF_YEAR_HAND_LIMIT,
-    })
+    });
 };
 
 const endEOYDiscardTurn = (state: GameState): GameState => {
@@ -349,5 +354,5 @@ const endEOYDiscardTurn = (state: GameState): GameState => {
             compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
         return startEOYDiscardTurn(nextPlayerId, state);
     }
-}
+};
 
