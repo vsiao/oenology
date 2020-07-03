@@ -55,6 +55,7 @@ export interface FillOrderPromptState {
 export interface ChooseFieldPromptState {
     type: "chooseField";
     disabledReasons: Record<FieldId, string | undefined>;
+    chooseVine?: boolean;
 }
 
 export interface MakeWinePromptState {

@@ -3,12 +3,14 @@ import { FieldId, GrapeColor, WineColor, CardId, WorkerPlacement, WorkerType } f
 import { StructureId } from "../structures";
 import { WineSpec } from "../orderCards";
 import { Choice } from "./PromptState";
+import { VineId } from "../vineCards";
 
 export type PromptAction =
     | BuildStructureAction
     | ChooseAction
     | ChooseCardsAction
     | ChooseFieldAction
+    | ChooseVineAction
     | ChooseWineAction
     | MakeWineAction
     | PlaceWorkerAction;
@@ -19,6 +21,7 @@ export const isPromptAction = (action: Action): action is PromptAction => {
         case "CHOOSE_ACTION":
         case "CHOOSE_CARDS":
         case "CHOOSE_FIELD":
+        case "CHOOSE_VINE":
         case "CHOOSE_WINE":
         case "MAKE_WINE":
         case "PLACE_WORKER":
@@ -74,6 +77,15 @@ interface ChooseFieldAction extends Action<"CHOOSE_FIELD"> {
 }
 export const chooseField = (fieldId: FieldId, playerId: string): PromptAction => {
     return { type: "CHOOSE_FIELD", fieldId, playerId };
+};
+
+interface ChooseVineAction extends Action<"CHOOSE_VINE"> {
+    vineId: VineId;
+    fieldId: FieldId;
+    playerId: string;
+}
+export const chooseVine = (vineId: VineId, fieldId: FieldId, playerId: string): PromptAction => {
+    return { type: "CHOOSE_VINE", vineId, fieldId, playerId };
 };
 
 interface ChooseWineAction extends Action<"CHOOSE_WINE"> {
