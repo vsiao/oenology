@@ -85,7 +85,8 @@ export type WorkerPlacement =
     | "makeWine"
     | "fillOrder"
     | "gainCoin"
-    | "yoke";
+    | "yokeHarvest"
+    | "yokeUproot";
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";

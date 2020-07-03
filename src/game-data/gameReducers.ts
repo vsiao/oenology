@@ -55,7 +55,8 @@ const initGame = (
             makeWine: [],
             fillOrder: [],
             gainCoin: [],
-            yoke: []
+            yokeHarvest: [],
+            yokeUproot: []
         },
         activityLog: [],
         playerId: players.some(({ id }) => id === userId) ? userId : null,

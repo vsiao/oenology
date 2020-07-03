@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn } from "../GameState";
+import GameState, { WorkerPlacementTurn, StructureState } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -9,6 +9,7 @@ import {
     plantVineInField,
     updatePlayer,
     pushActivityLog,
+    markStructureUsed,
 } from "../shared/sharedReducers";
 import {
     promptForAction,
@@ -181,7 +182,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            state = harvestField(state, action.fieldId)
+            state = harvestField(state, action.fieldId);
 
             const bonus = hasPlacementBonus &&
                 !pendingAction.bonusActivated &&
@@ -321,7 +322,9 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     return endTurn(gainCoins(1, state));
                 case "giveTour": {
                     const bonus = hasPlacementBonus && state.workerPlacements.giveTour.length === 1;
-                    return endTurn(gainCoins(bonus ? 3 : 2, state));
+                    const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
+                        Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
+                    return endTurn(gainCoins(bonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
                 }
                 case "harvestField":
                     return promptToHarvest(setPendingAction({ type: "harvestField" }, state));
@@ -354,7 +357,9 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     const bonus = hasPlacementBonus && state.workerPlacements.trainWorker.length === 1;
                     return endTurn(trainWorker(payCoins(bonus ? 3 : 4, state)));
                 }
-                case "yoke":
+                case "yokeHarvest":
+                    return promptToHarvest(setPendingAction({ type: "harvestField" }, markStructureUsed("yoke", state)));
+                case "yokeUproot":
                     return state;
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
