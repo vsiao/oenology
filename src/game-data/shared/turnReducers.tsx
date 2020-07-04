@@ -36,20 +36,21 @@ export const endTurn = (state: GameState): GameState => {
 // ----------------------------------------------------------------------------
 
 export const startMamaPapaTurn = (playerId: string, state: GameState): GameState => {
+    state = { ...state, currentTurn: { type: "mamaPapa", playerId }, };
     const player = state.players[state.currentTurn.playerId];
     const mama = mamaCards[player.mama];
     const papa = papaCards[player.papa];
 
-    return promptForAction({ ...state, currentTurn: { type: "mamaPapa", playerId }, }, {
+    return promptForAction(state, {
         title: "Choose your inheritance",
         description: <>
             <p>
                 Mama <strong>{mama.name}</strong>:
                     Draw {Object.entries(mama.cards).map(([type, num]) =>
-                        new Array<CardType>(num || 0).fill(type as CardType).map((t, i) =>
-                            <Card key={i} type={t} />
-                        ))}
-                    {mama.coins ? <>and gain <Coins>{mama.coins}</Coins>.</> : null}
+                new Array<CardType>(num || 0).fill(type as CardType).map((t, i) =>
+                    <Card key={i} type={t} />
+                ))}
+                {mama.coins ? <> and gain <Coins>{mama.coins}</Coins>.</> : null}
             </p>
             <p>
                 Papa <strong>{papa.name}</strong>:
@@ -96,7 +97,7 @@ const renderPapaChoice = (choice: StructureId | "victoryPoint" | "worker"): Reac
         default:
             return <>Build <strong>{structures[choice].name}</strong></>;
     }
-}
+};
 
 export const endMamaPapaTurn = (state: GameState): GameState => {
     const { tableOrder } = state;

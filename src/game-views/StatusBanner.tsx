@@ -61,22 +61,24 @@ const renderPendingActionStatus = (
         case "harvestField":
             return <span>{playerName} is harvesting a field.</span>;
         case "makeWine":
-            return <span>{playerName} is making some wine.</span>
+            return <span>{playerName} is making some wine.</span>;
         case "plantVine":
-            return <span>{playerName} is planting a <Vine />.</span>
+            return <span>{playerName} is planting a <Vine />.</span>;
         case "playVisitor":
             const card = season === "summer" ? <SummerVisitor /> : <WinterVisitor />;
             if (pendingAction.visitorId) {
                 const { name } = visitorCards[pendingAction.visitorId];
-                return <span>{playerName} is playing the <strong>{name}</strong> {card}.</span>
+                return <span>{playerName} is playing the <strong>{name}</strong> {card}.</span>;
             }
             return <span>{playerName} is playing a {card}.</span>;
         case "sellField":
-            return <span>{playerName} is selling a field.</span>
+            return <span>{playerName} is selling a field.</span>;
         case "sellGrapes":
-            return <span>{playerName} is selling grape(s).</span>
+            return <span>{playerName} is selling grape(s).</span>;
+        case "uproot":
+            return <span>{playerName} is uprooting a <Vine />.</span>;
     }
-}
+};
 
 const mapStateToProps = (state: AppState) => {
     const game = state.game!;

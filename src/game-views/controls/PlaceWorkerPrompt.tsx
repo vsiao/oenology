@@ -104,7 +104,7 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
                         ? action.bonusLabel
                         : action.title,
                     disabledReason: action.disabledReason && action.disabledReason(game),
-                    hasSpace: action.type === "yokeHarvest" || action.type === "yokeUproot" ||
+                    hasSpace: ["gainCoin", "yokeHarvest", "yokeUproot"].indexOf(action.type) !== -1 ||
                         game.workerPlacements[action.type].length < numSpots
                 })),
             {

@@ -178,9 +178,18 @@ export const promptToHarvest = (state: GameState): GameState => {
     });
 };
 
+export const promptToUproot = (state: GameState): GameState => {
+    return promptToChooseField(state, field => {
+        return field.vines.length === 0
+            ? "There's nothing here to uproot."
+            : undefined;
+    }, true);
+};
+
 export const promptToChooseField = (
     state: GameState,
-    disabledReason: (field: Field) => string | undefined
+    disabledReason: (field: Field) => string | undefined,
+    chooseVine = false
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
@@ -193,6 +202,7 @@ export const promptToChooseField = (
             field6: disabledReason(fields.field6),
             field7: disabledReason(fields.field7),
         },
+        chooseVine: chooseVine
     });
 };
 
