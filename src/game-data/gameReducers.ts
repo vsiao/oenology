@@ -24,6 +24,7 @@ const initGame = (
     shuffledCards: CardsByType
 ): GameState => {
     return {
+        year: 0,
         currentTurn: {
             type: "mamaPapa",
             playerId: players[0].id,

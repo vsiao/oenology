@@ -104,7 +104,7 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
     const nextIndex = (tableOrder.indexOf(state.currentTurn.playerId) + 1) % tableOrder.length;
 
     if (nextIndex === 0) {
-        return startWakeUpTurn(state.tableOrder[0], state);
+        return beginNewYear(state);
     }
     return startMamaPapaTurn(tableOrder[nextIndex], state);
 };
@@ -113,7 +113,15 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
 // Wake-up turns
 // ----------------------------------------------------------------------------
 
-export const startWakeUpTurn = (playerId: string, state: GameState): GameState => {
+const beginNewYear = (state: GameState): GameState => {
+    const year = state.year + 1;
+    return pushActivityLog(
+        { type: "season", season: `Spring (Year ${year})` },
+        beginWakeUpTurn(state.tableOrder[state.grapeIndex], { ...state, year, })
+    );
+};
+
+const beginWakeUpTurn = (playerId: string, state: GameState): GameState => {
     return promptForWakeUpOrder({
         ...state,
         currentTurn: { type: "wakeUpOrder", playerId, },
@@ -166,10 +174,10 @@ export const endWakeUpTurn = (state: GameState): GameState => {
         return startWorkerPlacementTurn(
             "summer",
             firstPlayerId,
-            pushActivityLog({ type: "season", season: "Summer" }, state)
+            pushActivityLog({ type: "season", season: `Summer (Year ${state.year})` }, state)
         );
     }
-    return startWakeUpTurn(tableOrder[nextWakeUpIndex], state);
+    return beginWakeUpTurn(tableOrder[nextWakeUpIndex], state);
 };
 
 export interface WakeUpChoiceData {
@@ -268,7 +276,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
         // If everyone passed, it's the end of the season
         if (season === "summer") {
             return pushActivityLog(
-                { type: "season", season: "Fall" },
+                { type: "season", season: `Fall (Year ${state.year})` },
                 startFallVisitorTurn(compactWakeUpOrder[0].playerId, {
                     ...state,
                     // preserve wake-up order; just reset "passed" state
@@ -388,7 +396,7 @@ const endFallVisitorTurn = (state: GameState): GameState => {
         return startWorkerPlacementTurn(
             "winter",
             compactWakeUpOrder[0].playerId,
-            pushActivityLog({ type: "season", season: "Winter" }, state)
+            pushActivityLog({ type: "season", season: `Winter (Year ${state.year})` }, state)
         );
     } else {
         const nextPlayerId =
@@ -427,15 +435,11 @@ const endEOYDiscardTurn = (state: GameState): GameState => {
         // Begin a new year
         const tableOrder = state.tableOrder;
         const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
-        return pushActivityLog(
-            { type: "season", season: "Spring" },
-            promptForWakeUpOrder({
-                ...state,
-                grapeIndex,
-                currentTurn: { type: "wakeUpOrder", playerId: tableOrder[grapeIndex] },
-                wakeUpOrder: wakeUpOrder.map((pos) => null) as GameState["wakeUpOrder"],
-            })
-        );
+        return beginNewYear({
+            ...state,
+            grapeIndex,
+            wakeUpOrder: wakeUpOrder.map((pos) => null) as GameState["wakeUpOrder"],
+        });
     } else {
         const nextPlayerId =
             compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;

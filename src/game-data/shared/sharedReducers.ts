@@ -7,7 +7,7 @@ import GameState, {
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
 import { VineId } from "../vineCards";
-import { addToDiscard, addCardsToHand } from "./cardReducers";
+import { addCardsToHand } from "./cardReducers";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -24,16 +24,13 @@ export const plantVineInField = (fieldId: FieldId, state: GameState): GameState 
     const vines: VineId[] = [...field.vines, vineId];
     return pushActivityLog(
         { type: "plant", playerId: player.id, vineId },
-        addToDiscard(
-            [{ type: "vine", id: vineId }],
-            updatePlayer(windmillAvailable ? markStructureUsed("windmill", gainVP(1, state)) : state,
-                player.id, {
-                fields: {
-                    ...player.fields,
-                    [field.id]: { ...field, vines },
-                }
-            })
-        )
+        updatePlayer(windmillAvailable ? markStructureUsed("windmill", gainVP(1, state)) : state,
+            player.id, {
+            fields: {
+                ...player.fields,
+                [field.id]: { ...field, vines },
+            }
+        })
     );
 };
 
@@ -105,9 +102,15 @@ const editResiduals = (
     playerId = state.currentTurn.playerId
 ) => {
     const playerState = state.players[playerId];
+    const delta = Math.min(playerState.residuals + numResiduals, 5) - playerState.residuals;
+    if (delta === 0) {
+        return state;
+    }
     return pushActivityLog(
-        { type: "residuals", playerId, delta: numResiduals },
-        updatePlayer(state, playerId, { residuals: playerState.residuals + numResiduals })
+        { type: "residuals", playerId, delta },
+        updatePlayer(state, playerId, {
+            residuals: playerState.residuals + delta
+        })
     );
 };
 export const gainResiduals = editResiduals;

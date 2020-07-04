@@ -8,6 +8,7 @@ import { MamaId, PapaId } from "./mamasAndPapas";
 
 export default interface GameState {
     // shared state
+    year: number;
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
     tableOrder: string[];
