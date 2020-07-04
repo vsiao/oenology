@@ -29,7 +29,7 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
                 return <li className="BuildStructurePrompt-choice" key={id}>
                     <ChoiceButton
                         className="BuildStructurePrompt-choiceButton"
-                        disabled={!!disabledReason}
+                        disabledReason={disabledReason}
                         onClick={() => onSelectStructure(id)}
                     >
                         {label}

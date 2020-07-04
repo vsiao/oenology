@@ -72,11 +72,11 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
             <ul className="PlaceWorkerPrompt-choices">
                 {placements.map((placement, i) => {
                     const requiresGrande = !placement.hasSpace && selectedWorkerType !== "grande";
-                    const disabled = !!placement.disabledReason || requiresGrande;
                     return <li className="PlaceWorkerPrompt-choice" key={i}>
                         <ChoiceButton
                             className="PlaceWorkerPrompt-choiceButton"
-                            disabled={disabled}
+                            disabledReason={placement.disabledReason ||
+                                (requiresGrande ? "No space. Use a grande worker?" : undefined)}
                             onClick={() => onPlaceWorker(placement.type, selectedWorkerType)}
                         >
                             {placement.label}

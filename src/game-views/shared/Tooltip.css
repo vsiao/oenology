@@ -1,0 +1,28 @@
+.AnchoredLayer {
+    display: block;
+    position: fixed;
+    width: 100vw;
+}
+
+.Tooltip {
+    background: black;
+    border-radius: .2em;
+    bottom: 0;
+    color: white;
+    font-size: .8em;
+    margin-bottom: .4em;
+    padding: .4em .8em;
+    position: absolute;
+    transform: translateX(-50%);
+}
+.Tooltip::after {
+    border: .4em solid black;
+    border-bottom-width: 0;
+    border-color: black transparent;
+    content: "";
+    display: block;
+    left: 50%;
+    position: absolute;
+    transform: translateX(-50%);
+    top: 100%;
+}

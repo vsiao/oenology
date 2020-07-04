@@ -6,11 +6,13 @@
     height: 2.8em;
     padding: 0 16px;
 }
-.ChoiceButton[disabled] {
+.ChoiceButton[aria-disabled=true] {
     background: #ddd;
     border-color: #ccc;
+    color: #aaa;
+    cursor: default;
 }
-.ChoiceButton:enabled:hover {
+.ChoiceButton[aria-disabled=false]:hover {
     border-color: black;
     cursor: pointer;
     transition: 150ms border-color;

@@ -45,9 +45,9 @@ export const structureUsedDisabledReason = (
     const player = state.players[playerId];
     switch (player.structures[id]) {
         case StructureState.Used:
-            return "You’ve already used this structure this year";
+            return "Can only be used once per year.";
         case StructureState.Unbuilt:
-            return "You haven’t built this structure yet";
+            return "You haven’t built this structure yet.";
     }
 };
 
