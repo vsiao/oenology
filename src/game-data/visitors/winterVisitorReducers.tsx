@@ -34,13 +34,14 @@ import {
     trainWorkerDisabledReason,
     needWineDisabledReason,
     numCardsDisabledReason,
+    harvestFieldDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
-import { endVisitor, setPendingAction, endTurn } from "../shared/turnReducers";
+import { endVisitor, setPendingAction } from "../shared/turnReducers";
 import { discardCards, drawCards, removeCardsFromHand, addCardsToHand } from "../shared/cardReducers";
 import {
     ageCellar,
@@ -50,7 +51,10 @@ import {
     harvestField,
     makeWineFromGrapes,
     placeGrapes,
+    harvestFields,
 } from "../shared/grapeWineReducers";
+import { Choice } from "../prompts/PromptState";
+import { makeWine } from "../prompts/promptActions";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -266,6 +270,30 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    harvester: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToHarvest(state, 2);
+            case "CHOOSE_FIELD":
+                return promptForAction(harvestFields(state, action.fields), {
+                    choices: [
+                        { id: "HARVESTER_COINS", label: <>Gain <Coins>2</Coins></>, },
+                        { id: "HARVESTER_VP", label: <>Gain <VP>1</VP></>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HARVESTER_COINS":
+                        return endVisitor(gainCoins(2, state));
+                    case "HARVESTER_VP":
+                        return endVisitor(gainVP(1, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     judge: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -290,6 +318,72 @@ export const winterVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endVisitor(gainVP(3, discardWines(state, action.wines)));
+            default:
+                return state;
+        }
+    },
+    laborer: (state, action, pendingAction) => {
+        type ChoiceId = "LABORER_HARVEST" | "LABORER_MAKE";
+        interface LaborerAction extends PlayVisitorPendingAction {
+            usedChoices: { [K in ChoiceId]?: true };
+        }
+        const promptLaborerAction = (state2: GameState, { usedChoices }: LaborerAction): GameState => {
+            const alreadyChose = Object.keys(usedChoices).length > 0;
+            const maybeLoseVp = alreadyChose ? <> (lose <VP>1</VP>)</> : null;
+            return promptForAction(state2, {
+                choices: ([
+                    {
+                        id: "LABORER_HARVEST",
+                        label: <>Harvest up to 2 fields{maybeLoseVp}</>,
+                        disabledReason: harvestFieldDisabledReason(state2),
+                    },
+                    {
+                        id: "LABORER_MAKE",
+                        label: <>Make up to 3 <WineGlass />{maybeLoseVp}</>,
+                        disabledReason: needGrapesDisabledReason(state2),
+                    },
+                ] as Choice[])
+                    .filter(choice => !usedChoices[choice.id as ChoiceId])
+                    .concat(alreadyChose ? { id: "LABORER_PASS", label: <>Pass</>, } : []),
+            });
+        };
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const laborerAction =
+                (state2.currentTurn as WorkerPlacementTurn).pendingAction as LaborerAction;
+
+            return Object.keys(laborerAction.usedChoices).length === 2
+                ? endVisitor(state2)
+                : promptLaborerAction(state2, laborerAction);
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS": {
+                const laborerAction: LaborerAction = { ...pendingAction, usedChoices: {} };
+                return promptLaborerAction(setPendingAction(laborerAction, state), laborerAction);
+            }
+            case "CHOOSE_ACTION":
+                const laborerAction = pendingAction as LaborerAction;
+                state = setPendingAction({
+                    ...laborerAction,
+                    usedChoices: {
+                        ...laborerAction.usedChoices,
+                        [action.choice]: structures,
+                    },
+                }, Object.keys(laborerAction.usedChoices).length > 0 ? loseVP(1, state) : state);
+                switch (action.choice) {
+                    case "LABORER_HARVEST":
+                        return promptToHarvest(state, 2);
+                    case "LABORER_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 3);
+                    case "LABORER_PASS":
+                        return endVisitor(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return maybeEndVisitor(harvestFields(state, action.fields));
+            case "MAKE_WINE":
+                return maybeEndVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }
@@ -672,14 +766,14 @@ export const winterVisitorReducers: Record<
                         ],
                     });
                 } else {
-                    return endTurn(
+                    return endVisitor(
                         addCardsToHand(cards, removeCardsFromHand(cards, state, playerId))
                     );
                 }
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "QUEEN_LOSE":
-                        return endTurn(loseVP(1, state, playerId));
+                        return endVisitor(loseVP(1, state, playerId));
                     case "QUEEN_GIVE":
                         return promptToChooseCard(state, {
                             title: <span>Give 2 cards to {playerName}</span>,
@@ -688,10 +782,21 @@ export const winterVisitorReducers: Record<
                             playerId,
                         });
                     case "QUEEN_PAY":
-                        return endTurn(gainCoins(3, payCoins(3, state, playerId)));
+                        return endVisitor(gainCoins(3, payCoins(3, state, playerId)));
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    reaper: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToHarvest(state, 3);
+            case "CHOOSE_FIELD":
+                state = harvestFields(state, action.fields);
+                return endVisitor(action.fields.length === 3 ? gainVP(2, state) : state);
             default:
                 return state;
         }

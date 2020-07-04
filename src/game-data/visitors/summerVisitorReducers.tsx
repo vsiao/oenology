@@ -64,11 +64,11 @@ export const summerVisitorReducers: Record<
                 }
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fields[0], state);
-                const vinesById: { [vineId in VineId]?: boolean } = {};
+                const vinesByName: { [vineName: string]: boolean } = {};
                 state.players[state.currentTurn.playerId].fields[action.fields[0]].vines.forEach(
-                    v => vinesById[v] = true
+                    v => vinesByName[vineCards[v].name] = true
                 );
-                return endVisitor(Object.keys(vinesById).length >= 3 ? gainVP(2, state) : state);
+                return endVisitor(Object.keys(vinesByName).length >= 3 ? gainVP(2, state) : state);
             default:
                 return state;
         }
@@ -340,7 +340,7 @@ export const summerVisitorReducers: Record<
                     ...contractorAction,
                     usedChoices: {
                         ...contractorAction.usedChoices,
-                        [action.choice]: true
+                        [action.choice]: true,
                     },
                 }, state);
                 switch (action.choice) {

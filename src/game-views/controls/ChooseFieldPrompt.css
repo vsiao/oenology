@@ -46,7 +46,7 @@
 .ChooseFieldPrompt-field--oneClick:not(.ChooseFieldPrompt-field--disabled) {
     cursor: pointer;
 }
-.ChooseFieldPrompt-field--oneClick:hover {
+.ChooseFieldPrompt-field--oneClick:not(.ChooseFieldPrompt-field--disabled):hover {
     transform: translateY(-.2em);
 }
 .ChooseFieldPrompt-field--selected {

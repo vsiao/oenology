@@ -188,9 +188,17 @@ export const winterVisitorCards = {
         "Harvest Expert",
         <>Harvest 1 field and either draw 1 <Vine /> or pay <Coins>1</Coins> to build a yoke.</>
     ),
+    harvester: winterVisitorCard(
+        "Harvester",
+        <>Harvest up to 2 fields and choose 1: Gain <Coins>2</Coins> or gain <VP>1</VP>.</>
+    ),
     judge: winterVisitorCard(
         "Judge",
         <>Draw 2 <SummerVisitor /> OR discard 1 <WineGlass /> of value 4 or more to gain <VP>3</VP>.</>,
+    ),
+    laborer: winterVisitorCard(
+        "Laborer",
+        <>Harvest up to 2 fields OR make up to 3 <WineGlass />. You may lose <VP>1</VP> to do both.</>
     ),
     marketer: winterVisitorCard(
         "Marketer",
@@ -227,6 +235,10 @@ export const winterVisitorCards = {
     queen: winterVisitorCard(
         "Queen",
         <>The player on your right must choose 1: lose <VP>1</VP>, give you 2 <Card />, or pay you <Coins>3</Coins>.</>
+    ),
+    reaper: winterVisitorCard(
+        "Reaper",
+        <>Harvest up to 3 fields. If you harvest 3 fields, gain <VP>2</VP>.</>
     ),
     scholar: winterVisitorCard(
         "Scholar",

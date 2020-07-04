@@ -62,6 +62,11 @@ export const devaluedIndex = (value: number, tokens: TokenMap) => {
 // Grape-and-wine-specific reducers
 // ----------------------------------------------------------------------------
 
+export const harvestFields = (state: GameState, fields: FieldId[]): GameState => {
+    fields.forEach(f => state = harvestField(state, f));
+    return state;
+};
+
 export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const yields = fieldYields(player.fields[fieldId]);
