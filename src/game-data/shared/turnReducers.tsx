@@ -77,7 +77,7 @@ export const chooseMamaPapa = (choice: string, state: GameState): GameState => {
                 case "victoryPoint":
                     return gainVP(1, state);
                 case "worker":
-                    return trainWorker(state);
+                    return trainWorker(state, { availableThisYear: true, });
                 default:
                     return buildStructure(state, papa.choiceA);
             }

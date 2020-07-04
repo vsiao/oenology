@@ -12,6 +12,7 @@ import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { StructureId, structures } from "../game-data/structures";
+import { useTooltip } from "./shared/useTooltip";
 
 interface Props {
     player: PlayerState;
@@ -134,16 +135,38 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     return null;
                 }
                 const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
-                return <li key={structureId} className={cx("SidebarPlayer-structure", {
-                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
-                    "SidebarPlayer-structure--used": isUsed
-                })}>
-                    {structure.name}&nbsp;
-                    {structureId === "yoke" && isUsed && <Worker color={player.color} />}
-                </li>;
+                return <StructureTooltip id={structureId as StructureId}>
+                    {anchorRef => 
+                        <li ref={anchorRef as React.RefObject<HTMLLIElement>}
+                            key={structureId}
+                            className={cx("SidebarPlayer-structure", {
+                                "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
+                                "SidebarPlayer-structure--used": isUsed
+                            })}
+                        >
+                            {structure.name}&nbsp;
+                            {structureId === "yoke" && isUsed && <Worker color={player.color} />}
+                        </li>}
+                </StructureTooltip>
             })}
         </ul>
     </div>;
+};
+
+const StructureTooltip: React.FunctionComponent<{
+    id: StructureId;
+    children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode
+}> = ({ id, children }) => {
+    const structure = structures[id];
+    const [anchorRef, maybeTooltip] = useTooltip(
+        "left",
+        structure.description + ` Costs ${structure.cost}.`
+    );
+
+    return <>
+        {children(anchorRef)}
+        {maybeTooltip}
+    </>;
 };
 
 const renderCard = (card: CardId): React.ReactNode => {

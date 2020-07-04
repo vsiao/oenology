@@ -114,13 +114,19 @@ export const gainResiduals = editResiduals;
 export const loseResiduals = (numResiduals: number, state: GameState, playerId = state.currentTurn.playerId) =>
     editResiduals(-numResiduals, state, playerId);
 
-export const trainWorker = (state: GameState, playerId = state.currentTurn.playerId): GameState => {
+export const trainWorker = (
+    state: GameState,
+    { playerId = state.currentTurn.playerId, availableThisYear = false }: {
+        playerId?: string;
+        availableThisYear?: boolean;
+    } = {}
+): GameState => {
     return pushActivityLog(
         { type: "trainWorker", playerId },
         updatePlayer(state, playerId, {
             workers: [
                 ...state.players[playerId].workers,
-                { type: "normal", available: false },
+                { type: "normal", available: availableThisYear },
             ],
         })
     );

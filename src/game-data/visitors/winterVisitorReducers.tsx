@@ -212,7 +212,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "GSPEAKER_TRAIN":
-                        state = trainWorker(payCoins(1, state, action.playerId), action.playerId);
+                        state = trainWorker(payCoins(1, state, action.playerId), {
+                            playerId: action.playerId,
+                        });
                         return endMainAction(
                             state.playerId !== state.currentTurn.playerId
                                 ? gainVP(1, state)

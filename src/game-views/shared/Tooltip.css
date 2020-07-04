@@ -1,28 +1,74 @@
 .AnchoredLayer {
-    display: block;
+    align-items: center;
+    display: flex;
+    justify-content: center;
     position: fixed;
     width: 100vw;
+    transform: translateX(-50%);
+    z-index: 900;
 }
 
 .Tooltip {
     background: black;
     border-radius: .2em;
-    bottom: 0;
     color: white;
     font-size: .8em;
-    margin-bottom: .4em;
+    max-width: 12em;
     padding: .4em .8em;
     position: absolute;
-    transform: translateX(-50%);
 }
+.Tooltip--top,
+.Tooltip--bottom {
+    margin: .4em 0;
+}
+.Tooltip--top {
+    bottom: 50%;
+}
+.Tooltip--bottom {
+    top: 50%;
+}
+.Tooltip--left,
+.Tooltip--right {
+    margin: 0 .4em;
+}
+.Tooltip--left {
+    right: 50%;
+}
+.Tooltip--right {
+    left: 50%;
+}
+
 .Tooltip::after {
     border: .4em solid black;
-    border-bottom-width: 0;
-    border-color: black transparent;
     content: "";
     display: block;
-    left: 50%;
     position: absolute;
+}
+.Tooltip--top::after,
+.Tooltip--bottom::after {
+    border-color: black transparent;
+    left: 50%;
     transform: translateX(-50%);
+}
+.Tooltip--top::after {
+    border-bottom-width: 0;
     top: 100%;
+}
+.Tooltip--bottom::after {
+    border-top-width: 0;
+    bottom: 100%;
+}
+.Tooltip--left::after,
+.Tooltip--right::after {
+    border-color: transparent black;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.Tooltip--left::after {
+    border-right-width: 0;
+    left: 100%;
+}
+.Tooltip--right::after {
+    border-left-width: 0;
+    right: 100%;
 }

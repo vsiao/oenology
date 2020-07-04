@@ -1,4 +1,5 @@
 import "./Tooltip.css";
+import cx from "classnames";
 import React, { useRef, useEffect, FunctionComponent, ReactNode, useState, RefObject, useMemo } from "react";
 import * as ReactDOM from "react-dom";
 
@@ -15,7 +16,7 @@ const useAnchoredLayer = (side: AnchorSide, children: ReactNode): [
     ReactNode,
 ] => {
     const anchorRef = useRef<HTMLElement>(null);
-    const [maybeLayer, setLayer] = useState<ReactNode>(null);
+   const [maybeLayer, setLayer] = useState<ReactNode>(null);
 
     useEffect(() => {
         let container: HTMLDivElement | null = null;
@@ -67,8 +68,12 @@ const AnchoredLayer: FunctionComponent<{
     return <div
         className="AnchoredLayer"
         style={{
-            left: (anchorRect.left + anchorRect.right) / 2,
-            top: anchorRect.top,
+            left: side === "top" || side === "bottom"
+                ? (anchorRect.left + anchorRect.right) / 2
+                : side === "left" ? anchorRect.left : anchorRect.right,
+            top: side === "left" || side === "right"
+                ? (anchorRect.top + anchorRect.bottom) / 2
+                : side === "top" ? anchorRect.top : anchorRect.bottom,
         }}
     >
         {children}
@@ -78,7 +83,7 @@ const AnchoredLayer: FunctionComponent<{
 const Tooltip: FunctionComponent<{
     side: AnchorSide;
 }> = ({ side, children, }) => {
-    return <div className="Tooltip">
+    return <div className={cx("Tooltip", `Tooltip--${side}`)}>
         {children}
     </div>;
 };
