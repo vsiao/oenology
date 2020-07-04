@@ -4,6 +4,11 @@
     overflow-y: auto;
     padding: 1em 1.6em;
 }
+.ChooseFieldPrompt-fields::after {
+    content: "";
+    display: inline-block;
+    min-width: 1.6em;
+}
 
 .ChooseFieldPrompt-field {
     background: #40a746;
@@ -16,6 +21,9 @@
     width: 240px;
     transition: 100ms transform ease-out;
     transform: translateY(0);
+}
+.ChooseFieldPrompt-field + .ChooseFieldPrompt-field {
+    margin-left: .8em;
 }
 .ChooseFieldPrompt-field--sold::before {
     background: white;
@@ -34,9 +42,15 @@
 .ChooseFieldPrompt-field--disabled {
     opacity: 0.7;
 }
-.ChooseFieldPrompt-field--choice:hover {
+.ChooseFieldPrompt-field--selectable:not(.ChooseFieldPrompt-field--disabled),
+.ChooseFieldPrompt-field--oneClick:not(.ChooseFieldPrompt-field--disabled) {
     cursor: pointer;
+}
+.ChooseFieldPrompt-field--oneClick:hover {
     transform: translateY(-.2em);
+}
+.ChooseFieldPrompt-field--selected {
+    box-shadow: 0 0 0 6px #61dafb;
 }
 
 .ChooseFieldPrompt-vines {
@@ -58,9 +72,14 @@
     padding: 8px;
     transition: 100ms box-shadow ease-in-out;
 }
-.ChooseFieldPrompt-vine--choice:hover {
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+.ChooseFieldPrompt-vine--choice {
     cursor: pointer;
+}
+.ChooseFieldPrompt-vine--choice:not(.ChooseFieldPrompt-vine--selected):hover {
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.7);
+}
+.ChooseFieldPrompt-vine--selected {
+    box-shadow: 0 0 0 2px #61dafb;
 }
 
 .ChooseFieldPrompt-fieldFooter {
@@ -70,4 +89,11 @@
     justify-content: flex-end;
     margin-top: auto;
     padding: 0 .8em;
+}
+
+.ChooseFieldPrompt-confirm {
+    bottom: 2em;
+    box-shadow: 0 0 .5em rgba(0, 0, 0, .3);
+    position: absolute;
+    right: 2em;
 }

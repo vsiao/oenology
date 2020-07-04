@@ -8,6 +8,7 @@ import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
 import { VineId } from "../vineCards";
 import { addCardsToHand } from "./cardReducers";
+import { VineInField } from "../prompts/promptActions";
 
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
     return { ...state, activityLog: [...state.activityLog, event], };
@@ -34,20 +35,20 @@ export const plantVineInField = (fieldId: FieldId, state: GameState): GameState 
     );
 };
 
-export const uprootVineFromField = (vineId: VineId, fieldId: FieldId, state: GameState): GameState => {
+export const uprootVineFromField = (vine: VineInField, state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    const field = player.fields[fieldId];
+    const field = player.fields[vine.field];
     const vines = [...field.vines];
-    const vineIndex = vines.indexOf(vineId);
+    const vineIndex = vines.indexOf(vine.id);
     if (vineIndex === -1) {
         throw new Error("Unxpected state: vine not found in field");
     }
     vines.splice(vineIndex, 1);
 
     return pushActivityLog(
-        { type: "uproot", playerId: player.id, vineId },
+        { type: "uproot", playerId: player.id, vineId: vine.id, },
         addCardsToHand(
-            [{ type: "vine", id: vineId }],
+            [{ type: "vine", id: vine.id }],
             updatePlayer(state, player.id, {
                 fields: {
                     ...player.fields,

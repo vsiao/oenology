@@ -108,7 +108,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             }
             const playerId = state.currentTurn.playerId;
             const player = state.players[state.currentTurn.playerId];
-            const field = player.fields[action.fieldId];
+            const field = player.fields[action.fields[0]];
 
             const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
             state = updatePlayer(bonus ? gainVP(1, state) : state, player.id, {
@@ -184,7 +184,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            state = harvestField(state, action.fieldId);
+            state = harvestField(state, action.fields[0]); // TODO harvest multiple
 
             const bonus = hasPlacementBonus &&
                 !pendingAction.bonusActivated &&
@@ -202,7 +202,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_VINE") {
                 return state;
             }
-            return endTurn(uprootVineFromField(action.vineId, action.fieldId, state));
+            return endTurn(uprootVineFromField(action.vines[0], state));
 
         case "makeWine":
             if (action.type !== "MAKE_WINE") {
@@ -224,7 +224,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     return promptToPlant(state, card.id);
 
                 case "CHOOSE_FIELD":
-                    state = plantVineInField(action.fieldId, state);
+                    state = plantVineInField(action.fields[0], state);
 
                     const bonus = hasPlacementBonus &&
                         !pendingAction.bonusActivated &&

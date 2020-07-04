@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     font-size: 1em;
-    margin: 1em 1.6em;
+    margin: 1.6em;
     max-width: calc(100% - 3.2em);
     overflow: hidden;
     pointer-events: all;
@@ -16,7 +16,7 @@
     transition: 150ms transform ease-in-out;
 }
 .PromptStructure--collapsed {
-    transform: translateY(calc(100% - 2.2em));
+    transform: translateY(calc(100% - 1em));
 }
 .PromptStructure-enter {
     opacity: 0;

@@ -63,9 +63,9 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                state = plantVineInField(action.fieldId, state);
+                state = plantVineInField(action.fields[0], state);
                 const vinesById: { [vineId in VineId]?: boolean } = {};
-                state.players[state.currentTurn.playerId].fields[action.fieldId].vines.forEach(
+                state.players[state.currentTurn.playerId].fields[action.fields[0]].vines.forEach(
                     v => vinesById[v] = true
                 );
                 return endVisitor(Object.keys(vinesById).length >= 3 ? gainVP(2, state) : state);
@@ -124,7 +124,7 @@ export const summerVisitorReducers: Record<
                 return endVisitor(buildStructure(payCoins(structure.cost - 1, state), action.structureId));
 
             case "CHOOSE_FIELD":
-                state = plantVineInField(action.fieldId, state);
+                state = plantVineInField(action.fields[0], state);
                 const canPlantAgain = !artisanAction.secondPlant &&
                     plantVinesDisabledReason(state) === undefined;
 
@@ -359,7 +359,7 @@ export const summerVisitorReducers: Record<
                     buildStructure(payCoins(structure.cost, state), action.structureId)
                 );
             case "CHOOSE_FIELD":
-                return maybeEndVisitor(plantVineInField(action.fieldId, state));
+                return maybeEndVisitor(plantVineInField(action.fields[0], state));
             default:
                 return state;
         }
@@ -377,7 +377,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(action.fieldId, state));
+                return endVisitor(plantVineInField(action.fields[0], state));
             default:
                 return state;
         }
@@ -396,7 +396,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                state = plantVineInField(action.fieldId, state);
+                state = plantVineInField(action.fields[0], state);
                 const numVinesPlanted = Object.values(state.players[state.currentTurn.playerId].fields)
                     .reduce((numVines, field) => numVines + field.vines.length, 0);
                 return endVisitor(numVinesPlanted >= 6 ? gainVP(2, state) : state);
@@ -470,7 +470,7 @@ export const summerVisitorReducers: Record<
                     : endVisitor(state);
 
             case "CHOOSE_FIELD":
-                state = plantVineInField(action.fieldId, state);
+                state = plantVineInField(action.fields[0], state);
                 const canPlantAgain = !homesteaderAction.secondPlant &&
                     plantVinesDisabledReason(state) === undefined;
 
@@ -522,7 +522,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(plantVineInField(action.fieldId, state));
+                return endVisitor(plantVineInField(action.fields[0], state));
             default:
                 return state;
         }
@@ -601,7 +601,7 @@ export const summerVisitorReducers: Record<
                     buildStructure(payCoins(structures[action.structureId].cost, state), action.structureId)
                 );
             case "CHOOSE_FIELD":
-                state = plantVineInField(action.fieldId, state);
+                state = plantVineInField(action.fields[0], state);
                 const { red, white } = vineCards[overseerAction.vineId].yields;
                 return endVisitor((red || 0) + (white || 0) === 4 ? gainVP(1, state) : state);
             default:
@@ -787,7 +787,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(harvestField(state, action.fieldId));
+                return endVisitor(harvestField(state, action.fields[0]));
             default:
                 return state;
         }

@@ -269,7 +269,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_FIELD":
-                return endVisitor(harvestField(state, action.fieldId));
+                return endVisitor(harvestField(state, action.fields[0]));
             default:
                 return state;
         }

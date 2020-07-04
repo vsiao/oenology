@@ -167,29 +167,40 @@ export const promptToPlant = (state: GameState, vineId: VineId, bypassFieldLimit
     });
 };
 
-export const promptToHarvest = (state: GameState): GameState => {
-    return promptToChooseField(state, field => {
-        if (field.harvested) {
-            return "You harvested this field already.";
-        }
-        return field.vines.length === 0
-            ? "There's nothing here to harvest."
-            : undefined;
-    });
+export const promptToHarvest = (state: GameState, numFields = 1): GameState => {
+    return promptToChooseField(
+        state,
+        field => {
+            if (field.harvested) {
+                return "You harvested this field already.";
+            }
+            return field.vines.length === 0
+                ? "There's nothing here to harvest."
+                : undefined;
+        },
+        { kind: "harvest", numSelections: numFields, }
+    );
 };
 
-export const promptToUproot = (state: GameState): GameState => {
-    return promptToChooseField(state, field => {
-        return field.vines.length === 0
-            ? "There's nothing here to uproot."
-            : undefined;
-    }, true);
+export const promptToUproot = (state: GameState, numVines = 1): GameState => {
+    return promptToChooseField(
+        state,
+        field => {
+            return field.vines.length === 0
+                ? "There's nothing here to uproot."
+                : undefined;
+        },
+        { kind: "uproot", numSelections: numVines, }
+    );
 };
 
 export const promptToChooseField = (
     state: GameState,
     disabledReason: (field: Field) => string | undefined,
-    chooseVine = false
+    { kind = "oneClick", numSelections = 1, }: {
+        kind?: "oneClick" | "harvest" | "uproot";
+        numSelections?: number,
+    } = {}
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
@@ -197,12 +208,13 @@ export const promptToChooseField = (
     const fields = state.players[state.currentTurn.playerId].fields;
     return enqueueActionPrompt(state, {
         type: "chooseField",
+        kind,
+        numSelections,
         disabledReasons: {
             field5: disabledReason(fields.field5),
             field6: disabledReason(fields.field6),
             field7: disabledReason(fields.field7),
         },
-        chooseVine: chooseVine
     });
 };
 

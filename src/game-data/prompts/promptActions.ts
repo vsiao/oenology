@@ -72,20 +72,23 @@ export const makeWine = (ingredients: WineIngredients[], playerId: string): Prom
 };
 
 interface ChooseFieldAction extends Action<"CHOOSE_FIELD"> {
-    fieldId: FieldId;
+    fields: FieldId[];
     playerId: string;
 }
-export const chooseField = (fieldId: FieldId, playerId: string): PromptAction => {
-    return { type: "CHOOSE_FIELD", fieldId, playerId };
+export const chooseField = (fields: FieldId[], playerId: string): PromptAction => {
+    return { type: "CHOOSE_FIELD", fields, playerId };
 };
 
+export interface VineInField {
+    id: VineId;
+    field: FieldId
+}
 interface ChooseVineAction extends Action<"CHOOSE_VINE"> {
-    vineId: VineId;
-    fieldId: FieldId;
+    vines: VineInField[];
     playerId: string;
 }
-export const chooseVine = (vineId: VineId, fieldId: FieldId, playerId: string): PromptAction => {
-    return { type: "CHOOSE_VINE", vineId, fieldId, playerId };
+export const chooseVine = (vines: VineInField[], playerId: string): PromptAction => {
+    return { type: "CHOOSE_VINE", vines, playerId };
 };
 
 interface ChooseWineAction extends Action<"CHOOSE_WINE"> {

@@ -54,8 +54,12 @@ export interface FillOrderPromptState {
 
 export interface ChooseFieldPromptState {
     type: "chooseField";
+    kind:
+        | "oneClick" // plant; buy/sell field
+        | "harvest" // multi-field selection
+        | "uproot"; // multi-vine selection
     disabledReasons: Record<FieldId, string | undefined>;
-    chooseVine?: boolean;
+    numSelections: number;
 }
 
 export interface MakeWinePromptState {
