@@ -27,9 +27,9 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
         <ActionPrompt />
         <div className="PlayerMat-header">
             {playerState && <>
-                <Residuals className="PlayerMat-residualPayments">0</Residuals>
+                <Residuals className="PlayerMat-residualPayments">{playerState.residuals}</Residuals>
                 <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
-                <VictoryPoints className="PlayerMat-victoryPoints">0</VictoryPoints>
+                <VictoryPoints className="PlayerMat-victoryPoints">{playerState.victoryPoints}</VictoryPoints>
                 <ul className="PlayerMat-workers">
                     {playerState.workers.map((worker, i) =>
                         <li key={i} className="PlayerMat-worker" >
