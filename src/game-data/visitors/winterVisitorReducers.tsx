@@ -240,13 +240,19 @@ export const winterVisitorReducers: Record<
     harvestExpert: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForAction(state, {
+                return promptToHarvest(state);
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HEXPERT_DRAW":
+                        return endVisitor(drawCards(state, { vine: 1 }));
+                    case "HEXPERT_BUILD":
+                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return promptForAction(harvestField(state, action.fieldId), {
                     choices: [
-                        {
-                            id: "HEXPERT_HARVEST",
-                            label: <>Harvest 1 field</>,
-                            disabledReason: harvestFieldDisabledReason(state),
-                        },
                         { id: "HEXPERT_DRAW", label: <>Draw 1 <Vine /></>, },
                         {
                             id: "HEXPERT_BUILD",
@@ -257,19 +263,6 @@ export const winterVisitorReducers: Record<
                         },
                     ],
                 });
-            case "CHOOSE_ACTION":
-                switch (action.choice) {
-                    case "HEXPERT_HARVEST":
-                        return promptToHarvest(state);
-                    case "HEXPERT_DRAW":
-                        return endVisitor(drawCards(state, { vine: 1 }));
-                    case "HEXPERT_BUILD":
-                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
-                    default:
-                        return state;
-                }
-            case "CHOOSE_FIELD":
-                return endVisitor(harvestField(state, action.fieldId));
             default:
                 return state;
         }
