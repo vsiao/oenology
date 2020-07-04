@@ -122,6 +122,10 @@ export const winterActions: BoardAction[] = [
 
 export const yearRoundActions: BoardAction[] = [
     {
+        type: "gainCoin",
+        title: <>Gain <Coins>1</Coins></>
+    },
+    {
         type: "yokeHarvest",
         title: "Yoke: Harvest one field",
         disabledReason: state => structureUsedDisabledReason(state, "yoke") || harvestFieldDisabledReason(state),
