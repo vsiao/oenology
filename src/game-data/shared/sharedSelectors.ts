@@ -94,12 +94,13 @@ export const plantVineInFieldDisabledReason = (
 export const plantVineDisabledReason = (
     state: GameState,
     vineId: VineId,
-    { bypassFieldLimit = false, bypassStructures = false, }: {
+    { bypassFieldLimit = false, bypassStructures = false, playerId = state.currentTurn.playerId }: {
         bypassFieldLimit?: boolean;
         bypassStructures?: boolean;
+        playerId?: string;
     } = {}
 ) => {
-    const player = state.players[state.currentTurn.playerId];
+    const player = state.players[playerId];
     const fields = Object.values(player.fields);
 
     if (!bypassStructures && !vineCards[vineId].structures.every(s => !!player.structures[s])) {
@@ -119,9 +120,10 @@ export const plantVinesDisabledReason = (
     opts: {
         bypassFieldLimit?: boolean;
         bypassStructures?: boolean;
+        playerId?: string;
     } = {}
 ) => {
-    const player = state.players[state.currentTurn.playerId];
+    const player = state.players[opts.playerId ?? state.currentTurn.playerId];
     return player.cardsInHand.some(card => {
         return card.type === "vine" && plantVineDisabledReason(state, card.id, opts) === undefined;
     })

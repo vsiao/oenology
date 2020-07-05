@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, StructureState } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -427,7 +427,7 @@ export const summerVisitorReducers: Record<
                     case "visitor":
                         return promptToChooseVineCard(state, { bypassFieldLimit: true });
                     case "vine":
-                        return promptToPlant(state, card.id, /* bypassFieldLimit */ true);
+                        return promptToPlant(state, card.id, { bypassFieldLimit: true });
                     default:
                         return state;
                 }
@@ -1000,5 +1000,65 @@ export const summerVisitorReducers: Record<
         }
 
     },
-    // volunteerCrew: s => endVisitor(s),
+    volunteerCrew: (state, action) => {
+        const promptPlayer = (state2: GameState, playerId: string): GameState => {
+            const playerName = state2.players[state2.currentTurn.playerId].name;
+            return promptForAction(state2, {
+                playerId,
+                choices: [
+                    {
+                        id: "VCREW_PLANT",
+                        label: <>
+                            Plant 1 <Vine />
+                            {playerId !== state2.currentTurn.playerId
+                                ? <> (<strong>{playerName}</strong> gains <Coins>2</Coins>)</>
+                                : null}
+                        </>,
+                        disabledReason: plantVinesDisabledReason(state, { playerId })
+                    },
+                    {
+                        id: "VCREW_PASS",
+                        label: <>Pass</>,
+                    },
+                ],
+            });
+        };
+        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
+            const i = state2.tableOrder.indexOf(currentPlayerId);
+            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
+            return nextPlayerId === state2.currentTurn.playerId
+                ? endVisitor(state2)
+                : promptPlayer(state2, nextPlayerId)
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptPlayer(state, state.currentTurn.playerId);
+                    case "vine":
+                        return promptToPlant(state, card.id, { playerId: action.playerId })
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "VCREW_PLANT":
+                        return promptToChooseVineCard(state, { playerId: action.playerId });
+                    case "VCREW_PASS":
+                        return maybePromptNextPlayer(state, action.playerId);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                state = plantVineInField(action.fields[0], state, action.playerId);
+                return maybePromptNextPlayer(
+                    action.playerId !== state.currentTurn.playerId ? gainCoins(2, state) : state,
+                    action.playerId
+                );
+            default:
+                return state;
+        }
+    },
 };

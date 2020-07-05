@@ -112,25 +112,29 @@ export const promptToChooseVineCard = (
     {
         bypassFieldLimit = false,
         bypassStructures = false,
+        playerId = state.currentTurn.playerId,
         optional = false,
     }: {
         bypassFieldLimit?: boolean;
         bypassStructures?: boolean;
+        playerId?: string;
         optional?: boolean;
     } = {}
 ): GameState => {
     return promptToChooseCard(state, {
         title: `Plant a vine`,
         style: "oneClick",
-        cards: state.players[state.currentTurn.playerId].cardsInHand
+        cards: state.players[playerId].cardsInHand
             .filter(({ type }) => type === "vine")
             .map(id => ({
                 id,
                 disabledReason: plantVineDisabledReason(state, id.id as VineId, {
                     bypassFieldLimit,
                     bypassStructures,
+                    playerId,
                 }),
             })),
+        playerId,
         optional,
     });
 };
@@ -154,17 +158,28 @@ export const promptToChooseVisitor = (
     });
 };
 
-export const promptToPlant = (state: GameState, vineId: VineId, bypassFieldLimit = false) => {
+export const promptToPlant = (
+    state: GameState,
+    vineId: VineId,
+    { bypassFieldLimit = false, playerId = state.currentTurn.playerId }: {
+        bypassFieldLimit?: boolean;
+        playerId?: string;
+    } = {}
+) => {
     state = removeCardsFromHand(
         [{ type: "vine", id: vineId }],
         setPendingAction({
             ...(state.currentTurn as WorkerPlacementTurn).pendingAction!,
             vineId,
         }, state),
+        playerId
     );
-    return promptToChooseField(state, field => {
-        return plantVineInFieldDisabledReason(vineId, field, bypassFieldLimit);
-    });
+    return promptToChooseField(
+        state,
+        field => plantVineInFieldDisabledReason(vineId, field, bypassFieldLimit),
+        { kind: "oneClick" },
+        playerId
+    );
 };
 
 export const promptToHarvest = (state: GameState, numFields = 1): GameState => {
@@ -200,12 +215,13 @@ export const promptToChooseField = (
     { kind = "oneClick", numSelections = 1, }: {
         kind?: "oneClick" | "harvest" | "uproot";
         numSelections?: number,
-    } = {}
+    } = {},
+    playerId = state.currentTurn.playerId
 ): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
+    if (state.playerId !== playerId) {
         return state;
     }
-    const fields = state.players[state.currentTurn.playerId].fields;
+    const fields = state.players[playerId].fields;
     return enqueueActionPrompt(state, {
         type: "chooseField",
         kind,

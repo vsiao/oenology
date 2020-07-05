@@ -14,22 +14,26 @@ export const pushActivityLog = (event: ActivityLogEvent, state: GameState): Game
     return { ...state, activityLog: [...state.activityLog, event], };
 };
 
-export const plantVineInField = (fieldId: FieldId, state: GameState): GameState => {
+export const plantVineInField = (
+    fieldId: FieldId,
+    state: GameState,
+    playerId = state.currentTurn.playerId
+): GameState => {
     const vineId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).vineId as VineId;
     if (!vineId) {
         throw new Error("Unexpected state: should've chosen a vine before planting");
     }
-    const player = state.players[state.currentTurn.playerId];
+    const player = state.players[playerId];
     const field = player.fields[fieldId];
-    const windmillAvailable = player.structures["windmill"] === StructureState.Built;
-    const vines: VineId[] = [...field.vines, vineId];
+    if (player.structures["windmill"] === StructureState.Built) {
+        state = markStructureUsed("windmill", gainVP(1, state, playerId), playerId);
+    }
     return pushActivityLog(
         { type: "plant", playerId: player.id, vineId },
-        updatePlayer(windmillAvailable ? markStructureUsed("windmill", gainVP(1, state)) : state,
-            player.id, {
+        updatePlayer(state, player.id, {
             fields: {
                 ...player.fields,
-                [field.id]: { ...field, vines },
+                [field.id]: { ...field, vines: [...field.vines, vineId] },
             }
         })
     );

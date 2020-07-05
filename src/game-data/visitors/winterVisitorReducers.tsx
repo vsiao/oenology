@@ -54,7 +54,6 @@ import {
     harvestFields,
 } from "../shared/grapeWineReducers";
 import { Choice } from "../prompts/PromptState";
-import { makeWine } from "../prompts/promptActions";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,

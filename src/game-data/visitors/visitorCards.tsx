@@ -154,10 +154,10 @@ export const summerVisitorCards = {
         "Vendor",
         <>Draw 1 <Vine />, 1 <Order />, and 1 <WinterVisitor />. Each opponent may draw 1 <SummerVisitor />.</>
     ),
-    // volunteerCrew: summerVisitorCard(
-    //     "Volunteer Crew",
-    //     <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
-    // ),
+    volunteerCrew: summerVisitorCard(
+        "Volunteer Crew",
+        <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
+    ),
 };
 
 const winterVisitorCard = (name: string, description: React.ReactNode) =>
