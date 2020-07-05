@@ -29,7 +29,6 @@ import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
 import {
     fillOrderDisabledReason,
-    harvestFieldDisabledReason,
     moneyDisabledReason,
     needGrapesDisabledReason,
     trainWorkerDisabledReason,
