@@ -67,12 +67,12 @@ export const startMamaPapaTurn = (playerId: string, state: GameState): GameState
     });
 };
 
-export const chooseMamaPapa = (choice: string, state: GameState): GameState => {
+export const chooseMamaPapa = (choice: string, seed: string, state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const mama = mamaCards[player.mama];
     const papa = papaCards[player.papa];
 
-    state = drawCards(gainCoins(mama.coins, state), mama.cards);
+    state = drawCards(gainCoins(mama.coins, state), seed, mama.cards);
     switch (choice) {
         case "PAPA_A":
             state = gainCoins(papa.coins, state);
@@ -131,7 +131,11 @@ const beginWakeUpTurn = (playerId: string, state: GameState): GameState => {
     });
 };
 
-export const chooseWakeUp = ({ idx, visitor }: WakeUpChoiceData, state: GameState): GameState => {
+export const chooseWakeUp = (
+    { idx, visitor }: WakeUpChoiceData,
+    seed: string,
+    state: GameState
+): GameState => {
     const playerId = state.currentTurn.playerId;
     state = {
         ...state,
@@ -143,14 +147,15 @@ export const chooseWakeUp = ({ idx, visitor }: WakeUpChoiceData, state: GameStat
         case 0:
             return state;
         case 1:
-            return drawCards(state, { vine: 1 });
+            return drawCards(state, seed, { vine: 1 });
         case 2:
-            return drawCards(state, { order: 1 });
+            return drawCards(state, seed, { order: 1 });
         case 3:
             return gainCoins(1, state);
         case 4:
             return drawCards(
                 state,
+                seed,
                 visitor === "summer" ? { summerVisitor: 1 } : { winterVisitor: 1 }
             );
         case 5:

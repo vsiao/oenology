@@ -1,16 +1,18 @@
-import GameState, { PlayerState, CardsByType, StructureState } from "./GameState";
+import Alea from "alea";
+import GameState, { PlayerState, StructureState } from "./GameState";
 import { GameAction, PlayerInit } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
-import { CHEAT_drawCard } from "./shared/cardReducers";
+import { CHEAT_drawCard, UNSHUFFLED_CARDS, shuffle } from "./shared/cardReducers";
 import { startMamaPapaTurn } from "./shared/turnReducers";
+import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     switch (action.type) {
         case "START_GAME":
             return startMamaPapaTurn(
                 action.players[0].id,
-                initGame(userId, action.players, action.shuffledCards)
+                initGame(userId, action.players, action._key!)
             );
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
@@ -18,26 +20,25 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     return board(prompt(state, action), action);
 };
 
-const initGame = (
-    userId: string,
-    players: PlayerInit[],
-    shuffledCards: CardsByType
-): GameState => {
+const initGame = (userId: string, players: PlayerInit[], seed: string): GameState => {
+    const random = Alea(seed);
+    const mamas = shuffle(Object.keys(mamaCards) as MamaId[], random);
+    const papas = shuffle(Object.keys(papaCards) as PapaId[], random);
     return {
         year: 0,
         currentTurn: {
             type: "mamaPapa",
             playerId: players[0].id,
         },
-        drawPiles: shuffledCards,
-        discardPiles: {
+        drawPiles: {
             vine: [],
             summerVisitor: [],
             order: [],
             winterVisitor: [],
         },
+        discardPiles: UNSHUFFLED_CARDS,
         players: Object.fromEntries(
-            players.map(player => [player.id, initPlayer(player)])
+            players.map((p, i) => [p.id, initPlayer(p, mamas[i], papas[i])])
         ),
         tableOrder: players.map(({ id }) => id),
         grapeIndex: 0,
@@ -65,7 +66,11 @@ const initGame = (
     };
 };
 
-const initPlayer = ({ id, name, color, mama, papa }: PlayerInit): PlayerState => {
+const initPlayer = (
+    { id, name, color }: PlayerInit,
+    mama: MamaId,
+    papa: PapaId
+): PlayerState => {
     return {
         id,
         name,

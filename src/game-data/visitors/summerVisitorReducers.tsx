@@ -635,7 +635,7 @@ export const summerVisitorReducers: Record<
                 switch (action.choice) {
                     case "LANDSCAPER_DRAW_PLANT":
                         return promptToChooseVineCard(
-                            drawCards(state, { vine: 1 }),
+                            drawCards(state, action._key!, { vine: 1 }),
                             { optional: true }
                         );
                     case "LANDSCAPER_SWITCH":
@@ -690,7 +690,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "WAKE_UP":
-                        return passToNextSeason(chooseWakeUp(action.data as WakeUpChoiceData, {
+                        return passToNextSeason(chooseWakeUp(action.data as WakeUpChoiceData, action._key!, {
                             ...state,
                             // Clear the previous wake-up position
                             wakeUpOrder: state.wakeUpOrder.map(
@@ -744,7 +744,7 @@ export const summerVisitorReducers: Record<
                     case "PATRON_GAIN":
                         return endVisitor(gainCoins(4, state));
                     case "PATRON_DRAW":
-                        return endVisitor(drawCards(state, { order: 1, winterVisitor: 1, }));
+                        return endVisitor(drawCards(state, action._key!, { order: 1, winterVisitor: 1, }));
                     default:
                         return state;
                 }
@@ -763,7 +763,7 @@ export const summerVisitorReducers: Record<
                     });
                 } else {
                     return endTurn(
-                        drawCards(discardCards(action.cards!, state), {
+                        drawCards(discardCards(action.cards!, state), action._key!, {
                             vine: 1,
                             summerVisitor: 1,
                             order: 1,
@@ -826,11 +826,13 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SPONSOR_DRAW":
-                        return endVisitor(drawCards(state, { vine: 2 }));
+                        return endVisitor(drawCards(state, action._key!, { vine: 2 }));
                     case "SPONSOR_GAIN":
                         return endVisitor(gainCoins(3, state));
                     case "SPONSOR_BOTH":
-                        return endVisitor(gainCoins(3, drawCards(loseVP(1, state), { vine: 2 })));
+                        return endVisitor(
+                            gainCoins(3, drawCards(loseVP(1, state), action._key!, { vine: 2 }))
+                        );
                     default:
                         return state;
                 }
@@ -980,7 +982,7 @@ export const summerVisitorReducers: Record<
                 state = setPendingAction({
                     ...vendorAction,
                     mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
-                }, drawCards(state, { vine: 1, order: 1, winterVisitor: 1, }));
+                }, drawCards(state, action._key!, { vine: 1, order: 1, winterVisitor: 1, }));
                 return state.playerId === null || state.playerId === currentTurnPlayerId
                     ? state
                     : promptForAction(state, {
@@ -994,7 +996,7 @@ export const summerVisitorReducers: Record<
                 switch (action.choice) {
                     case "VENDOR_DRAW":
                         return maybeEndVisitor(
-                            drawCards(state, { summerVisitor: 1 }, action.playerId),
+                            drawCards(state, action._key!, { summerVisitor: 1 }, action.playerId),
                             action.playerId
                         );
                     case "VENDOR_PASS":

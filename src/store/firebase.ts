@@ -69,7 +69,7 @@ export function* subscribeToRoom(gameId: string, userId: string) {
 export function* publishGameLog(gameId: string) {
     while (true) {
         const gameAction = yield take(isGameAction);
-        if (!gameAction.published) {
+        if (!gameAction._key) {
             firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
         }
     }
@@ -78,7 +78,9 @@ export function* publishGameLog(gameId: string) {
 export function* subscribeToGameLog(gameId: string) {
     const firebaseEventChannel = eventChannel(emit => {
         const ref = firebase.database().ref(`gameLogs/${gameId}`);
-        ref.on("child_added", snap => emit({ ...snap.val(), published: true }));
+        ref.on("child_added", snap => {
+            emit({ ...snap.val(), _key: snap.key })
+        });
         return () => ref.off("child_added");
     });
     while (true) {

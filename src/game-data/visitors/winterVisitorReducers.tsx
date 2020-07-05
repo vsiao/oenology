@@ -116,7 +116,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "CRUSHEX_GAIN":
-                        return endVisitor(drawCards(gainCoins(3, state), { order: 1 }));
+                        return endVisitor(drawCards(gainCoins(3, state), action._key!, { order: 1 }));
                     case "CRUSHEX_MAKE":
                         return promptToMakeWine(state, /* upToN */ 3);
                     default:
@@ -144,9 +144,9 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "CRUSHER_GAIN":
-                        return endVisitor(gainCoins(3, drawCards(state, { summerVisitor: 1 })));
+                        return endVisitor(gainCoins(3, drawCards(state, action._key!, { summerVisitor: 1 })));
                     case "CRUSHER_DRAW":
-                        return promptToMakeWine(drawCards(state, { order: 1 }), /* upToN */ 2);
+                        return promptToMakeWine(drawCards(state, action._key!, { order: 1 }), /* upToN */ 2);
                     default:
                         return state;
                 }
@@ -276,7 +276,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "HEXPERT_DRAW":
-                        return endVisitor(drawCards(state, { vine: 1 }));
+                        return endVisitor(drawCards(state, action._key!, { vine: 1 }));
                     case "HEXPERT_BUILD":
                         return endVisitor(buildStructure(payCoins(1, state), "yoke"));
                     default:
@@ -339,7 +339,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "JUDGE_DRAW":
-                        return endVisitor(drawCards(state, { summerVisitor: 2 }));
+                        return endVisitor(drawCards(state, action._key!, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
                         return promptToChooseWine(state, { minValue: 4, limit: 1 });
                     default:
@@ -443,7 +443,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "MARKETER_DRAW":
-                        return endVisitor(gainCoins(1, drawCards(state, { summerVisitor: 2 })));
+                        return endVisitor(gainCoins(1, drawCards(state, action._key!, { summerVisitor: 2 })));
                     case "MARKETER_FILL":
                         return promptToChooseOrderCard(state);
                     default:
@@ -638,6 +638,7 @@ export const winterVisitorReducers: Record<
                                     { ...mentorAction, reactions: mentorAction.reactions - 1 },
                                     state
                                 ),
+                                action._key!,
                                 action.choice === "MENTOR_DRAW_VINE"
                                     ? { vine: 1 }
                                     : { summerVisitor: 1 }
@@ -730,7 +731,9 @@ export const winterVisitorReducers: Record<
                 if (state.players[playerId].victoryPoints < 0) {
                     return endVisitor(gainCoins(6, state));
                 } else {
-                    return endVisitor(drawCards(state, { vine: 1, summerVisitor: 1, order: 1 }));
+                    return endVisitor(
+                        drawCards(state, action._key!, { vine: 1, summerVisitor: 1, order: 1 })
+                    );
                 }
             default:
                 return state;
@@ -853,13 +856,13 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SCHOLAR_DRAW":
-                        return endVisitor(drawCards(state, { order: 2 }));
+                        return endVisitor(drawCards(state, action._key!, { order: 2 }));
                     case "SCHOLAR_TRAIN":
                         return endVisitor(trainWorker(payCoins(3, state)));
                     case "SCHOLAR_BOTH":
                         return endVisitor(
                             trainWorker(payCoins(3,
-                                drawCards(loseVP(1, state), { order: 2 })
+                                drawCards(loseVP(1, state), action._key!, { order: 2 })
                             ))
                         );
                     default:

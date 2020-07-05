@@ -1,3 +1,4 @@
+import Alea from "alea";
 import GameState, { CardType, CardId, CardsByType } from "../GameState";
 import { pushActivityLog, updatePlayer } from "./sharedReducers";
 import {
@@ -18,26 +19,52 @@ export const UNSHUFFLED_CARDS: CardsByType = {
     winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
 };
 
+export const shuffle = <T>(inCards: T[], random: () => number): T[] => {
+    const out = inCards.slice();
+
+    // Fisher-Yates shuffle
+    for (let i = out.length - 1; i >= 0; --i) {
+        const j = Math.floor(random() * (i + 1)); // 0 <= x <= i
+        const tmp = out[i];
+        out[i] = out[j];
+        out[j] = tmp;
+    }
+    return out;
+};
+
 const splitDeck = <T extends unknown>(deck: T[], n: number | undefined): [T[], T[]] => {
     return [n ? deck.slice(0, n) : [], n ? deck.slice(n) : deck];
 };
 export const drawCards = (
     state: GameState,
+    seed: string,
     numCards: { [K in CardType]?: number },
     playerId = state.currentTurn.playerId
 ): GameState => {
-    const drawPiles = state.drawPiles;
-    const [drawnVines, vine] = splitDeck(drawPiles.vine, numCards.vine);
-    const [drawnSummerVisitors, summerVisitor] = splitDeck(drawPiles.summerVisitor, numCards.summerVisitor);
-    const [drawnOrders, order] = splitDeck(drawPiles.order, numCards.order);
-    const [drawnWinterVisitors, winterVisitor] = splitDeck(drawPiles.winterVisitor, numCards.winterVisitor);
+    const drawnCards: CardId[] = [];
 
-    const drawnCards = [
-        ...drawnVines.map((id) => ({ type: "vine" as const, id })),
-        ...drawnSummerVisitors.map((id) => ({ type: "visitor" as const, id })),
-        ...drawnOrders.map((id) => ({ type: "order" as const, id })),
-        ...drawnWinterVisitors.map((id) => ({ type: "visitor" as const, id })),
-    ];
+    let random: () => number;
+    Object.entries(numCards).forEach(([t, numCards]) => {
+        if (!numCards) {
+            return;
+        }
+        const type = t as CardType;
+        const { drawPiles, discardPiles } = state;
+        let drawPile: string[] = drawPiles[type];
+        if (drawPile.length < numCards) {
+            drawPile = [...drawPile, ...shuffle(discardPiles[type], random || (random = Alea(seed)))];
+            state = { ...state, discardPiles: { ...state.discardPiles, [type]: [] } };
+        }
+        let cards: string[];
+        [cards, drawPile] = splitDeck(drawPile, numCards);
+        state = { ...state, drawPiles: { ...state.drawPiles, [type]: drawPile } };
+
+        drawnCards.push(
+            ...cards.map(id =>
+                ({ type: type === "vine" || type === "order" ? type : "visitor", id, }) as CardId
+            )
+        );
+    });
 
     return pushActivityLog(
         {
@@ -47,11 +74,7 @@ export const drawCards = (
                 ? (visitorCards[card.id].season === "summer" ? "summerVisitor" : "winterVisitor")
                 : card.type),
         },
-        addCardsToHand(
-            drawnCards,
-            { ...state, drawPiles: { vine, summerVisitor, order, winterVisitor }, },
-            playerId,
-        )
+        addCardsToHand(drawnCards, state, playerId)
     );
 };
 

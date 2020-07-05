@@ -36,13 +36,13 @@ export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
         case "mamaPapa":
             if (action.type === "CHOOSE_ACTION") {
-                return endTurn(chooseMamaPapa(action.choice, state));
+                return endTurn(chooseMamaPapa(action.choice, action._key!, state));
             }
             return state;
 
         case "wakeUpOrder": {
             if (action.type === "CHOOSE_ACTION" && action.choice === "WAKE_UP") {
-                return endTurn(chooseWakeUp(action.data as WakeUpChoiceData, state));
+                return endTurn(chooseWakeUp(action.data as WakeUpChoiceData, action._key!, state));
             }
             return state;
         }
@@ -54,15 +54,18 @@ export const board = (state: GameState, action: GameAction): GameState => {
                 case "CHOOSE_ACTION":
                     switch (action.choice) {
                         case "FALL_DRAW_BOTH":
-                            return endTurn(drawCards(state, { summerVisitor: 1, winterVisitor: 1 }));
+                            return endTurn(drawCards(state, action._key!, {
+                                summerVisitor: 1,
+                                winterVisitor: 1
+                            }));
                         case "FALL_DRAW_SUMMER":
-                            return endTurn(drawCards(state, { summerVisitor: 1 }));
+                            return endTurn(drawCards(state, action._key!, { summerVisitor: 1 }));
                         case "FALL_DRAW_SUMMER_2":
-                            return endTurn(drawCards(state, { summerVisitor: 2 }));
+                            return endTurn(drawCards(state, action._key!, { summerVisitor: 2 }));
                         case "FALL_DRAW_WINTER":
-                            return endTurn(drawCards(state, { winterVisitor: 1 }));
+                            return endTurn(drawCards(state, action._key!, { winterVisitor: 1 }));
                         case "FALL_DRAW_WINTER_2":
-                            return endTurn(drawCards(state, { winterVisitor: 2 }));
+                            return endTurn(drawCards(state, action._key!, { winterVisitor: 2 }));
                         default:
                             return state;
                     }
@@ -306,11 +309,11 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                     });
                 case "drawOrder": {
                     const bonus = hasPlacementBonus && state.workerPlacements.drawOrder.length === 1;
-                    return endTurn(drawCards(state, { order: bonus ? 2 : 1 }));
+                    return endTurn(drawCards(state, action._key!, { order: bonus ? 2 : 1 }));
                 }
                 case "drawVine": {
                     const bonus = hasPlacementBonus && state.workerPlacements.drawVine.length === 1;
-                    return endTurn(drawCards(state, { vine: bonus ? 2 : 1 }));
+                    return endTurn(drawCards(state, action._key!, { vine: bonus ? 2 : 1 }));
                 }
                 case "fillOrder":
                     return promptToChooseOrderCard(setPendingAction({ type: "fillOrder" }, state));
