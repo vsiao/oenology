@@ -126,6 +126,10 @@ export const summerVisitorCards = {
     //     "Producer",
     //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
     // ),
+    sharecropper: summerVisitorCard(
+        "Sharecropper",
+        <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    ),
     sponsor: summerVisitorCard(
         "Sponsor",
         <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
@@ -186,7 +190,7 @@ export const winterVisitorCards = {
     ),
     governess: winterVisitorCard(
         "Governess",
-        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year or discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
+        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
     ),
     guestSpeaker: winterVisitorCard(
         "Guest Speaker",

@@ -847,6 +847,62 @@ export const summerVisitorReducers: Record<
         }
     },
     // producer: s => endVisitor(s),
+    sharecropper: (state, action, pendingAction) => {
+        const sharecropperAction = pendingAction as PlayVisitorPendingAction & {
+            isDiscarding?: boolean;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "SHARECROPPER_PLANT",
+                                    label: <>Plant 1 <Vine /></>,
+                                    disabledReason: plantVinesDisabledReason(state, { bypassStructures: true })
+                                },
+                                {
+                                    id: "SHARECROPPER_UPROOT",
+                                    label: <>Uproot and discard 1 <Vine /> to gain <VP>2</VP></>,
+                                    disabledReason: uprootDisabledReason(state)
+                                }
+                            ]
+                        });
+                    case "vine":
+                        return sharecropperAction.isDiscarding ?
+                            endVisitor(gainVP(2, discardCards(action.cards!, state))) :
+                            promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SHARECROPPER_PLANT":
+                        return promptToChooseVineCard(state, { bypassStructures: true });
+                    case "SHARECROPPER_UPROOT":
+                        return promptToUproot(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_VINE":
+                state = uprootVineFromField(action.vines[0], state);
+                return promptToChooseCard(setPendingAction({
+                    ...sharecropperAction,
+                    isDiscarding: true
+                }, state), {
+                    title: "Discard a vine",
+                    cards: state.players[state.currentTurn.playerId].cardsInHand
+                        .filter(({ type }) => type === "vine")
+                        .map(id => ({ id }))
+                });
+            case "CHOOSE_FIELD":
+                return endVisitor(plantVineInField(action.fields[0], state));
+            default:
+                return state;
+        }
+    },
     surveyor: (state, action) => {
         const fields = Object.values(state.players[state.currentTurn.playerId].fields);
         let numEmptyAndOwned = 0;
