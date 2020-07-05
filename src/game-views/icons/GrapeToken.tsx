@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./GrapeToken.css";
 
-const Grape: React.FunctionComponent = () => {
+const GrapeToken: React.FunctionComponent = () => {
     return <svg
         className="GrapeToken"
         xmlns="http://www.w3.org/2000/svg"
@@ -62,4 +62,4 @@ const Grape: React.FunctionComponent = () => {
     </svg>;
 };
 
-export default Grape;
+export default GrapeToken;
