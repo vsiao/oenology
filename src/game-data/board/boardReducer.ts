@@ -261,6 +261,7 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
             if (workerIndex === null) {
                 throw new Error("Unexpected state: no available workers");
             }
+            state = pushActivityLog({ type: "placeWorker", playerId: player.id, }, state);
             state = {
                 ...updatePlayer(state, player.id, {
                     workers: player.workers.map(

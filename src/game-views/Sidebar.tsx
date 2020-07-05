@@ -34,7 +34,9 @@ const Sidebar: React.FunctionComponent<Props> = props => {
         <div className="Sidebar-activityLog">
             <div className="Sidebar-activityLogContents">
                 {props.activityLog.map((event, i) =>
-                    <ActivityLogItem key={i} event={event} playerNameById={props.playerNameById} />
+                    event.type !== "placeWorker"
+                        ? <ActivityLogItem key={i} event={event} playerNameById={props.playerNameById} />
+                        : null
                 )}
             </div>
         </div>

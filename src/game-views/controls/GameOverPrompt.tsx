@@ -9,14 +9,18 @@ import VictoryPoints from "../icons/VictoryPoints";
 import Coins from "../icons/Coins";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "../icons/Card";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
+import Worker from "../icons/Worker";
 
+interface PlayerWithStats extends PlayerState {
+    coinsGained: number;
+    vinesPlanted: number;
+    sVisitorsPlayed: number;
+    ordersFilled: number;
+    wVisitorsPlayed: number;
+    workersPlaced: number;
+}
 interface Props {
-    players: (PlayerState & {
-        vinesPlanted: number;
-        sVisitorsPlayed: number;
-        ordersFilled: number;
-        wVisitorsPlayed: number;
-    })[]; // Ordered by win conditions
+    players: PlayerWithStats[]; // Ordered by win conditions
 }
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
@@ -25,11 +29,12 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
             <thead>
                 <tr className="GameOverPrompt-row">
                     <th className="GameOverPrompt-colHeader"></th>
-                    <th className="GameOverPrompt-colHeader">Coins</th>
+                    <th className="GameOverPrompt-colHeader"><Coins /><br />gained</th>
                     <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
                     <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
                     <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
                     <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
+                    <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
                 </tr>
             </thead>
             <tbody>
@@ -39,11 +44,12 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                             <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
                             <strong>{p.name}</strong>
                         </th>
-                        <td><Coins>{p.coins}</Coins></td>
+                        <td>{p.coinsGained}</td>
                         <td>{p.vinesPlanted}</td>
                         <td>{p.sVisitorsPlayed}</td>
                         <td>{p.ordersFilled}</td>
                         <td>{p.wVisitorsPlayed}</td>
+                        <td>{p.workersPlaced}</td>
                     </tr>)}
             </tbody>
         </table>
@@ -61,15 +67,31 @@ const crushPadValue = (state: GameState, playerId: string) => {
 
 const mapStateToProps = (state: AppState) => {
     const game = state.game!
-    const playersWithStats = Object.fromEntries(
+    const playersWithStats: Record<string, PlayerWithStats> = Object.fromEntries(
         Object.entries(game.players).map(([id, p]) => [
-            id, { ...p, vinesPlanted: 0, sVisitorsPlayed: 0, ordersFilled: 0, wVisitorsPlayed: 0, }
+            id, {
+                ...p,
+                coinsGained: 0,
+                vinesPlanted: 0,
+                sVisitorsPlayed: 0,
+                ordersFilled: 0,
+                wVisitorsPlayed: 0,
+                workersPlaced: 0,
+            }
         ])
     );
     game.activityLog.forEach(event => {
         switch (event.type) {
+            case "coins":
+                if (event.delta > 0) {
+                    playersWithStats[event.playerId].coinsGained += event.delta;
+                }
+                return;
             case "fill":
                 playersWithStats[event.playerId].ordersFilled++;
+                return;
+            case "placeWorker":
+                playersWithStats[event.playerId].workersPlaced++;
                 return;
             case "plant":
                 playersWithStats[event.playerId].vinesPlanted++;

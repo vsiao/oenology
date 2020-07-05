@@ -378,6 +378,8 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 // ----------------------------------------------------------------------------
 
 const endYear = (state: GameState): GameState => {
+    state = pushActivityLog({ type: "season", season: `End of Year ${state.year}` }, state);
+
     if (Object.values(state.players).some(p => p.victoryPoints >= 20)) {
         // End of game
         return displayGameOverPrompt(state);
@@ -385,6 +387,8 @@ const endYear = (state: GameState): GameState => {
 
     const { wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
+
+    Object.values(state.players).forEach(p => state = gainCoins(p.residuals, state, p.id));
 
     return beginEOYDiscardTurn(compactWakeUpOrder[0].playerId, {
         ...state,
@@ -397,8 +401,6 @@ const endYear = (state: GameState): GameState => {
                     playerId,
                     {
                         ...playerState,
-                        // Collect residual payments
-                        coins: playerState.coins + playerState.residuals,
                         // Retrieve workers
                         tempWorker: undefined,
                         workers: playerState.workers

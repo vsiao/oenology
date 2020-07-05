@@ -16,6 +16,7 @@ export type ActivityLogEvent =
     | HarvestEvent
     | MakeWineEvent
     | PassEvent
+    | PlaceWorkerEvent
     | PlantEvent
     | ResidualsEvent
     | SeasonEvent
@@ -60,6 +61,7 @@ interface MakeWineEvent extends LogEvent<"makeWine"> {
     wines: WineSpec[];
 }
 interface PassEvent extends LogEvent<"pass"> { }
+interface PlaceWorkerEvent extends LogEvent<"placeWorker"> { }
 interface ResidualsEvent extends LogEvent<"residuals"> {
     delta: number;
 }
