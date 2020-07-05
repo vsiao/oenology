@@ -146,9 +146,7 @@ export const winterVisitorReducers: Record<
                     case "CRUSHER_GAIN":
                         return endVisitor(gainCoins(3, drawCards(state, { summerVisitor: 1 })));
                     case "CRUSHER_DRAW":
-                        return endVisitor(
-                            promptToMakeWine(drawCards(state, { order: 1 }), /* upToN */ 2)
-                        );
+                        return promptToMakeWine(drawCards(state, { order: 1 }), /* upToN */ 2);
                     default:
                         return state;
                 }
