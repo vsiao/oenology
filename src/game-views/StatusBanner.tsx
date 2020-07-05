@@ -5,8 +5,10 @@ import { AppState } from "../store/AppState";
 import { CurrentTurn, WorkerPlacementTurnPendingAction } from "../game-data/GameState";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
+import { gameIsOver } from "../game-data/shared/sharedSelectors";
 
 interface Props {
+    gameOver: boolean;
     currentTurn: CurrentTurn;
     playerNames: Record<string, string>;
     playerId: string | null;
@@ -14,7 +16,7 @@ interface Props {
 
 const StatusBanner: React.FunctionComponent<Props> = props => {
     return <div className="StatusBanner">
-        {renderStatus(props)}
+        {props.gameOver ? "Game over! Thanks for playing!" : renderStatus(props)}
     </div>;
 };
 
@@ -83,6 +85,7 @@ const renderPendingActionStatus = (
 const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     return {
+        gameOver: gameIsOver(game),
         currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(
             Object.keys(game.players)

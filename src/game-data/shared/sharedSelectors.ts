@@ -284,3 +284,10 @@ export const moneyDisabledReason = (
 ): string | undefined => {
     return state.players[playerId].coins < cost ? "You don't have enough money." : undefined;
 };
+
+export const gameIsOver = (state: GameState) => {
+    return state.currentTurn.type === "workerPlacement"
+        && state.currentTurn.season === "winter"
+        && state.wakeUpOrder.every(pos => !pos || pos.passed)
+        && Object.values(state.players).some(p => p.victoryPoints >= 20);
+};

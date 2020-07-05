@@ -2,7 +2,7 @@ import * as React from "react";
 import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction, StructureState, PlayerState, CardType } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
-import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard, displayGameOverPrompt } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
@@ -286,47 +286,7 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
                 })
             );
         } else {
-            // End of year
-            return startEOYDiscardTurn(compactWakeUpOrder[0].playerId, {
-                ...state,
-                workerPlacements: (Object.fromEntries(
-                    Object.entries(state.workerPlacements).map(([placement]) => [placement, []])
-                ) as unknown) as GameState["workerPlacements"],
-                players: Object.fromEntries(
-                    Object.entries(state.players).map(([playerId, playerState]) => {
-                        return [
-                            playerId,
-                            {
-                                ...playerState,
-                                // Collect residual payments
-                                coins: playerState.coins + playerState.residuals,
-                                // Retrieve workers
-                                tempWorker: undefined,
-                                workers: playerState.workers
-                                    .filter(w => !w.isTemp)
-                                    .map(w => ({ ...w, available: true })),
-                                // Age grape and wine tokens
-                                crushPad: {
-                                    red: ageAll(playerState.crushPad.red),
-                                    white: ageAll(playerState.crushPad.white),
-                                },
-                                cellar: ageCellar(playerState.cellar, playerState.structures),
-                                // Reset field harvested state
-                                fields: {
-                                    field5: { ...playerState.fields.field5, harvested: false },
-                                    field6: { ...playerState.fields.field6, harvested: false },
-                                    field7: { ...playerState.fields.field7, harvested: false },
-                                },
-                                structures: Object.fromEntries(
-                                    Object.entries(playerState.structures).map(([structure, structureState]) => (
-                                        [structure, structureState === StructureState.Unbuilt ? structureState : StructureState.Built]
-                                    ))
-                                ) as PlayerState["structures"]
-                            },
-                        ];
-                    })
-                ),
-            });
+            return endYear(state);
         }
     }
     const activeWakeUpOrder = compactWakeUpOrder
@@ -406,11 +366,62 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 };
 
 //
-// End-of-year discard turns
+// End-of-year turns
 // ----------------------------------------------------------------------------
 
+const endYear = (state: GameState): GameState => {
+    if (Object.values(state.players).some(p => p.victoryPoints >= 20)) {
+        // End of game
+        return displayGameOverPrompt(state);
+    }
+
+    const { wakeUpOrder } = state;
+    const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
+
+    return beginEOYDiscardTurn(compactWakeUpOrder[0].playerId, {
+        ...state,
+        workerPlacements: (Object.fromEntries(
+            Object.entries(state.workerPlacements).map(([placement]) => [placement, []])
+        ) as unknown) as GameState["workerPlacements"],
+        players: Object.fromEntries(
+            Object.entries(state.players).map(([playerId, playerState]) => {
+                return [
+                    playerId,
+                    {
+                        ...playerState,
+                        // Collect residual payments
+                        coins: playerState.coins + playerState.residuals,
+                        // Retrieve workers
+                        tempWorker: undefined,
+                        workers: playerState.workers
+                            .filter(w => !w.isTemp)
+                            .map(w => ({ ...w, available: true })),
+                        // Age grape and wine tokens
+                        crushPad: {
+                            red: ageAll(playerState.crushPad.red),
+                            white: ageAll(playerState.crushPad.white),
+                        },
+                        cellar: ageCellar(playerState.cellar, playerState.structures),
+                        // Reset field harvested state
+                        fields: {
+                            field5: { ...playerState.fields.field5, harvested: false },
+                            field6: { ...playerState.fields.field6, harvested: false },
+                            field7: { ...playerState.fields.field7, harvested: false },
+                        },
+                        structures: Object.fromEntries(
+                            Object.entries(playerState.structures).map(([structure, structureState]) => (
+                                [structure, structureState === StructureState.Unbuilt ? structureState : StructureState.Built]
+                            ))
+                        ) as PlayerState["structures"]
+                    },
+                ];
+            })
+        ),
+    });
+};
+
 const END_OF_YEAR_HAND_LIMIT = 7;
-const startEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
+const beginEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
     state = {
         ...state,
         currentTurn: { type: "endOfYearDiscard", playerId },
@@ -443,7 +454,7 @@ const endEOYDiscardTurn = (state: GameState): GameState => {
     } else {
         const nextPlayerId =
             compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
-        return startEOYDiscardTurn(nextPlayerId, state);
+        return beginEOYDiscardTurn(nextPlayerId, state);
     }
 };
 

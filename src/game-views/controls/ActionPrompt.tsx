@@ -11,6 +11,7 @@ import BuildStructurePrompt from "./BuildStructurePrompt";
 import ChooseCardPrompt from "./ChooseCardPrompt";
 import ChooseWinePrompt from "./ChooseWinePrompt";
 import PlaceWorkerPrompt from "./PlaceWorkerPrompt";
+import GameOverPrompt from "./GameOverPrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -51,6 +52,8 @@ const renderPrompt = (
             return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
         case "placeWorker":
             return <PlaceWorkerPrompt playerId={props.playerId} />;
+        case "gameOver":
+            return <GameOverPrompt />;
     }
 };
 

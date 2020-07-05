@@ -2,7 +2,6 @@ import { Coupon } from "../structures";
 import { CardId, FieldId } from "../GameState";
 import { OrderId } from "../orderCards";
 import { VisitorId } from "../visitors/visitorCards";
-import { VineId } from "../vineCards";
 
 export type PromptState =
     | ChooseActionPromptState
@@ -12,7 +11,8 @@ export type PromptState =
     | ChooseFieldPromptState
     | MakeWinePromptState
     | PlaceWorkerPromptState
-    | BuildStructurePromptState;
+    | BuildStructurePromptState
+    | GameOverPromptState;
 
 export interface Choice<DataT = unknown> {
     id: string;
@@ -74,4 +74,8 @@ export interface PlaceWorkerPromptState {
 export interface BuildStructurePromptState {
     type: "buildStructure";
     coupon?: Coupon;
+}
+
+export interface GameOverPromptState {
+    type: "gameOver";
 }

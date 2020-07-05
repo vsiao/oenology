@@ -286,3 +286,7 @@ export const promptToBuildStructure = (
     }
     return enqueueActionPrompt(state, { type: "buildStructure", coupon });
 };
+
+export const displayGameOverPrompt = (state: GameState) => {
+    return enqueueActionPrompt(state, { type: "gameOver" });
+};
