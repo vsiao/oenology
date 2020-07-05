@@ -8,6 +8,7 @@ import Coins from "./icons/Coins";
 import { Vine, SummerVisitor, Order, WinterVisitor } from "./icons/Card";
 import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
+import GrapeToken from "./icons/GrapeToken";
 import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
@@ -16,6 +17,7 @@ import { useTooltip } from "./shared/useTooltip";
 
 interface Props {
     player: PlayerState;
+    hasGrape?: boolean;
 }
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
@@ -33,6 +35,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     </li>
                 )}
             </ul>
+            {props.hasGrape && <GrapeToken />}
             <Residuals className="SidebarPlayer-residualPayments">{player.residuals}</Residuals>
             <Coins className="SidebarPlayer-coins">{player.coins}</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">{player.victoryPoints}</VictoryPoints>
@@ -136,7 +139,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 }
                 const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
                 return <StructureTooltip id={structureId as StructureId}>
-                    {anchorRef => 
+                    {anchorRef =>
                         <li ref={anchorRef as React.RefObject<HTMLLIElement>}
                             key={structureId}
                             className={cx("SidebarPlayer-structure", {
@@ -147,7 +150,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                             {structure.name}&nbsp;
                             {structureId === "yoke" && isUsed && <Worker color={player.color} />}
                         </li>}
-                </StructureTooltip>
+                </StructureTooltip>;
             })}
         </ul>
     </div>;
@@ -155,7 +158,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
 
 const StructureTooltip: React.FunctionComponent<{
     id: StructureId;
-    children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode
+    children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode;
 }> = ({ id, children }) => {
     const structure = structures[id];
     const [anchorRef, maybeTooltip] = useTooltip(
