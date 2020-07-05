@@ -498,7 +498,7 @@ export const summerVisitorReducers: Record<
             case "BUILD_STRUCTURE":
                 const { cost } = structures[action.structureId];
                 state = buildStructure(
-                    payCoins(cost - coupon.amount, state),
+                    payCoins(cost - coupon.amount, state, action.playerId),
                     action.structureId,
                     action.playerId
                 );
