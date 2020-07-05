@@ -83,17 +83,17 @@ export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
 
 export const placeGrapes = (
     state: GameState,
-    values: { red: number; white: number; }
+    { red = 0, white = 0 }: { red?: number; white?: number; }
 ): GameState => {
     const player = state.players[state.currentTurn.playerId];
 
     // devalue grapes if crush pad already contains the same value
-    const red = devaluedIndex(values.red, player.crushPad.red);
-    const white = devaluedIndex(values.white, player.crushPad.white);
+    const rIdx = devaluedIndex(red, player.crushPad.red);
+    const wIdx = devaluedIndex(white, player.crushPad.white);
     return updatePlayer(state, player.id, {
         crushPad: {
-            red: player.crushPad.red.map((r, i) => i === red || r) as TokenMap,
-            white: player.crushPad.white.map((w, i) => i === white || w) as TokenMap,
+            red: player.crushPad.red.map((r, i) => i === rIdx || r) as TokenMap,
+            white: player.crushPad.white.map((w, i) => i === wIdx || w) as TokenMap,
         },
     });
 };

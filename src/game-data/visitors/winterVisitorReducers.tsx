@@ -392,13 +392,15 @@ export const winterVisitorReducers: Record<
             }
             case "CHOOSE_ACTION":
                 const laborerAction = pendingAction as LaborerAction;
-                state = setPendingAction({
-                    ...laborerAction,
-                    usedChoices: {
-                        ...laborerAction.usedChoices,
-                        [action.choice]: structures,
-                    },
-                }, Object.keys(laborerAction.usedChoices).length > 0 ? loseVP(1, state) : state);
+                if (action.choice !== "LABORER_PASS") {
+                    state = setPendingAction({
+                        ...laborerAction,
+                        usedChoices: {
+                            ...laborerAction.usedChoices,
+                            [action.choice]: structures,
+                        },
+                    }, Object.keys(laborerAction.usedChoices).length > 0 ? loseVP(1, state) : state);
+                }
                 switch (action.choice) {
                     case "LABORER_HARVEST":
                         return promptToHarvest(state, 2);

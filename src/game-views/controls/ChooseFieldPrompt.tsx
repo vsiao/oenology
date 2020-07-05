@@ -45,7 +45,7 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
                         "ChooseFieldPrompt-field--selected": isSelected,
                     })}
                     onClick={
-                        prompt.kind === "uproot"
+                        prompt.kind === "uproot" || isDisabled
                             ? undefined
                             : () => {
                                 if (prompt.kind === "oneClick") {

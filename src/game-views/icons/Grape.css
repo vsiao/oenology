@@ -11,9 +11,6 @@
     margin: .1em;
     width: 1.4em;
 }
-.Grape + .Grape {
-    margin-left: 0.4em;
-}
 .Grape--red {
     background: #d80000;
     color: white;

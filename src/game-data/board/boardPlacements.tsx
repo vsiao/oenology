@@ -44,7 +44,10 @@ export const summerActions: BoardAction[] = [
             const player = state.players[state.currentTurn.playerId];
             return hasGrapes(state) ||
                 Object.values(player.fields)
-                    .some(f => (f.sold && player.coins >= f.value) || f.vines.length === 0)
+                    .some(f =>
+                        (f.sold && player.coins >= f.value) ||
+                        (!f.sold && f.vines.length === 0)
+                    )
                 ? undefined
                 : "You don't have anything to buy or sell.";
         },

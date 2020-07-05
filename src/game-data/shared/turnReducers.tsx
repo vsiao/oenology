@@ -53,8 +53,11 @@ export const startMamaPapaTurn = (playerId: string, state: GameState): GameState
                 {mama.coins ? <> and gain <Coins>{mama.coins}</Coins>.</> : null}
             </p>
             <p>
-                Papa <strong>{papa.name}</strong>:
-                    Gain <Coins>{papa.coins}</Coins> and choose 1:
+                Papa <strong>{papa.name}</strong>: {
+                    papa.coins
+                        ? <>Gain <Coins>{papa.coins}</Coins> and choose 1:</>
+                        : <>Choose 1:</>
+                }
             </p>
         </>,
         choices: [

@@ -313,8 +313,13 @@ export const summerVisitorReducers: Record<
                 return promptForAction(state, {
                     choices: [
                         {
-                            id: "BUYER_PLACE",
-                            label: <>Pay <Coins>2</Coins> to place a <Grape>1</Grape> on your crush pad</>,
+                            id: "BUYER_PLACE_RED",
+                            label: <>Pay <Coins>2</Coins> to place a <Grape color="red">1</Grape> on your crush pad</>,
+                            disabledReason: moneyDisabledReason(state, 2),
+                        },
+                        {
+                            id: "BUYER_PLACE_WHITE",
+                            label: <>Pay <Coins>2</Coins> to place a <Grape color="white">1</Grape> on your crush pad</>,
                             disabledReason: moneyDisabledReason(state, 2),
                         },
                         {
@@ -326,8 +331,10 @@ export const summerVisitorReducers: Record<
                 });
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case "BUYER_PLACE":
-                        return endVisitor(payCoins(2, placeGrapes(state, { red: 1, white: 1 })));
+                    case "BUYER_PLACE_RED":
+                        return endVisitor(payCoins(2, placeGrapes(state, { red: 1 })));
+                    case "BUYER_PLACE_WHITE":
+                        return endVisitor(payCoins(2, placeGrapes(state, { white: 1 })));
                     case "BUYER_DISCARD":
                         return endVisitor(state); // TODO
                     default:

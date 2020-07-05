@@ -25,11 +25,11 @@ import {
     promptToHarvest,
     promptToUproot
 } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, harvestFieldDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
+import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData, chooseMamaPapa } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { harvestField, fillOrder, makeWineFromGrapes } from "../shared/grapeWineReducers";
+import { fillOrder, makeWineFromGrapes, harvestFields } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
@@ -184,19 +184,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_FIELD") {
                 return state;
             }
-            state = harvestField(state, action.fields[0]); // TODO harvest multiple
-
-            const bonus = hasPlacementBonus &&
-                !pendingAction.bonusActivated &&
-                state.workerPlacements.harvestField.length === 1 &&
-                harvestFieldDisabledReason(state) === undefined;
-
-            if (bonus) {
-                return promptToHarvest(
-                    setPendingAction({ ...pendingAction, bonusActivated: true }, state)
-                );
-            }
-            return endTurn(state);
+            return endTurn(harvestFields(state, action.fields));
 
         case "uproot":
             if (action.type !== "CHOOSE_VINE") {
@@ -334,8 +322,10 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                         Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
                     return endTurn(gainCoins(bonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
                 }
-                case "harvestField":
-                    return promptToHarvest(setPendingAction({ type: "harvestField" }, state));
+                case "harvestField": {
+                    const bonus = hasPlacementBonus && state.workerPlacements.harvestField.length === 1;
+                    return promptToHarvest(setPendingAction({ type: "harvestField" }, state), bonus ? 2 : 1);
+                }
                 case "makeWine": {
                     const bonus = hasPlacementBonus && state.workerPlacements.makeWine.length === 1;
                     return promptToMakeWine(
