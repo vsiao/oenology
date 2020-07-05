@@ -168,6 +168,10 @@ export const winterVisitorCards = {
         "Assessor",
         <>Gain <Coins>1</Coins> for each card in your hand OR discard your hand (min of 1 card) to gain <VP>2</VP>.</>,
     ),
+    benefactor: winterVisitorCard(
+        "Benefactor",
+        <>Draw 1 <Vine /> and 1 <SummerVisitor /> OR discard 2 visitor cards to gain <VP>2</VP>.</>
+    ),
     bottler: winterVisitorCard(
         "Bottler",
         <>Make up to 3 <WineGlass />. Gain <VP>1</VP> for each type of wine you make.</>
@@ -203,6 +207,10 @@ export const winterVisitorCards = {
     harvester: winterVisitorCard(
         "Harvester",
         <>Harvest up to 2 fields and choose 1: Gain <Coins>2</Coins> or gain <VP>1</VP>.</>
+    ),
+    jackOfAllTrades: winterVisitorCard(
+        "Jack-of-all-trades",
+        <>Choose 2: Harvest 1 field, make up to 2 <WineGlass />, or fill 1 <Order /></>
     ),
     judge: winterVisitorCard(
         "Judge",

@@ -183,7 +183,7 @@ export const canFillOrderWithWines = (orderId: OrderId, wines: WineSpec[]): fals
 
 export const fillOrderDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
     return needWineDisabledReason(state, 1, playerId) ||
-        needCardOfTypeDisabledReason(state, "order", playerId) ||
+        needCardOfTypeDisabledReason(state, "order", { playerId }) ||
         (state.players[playerId].cardsInHand.some(card => {
             return card.type === "order" &&
                 canFillOrderWithWines(card.id, allWines(state, playerId));
@@ -203,13 +203,18 @@ export const numCardsDisabledReason = (
 
 export const needCardOfTypeDisabledReason = (
     state: GameState,
-    type: CardType,
-    playerId = state.currentTurn.playerId
+    type: CardType | "visitor",
+    { playerId = state.currentTurn.playerId, numCards = 1 }: {
+        playerId?: string;
+        numCards?: number;
+    } = {}
 ) => {
     const hasCard = state.players[playerId].cardsInHand.some(card => {
         if (card.type === "visitor") {
             const { season } = visitorCards[card.id];
             switch (type) {
+                case "visitor":
+                    return true;
                 case "summerVisitor":
                     return season === "summer";
                 case "winterVisitor":

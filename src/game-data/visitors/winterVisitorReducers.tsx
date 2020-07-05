@@ -35,6 +35,7 @@ import {
     needWineDisabledReason,
     numCardsDisabledReason,
     harvestFieldDisabledReason,
+    needCardOfTypeDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -80,6 +81,47 @@ export const winterVisitorReducers: Record<
                         return endVisitor(gainCoins(numCards, state));
                     case "ASSESSOR_DISCARD":
                         return endVisitor(gainVP(2, discardCards(player.cardsInHand, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    benefactor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const cards = action.cards!;
+                switch (cards.length) {
+                    case 1:
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "BENEFACTOR_DRAW", label: <>Draw 1 <Vine /> and 1 <SummerVisitor /></>, },
+                                {
+                                    id: "BENEFACTOR_DISCARD",
+                                    label: <>Discard 2 visitor cards to gain <VP>2</VP></>,
+                                    disabledReason:
+                                        needCardOfTypeDisabledReason(state, "visitor", { numCards: 2 }),
+                                },
+                            ],
+                        });
+                    case 2:
+                        return endVisitor(gainVP(2, discardCards(cards, state)));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BENEFACTOR_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { vine: 1, summerVisitor: 1 }));
+                    case "BENEFACTOR_DISCARD":
+                        return promptToChooseCard(state, {
+                            title: "Discard 2 visitors",
+                            cards: state.players[state.currentTurn.playerId].cardsInHand
+                                .filter(({ type }) => type === "visitor")
+                                .map(id => ({ id })),
+                            numCards: 2,
+                        });
                     default:
                         return state;
                 }
@@ -319,6 +361,85 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    jackOfAllTrades: (state, action, pendingAction) => {
+        type ChoiceId = "JACK_HARVEST" | "JACK_MAKE" | "JACK_FILL";
+        interface JackAction extends PlayVisitorPendingAction {
+            usedChoices: { [K in ChoiceId]?: true };
+        }
+        const promptJackAction = (state2: GameState, jackAction: JackAction): GameState => {
+            return promptForAction(
+                state2,
+                {
+                    choices: [
+                        {
+                            id: "JACK_HARVEST",
+                            label: <>Harvest 1 field</>,
+                            disabledReason: harvestFieldDisabledReason(state2),
+                        },
+                        {
+                            id: "JACK_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state2),
+                        },
+                        {
+                            id: "JACK_FILL",
+                            label: <>Fill 1 <Order /></>,
+                            disabledReason: fillOrderDisabledReason(state2),
+                        },
+                    ].filter(choice => !jackAction.usedChoices[choice.id as ChoiceId]),
+                }
+            );
+        };
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const jackAction =
+                (state2.currentTurn as WorkerPlacementTurn).pendingAction as JackAction;
+
+            return Object.keys(jackAction.usedChoices).length === 2
+                ? endVisitor(state2)
+                : promptJackAction(state2, jackAction);
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        const jackAction: JackAction = { ...pendingAction, usedChoices: {}, };
+                        return promptJackAction(setPendingAction(jackAction, state), jackAction);
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                const jackAction = pendingAction as JackAction;
+                state = setPendingAction({
+                    ...jackAction,
+                    usedChoices: {
+                        ...jackAction.usedChoices,
+                        [action.choice]: true,
+                    },
+                }, state);
+                switch (action.choice) {
+                    case "JACK_HARVEST":
+                        return promptToHarvest(state);
+                    case "JACK_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 2);
+                    case "JACK_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return maybeEndVisitor(harvestField(state, action.fields[0]));
+            case "MAKE_WINE":
+                return maybeEndVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "CHOOSE_WINE":
+                return maybeEndVisitor(fillOrder(action.wines, state));
             default:
                 return state;
         }

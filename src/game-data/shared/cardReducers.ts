@@ -79,7 +79,16 @@ export const drawCards = (
 };
 
 export const discardCards = (cards: CardId[], state: GameState): GameState => {
-    return addToDiscard(cards, removeCardsFromHand(cards, state));
+    return pushActivityLog(
+        {
+            type: "discard",
+            playerId: state.currentTurn.playerId,
+            cards: cards.map((card) => card.type === "visitor"
+                ? (visitorCards[card.id].season === "summer" ? "summerVisitor" : "winterVisitor")
+                : card.type),
+        },
+        addToDiscard(cards, removeCardsFromHand(cards, state))
+    );
 };
 
 export const addCardsToHand = (

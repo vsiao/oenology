@@ -66,14 +66,14 @@ export const promptForAction = <DataT extends unknown = undefined>(
 export const promptToChooseCard = (
     state: GameState,
     {
-        title = "Choose a card",
+        title,
         style = "selector",
         cards,
         optional,
         numCards = 1,
         playerId = state.currentTurn.playerId,
     }: {
-        title?: React.ReactNode;
+        title: React.ReactNode;
         style?: "selector" | "oneClick",
         cards: {
             id: CardId;
