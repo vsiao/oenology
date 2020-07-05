@@ -21,6 +21,7 @@ import {
     payCoins,
     plantVineInField,
     uprootVineFromField,
+    uprootVinesFromFields,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -606,6 +607,63 @@ export const summerVisitorReducers: Record<
                     )
                     : endVisitor(state);
 
+            default:
+                return state;
+        }
+    },
+    horticulturist: (state, action, pendingAction) => {
+        const horticulturistAction = pendingAction as PlayVisitorPendingAction & {
+            isDiscarding?: boolean;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "HORTICULTURIST_PLANT",
+                                    label: <>Plant 1 <Vine /></>,
+                                    disabledReason: plantVinesDisabledReason(state, { bypassStructures: true })
+                                },
+                                {
+                                    id: "HORTICULTURIST_UPROOT",
+                                    label: <>Uproot and discard 2 <Vine /> to gain <VP>3</VP></>,
+                                    disabledReason: uprootDisabledReason(state, { numVines: 2 })
+                                }
+                            ]
+                        });
+                    case "vine":
+                        return horticulturistAction.isDiscarding ?
+                            endVisitor(gainVP(3, discardCards(action.cards!, state))) :
+                            promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HORTICULTURIST_PLANT":
+                        return promptToChooseVineCard(state, { bypassStructures: true });
+                    case "HORTICULTURIST_UPROOT":
+                        return promptToUproot(state, 2);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_VINE":
+                state = uprootVinesFromFields(action.vines, state);
+                return promptToChooseCard(setPendingAction({
+                    ...horticulturistAction,
+                    isDiscarding: true
+                }, state), {
+                    title: "Discard 2 vines",
+                    cards: state.players[state.currentTurn.playerId].cardsInHand
+                        .filter(({ type }) => type === "vine")
+                        .map(id => ({ id })),
+                    numCards: 2
+                });
+            case "CHOOSE_FIELD":
+                return endVisitor(plantVineInField(action.fields[0], state));
             default:
                 return state;
         }

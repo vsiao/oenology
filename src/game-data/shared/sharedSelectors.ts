@@ -256,7 +256,9 @@ export const harvestFieldDisabledReason = (state: GameState): string | undefined
     return undefined;
 };
 
-export const uprootDisabledReason = (state: GameState): string | undefined => {
+export const uprootDisabledReason = (state: GameState, { numVines = 1 }: {
+    numVines?: number;
+} = {}): string | undefined => {
     const playerState = state.players[state.currentTurn.playerId];
     if (
         Object.values(playerState.fields)
@@ -264,6 +266,11 @@ export const uprootDisabledReason = (state: GameState): string | undefined => {
     ) {
         return "You don't have any vines to uproot.";
     };
+    if (
+        Object.values(playerState.fields)
+            .reduce((count, field) => count += field.vines.length, 0) < numVines) {
+        return "You don't have enough vines to uproot.";
+    }
     return undefined;
 };
 
