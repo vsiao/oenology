@@ -86,6 +86,10 @@ export const summerVisitorCards = {
         "Homesteader",
         <>Build 1 structure at a <Coins>3</Coins> discount OR plant up to 2 <Vine />. You may lose <VP>1</VP> to do both.</>
     ),
+    horticulturist: summerVisitorCard(
+        "Horticulturist",
+        <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 2 <Vine /> to gain <VP>3</VP>.</>
+    ),
     landscaper: summerVisitorCard(
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,
@@ -118,14 +122,18 @@ export const summerVisitorCards = {
     //     "planner",
     //     <>place a worker on an action in a future season. take the action at the beginning of that season.</>,
     // ),
-    // planter: summerVisitorCard(
-    //     "Planter",
-    //     <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
-    // ),
+    planter: summerVisitorCard(
+        "Planter",
+        <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    ),
     // producer: summerVisitorCard(
     //     "Producer",
     //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
     // ),
+    sharecropper: summerVisitorCard(
+        "Sharecropper",
+        <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    ),
     sponsor: summerVisitorCard(
         "Sponsor",
         <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
@@ -190,7 +198,7 @@ export const winterVisitorCards = {
     ),
     governess: winterVisitorCard(
         "Governess",
-        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year or discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
+        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
     ),
     guestSpeaker: winterVisitorCard(
         "Guest Speaker",
