@@ -48,7 +48,12 @@ const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId:
             .map(([id, structure]) => ({
                 id: id as StructureId,
                 label: <>{structure.name} <Coins>{structure.cost}</Coins></>,
-                disabledReason: structureDisabledReason(state.game!, id as StructureId, coupon)
+                disabledReason: structureDisabledReason(
+                    state.game!,
+                    id as StructureId,
+                    coupon,
+                    ownProps.playerId
+                ),
             })),
     };
 };
