@@ -1,5 +1,5 @@
 import * as React from "react";
-import { default as VP } from "../../game-views/icons/VictoryPoints";
+import VictoryPoints, { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Card, { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
@@ -183,6 +183,10 @@ export const winterVisitorCards = {
     designer: winterVisitorCard(
         "Designer",
         <>Build 1 structure at its regular cost. Then, if you have at least 6 structures, gain <VP>2</VP>.</>
+    ),
+    governess: winterVisitorCard(
+        "Governess",
+        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year or discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
     ),
     guestSpeaker: winterVisitorCard(
         "Guest Speaker",
