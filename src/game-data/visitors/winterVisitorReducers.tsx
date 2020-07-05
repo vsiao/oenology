@@ -169,6 +169,38 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    governess: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "GOVERNESS_TRAIN",
+                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 3),
+                        },
+                        {
+                            id: "GOVERNESS_DISCARD",
+                            label: <>Discard 1 <WineGlass /> to gain <VP>2</VP></>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "GOVERNESS_TRAIN":
+                        return endVisitor(trainWorker(payCoins(3, state), { availableThisYear: true }));
+                    case "GOVERNESS_DISCARD":
+                        return promptToChooseWine(state, { limit: 1 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(2, discardWines(state, action.wines)));
+            default:
+                return state;
+        }
+    },
     guestSpeaker: (state, action, pendingAction) => {
         const gspeakerAction = pendingAction as PlayVisitorPendingAction & {
             // list of players who have yet to compelte their main action (train worker or pass)
