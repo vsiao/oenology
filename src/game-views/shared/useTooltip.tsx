@@ -58,7 +58,7 @@ const useAnchoredLayer = (side: AnchorSide, children: ReactNode): [
     return [anchorRef, maybeLayer];
 };
 
-type AnchorSide = "top" | "right" | "bottom" | "left";
+export type AnchorSide = "top" | "right" | "bottom" | "left";
 const AnchoredLayer: FunctionComponent<{
     anchorNode: Element;
     side: AnchorSide;

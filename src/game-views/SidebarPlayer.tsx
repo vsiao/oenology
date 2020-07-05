@@ -13,7 +13,7 @@ import WineGlass from "./icons/WineGlass";
 import { fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { StructureId, structures } from "../game-data/structures";
-import { useTooltip } from "./shared/useTooltip";
+import { AnchorSide, useTooltip } from "./shared/useTooltip";
 
 interface Props {
     player: PlayerState;
@@ -84,10 +84,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     )}
                 </div>
             </div>
-            <div className={cx("SidebarPlayer-cellar", {
-                "SidebarPlayer-cellar--withMedium": hasMediumCellar,
-                "SidebarPlayer-cellar--withLarge": hasLargeCellar,
-            })}>
+            <div className="SidebarPlayer-cellar">
                 <div className="SidebarPlayer-wines">
                     {player.cellar.red.map((hasWine, i) =>
                         <div className="SidebarPlayer-wine" key={i}>
@@ -130,6 +127,24 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                         </div>;
                     })}
                 </div>
+                {hasMediumCellar
+                    ? null
+                    : <StructureTooltip id="mediumCellar" side="top">
+                        {ref =>
+                            <div
+                                ref={ref as React.RefObject<HTMLDivElement>}
+                                className="SidebarPlayer-mediumCellarOverlay"
+                            />}
+                    </StructureTooltip>}
+                {hasLargeCellar
+                    ? null
+                    : <StructureTooltip id="largeCellar" side="top">
+                        {ref =>
+                            <div
+                                ref={ref as React.RefObject<HTMLDivElement>}
+                                className="SidebarPlayer-largeCellarOverlay"
+                            />}
+                    </StructureTooltip>}
             </div>
         </div>
         <ul className="SidebarPlayer-structures">
@@ -138,10 +153,9 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     return null;
                 }
                 const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
-                return <StructureTooltip id={structureId as StructureId}>
+                return <StructureTooltip key={structureId} id={structureId as StructureId}>
                     {anchorRef =>
                         <li ref={anchorRef as React.RefObject<HTMLLIElement>}
-                            key={structureId}
                             className={cx("SidebarPlayer-structure", {
                                 "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
                                 "SidebarPlayer-structure--used": isUsed
@@ -159,10 +173,11 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
 const StructureTooltip: React.FunctionComponent<{
     id: StructureId;
     children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode;
-}> = ({ id, children }) => {
+    side?: AnchorSide
+}> = ({ id, children, side = "left" }) => {
     const structure = structures[id];
     const [anchorRef, maybeTooltip] = useTooltip(
-        "left",
+        side,
         structure.description + ` Costs ${structure.cost}.`
     );
 

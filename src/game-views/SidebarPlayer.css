@@ -113,34 +113,47 @@
     position: relative;
     z-index: 0;
 }
-.SidebarPlayer-cellar:before,
-.SidebarPlayer-cellar:after  {
+.SidebarPlayer-mediumCellarOverlay,
+.SidebarPlayer-largeCellarOverlay {
     background-image: repeating-linear-gradient(
         45deg,
         transparent,
         transparent 5px,
-        #ddd 5px,
-        #ddd 10px
+        rgba(200, 200, 200, .5) 5px,
+        rgba(200, 200, 200, .5) 10px
     );
     bottom: 0;
     content: "";
     position: absolute;
     top: 1px;
-    z-index: -1;
 }
-.SidebarPlayer-cellar:before {
+.SidebarPlayer-mediumCellarOverlay::after,
+.SidebarPlayer-largeCellarOverlay::after {
+    align-items: center;
+    background: #ddd;
+    bottom: 0;
+    display: flex;
+    font-size: .7em;
+    justify-content: center;
+    height: 2em;
+    position: absolute;
+    width: 100%;
+}
+
+.SidebarPlayer-mediumCellarOverlay {
     left: 34%;
     right: 34%;
 }
-.SidebarPlayer-cellar:after {
+.SidebarPlayer-mediumCellarOverlay:hover::after {
+    content: "Medium Cellar";
+}
+
+.SidebarPlayer-largeCellarOverlay {
     left: 68%;
     right: 0;
 }
-.SidebarPlayer-cellar--withMedium:before {
-    display: none;
-}
-.SidebarPlayer-cellar--withLarge:after {
-    display: none;
+.SidebarPlayer-largeCellarOverlay:hover::after {
+    content: "Large Cellar";
 }
 
 .SidebarPlayer-structures {
