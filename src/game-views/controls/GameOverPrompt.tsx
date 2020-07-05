@@ -7,21 +7,46 @@ import GameState, { PlayerState } from "../../game-data/GameState";
 import { allWines } from "../../game-data/shared/sharedSelectors";
 import VictoryPoints from "../icons/VictoryPoints";
 import Coins from "../icons/Coins";
+import { SummerVisitor, WinterVisitor, Order, Vine } from "../icons/Card";
+import { visitorCards } from "../../game-data/visitors/visitorCards";
 
 interface Props {
-    players: PlayerState[]; // Ordered by win conditions
+    players: (PlayerState & {
+        vinesPlanted: number;
+        sVisitorsPlayed: number;
+        ordersFilled: number;
+        wVisitorsPlayed: number;
+    })[]; // Ordered by win conditions
 }
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure title="Game over!">
-        <ol>
-            {props.players.map(p =>
-                <li key={p.id}>
-                    <strong>{p.name}</strong>&nbsp;
-                    <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
-                    <Coins>{p.coins}</Coins>
-                </li>)}
-        </ol>
+        <table className="GameOverPrompt-table">
+            <thead>
+                <tr className="GameOverPrompt-row">
+                    <th className="GameOverPrompt-colHeader"></th>
+                    <th className="GameOverPrompt-colHeader">Coins</th>
+                    <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
+                    <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
+                    <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
+                    <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
+                </tr>
+            </thead>
+            <tbody>
+                {props.players.map(p =>
+                    <tr key={p.id} className="GameOverPrompt-row">
+                        <th className="GameOverPrompt-rowHeader" scope="row">
+                            <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
+                            <strong>{p.name}</strong>
+                        </th>
+                        <td><Coins>{p.coins}</Coins></td>
+                        <td>{p.vinesPlanted}</td>
+                        <td>{p.sVisitorsPlayed}</td>
+                        <td>{p.ordersFilled}</td>
+                        <td>{p.wVisitorsPlayed}</td>
+                    </tr>)}
+            </tbody>
+        </table>
     </PromptStructure>;
 };
 
@@ -36,7 +61,32 @@ const crushPadValue = (state: GameState, playerId: string) => {
 
 const mapStateToProps = (state: AppState) => {
     const game = state.game!
-    const players = Object.values(game.players);
+    const playersWithStats = Object.fromEntries(
+        Object.entries(game.players).map(([id, p]) => [
+            id, { ...p, vinesPlanted: 0, sVisitorsPlayed: 0, ordersFilled: 0, wVisitorsPlayed: 0, }
+        ])
+    );
+    game.activityLog.forEach(event => {
+        switch (event.type) {
+            case "fill":
+                playersWithStats[event.playerId].ordersFilled++;
+                return;
+            case "plant":
+                playersWithStats[event.playerId].vinesPlanted++;
+                return;
+            case "visitor":
+                switch (visitorCards[event.visitorId].season) {
+                    case "summer":
+                        playersWithStats[event.playerId].sVisitorsPlayed++;
+                        return;
+                    case "winter":
+                        playersWithStats[event.playerId].wVisitorsPlayed++;
+                        return;
+                }
+        }
+    });
+
+    const players = Object.values(playersWithStats);
     players.sort((p2, p1) => {
         if (p1.victoryPoints !== p2.victoryPoints) {
             return p1.victoryPoints - p2.victoryPoints;
