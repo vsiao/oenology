@@ -34,6 +34,10 @@ export const summerVisitorCards = {
         "Agriculturist",
         <>Plant 1 <Vine />. Then, if you have at least 3 different types of <Vine /> planted on that field, gain <VP>2</VP>.</>
     ),
+    architect: summerVisitorCard(
+        "Architect",
+        <>Build a structure at a <Coins>3</Coins> discount OR gain <VP>1</VP> for each <Coins>4</Coins> structure you have built.</>
+    ),
     artisan: summerVisitorCard(
         "Artisan",
         <>Choose 1: Gain <Coins>3</Coins>, build a structure at a <Coins>1</Coins> discount, or plant up to 2 <Vine />.</>
@@ -45,6 +49,10 @@ export const summerVisitorCards = {
     banker: summerVisitorCard(
         "Banker",
         <>Gain <Coins>5</Coins>. Each opponent may lose <VP>1</VP> to gain <Coins>3</Coins>.</>
+    ),
+    blacksmith: summerVisitorCard(
+        "Blacksmith",
+        <>Build a structure at a <Coins>2</Coins> discount. If it is a <Coins>5</Coins> or <Coins>6</Coins> structure, also gain <VP>1</VP>.</>
     ),
     broker: summerVisitorCard(
         "Broker",
@@ -70,10 +78,10 @@ export const summerVisitorCards = {
         "Grower",
         <>Plant 1 <Vine />. Then, if you have planted a total of at least 6 <Vine />, gain <VP>2</VP>.</>
     ),
-    // handyman: summerVisitorCard(
-    //     "Handyman",
-    //     <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
-    // ),
+    handyman: summerVisitorCard(
+        "Handyman",
+        <>All players may build 1 structure at a <Coins>2</Coins> discount. You gain <VP>1</VP> for each opponent who does this.</>,
+    ),
     homesteader: summerVisitorCard(
         "Homesteader",
         <>Build 1 structure at a <Coins>3</Coins> discount OR plant up to 2 <Vine />. You may lose <VP>1</VP> to do both.</>

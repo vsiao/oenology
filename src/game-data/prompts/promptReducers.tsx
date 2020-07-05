@@ -260,8 +260,12 @@ export const promptToPlaceWorker = (state: GameState) => {
     return enqueueActionPrompt(state, { type: "placeWorker" });
 };
 
-export const promptToBuildStructure = (state: GameState, coupon?: Coupon): GameState => {
-    if (state.playerId !== state.currentTurn.playerId) {
+export const promptToBuildStructure = (
+    state: GameState,
+    coupon?: Coupon,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    if (state.playerId !== playerId) {
         return state;
     }
     return enqueueActionPrompt(state, { type: "buildStructure", coupon });

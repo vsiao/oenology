@@ -47,11 +47,7 @@ const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId:
             .filter(([id, structure]) => coupon.kind !== "voucher" || structure.cost <= coupon.upToCost)
             .map(([id, structure]) => ({
                 id: id as StructureId,
-                label: <>{structure.name} {
-                    coupon.kind === "voucher"
-                        ? null
-                        : <Coins>{structure.cost - coupon.amount}</Coins>
-                }</>,
+                label: <>{structure.name} <Coins>{structure.cost}</Coins></>,
                 disabledReason: structureDisabledReason(state.game!, id as StructureId, coupon)
             })),
     };

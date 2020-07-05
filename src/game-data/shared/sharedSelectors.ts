@@ -6,10 +6,11 @@ import { Coupon, structures, StructureId } from "../structures";
 
 export const buildStructureDisabledReason = (
     state: GameState,
-    coupon: Coupon = { kind: "discount", amount: 0 }
+    coupon: Coupon = { kind: "discount", amount: 0 },
+    playerId = state.currentTurn.playerId
 ) => {
     return Object.keys(structures)
-        .some(id => structureDisabledReason(state, id as StructureId, coupon) === undefined)
+        .some(id => structureDisabledReason(state, id as StructureId, coupon, playerId) === undefined)
         ? undefined
         : "You don't have any structures you can build.";
 };
@@ -17,9 +18,10 @@ export const buildStructureDisabledReason = (
 export const structureDisabledReason = (
     state: GameState,
     id: StructureId,
-    coupon: Coupon
+    coupon: Coupon,
+    playerId = state.currentTurn.playerId
 ): string | undefined => {
-    const player = state.players[state.currentTurn.playerId];
+    const player = state.players[playerId];
     if (player.structures[id]) {
         return "Already built";
     }

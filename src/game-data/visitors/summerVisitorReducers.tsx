@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, StructureState } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -31,7 +31,7 @@ import {
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
-import { maxStructureCost, structures, Coupon } from "../structures";
+import { maxStructureCost, structures, Coupon, StructureId } from "../structures";
 import { VineId, vineCards } from "../vineCards";
 import WineGlass from "../../game-views/icons/WineGlass";
 import {
@@ -69,6 +69,45 @@ export const summerVisitorReducers: Record<
                     v => vinesByName[vineCards[v].name] = true
                 );
                 return endVisitor(Object.keys(vinesByName).length >= 3 ? gainVP(2, state) : state);
+            default:
+                return state;
+        }
+    },
+    architect: (state, action) => {
+        const coupon = { kind: "discount", amount: 3, } as const;
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "ARCHITECT_BUILD",
+                            label: <>Build a structure at a <Coins>3</Coins> discount</>,
+                            disabledReason: buildStructureDisabledReason(state, coupon),
+                        },
+                        {
+                            id: "ARCHITECT_GAIN",
+                            label: <>Gain <VP>1</VP> for each <Coins>4</Coins> structure you have built</>,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ARCHITECT_BUILD":
+                        return promptToBuildStructure(state, coupon);
+                    case "ARCHITECT_GAIN":
+                        const player = state.players[state.currentTurn.playerId];
+                        const num4Built = Object.entries(structures).filter(([id, { cost }]) =>
+                            cost === 4 && player.structures[id as StructureId]
+                        ).length;
+                        return endVisitor(gainVP(num4Built, state));
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                const { cost } = structures[action.structureId];
+                return endVisitor(
+                    buildStructure(payCoins(cost - coupon.amount, state), action.structureId)
+                );
             default:
                 return state;
         }
@@ -226,6 +265,22 @@ export const summerVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    blacksmith: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToBuildStructure(state, { kind: "discount", amount: 2, });
+            case "BUILD_STRUCTURE":
+                const { cost } = structures[action.structureId];
+                return endVisitor(
+                    buildStructure(
+                        payCoins(cost - 2, cost === 5 || cost === 6 ? gainVP(1, state) : state),
+                        action.structureId
+                    )
+                );
             default:
                 return state;
         }
@@ -404,7 +459,67 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // handyman: s => endVisitor(s),
+    handyman: (state, action) => {
+        const coupon = { kind: "discount", amount: 2, } as const;
+        const promptPlayer = (state2: GameState, playerId: string): GameState => {
+            const playerName = state2.players[state2.currentTurn.playerId].name;
+            return promptForAction(state2, {
+                playerId,
+                choices: [
+                    {
+                        id: "HANDYMAN_BUILD",
+                        label: <>
+                            Build 1 structure at a <Coins>2</Coins> discount
+                            {playerId !== state2.currentTurn.playerId
+                                ? <> (<strong>{playerName}</strong> gains <VP>1</VP>)</>
+                                : null}
+                        </>,
+                        disabledReason: buildStructureDisabledReason(state2, coupon, playerId),
+                    },
+                    {
+                        id: "HANDYMAN_PASS",
+                        label: <>Pass</>,
+                    },
+                ],
+            });
+        };
+        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
+            const i = state2.tableOrder.indexOf(currentPlayerId);
+            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
+            return nextPlayerId === state2.currentTurn.playerId
+                ? endVisitor(state2)
+                : promptPlayer(state2, nextPlayerId)
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptPlayer(state, state.currentTurn.playerId);
+
+            case "BUILD_STRUCTURE":
+                const { cost } = structures[action.structureId];
+                state = buildStructure(
+                    payCoins(cost - coupon.amount, state),
+                    action.structureId,
+                    action.playerId
+                );
+                return maybePromptNextPlayer(
+                    action.playerId !== state.currentTurn.playerId ? gainVP(1, state) : state,
+                    action.playerId
+                );
+
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HANDYMAN_BUILD":
+                        return promptToBuildStructure(state, coupon, action.playerId);
+                    case "HANDYMAN_PASS":
+                        return maybePromptNextPlayer(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     homesteader: (state, action, pendingAction) => {
         const homesteaderAction = pendingAction as PlayVisitorPendingAction & {
             doBoth: boolean;

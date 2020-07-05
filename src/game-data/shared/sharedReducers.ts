@@ -59,8 +59,12 @@ export const uprootVineFromField = (vine: VineInField, state: GameState): GameSt
     );
 };
 
-export const buildStructure = (state: GameState, structureId: StructureId): GameState => {
-    const player = state.players[state.currentTurn.playerId];
+export const buildStructure = (
+    state: GameState,
+    structureId: StructureId,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    const player = state.players[playerId];
     return pushActivityLog(
         { type: "build", playerId: player.id, structureId },
         updatePlayer(state, player.id, {
