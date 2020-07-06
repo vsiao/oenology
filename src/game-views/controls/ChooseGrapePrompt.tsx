@@ -49,7 +49,7 @@ const ChooseGrapePrompt: React.FunctionComponent<Props> = props => {
             </ul>
             <ChoiceButton
                 className="ChooseGrapePrompt-submit"
-                disabled={selectedGrapes.length === 0 || props.prompt.limit !== undefined && selectedGrapes.length > props.prompt.limit}
+                disabled={selectedGrapes.length === 0 || (props.prompt.limit !== undefined && selectedGrapes.length > props.prompt.limit)}
                 onClick={() => props.onConfirm(selectedGrapes)}
             >
                 Confirm

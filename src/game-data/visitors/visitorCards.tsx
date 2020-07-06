@@ -196,6 +196,10 @@ export const winterVisitorCards = {
         "Designer",
         <>Build 1 structure at its regular cost. Then, if you have at least 6 structures, gain <VP>2</VP>.</>
     ),
+    exporter: winterVisitorCard(
+        "Exporter",
+        <>Choose 1: Make up to 2 <WineGlass />, fill 1 <Order />, or discard 1 <Grape /> to gain <VP>2</VP>.</>
+    ),
     governess: winterVisitorCard(
         "Governess",
         <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>

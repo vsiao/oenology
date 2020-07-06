@@ -213,6 +213,49 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    exporter: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "EXPORTER_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        },
+                        {
+                            id: "EXPORTER_FILL",
+                            label: <>Fill 1 <Order /></>,
+                            disabledReason: fillOrderDisabledReason(state)
+                        },
+                        {
+                            id: "EXPORTER_DISCARD",
+                            label: <>Discard 1 <Grape /> to gain <VP>2</VP></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        }
+                    ]
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "EXPORTER_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 2);
+                    case "EXPORTER_FILL":
+                        return promptToChooseOrderCard(state);
+                    case "EXPORTER_DISCARD":
+                        return promptToChooseGrape(state, 1);
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "CHOOSE_WINE":
+                return endVisitor(fillOrder(action.wines, state));
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(2, discardGrapes(state, action.grapes)));
+            default:
+                return state;
+        }
+    },
     governess: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
