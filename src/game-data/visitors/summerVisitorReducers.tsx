@@ -640,9 +640,9 @@ export const summerVisitorReducers: Record<
                             ]
                         });
                     case "vine":
-                        return horticulturistAction.isDiscarding ?
-                            endVisitor(gainVP(3, discardCards(action.cards!, state))) :
-                            promptToPlant(state, card.id);
+                        return horticulturistAction.isDiscarding
+                            ? endVisitor(gainVP(3, discardCards(action.cards!, state)))
+                            : promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -904,9 +904,9 @@ export const summerVisitorReducers: Record<
                             ]
                         });
                     case "vine":
-                        return planterAction.isDiscarding ?
-                            endVisitor(gainVP(2, discardCards(action.cards!, state))) :
-                            promptToPlant(state, card.id);
+                        return planterAction.isDiscarding
+                            ? endVisitor(gainVP(2, discardCards(action.cards!, state)))
+                            : promptToPlant(state, card.id);
                     default:
                         return state;
                 }
@@ -934,10 +934,12 @@ export const summerVisitorReducers: Record<
                 state = plantVineInField(action.fields[0], state);
                 const canPlantAgain = !planterAction.secondPlant &&
                     plantVinesDisabledReason(state) === undefined;
-                return canPlantAgain ? promptToChooseVineCard(
-                    setPendingAction({ ...planterAction, secondPlant: true }, state),
-                    { optional: true }
-                ) : endVisitor(gainCoins(1, state));
+                return canPlantAgain
+                    ? promptToChooseVineCard(
+                        setPendingAction({ ...planterAction, secondPlant: true }, state),
+                        { optional: true }
+                    )
+                    : endVisitor(gainCoins(1, state));
             default:
                 return state;
         }
