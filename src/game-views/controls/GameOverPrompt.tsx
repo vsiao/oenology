@@ -1,6 +1,7 @@
 import "./GameOverPrompt.css";
 import cx from "classnames";
 import * as React from "react";
+import ChartistGraph from "react-chartist";
 import { connect } from "react-redux";
 import PromptStructure from "./PromptStructure";
 import { AppState } from "../../store/AppState";
@@ -19,6 +20,7 @@ interface PlayerWithStats extends PlayerState {
     ordersFilled: number;
     wVisitorsPlayed: number;
     workersPlaced: number;
+    accumulatedVPByYear: number[];
 }
 interface Props {
     players: PlayerWithStats[]; // Ordered by win conditions
@@ -26,6 +28,7 @@ interface Props {
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
     const [isScrolled, setIsScrolled] = React.useState(false);
+    const [showStats, setShowStats] = React.useState(true);
 
     const handleScroll = (event: React.UIEvent) => {
         const nowScrolled = (event.target as HTMLDivElement).scrollLeft > 5;
@@ -38,40 +41,74 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
         <div
             className={cx({
                 "GameOverPrompt-body": true,
-                "GameOverPrompt-body--scrolled": isScrolled,
+                "GameOverPrompt-body--scrolled": isScrolled && showStats,
             })}
             onScroll={handleScroll}
         >
-            <table className="GameOverPrompt-table">
-                <thead>
-                    <tr className="GameOverPrompt-row">
-                        <th className="GameOverPrompt-colHeader GameOverPrompt-rowHeader"></th>
-                        <th className="GameOverPrompt-colHeader"><Coins /><br />gained</th>
-                        <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
-                        <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
-                        <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
-                        <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
-                        <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {props.players.map(p =>
-                        <tr key={p.id} className="GameOverPrompt-row">
-                            <th className="GameOverPrompt-rowHeader" scope="row">
-                                <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
-                                <strong>{p.name}</strong>
+            {showStats
+                ? <table className="GameOverPrompt-table">
+                    <thead>
+                        <tr className="GameOverPrompt-row">
+                            <th className="GameOverPrompt-colHeader GameOverPrompt-rowHeader">
+                                <button className="GameOverPrompt-graphButton" onClick={() => setShowStats(false)}>
+                                    <svg className="GameOverPrompt-graphIcon" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 100 100">
+                                        <polygon points="95,95 5,95 5,5 16.25,5 16.25,83.75 95,83.75"/>
+                                        <polygon points="94.173,9.467 60.989,47.021 47.059,30.419 21.273,56.107 21.273,72.018 46.508,47.081 60.537,64.229 94.173,26.338"/>
+                                    </svg>
+                                </button>
                             </th>
-                            <td>{p.coinsGained}</td>
-                            <td>{p.vinesPlanted}</td>
-                            <td>{p.sVisitorsPlayed}</td>
-                            <td>{p.ordersFilled}</td>
-                            <td>{p.wVisitorsPlayed}</td>
-                            <td>{p.workersPlaced}</td>
-                        </tr>)}
-                </tbody>
-            </table>
+                            <th className="GameOverPrompt-colHeader"><Coins /><br />gained</th>
+                            <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
+                            <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
+                            <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
+                            <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
+                            <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {props.players.map(p =>
+                            <tr key={p.id} className="GameOverPrompt-row">
+                                <th className="GameOverPrompt-rowHeader" scope="row">
+                                    <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
+                                    <strong>{p.name}</strong>
+                                </th>
+                                <td>{p.coinsGained}</td>
+                                <td>{p.vinesPlanted}</td>
+                                <td>{p.sVisitorsPlayed}</td>
+                                <td>{p.ordersFilled}</td>
+                                <td>{p.wVisitorsPlayed}</td>
+                                <td>{p.workersPlaced}</td>
+                            </tr>)}
+                    </tbody>
+                </table>
+                : <div className="GameOverPrompt-chart">
+                    <button className="GameOverPrompt-statsButton" onClick={() => setShowStats(true)}>
+                        Back to Stats
+                    </button>
+                    {renderVPGraph(props)}
+                </div>}
         </div>
     </PromptStructure>;
+};
+
+const renderVPGraph = (props: Props): React.ReactNode => {
+    return <ChartistGraph
+        className="GameOverPrompt-graph"
+        type="Line"
+        data={{
+            labels: props.players[0].accumulatedVPByYear.slice(0, -2).map((_, i) => `Year ${i + 1}`),
+            series: props.players.map((p, i) => ({
+                className: cx(`ct-series-${"abcdef".charAt(i)}`, `GameOverPrompt-line--${p.color}`),
+                name: p.name,
+                data: p.accumulatedVPByYear.slice(0, -1),
+            })),
+        }}
+        options={{
+            fullWidth: true,
+            height: 240,
+            width: 440,
+        }}
+    />;
 };
 
 const cellarValue = (state: GameState, playerId: string) => {
@@ -95,9 +132,11 @@ const mapStateToProps = (state: AppState) => {
                 ordersFilled: 0,
                 wVisitorsPlayed: 0,
                 workersPlaced: 0,
+                accumulatedVPByYear: [0, 0],
             }
         ])
     );
+    let year = 1;
     game.activityLog.forEach(event => {
         switch (event.type) {
             case "coins":
@@ -114,6 +153,14 @@ const mapStateToProps = (state: AppState) => {
             case "plant":
                 playersWithStats[event.playerId].vinesPlanted++;
                 return;
+            case "season":
+                if (event.season.startsWith("End of Year")) {
+                    year++;
+                    Object.values(playersWithStats).forEach(p => {
+                        p.accumulatedVPByYear.push(p.accumulatedVPByYear[year - 1]);
+                    });
+                }
+                return;
             case "visitor":
                 switch (visitorCards[event.visitorId].season) {
                     case "summer":
@@ -123,6 +170,10 @@ const mapStateToProps = (state: AppState) => {
                         playersWithStats[event.playerId].wVisitorsPlayed++;
                         return;
                 }
+                return;
+            case "vp":
+                playersWithStats[event.playerId].accumulatedVPByYear[year] += event.delta;
+                return;
         }
     });
 

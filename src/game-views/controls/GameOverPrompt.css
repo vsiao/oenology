@@ -26,6 +26,30 @@
     box-shadow: inset 0 1px #ddd;
 }
 
+.GameOverPrompt-graphButton {
+    align-items: center;
+    background: white;
+    border: .2em solid #ddd;
+    border-radius: 1em;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    height: 2em;
+    justify-content: center;
+    position: relative;
+    top: -.5em;
+    width: 2em;
+}
+.GameOverPrompt-graphButton:hover {
+    border-color: black;
+    transition: 150ms border-color linear;
+}
+
+.GameOverPrompt-graphIcon {
+    height: 1em;
+    width: 1em;
+}
+
 .GameOverPrompt-colHeader {
     padding: 0 .5em;
 }
@@ -36,13 +60,57 @@
     box-sizing: border-box;
     display: flex;
     height: 3.2em;
-    left: 1em;
-    padding-left: 1em;
+    left: 0;
+    padding-left: 2em;
     position: absolute;
     text-align: left;
-    width: 8em;
+    width: 9em;
     z-index: 1;
 }
-.GameOverPrompt-row + .GameOverPrompt-row .GameOverPrompt-rowHeader{
+.GameOverPrompt-row + .GameOverPrompt-row .GameOverPrompt-rowHeader::after {
+    top: 0;
+    content: "";
+    display: block;
+    height: 2px;
+    position: absolute;
+    right: 0;
+    width: 8em;
     box-shadow: inset 0 1px #ddd;
+}
+
+.GameOverPrompt-statsButton {
+    background: transparent;
+    cursor: pointer;
+    display: inline-block;
+    margin: 1em 1.6em;
+    text-decoration: underline;
+}
+
+.GameOverPrompt-graph {
+    margin-right: 1.6em;
+}
+
+.GameOverPrompt-line--blue .ct-line,
+.GameOverPrompt-line--blue .ct-point {
+    stroke: royalblue;
+}
+.GameOverPrompt-line--green .ct-point,
+.GameOverPrompt-line--green .ct-line {
+    stroke: seagreen;
+}
+.GameOverPrompt-line--orange .ct-point,
+.GameOverPrompt-line--orange .ct-line {
+    stroke: darkorange;
+}
+.GameOverPrompt-line--purple .ct-point,
+.GameOverPrompt-line--purple .ct-line {
+    stroke: purple;
+}
+.GameOverPrompt-line--red .ct-point,
+.GameOverPrompt-line--red .ct-line {
+    stroke: firebrick;
+}
+.GameOverPrompt-line--yellow .ct-point,
+.GameOverPrompt-line--yellow .ct-line {
+    stroke: gold;
 }
