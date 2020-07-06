@@ -360,15 +360,6 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 return promptToHarvest(state);
-            case "CHOOSE_ACTION":
-                switch (action.choice) {
-                    case "HEXPERT_DRAW":
-                        return endVisitor(drawCards(state, action._key!, { vine: 1 }));
-                    case "HEXPERT_BUILD":
-                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
-                    default:
-                        return state;
-                }
             case "CHOOSE_FIELD":
                 return promptForAction(harvestField(state, action.fields[0]), {
                     choices: [
@@ -382,6 +373,15 @@ export const winterVisitorReducers: Record<
                         },
                     ],
                 });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HEXPERT_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { vine: 1 }));
+                    case "HEXPERT_BUILD":
+                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
+                    default:
+                        return state;
+                }
             default:
                 return state;
         }
