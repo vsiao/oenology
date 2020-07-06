@@ -94,10 +94,10 @@ export const summerVisitorCards = {
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,
     ),
-    // negotiator: summerVisitorCard(
-    //     "Negotiator",
-    //     <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
-    // ),
+    negotiator: summerVisitorCard(
+        "Negotiator",
+        <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
+    ),
     noviceGuide: summerVisitorCard(
         "Novice Guide",
         <>Gain <Coins>3</Coins> OR make up to 2 <WineGlass />.</>
