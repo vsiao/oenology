@@ -12,6 +12,7 @@ import ChooseCardPrompt from "./ChooseCardPrompt";
 import ChooseWinePrompt from "./ChooseWinePrompt";
 import PlaceWorkerPrompt from "./PlaceWorkerPrompt";
 import GameOverPrompt from "./GameOverPrompt";
+import ChooseGrapePrompt from "./ChooseGrapePrompt";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -45,6 +46,8 @@ const renderPrompt = (
             return <ChooseCardPrompt prompt={prompt} playerId={props.playerId} />;
         case "chooseField":
             return <ChooseFieldPrompt prompt={prompt} playerId={props.playerId} />;
+        case "chooseGrape":
+            return <ChooseGrapePrompt prompt={prompt} playerId={props.playerId} />;
         case "chooseWine":
         case "fillOrder":
             return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;

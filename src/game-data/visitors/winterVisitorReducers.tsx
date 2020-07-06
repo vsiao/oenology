@@ -24,6 +24,7 @@ import {
     promptToFillOrder,
     promptToHarvest,
     promptToChooseCard,
+    promptToChooseGrape,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
@@ -53,6 +54,7 @@ import {
     makeWineFromGrapes,
     placeGrapes,
     harvestFields,
+    discardGrapes,
 } from "../shared/grapeWineReducers";
 import { Choice } from "../prompts/PromptState";
 
@@ -211,6 +213,49 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    exporter: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "EXPORTER_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        },
+                        {
+                            id: "EXPORTER_FILL",
+                            label: <>Fill 1 <Order /></>,
+                            disabledReason: fillOrderDisabledReason(state)
+                        },
+                        {
+                            id: "EXPORTER_DISCARD",
+                            label: <>Discard 1 <Grape /> to gain <VP>2</VP></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        }
+                    ]
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "EXPORTER_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 2);
+                    case "EXPORTER_FILL":
+                        return promptToChooseOrderCard(state);
+                    case "EXPORTER_DISCARD":
+                        return promptToChooseGrape(state, 1);
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "CHOOSE_WINE":
+                return endVisitor(fillOrder(action.wines, state));
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(2, discardGrapes(state, action.grapes)));
+            default:
+                return state;
+        }
+    },
     governess: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -315,15 +360,6 @@ export const winterVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 return promptToHarvest(state);
-            case "CHOOSE_ACTION":
-                switch (action.choice) {
-                    case "HEXPERT_DRAW":
-                        return endVisitor(drawCards(state, action._key!, { vine: 1 }));
-                    case "HEXPERT_BUILD":
-                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
-                    default:
-                        return state;
-                }
             case "CHOOSE_FIELD":
                 return promptForAction(harvestField(state, action.fields[0]), {
                     choices: [
@@ -337,6 +373,15 @@ export const winterVisitorReducers: Record<
                         },
                     ],
                 });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "HEXPERT_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { vine: 1 }));
+                    case "HEXPERT_BUILD":
+                        return endVisitor(buildStructure(payCoins(1, state), "yoke"));
+                    default:
+                        return state;
+                }
             default:
                 return state;
         }
@@ -890,6 +935,40 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    promoter: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "PROMOTER_GRAPE",
+                            label: <>Discard <Grape /></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        },
+                        {
+                            id: "PROMOTER_WINE",
+                            label: <>Discard <WineGlass /></>,
+                            disabledReason: needWineDisabledReason(state)
+                        }
+                    ]
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "PROMOTER_GRAPE":
+                        return promptToChooseGrape(state, 1);
+                    case "PROMOTER_WINE":
+                        return promptToChooseWine(state, { limit: 1 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardGrapes(state, action.grapes))));
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardWines(state, action.wines))));
             default:
                 return state;
         }

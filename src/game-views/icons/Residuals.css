@@ -1,7 +1,5 @@
 .Residuals {
     align-items: center;
-    border: .1em solid #ad6b2a;
-    border-radius: .9em;
     color: black;
     display: inline-flex;
     height: 1.6em;
@@ -9,14 +7,23 @@
     position: relative;
     width: 1.6em;
 }
+
+.ResidualsArrow {
+    fill: #8e5823;
+    height: 1.6em;
+    position: absolute;
+    transform: rotate(10deg) scale(-1, 1);
+    width: 1.6em;
+    z-index: 1;
+}
+
 .Residuals-amount {
     align-items: center;
     background: #cd7f32;
-    border-radius: .6em;
+    border-radius: 100%;
     display: inline-flex;
     font-weight: 600;
-    height: 1.2em;
+    height: 1.1em;
     justify-content: center;
-    position: relative;
-    width: 1.2em;
+    width: 1.1em;
 }

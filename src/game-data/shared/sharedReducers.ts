@@ -39,6 +39,11 @@ export const plantVineInField = (
     );
 };
 
+export const uprootVinesFromFields = (vines: VineInField[], state: GameState): GameState => {
+    vines.forEach(v => state = uprootVineFromField(v, state));
+    return state;
+};
+
 export const uprootVineFromField = (vine: VineInField, state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const field = player.fields[vine.field];

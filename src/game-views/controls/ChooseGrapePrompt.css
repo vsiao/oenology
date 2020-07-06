@@ -1,0 +1,26 @@
+.ChooseGrapePrompt-grapeSelector {
+    font-style: italic;
+    padding: 1em 1.6em;
+}
+
+.ChooseGrapePrompt-grapes {
+    display: inline-flex;
+}
+
+.ChooseGrapePrompt-grapeButton {
+    background: none;
+    border-radius: 50%;
+    margin-right: 4px;
+    outline: none;
+    padding: 4px;
+}
+.ChooseGrapePrompt-grapeButton:enabled {
+    cursor: pointer;
+}
+.ChooseGrapePrompt-grapeButton--selected {
+    background: #61dafb;
+}
+
+.ChooseGrapePrompt-submit {
+    margin-left: 12px;
+}

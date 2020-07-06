@@ -1,7 +1,7 @@
 import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn } from "../GameState";
 import { WineSpec, OrderId, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
-import { WineIngredients } from "../prompts/promptActions";
+import { WineIngredients, GrapeSpec } from "../prompts/promptActions";
 import { fieldYields } from "./sharedSelectors";
 import { addToDiscard } from "./cardReducers";
 
@@ -98,6 +98,19 @@ export const placeGrapes = (
     });
 };
 
+export const discardGrapes = (state: GameState, grapes: GrapeSpec[]) => {
+    const player = state.players[state.currentTurn.playerId];
+
+    let crushPad = player.crushPad;
+    grapes.forEach(g => {
+        crushPad = {
+            ...crushPad,
+            [g.color]: crushPad[g.color].map((hasWine, i) => hasWine && g.value !== i + 1),
+        };
+    });
+    return updatePlayer(state, state.currentTurn.playerId, { crushPad });
+};
+
 export const makeWineFromGrapes = (
     state: GameState,
     wine: WineIngredients[],
@@ -162,6 +175,6 @@ export const discardWines = (state: GameState, wines: WineSpec[]) => {
             ...cellar,
             [w.color]: cellar[w.color].map((hasWine, i) => hasWine && w.value !== i + 1),
         };
-    })
+    });
     return updatePlayer(state, state.currentTurn.playerId, { cellar });
 };

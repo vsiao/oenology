@@ -86,14 +86,18 @@ export const summerVisitorCards = {
         "Homesteader",
         <>Build 1 structure at a <Coins>3</Coins> discount OR plant up to 2 <Vine />. You may lose <VP>1</VP> to do both.</>
     ),
+    horticulturist: summerVisitorCard(
+        "Horticulturist",
+        <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 2 <Vine /> to gain <VP>3</VP>.</>
+    ),
     landscaper: summerVisitorCard(
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,
     ),
-    // negotiator: summerVisitorCard(
-    //     "Negotiator",
-    //     <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
-    // ),
+    negotiator: summerVisitorCard(
+        "Negotiator",
+        <>Discard 1 <Grape /> to gain <Residuals>1</Residuals> OR discard 1 wine to gain <Residuals>2</Residuals>.</>,
+    ),
     noviceGuide: summerVisitorCard(
         "Novice Guide",
         <>Gain <Coins>3</Coins> OR make up to 2 <WineGlass />.</>
@@ -118,14 +122,18 @@ export const summerVisitorCards = {
     //     "planner",
     //     <>place a worker on an action in a future season. take the action at the beginning of that season.</>,
     // ),
-    // planter: summerVisitorCard(
-    //     "Planter",
-    //     <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
-    // ),
+    planter: summerVisitorCard(
+        "Planter",
+        <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    ),
     // producer: summerVisitorCard(
     //     "Producer",
     //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
     // ),
+    sharecropper: summerVisitorCard(
+        "Sharecropper",
+        <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
+    ),
     sponsor: summerVisitorCard(
         "Sponsor",
         <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
@@ -188,9 +196,13 @@ export const winterVisitorCards = {
         "Designer",
         <>Build 1 structure at its regular cost. Then, if you have at least 6 structures, gain <VP>2</VP>.</>
     ),
+    exporter: winterVisitorCard(
+        "Exporter",
+        <>Choose 1: Make up to 2 <WineGlass />, fill 1 <Order />, or discard 1 <Grape /> to gain <VP>2</VP>.</>
+    ),
     governess: winterVisitorCard(
         "Governess",
-        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year or discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
+        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
     ),
     guestSpeaker: winterVisitorCard(
         "Guest Speaker",
@@ -251,6 +263,10 @@ export const winterVisitorCards = {
     professor: winterVisitorCard(
         "Professor",
         <>Pay <Coins>2</Coins> to train 1 <Worker /> OR gain <VP>2</VP> if you have a total of 6 <Worker />.</>,
+    ),
+    promoter: winterVisitorCard(
+        "Promoter",
+        <>Discard <Grape /> or <WineGlass /> to gain <VP>1</VP> and <Residuals>1</Residuals>.</>
     ),
     queen: winterVisitorCard(
         "Queen",

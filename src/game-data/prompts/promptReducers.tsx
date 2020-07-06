@@ -244,6 +244,13 @@ export const promptToChooseWine = (
     return enqueueActionPrompt(state, { type: "chooseWine", minValue, limit });
 };
 
+export const promptToChooseGrape = (state: GameState, limit?: number): GameState => {
+    if (state.playerId !== state.currentTurn.playerId) {
+        return state;
+    }
+    return enqueueActionPrompt(state, { type: "chooseGrape", limit });
+};
+
 export const promptToFillOrder = (state: GameState, orderId: OrderId): GameState => {
     state = removeCardsFromHand(
         [{ type: "order", id: orderId }],

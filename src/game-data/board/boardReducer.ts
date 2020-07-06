@@ -23,13 +23,14 @@ import {
     promptToMakeWine,
     promptToPlant,
     promptToHarvest,
-    promptToUproot
+    promptToUproot,
+    promptToChooseGrape
 } from "../prompts/promptReducers";
 import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData, chooseMamaPapa } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { fillOrder, makeWineFromGrapes, harvestFields } from "../shared/grapeWineReducers";
+import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
@@ -135,6 +136,21 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     )
             );
         }
+        case "sellGrapes":
+            if (action.type !== "CHOOSE_GRAPE") {
+                return state;
+            }
+            const playerId = state.currentTurn.playerId;
+            const sellValue = Math.ceil(action.grapes.reduce((sum, g) => sum += g.value, 0) / 3);
+            const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
+
+            return endTurn(gainCoins(
+                sellValue,
+                pushActivityLog(
+                    { type: "sellGrapes", grapes: action.grapes, playerId },
+                    discardGrapes(bonus ? gainVP(1, state) : state, action.grapes)
+                )));
+
         case "buySell":
             if (action.type !== "CHOOSE_ACTION") {
                 return state;
@@ -163,7 +179,9 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                         }
                     );
                 case "BOARD_SELL_GRAPES":
-                    return endTurn(state); // TODO (+bonus)
+                    return promptToChooseGrape(
+                        setPendingAction({ type: "sellGrapes" }, state)
+                    );
                 default:
                     return state;
             }
@@ -235,9 +253,6 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
         case "playVisitor":
             return visitor(state, action);
-
-        case "sellGrapes":
-            return state;
     }
 };
 

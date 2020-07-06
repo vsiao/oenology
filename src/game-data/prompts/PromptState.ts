@@ -6,6 +6,7 @@ import { VisitorId } from "../visitors/visitorCards";
 export type PromptState =
     | ChooseActionPromptState
     | ChooseCardPromptState
+    | ChooseGrapePromptState
     | ChooseWinePromptState
     | FillOrderPromptState
     | ChooseFieldPromptState
@@ -45,6 +46,11 @@ export interface ChooseWinePromptState {
     type: "chooseWine";
     minValue: number;
     limit: number;
+}
+
+export interface ChooseGrapePromptState {
+    type: "chooseGrape";
+    limit?: number;
 }
 
 export interface FillOrderPromptState {

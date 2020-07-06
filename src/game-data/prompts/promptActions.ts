@@ -10,6 +10,7 @@ export type PromptAction =
     | ChooseAction
     | ChooseCardsAction
     | ChooseFieldAction
+    | ChooseGrapeAction
     | ChooseVineAction
     | ChooseWineAction
     | MakeWineAction
@@ -21,6 +22,7 @@ export const isPromptAction = (action: Action): action is PromptAction => {
         case "CHOOSE_ACTION":
         case "CHOOSE_CARDS":
         case "CHOOSE_FIELD":
+        case "CHOOSE_GRAPE":
         case "CHOOSE_VINE":
         case "CHOOSE_WINE":
         case "MAKE_WINE":
@@ -81,7 +83,7 @@ export const chooseField = (fields: FieldId[], playerId: string): PromptAction =
 
 export interface VineInField {
     id: VineId;
-    field: FieldId
+    field: FieldId;
 }
 interface ChooseVineAction extends Action<"CHOOSE_VINE"> {
     vines: VineInField[];
@@ -97,6 +99,14 @@ interface ChooseWineAction extends Action<"CHOOSE_WINE"> {
 }
 export const chooseWine = (wines: WineSpec[], playerId: string): PromptAction => {
     return { type: "CHOOSE_WINE", wines, playerId };
+};
+
+interface ChooseGrapeAction extends Action<"CHOOSE_GRAPE"> {
+    grapes: GrapeSpec[];
+    playerId: string;
+}
+export const chooseGrape = (grapes: GrapeSpec[], playerId: string): PromptAction => {
+    return { type: "CHOOSE_GRAPE", grapes, playerId };
 };
 
 interface BuildStructureAction extends Action<"BUILD_STRUCTURE"> {

@@ -3,6 +3,7 @@ import { WineSpec } from "./orderCards";
 import { StructureId } from "./structures";
 import { VisitorId } from "./visitors/visitorCards";
 import { CardType } from "./GameState";
+import { GrapeSpec } from "./prompts/promptActions";
 
 export type ActivityLog = ActivityLogEvent[];
 
@@ -20,6 +21,7 @@ export type ActivityLogEvent =
     | PlantEvent
     | ResidualsEvent
     | SeasonEvent
+    | SellGrapeEvent
     | TrainWorkerEvent
     | UprootEvent
     | VisitorEvent
@@ -68,6 +70,9 @@ interface ResidualsEvent extends LogEvent<"residuals"> {
 interface SeasonEvent {
     type: "season";
     season: string;
+}
+interface SellGrapeEvent extends LogEvent<"sellGrapes"> {
+    grapes: GrapeSpec[];
 }
 interface TrainWorkerEvent extends LogEvent<"trainWorker"> { }
 interface UprootEvent extends LogEvent<"uproot"> {
