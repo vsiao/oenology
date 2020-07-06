@@ -100,6 +100,8 @@ const renderActivity = (
             return <>{player} {event.type === "plant" ? "planted" : "uprooted"} some <strong>{name}</strong> {renderYields(yields)}</>;
         case "residuals":
             return <>{player} {event.delta < 0 ? "lost" : "gained"} <Residuals>{Math.abs(event.delta)}</Residuals></>;
+        case "sellGrapes":
+            return <>{player} sold {event.grapes.map((g, i) => <Grape key={i} color={g.color}>{g.value}</Grape>)}</>;
         case "trainWorker":
             return <>{player} trained a <Worker /></>;
         case "visitor":

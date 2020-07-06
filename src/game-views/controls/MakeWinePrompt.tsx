@@ -12,6 +12,7 @@ import WineGlass from "../icons/WineGlass";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import { devaluedIndex } from "../../game-data/shared/grapeWineReducers";
+import { allGrapes } from "../../game-data/shared/sharedSelectors";
 
 
 interface Props {
@@ -151,21 +152,13 @@ const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>
 
 const mapStateToProps = (state: AppState, ownProps: { cellarLimit?: number, playerId: string; }) => {
     const { cellarLimit, playerId } = ownProps;
-    const grapes: GrapeSpec[] = [];
     const currentPlayer = state.game!.players[playerId];
-    const { red, white } = currentPlayer.crushPad;
-    red.forEach((r, i) => {
-        if (r) grapes.push({ color: "red", value: i + 1 });
-    });
-    white.forEach((w, i) => {
-        if (w) grapes.push({ color: "white", value: i + 1 });
-    });
     const hasMediumCellar = currentPlayer.structures["mediumCellar"];
     const hasLargeCellar = currentPlayer.structures["largeCellar"];
     return {
         cellar: currentPlayer.cellar,
         cellarLimit: cellarLimit ? cellarLimit : hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3,
-        grapes,
+        grapes: allGrapes(state.game!, playerId),
         playerId
     };
 };
