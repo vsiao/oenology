@@ -3,6 +3,7 @@ import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
 import { Coupon, structures, StructureId } from "../structures";
+import { GrapeSpec } from "../prompts/promptActions";
 
 export const buildStructureDisabledReason = (
     state: GameState,
@@ -135,6 +136,19 @@ export const hasGrapes = (state: GameState, playerId = state.currentTurn.playerI
     return Object.values(state.players[playerId].crushPad)
         .some(grapes => grapes.some(g => g === true));
 };
+
+export const allGrapes = (state: GameState, playerId = state.currentTurn.playerId): GrapeSpec[] => {
+    const grapes: GrapeSpec[] = [];
+    const { red, white } = state.players[playerId].crushPad;
+    red.forEach((r, i) => {
+        if (r) grapes.push({ color: "red", value: i + 1 });
+    });
+    white.forEach((w, i) => {
+        if (w) grapes.push({ color: "white", value: i + 1 });
+    });
+    return grapes;
+};
+
 export const needGrapesDisabledReason = (state: GameState, playerId = state.currentTurn.playerId) => {
     return hasGrapes(state, playerId) ? undefined : "You don't have any grapes.";
 };

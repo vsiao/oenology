@@ -6,6 +6,7 @@ import { VisitorId } from "../visitors/visitorCards";
 export type PromptState =
     | ChooseActionPromptState
     | ChooseCardPromptState
+    | ChooseGrapePromptState
     | ChooseWinePromptState
     | FillOrderPromptState
     | ChooseFieldPromptState
@@ -47,6 +48,11 @@ export interface ChooseWinePromptState {
     limit: number;
 }
 
+export interface ChooseGrapePromptState {
+    type: "chooseGrape";
+    limit?: number;
+}
+
 export interface FillOrderPromptState {
     type: "fillOrder";
     orderIds: OrderId[];
@@ -55,9 +61,9 @@ export interface FillOrderPromptState {
 export interface ChooseFieldPromptState {
     type: "chooseField";
     kind:
-        | "oneClick" // plant; buy/sell field
-        | "harvest" // multi-field selection
-        | "uproot"; // multi-vine selection
+    | "oneClick" // plant; buy/sell field
+    | "harvest" // multi-field selection
+    | "uproot"; // multi-vine selection
     disabledReasons: Record<FieldId, string | undefined>;
     numSelections: number;
 }

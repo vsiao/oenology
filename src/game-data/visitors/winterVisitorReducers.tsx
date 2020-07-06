@@ -24,6 +24,7 @@ import {
     promptToFillOrder,
     promptToHarvest,
     promptToChooseCard,
+    promptToChooseGrape,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { WinterVisitorId } from "./visitorCards";
@@ -53,6 +54,7 @@ import {
     makeWineFromGrapes,
     placeGrapes,
     harvestFields,
+    discardGrapes,
 } from "../shared/grapeWineReducers";
 import { Choice } from "../prompts/PromptState";
 
@@ -890,6 +892,40 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    promoter: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "PROMOTER_GRAPE",
+                            label: <>Discard <Grape /></>,
+                            disabledReason: needGrapesDisabledReason(state)
+                        },
+                        {
+                            id: "PROMOTER_WINE",
+                            label: <>Discard <WineGlass /></>,
+                            disabledReason: needWineDisabledReason(state)
+                        }
+                    ]
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "PROMOTER_GRAPE":
+                        return promptToChooseGrape(state, 1);
+                    case "PROMOTER_WINE":
+                        return promptToChooseWine(state, { limit: 1 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardGrapes(state, action.grapes))));
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardWines(state, action.wines))));
             default:
                 return state;
         }
