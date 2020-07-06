@@ -1,5 +1,21 @@
+.GameOverPrompt-body {
+    overflow-x: auto;
+}
+.GameOverPrompt-body--scrolled::before {
+    border-right: 1px solid #aaa;
+    box-shadow: 0 0 6px rgba(0, 0, 0, .3);
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 9em;
+}
+
 .GameOverPrompt-table {
     margin: 1em;
+    padding-left: 8em;
     text-align: center;
 }
 
@@ -15,7 +31,18 @@
 }
 
 .GameOverPrompt-rowHeader {
-    min-width: 6em;
+    align-items: center;
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    height: 3.2em;
+    left: 1em;
     padding-left: 1em;
+    position: absolute;
     text-align: left;
+    width: 8em;
+    z-index: 1;
+}
+.GameOverPrompt-row + .GameOverPrompt-row .GameOverPrompt-rowHeader{
+    box-shadow: inset 0 1px #ddd;
 }

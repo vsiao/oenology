@@ -1,4 +1,5 @@
 import "./GameOverPrompt.css";
+import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import PromptStructure from "./PromptStructure";
@@ -24,35 +25,52 @@ interface Props {
 }
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
+    const [isScrolled, setIsScrolled] = React.useState(false);
+
+    const handleScroll = (event: React.UIEvent) => {
+        const nowScrolled = (event.target as HTMLDivElement).scrollLeft > 5;
+        if (nowScrolled !== isScrolled) {
+            setIsScrolled(nowScrolled);
+        }
+    };
+
     return <PromptStructure title="Game over!">
-        <table className="GameOverPrompt-table">
-            <thead>
-                <tr className="GameOverPrompt-row">
-                    <th className="GameOverPrompt-colHeader"></th>
-                    <th className="GameOverPrompt-colHeader"><Coins /><br />gained</th>
-                    <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
-                    <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
-                    <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
-                    <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
-                    <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {props.players.map(p =>
-                    <tr key={p.id} className="GameOverPrompt-row">
-                        <th className="GameOverPrompt-rowHeader" scope="row">
-                            <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
-                            <strong>{p.name}</strong>
-                        </th>
-                        <td>{p.coinsGained}</td>
-                        <td>{p.vinesPlanted}</td>
-                        <td>{p.sVisitorsPlayed}</td>
-                        <td>{p.ordersFilled}</td>
-                        <td>{p.wVisitorsPlayed}</td>
-                        <td>{p.workersPlaced}</td>
-                    </tr>)}
-            </tbody>
-        </table>
+        <div
+            className={cx({
+                "GameOverPrompt-body": true,
+                "GameOverPrompt-body--scrolled": isScrolled,
+            })}
+            onScroll={handleScroll}
+        >
+            <table className="GameOverPrompt-table">
+                <thead>
+                    <tr className="GameOverPrompt-row">
+                        <th className="GameOverPrompt-colHeader GameOverPrompt-rowHeader"></th>
+                        <th className="GameOverPrompt-colHeader"><Coins /><br />gained</th>
+                        <th className="GameOverPrompt-colHeader"><Vine /><br />planted</th>
+                        <th className="GameOverPrompt-colHeader"><SummerVisitor /><br />played</th>
+                        <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
+                        <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
+                        <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {props.players.map(p =>
+                        <tr key={p.id} className="GameOverPrompt-row">
+                            <th className="GameOverPrompt-rowHeader" scope="row">
+                                <VictoryPoints>{p.victoryPoints}</VictoryPoints>&nbsp;
+                                <strong>{p.name}</strong>
+                            </th>
+                            <td>{p.coinsGained}</td>
+                            <td>{p.vinesPlanted}</td>
+                            <td>{p.sVisitorsPlayed}</td>
+                            <td>{p.ordersFilled}</td>
+                            <td>{p.wVisitorsPlayed}</td>
+                            <td>{p.workersPlaced}</td>
+                        </tr>)}
+                </tbody>
+            </table>
+        </div>
     </PromptStructure>;
 };
 
