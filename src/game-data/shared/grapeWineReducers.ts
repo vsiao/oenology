@@ -40,7 +40,8 @@ export const ageAll = (tokens: TokenMap, valueCap: number = tokens.length): Toke
 
 export const ageSingle = (tokens: TokenMap, i: number, valueCap: number = tokens.length): TokenMap => {
     const newTokenMap = tokens.slice() as TokenMap;
-    if (i === valueCap - 1 || newTokenMap[i + 1]) {
+    const atCellarBoundary = i + 1 === 3 || i + 1 === 6 || i + 1 === 9;
+    if (newTokenMap[i + 1] || (atCellarBoundary && i + 1 >= valueCap)) {
         // can't age
         newTokenMap[i] = true;
     } else {

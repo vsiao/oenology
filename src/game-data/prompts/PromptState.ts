@@ -72,6 +72,7 @@ export interface ChooseFieldPromptState {
 export interface MakeWinePromptState {
     type: "makeWine";
     upToN: number;
+    asZymologist: boolean;
 }
 
 export interface PlaceWorkerPromptState {

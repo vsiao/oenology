@@ -103,16 +103,20 @@
     width: 2em;
 }
 
-.SidebarPlayer-wines {
-    display: flex;
-    justify-content: flex-end;
-}
-
 .SidebarPlayer-cellar {
     box-shadow: inset 0 1px 0 0 #ccc;
     position: relative;
     z-index: 0;
 }
+
+.SidebarPlayer-wines {
+    display: flex;
+    justify-content: flex-end;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+}
+
 .SidebarPlayer-mediumCellarOverlay,
 .SidebarPlayer-largeCellarOverlay {
     background-image: repeating-linear-gradient(
@@ -138,6 +142,7 @@
     height: 2em;
     position: absolute;
     width: 100%;
+    z-index: 1;
 }
 
 .SidebarPlayer-mediumCellarOverlay {

@@ -13,12 +13,13 @@ import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import { devaluedIndex } from "../../game-data/shared/grapeWineReducers";
 import { allGrapes } from "../../game-data/shared/sharedSelectors";
+import { MakeWinePromptState } from "../../game-data/prompts/PromptState";
 
 
 interface Props {
+    prompt: MakeWinePromptState;
     cellar: Record<WineColor, TokenMap>;
     cellarLimit: number;
-    upToN: number;
     grapes: GrapeSpec[];
     onConfirm: (ingredients: WineIngredients[]) => void;
 }
@@ -29,14 +30,23 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     const [localCellar, setCellar] = React.useState(props.cellar);
     const [cart, setCart] = React.useState<WineIngredients[]>([]);
 
-    const wine = wineFromGrapes(selectedGrapes, localCellar, props.cellarLimit);
+    const wine = wineFromGrapes(
+        selectedGrapes,
+        localCellar,
+        props.cellarLimit,
+        /* minValue */ props.prompt.asZymologist ? 4 : 1
+    );
 
-    return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.upToN} wine`}>
+    return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.prompt.upToN} wine`}>
         <div className="MakeWinePrompt-hints">
             <p className="MakeWinePrompt-formula"><Grape color="red" /> = <WineGlass color="red" /></p>
             <p className="MakeWinePrompt-formula"><Grape color="white" /> = <WineGlass color="white" /></p>
-            <p className="MakeWinePrompt-formula"><Grape color="red" /><span> + </span><Grape color="white" /> = <WineGlass color="blush" /></p>
-            <p className="MakeWinePrompt-formula"><Grape color="red" /><span> + </span><Grape color="red" /><span> + </span><Grape color="white" /> = <WineGlass color="sparkling" /></p>
+            <p className="MakeWinePrompt-formula">
+                <Grape color="red" /> + <Grape color="white" /> = <WineGlass color="blush" />
+            </p>
+            <p className="MakeWinePrompt-formula">
+                <Grape color="red" /> + <Grape color="red" /> + <Grape color="white" /> = <WineGlass color="sparkling" />
+            </p>
         </div>
         <div className="MakeWinePrompt-grapeSelector">
             {
@@ -52,7 +62,7 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
                                     })}
                                     role="switch"
                                     aria-checked={isSelected}
-                                    disabled={cart.length >= props.upToN}
+                                    disabled={cart.length >= props.prompt.upToN}
                                     onClick={() => setSelectedGrapes(
                                         isSelected
                                             ? selectedGrapes.filter(g => g !== grape)
@@ -121,7 +131,12 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>, maxValue: number): WineIngredients | null => {
+const wineFromGrapes = (
+    grapes: GrapeSpec[],
+    cellar: Record<WineColor, TokenMap>,
+    maxValue: number,
+    minValue = 1
+): WineIngredients | null => {
     const numRed = grapes.filter(g => g.color === "red").length;
     const totalValue = grapes.reduce((v, g) => v + g.value, 0);
 
@@ -137,6 +152,7 @@ const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>
     }
     const cellarValue = devaluedIndex(Math.min(totalValue, maxValue), cellar[color]) + 1;
     if (
+        cellarValue < minValue ||
         (color === "blush" && cellarValue < 4) ||
         (color === "sparkling" && cellarValue < 7)
     ) {
@@ -150,14 +166,16 @@ const wineFromGrapes = (grapes: GrapeSpec[], cellar: Record<WineColor, TokenMap>
     };
 };
 
-const mapStateToProps = (state: AppState, ownProps: { cellarLimit?: number, playerId: string; }) => {
-    const { cellarLimit, playerId } = ownProps;
+const mapStateToProps = (
+    state: AppState,
+    { prompt, playerId }: { prompt: MakeWinePromptState; playerId: string; }
+) => {
     const currentPlayer = state.game!.players[playerId];
     const hasMediumCellar = currentPlayer.structures["mediumCellar"];
     const hasLargeCellar = currentPlayer.structures["largeCellar"];
     return {
         cellar: currentPlayer.cellar,
-        cellarLimit: cellarLimit ? cellarLimit : hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3,
+        cellarLimit: prompt.asZymologist || hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3,
         grapes: allGrapes(state.game!, playerId),
         playerId
     };

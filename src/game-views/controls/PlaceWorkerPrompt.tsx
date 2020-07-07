@@ -109,7 +109,7 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
                             ? bonusLabel
                             : title,
                         disabledReason: disabledReason && disabledReason(game),
-                        hasSpace: placements.length <= numSpots ||
+                        hasSpace: placements.length < numSpots ||
                             placements.slice(0, numSpots).some(w => !w),
                     };
                 }

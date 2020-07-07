@@ -52,7 +52,7 @@ const renderPrompt = (
         case "fillOrder":
             return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;
         case "makeWine":
-            return <MakeWinePrompt upToN={prompt.upToN} playerId={props.playerId} />;
+            return <MakeWinePrompt prompt={prompt} playerId={props.playerId} />;
         case "placeWorker":
             return <PlaceWorkerPrompt playerId={props.playerId} />;
         case "gameOver":

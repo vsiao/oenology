@@ -822,6 +822,82 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    motivator: (state, action) => {
+        const promptPlayer = (state2: GameState, playerId: string): GameState => {
+            const playerName = state2.players[state2.currentTurn.playerId].name;
+            return promptForAction(state2, {
+                playerId,
+                choices: [
+                    {
+                        id: "MOTIVATOR_RETRIEVE",
+                        label: <>
+                            Retrieve <Worker workerType="grande" color={state.players[playerId].color} />
+                            {playerId !== state2.currentTurn.playerId
+                                ? <> (<strong>{playerName}</strong> gains <VP>1</VP>)</>
+                                : null}
+                        </>,
+                    },
+                    {
+                        id: "MOTIVATOR_PASS",
+                        label: <>Pass</>,
+                    },
+                ],
+            });
+        };
+        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
+            const i = state2.tableOrder.indexOf(currentPlayerId);
+            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
+            if (nextPlayerId === state2.currentTurn.playerId) {
+                return endVisitor(state2);
+            }
+            const active = state2.wakeUpOrder.some(pos =>
+                pos !== null && (pos.playerId === nextPlayerId) && !pos.passed
+            );
+            const placedGrande = Object.values(state2.workerPlacements)
+                .some(placements =>
+                    placements.some(w => w && w.playerId === nextPlayerId && w.type === "grande")
+                );
+            return placedGrande && active
+                ? promptPlayer(state2, nextPlayerId)
+                : maybePromptNextPlayer(state2, nextPlayerId);
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptPlayer(state, state.currentTurn.playerId);
+
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MOTIVATOR_RETRIEVE":
+                        const player = state.players[action.playerId];
+                        state = {
+                            ...(player.id !== state.currentTurn.playerId ? gainVP(1, state) : state),
+                            workerPlacements: Object.fromEntries(
+                                Object.entries(state.workerPlacements).map(([placement, workers]) => [
+                                    placement,
+                                    workers.map(w =>
+                                        w && w.playerId === player.id && w.type === "grande" ? null : w
+                                    ),
+                                ])
+                            ) as GameState["workerPlacements"],
+                        };
+                        return maybePromptNextPlayer(
+                            updatePlayer(state, player.id, {
+                                workers: player.workers.map(w =>
+                                    w.type === "grande" ? { ...w, available: true } : w
+                                )
+                            }),
+                            player.id
+                        );
+                    case "MOTIVATOR_PASS":
+                        return maybePromptNextPlayer(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     noble: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -1206,6 +1282,21 @@ export const winterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    zymologist: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToMakeWine(
+                    state,
+                    /* upToN */ 2,
+                    state.currentTurn.playerId,
+                    /* asZymologist */ true
+                );
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }

@@ -271,12 +271,13 @@ export const promptToFillOrder = (state: GameState, orderId: OrderId): GameState
 export const promptToMakeWine = (
     state: GameState,
     upToN: number,
-    playerId = state.currentTurn.playerId
+    playerId = state.currentTurn.playerId,
+    asZymologist = false
 ): GameState => {
     if (state.playerId !== playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "makeWine", upToN });
+    return enqueueActionPrompt(state, { type: "makeWine", upToN, asZymologist });
 };
 
 export const promptToPlaceWorker = (state: GameState) => {

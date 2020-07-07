@@ -248,6 +248,10 @@ export const winterVisitorCards = {
         "Mentor",
         <>All players may make up to 2 <WineGlass />. Draw 1 <Vine /> or 1 <SummerVisitor /> for each opponent who does this.</>
     ),
+    motivator: winterVisitorCard(
+        "Motivator",
+        <>Each player may retrieve their grande worker. Gain <VP>1</VP> for each opponent who does this.</>
+    ),
     noble: winterVisitorCard(
         "Noble",
         <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to gain <VP>2</VP>.</>
@@ -299,6 +303,10 @@ export const winterVisitorCards = {
     uncertifiedTeacher: winterVisitorCard(
         "Uncertified Teacher",
         <>Lose <VP>1</VP> to train 1 <Worker /> OR gain <VP>1</VP> for each opponent who has a total of 6 <Worker />.</>
+    ),
+    zymologist: winterVisitorCard(
+        "Zymologist",
+        <>Make up to 2 <WineGlass /> of value 4 or greater, even if you haven't upgraded your cellar.</>
     ),
 };
 
