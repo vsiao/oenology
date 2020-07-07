@@ -31,11 +31,13 @@ export const promptForAction = <DataT extends unknown = undefined>(
         description = null,
         playerId = state.currentTurn.playerId,
         choices,
+        upToN,
     }: {
         title?: string;
         description?: React.ReactNode;
         playerId?: string;
         choices: Choice<DataT>[];
+        upToN?: number;
     }
 ): GameState => {
     if (state.playerId !== playerId) {
@@ -60,6 +62,7 @@ export const promptForAction = <DataT extends unknown = undefined>(
         playerId,
         contextVisitor,
         choices,
+        upToN,
     });
 };
 

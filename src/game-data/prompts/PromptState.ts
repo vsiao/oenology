@@ -28,6 +28,7 @@ export interface ChooseActionPromptState {
     playerId: string;
     contextVisitor?: VisitorId;
     choices: Choice[];
+    upToN?: number;
 }
 
 export interface ChooseCardPromptState {

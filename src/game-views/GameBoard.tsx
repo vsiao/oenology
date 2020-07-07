@@ -13,7 +13,7 @@ type Season = "spring" | "summer" | "fall" | "winter";
 interface Props {
     season: Season;
     wakeUpOrder: ({ current: boolean; passed?: boolean; color: PlayerColor; } | null)[];
-    workerPlacements: Record<WorkerPlacement, BoardWorker[]>;
+    workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
 }
 
 const GameBoard: React.FunctionComponent<Props> = props => {

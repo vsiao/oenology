@@ -8,6 +8,7 @@ import { VineId } from "../vineCards";
 export type PromptAction =
     | BuildStructureAction
     | ChooseAction
+    | ChooseActionMulti
     | ChooseCardsAction
     | ChooseFieldAction
     | ChooseGrapeAction
@@ -20,6 +21,7 @@ export const isPromptAction = (action: Action): action is PromptAction => {
     switch (action.type) {
         case "BUILD_STRUCTURE":
         case "CHOOSE_ACTION":
+        case "CHOOSE_ACTION_MULTI":
         case "CHOOSE_CARDS":
         case "CHOOSE_FIELD":
         case "CHOOSE_GRAPE":
@@ -44,6 +46,18 @@ export const chooseAction = ({ id, data }: Choice, playerId: string): PromptActi
         choice: id,
         ...(data ? { data } : null),
         playerId
+    };
+};
+
+interface ChooseActionMulti extends Action<"CHOOSE_ACTION_MULTI"> {
+    choices: string[];
+    playerId: string;
+}
+export const chooseActionMulti = (choices: string[], playerId: string): PromptAction => {
+    return {
+        type: "CHOOSE_ACTION_MULTI",
+        choices,
+        playerId,
     };
 };
 

@@ -92,7 +92,6 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
     }
 
     const pendingAction = currentTurn.pendingAction;
-    const hasPlacementBonus = Object.keys(state.players).length > 2;
 
     switch (pendingAction.type) {
         case "buildStructure": {
@@ -100,9 +99,11 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 return state;
             }
             const structure = structures[action.structureId];
-            const bonus = hasPlacementBonus && state.workerPlacements.buildStructure.length === 1;
             return endTurn(
-                buildStructure(payCoins(structure.cost - (bonus ? 1 : 0), state), action.structureId)
+                buildStructure(
+                    payCoins(structure.cost - (pendingAction.hasBonus ? 1 : 0), state),
+                    action.structureId
+                )
             );
         }
         case "buyField":
@@ -114,8 +115,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             const player = state.players[state.currentTurn.playerId];
             const field = player.fields[action.fields[0]];
 
-            const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
-            state = updatePlayer(bonus ? gainVP(1, state) : state, player.id, {
+            state = updatePlayer(pendingAction.hasBonus ? gainVP(1, state) : state, player.id, {
                 fields: {
                     ...player.fields,
                     [field.id]: { ...field, sold: !field.sold },
@@ -142,13 +142,12 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             }
             const playerId = state.currentTurn.playerId;
             const sellValue = Math.ceil(action.grapes.reduce((sum, g) => sum += g.value, 0) / 3);
-            const bonus = hasPlacementBonus && state.workerPlacements.buySell.length === 1;
 
             return endTurn(gainCoins(
                 sellValue,
                 pushActivityLog(
                     { type: "sellGrapes", grapes: action.grapes, playerId },
-                    discardGrapes(bonus ? gainVP(1, state) : state, action.grapes)
+                    discardGrapes(pendingAction.hasBonus ? gainVP(1, state) : state, action.grapes)
                 )));
 
         case "buySell":
@@ -158,7 +157,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             switch (action.choice) {
                 case "BOARD_BUY_FIELD":
                     return promptToChooseField(
-                        setPendingAction({ type: "buyField" }, state),
+                        setPendingAction({ type: "buyField", hasBonus: pendingAction.hasBonus }, state),
                         field => {
                             if (!field.sold) {
                                 return "You already own this field.";
@@ -168,7 +167,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     );
                 case "BOARD_SELL_FIELD":
                     return promptToChooseField(
-                        setPendingAction({ type: "sellField" }, state),
+                        setPendingAction({ type: "sellField", hasBonus: pendingAction.hasBonus }, state),
                         field => {
                             if (field.sold) {
                                 return "You already sold this field.";
@@ -180,7 +179,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     );
                 case "BOARD_SELL_GRAPES":
                     return promptToChooseGrape(
-                        setPendingAction({ type: "sellGrapes" }, state)
+                        setPendingAction({ type: "sellGrapes", hasBonus: pendingAction.hasBonus }, state)
                     );
                 default:
                     return state;
@@ -195,8 +194,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     }
                     return promptToFillOrder(state, card.id);
                 case "CHOOSE_WINE":
-                    const bonus = hasPlacementBonus && state.workerPlacements.fillOrder.length === 1;
-                    return endTurn(fillOrder(action.wines, state, /* bonusVP */ bonus));
+                    return endTurn(fillOrder(action.wines, state, /* bonusVP */ pendingAction.hasBonus));
                 default:
                     return state;
             }
@@ -235,14 +233,9 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 case "CHOOSE_FIELD":
                     state = plantVineInField(action.fields[0], state);
 
-                    const bonus = hasPlacementBonus &&
-                        !pendingAction.bonusActivated &&
-                        state.workerPlacements.plantVine.length === 1 &&
-                        plantVinesDisabledReason(state) === undefined;
-
-                    if (bonus) {
+                    if (pendingAction.hasBonus && plantVinesDisabledReason(state) === undefined) {
                         return promptToChooseVineCard(
-                            setPendingAction({ type: "plantVine", bonusActivated: true }, state),
+                            setPendingAction({ type: "plantVine", hasBonus: false }, state),
                             { optional: true }
                         );
                     }
@@ -257,8 +250,6 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 };
 
 const placeWorker = (state: GameState, action: GameAction): GameState => {
-    const hasPlacementBonus = Object.keys(state.players).length > 2;
-
     switch (action.type) {
         case "PLACE_WORKER": {
             state = { ...state, lastActionKey: action._key } as unknown as GameState;
@@ -277,6 +268,18 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                 throw new Error("Unexpected state: no available workers");
             }
             state = pushActivityLog({ type: "placeWorker", playerId: player.id, }, state);
+            const placements = state.workerPlacements[action.placement].slice();
+            let placementIdx = placements.findIndex(w => w === null);
+            if (placementIdx < 0) {
+                placementIdx = placements.length;
+            }
+            const hasBonus = state.tableOrder.length > 2 && placementIdx === 0;
+            placements[placementIdx] = {
+                type: action.workerType,
+                playerId: state.currentTurn.playerId,
+                color: player.color,
+                isTemp: player.workers[workerIndex].isTemp,
+            };
             state = {
                 ...updatePlayer(state, player.id, {
                     workers: player.workers.map(
@@ -285,24 +288,18 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                 }),
                 workerPlacements: {
                     ...state.workerPlacements,
-                    [action.placement]: [...state.workerPlacements[action.placement], {
-                        type: action.workerType,
-                        playerId: state.currentTurn.playerId,
-                        color: player.color,
-                        isTemp: player.workers[workerIndex].isTemp,
-                    }],
+                    [action.placement]: placements,
                 },
             };
 
             switch (action.placement) {
                 case "buildStructure":
-                    const bonus = hasPlacementBonus && state.workerPlacements.buildStructure.length === 1;
                     return promptToBuildStructure(
-                        setPendingAction({ type: "buildStructure" }, state),
-                        bonus ? { kind: "discount", amount: 1 } : undefined
+                        setPendingAction({ type: "buildStructure", hasBonus }, state),
+                        hasBonus ? { kind: "discount", amount: 1 } : undefined
                     );
                 case "buySell":
-                    return promptForAction(setPendingAction({ type: "buySell" }, state), {
+                    return promptForAction(setPendingAction({ type: "buySell", hasBonus }, state), {
                         choices: [
                             {
                                 id: "BOARD_SELL_GRAPES",
@@ -325,60 +322,59 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                         ],
                     });
                 case "drawOrder": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.drawOrder.length === 1;
-                    return endTurn(drawCards(state, action._key!, { order: bonus ? 2 : 1 }));
+                    return endTurn(drawCards(state, action._key!, { order: hasBonus ? 2 : 1 }));
                 }
                 case "drawVine": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.drawVine.length === 1;
-                    return endTurn(drawCards(state, action._key!, { vine: bonus ? 2 : 1 }));
+                    return endTurn(drawCards(state, action._key!, { vine: hasBonus ? 2 : 1 }));
                 }
                 case "fillOrder":
-                    return promptToChooseOrderCard(setPendingAction({ type: "fillOrder" }, state));
+                    return promptToChooseOrderCard(setPendingAction({ type: "fillOrder", hasBonus }, state));
                 case "gainCoin":
                     return endTurn(gainCoins(1, state));
                 case "giveTour": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.giveTour.length === 1;
                     const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
                         Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
-                    return endTurn(gainCoins(bonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
+                    return endTurn(gainCoins(hasBonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
                 }
                 case "harvestField": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.harvestField.length === 1;
-                    return promptToHarvest(setPendingAction({ type: "harvestField" }, state), bonus ? 2 : 1);
+                    return promptToHarvest(
+                        setPendingAction({ type: "harvestField", hasBonus }, state),
+                        hasBonus ? 2 : 1
+                    );
                 }
                 case "makeWine": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.makeWine.length === 1;
                     return promptToMakeWine(
-                        setPendingAction({ type: "makeWine" }, state),
-                        /* upToN */ bonus ? 3 : 2
+                        setPendingAction({ type: "makeWine", hasBonus }, state),
+                        /* upToN */ hasBonus ? 3 : 2
                     );
                 }
                 case "plantVine":
-                    return promptToChooseVineCard(setPendingAction({ type: "plantVine" }, state));
+                    return promptToChooseVineCard(
+                        setPendingAction({ type: "plantVine", hasBonus }, state)
+                    );
                 case "playSummerVisitor": {
-                    const canPlayAdditionalVisitor = hasPlacementBonus &&
-                        state.workerPlacements.playSummerVisitor.length === 1;
                     return promptToChooseVisitor(
                         "summer",
-                        setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor }, state)
+                        setPendingAction({ type: "playVisitor", hasBonus }, state)
                     );
                 }
                 case "playWinterVisitor": {
-                    const canPlayAdditionalVisitor = hasPlacementBonus &&
-                        state.workerPlacements.playWinterVisitor.length === 1;
                     return promptToChooseVisitor(
                         "winter",
-                        setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor }, state)
+                        setPendingAction({ type: "playVisitor", hasBonus }, state)
                     );
                 }
                 case "trainWorker": {
-                    const bonus = hasPlacementBonus && state.workerPlacements.trainWorker.length === 1;
-                    return endTurn(trainWorker(payCoins(bonus ? 3 : 4, state)));
+                    return endTurn(trainWorker(payCoins(hasBonus ? 3 : 4, state)));
                 }
                 case "yokeHarvest":
-                    return promptToHarvest(setPendingAction({ type: "harvestField" }, markStructureUsed("yoke", state)));
+                    return promptToHarvest(
+                        setPendingAction({ type: "harvestField", hasBonus }, markStructureUsed("yoke", state))
+                    );
                 case "yokeUproot":
-                    return promptToUproot(setPendingAction({ type: "uproot" }, markStructureUsed("yoke", state)));
+                    return promptToUproot(
+                        setPendingAction({ type: "uproot", hasBonus }, markStructureUsed("yoke", state))
+                    );
                 default:
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const exhaustivenessCheck: never = action.placement;

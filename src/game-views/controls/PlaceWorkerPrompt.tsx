@@ -101,17 +101,25 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
                 (game.currentTurn as WorkerPlacementTurn).season === "summer"
                     ? summerActions
                     : winterActions)
-                .concat(yearRoundActions)
-                .map(({ type, bonusLabel, title, disabledReason, }) => ({
-                    type,
-                    label: bonusLabel && numPlayers > 2 && game.workerPlacements[type].length === 0
-                        ? bonusLabel
-                        : title,
-                    disabledReason: disabledReason && disabledReason(game),
-                    hasSpace: ["gainCoin", "yokeHarvest", "yokeUproot"].indexOf(type) !== -1 ||
-                        game.workerPlacements[type].length < numSpots
-                })
+                .map(({ type, bonusLabel, title, disabledReason, }) => {
+                    const placements = game.workerPlacements[type];
+                    return {
+                        type,
+                        label: bonusLabel && numPlayers > 2 && !placements[0]
+                            ? bonusLabel
+                            : title,
+                        disabledReason: disabledReason && disabledReason(game),
+                        hasSpace: placements.length <= numSpots ||
+                            placements.slice(0, numSpots).some(w => !w),
+                    };
+                }
             ),
+            ...yearRoundActions.map(({ type, title, disabledReason, }) => ({
+                type,
+                label: title,
+                disabledReason: disabledReason && disabledReason(game),
+                hasSpace: true,
+            })),
             {
                 type: null,
                 label: "Pass",

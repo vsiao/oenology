@@ -12,7 +12,7 @@ interface Props {
     numSpots: number;
     bonusDisplay: React.ReactNode;
     season: string;
-    workers: BoardWorker[];
+    workers: (BoardWorker | null)[];
 }
 
 const BoardPlacement: React.FunctionComponent<Props> = props => {
@@ -32,9 +32,9 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                 </div>
                 {i === numSpots - 1 && workers.length > numSpots && (
                     <div className="BoardPlacement-overflow">
-                        {workers.slice(numSpots).map((w, i) => (
-                            <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} />
-                        ))}
+                        {workers.slice(numSpots).map((w, i) =>
+                            w && <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} />
+                        )}
                     </div>)}
             </td>;
         })}

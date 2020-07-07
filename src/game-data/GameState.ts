@@ -24,7 +24,7 @@ export default interface GameState {
     ];
     drawPiles: CardsByType;
     discardPiles: CardsByType;
-    workerPlacements: Record<WorkerPlacement, BoardWorker[]>;
+    workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 
     // local state
@@ -57,10 +57,10 @@ export interface WorkerPlacementTurn {
 
 export interface PlayVisitorPendingAction {
     type: "playVisitor";
-    canPlayAdditionalVisitor: boolean;
     visitorId?: VisitorId;
+    hasBonus: boolean;
 }
-export type WorkerPlacementTurnPendingAction =
+export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction
     | { type: "buySell"; }
     | { type: "sellGrapes"; }
@@ -71,7 +71,8 @@ export type WorkerPlacementTurnPendingAction =
     | { type: "harvestField"; }
     | { type: "uproot"; }
     | { type: "makeWine"; }
-    | { type: "fillOrder"; orderId?: OrderId; };
+    | { type: "fillOrder"; orderId?: OrderId; }
+) & { hasBonus: boolean };
 
 export type WorkerPlacement =
     | "drawVine"

@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -25,6 +25,7 @@ import {
     uprootVineFromField,
     uprootVinesFromFields,
     gainResiduals,
+    updatePlayer,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -54,6 +55,9 @@ import {
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
+import Worker from "../../game-views/icons/Worker";
+import { allPlacements } from "../board/boardPlacements";
+import { Choice } from "../prompts/PromptState";
 
 export const summerVisitorReducers: Record<
     SummerVisitorId,
@@ -944,7 +948,68 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // producer: s => endVisitor(s),
+    producer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const playerId = state.currentTurn.playerId;
+                const hasBonus = state.tableOrder.length > 2;
+                return promptForAction(state, {
+                    upToN: 2,
+                    title: "Retrieve up to 2 workers",
+                    choices: allPlacements
+                        .map(({ type, bonusLabel, title }) =>
+                            state.workerPlacements[type]
+                                .map((w, i) =>
+                                    w && w.playerId === playerId
+                                    ? {
+                                        id: `${type}_${i}`,
+                                        label: <>
+                                            <Worker
+                                                color={w.color}
+                                                workerType={w.type}
+                                                isTemp={w.isTemp}
+                                            />&nbsp;
+                                            {bonusLabel && hasBonus ? bonusLabel : title}
+                                        </>,
+                                    } as Choice
+                                    : null
+                                )
+                                .filter((c: Choice | null): c is Choice => !!c)
+                        )
+                        .flat(),
+                });
+            case "CHOOSE_ACTION_MULTI":
+                const workers: (WorkerType | "temp")[] = [];
+                action.choices.forEach(id => {
+                    const parts = id.split("_");
+                    const placement = parts[0] as WorkerPlacement;
+                    const index = parseInt(parts[1], 10);
+
+                    state = {
+                        ...state,
+                        workerPlacements: {
+                            ...state.workerPlacements,
+                            [placement]: state.workerPlacements[placement].map((w, i) => {
+                                if (!w || i !== index) {
+                                    return w;
+                                }
+                                workers.push(w.isTemp ? "temp" : w.type);
+                                return null;
+                            }),
+                        },
+                    };
+                });
+                const player = state.players[state.currentTurn.playerId];
+                const playerWorkers = player.workers.slice();
+                workers.forEach(type => {
+                    const i = playerWorkers.findIndex(w => (type === "temp" && w.isTemp) || w.type === type);
+                    playerWorkers[i] = { ...playerWorkers[i], available: true };
+                });
+                return endVisitor(updatePlayer(payCoins(2, state), player.id, { workers: playerWorkers, }));
+            default:
+                return state;
+        }
+    },
     sharecropper: (state, action, pendingAction) => {
         const sharecropperAction = pendingAction as PlayVisitorPendingAction & {
             isDiscarding?: boolean;

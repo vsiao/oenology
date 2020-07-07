@@ -4,6 +4,7 @@
     border-radius: .4em;
     display: inline-block;
     height: 2.8em;
+    outline: none;
     padding: 0 16px;
 }
 .ChoiceButton[aria-disabled=true] {

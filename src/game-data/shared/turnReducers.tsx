@@ -320,10 +320,10 @@ export const endVisitor = (state: GameState): GameState => {
         state,
         currentTurn.season === "summer" ? "summerVisitor" : "winterVisitor"
     ) === undefined;
-    if (pendingAction.canPlayAdditionalVisitor && hasCard) {
+    if (pendingAction.hasBonus && hasCard) {
         return promptToChooseVisitor(
             currentTurn.season,
-            setPendingAction({ type: "playVisitor", canPlayAdditionalVisitor: false }, state),
+            setPendingAction({ type: "playVisitor", hasBonus: false }, state),
             /* bonus */ true
         );
     }

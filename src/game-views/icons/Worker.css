@@ -1,36 +1,43 @@
 .Worker {
+    align-items: center;
+    display: inline-flex;
     height: 1.4em;
-    stroke: black;
-    stroke-width: .4em;
-    vertical-align: text-bottom;
+    position: relative;
     width: 1.4em;
 }
 .Worker--grande {
     height: 2em;
-    vertical-align: text-bottom;
     width: 2em;
 }
-.Worker--blue {
+
+.Worker-icon {
+    height: 100%;
+    position: absolute;
+    stroke: black;
+    stroke-width: .4em;
+    width: 100%;
+}
+.Worker-icon--blue {
     fill: royalblue;
 }
-.Worker--green {
+.Worker-icon--green {
     fill: seagreen;
 }
-.Worker--orange {
+.Worker-icon--orange {
     fill: darkorange;
 }
-.Worker--purple {
+.Worker-icon--purple {
     fill: purple;
 }
-.Worker--red {
+.Worker-icon--red {
     fill: firebrick;
 }
-.Worker--yellow {
+.Worker-icon--yellow {
     fill: gold;
 }
-.Worker--temp {
+.Worker-icon--temp {
     fill: #999;
 }
-.Worker--disabled {
+.Worker-icon--disabled {
     fill: white;
 }

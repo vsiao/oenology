@@ -126,10 +126,10 @@ export const summerVisitorCards = {
         "Planter",
         <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
     ),
-    // producer: summerVisitorCard(
-    //     "Producer",
-    //     <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
-    // ),
+    producer: summerVisitorCard(
+        "Producer",
+        <>Pay <Coins>2</Coins> to retrieve up to 2 <Worker /> from other actions. They may be used again this year.</>,
+    ),
     sharecropper: summerVisitorCard(
         "Sharecropper",
         <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>

@@ -2,6 +2,7 @@ import { PromptAction, isPromptAction } from "./prompts/promptActions";
 import { Action } from "redux";
 import { PlayerColor, CardsByType } from "./GameState";
 import { MamaId, PapaId } from "./mamasAndPapas";
+import { VisitorId } from "./visitors/visitorCards";
 
 export type GameAction = (
     | StartGameAction
@@ -35,6 +36,7 @@ export interface StartGameAction extends Action<"START_GAME"> {
         papa?: PapaId; // deprecated; see #PreGameShuffle
     })[];
     shuffledCards?: CardsByType; // deprecated; see #PreGameShuffle
+    excludeCards?: { [K in VisitorId]?: true };
 }
 export const startGame = (players: PlayerInit[]): StartGameAction => {
     return { type: "START_GAME", players, };

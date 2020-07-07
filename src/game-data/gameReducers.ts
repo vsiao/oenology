@@ -3,7 +3,7 @@ import GameState, { PlayerState, StructureState, CardsByType } from "./GameState
 import { GameAction, PlayerInit, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
-import { CHEAT_drawCard, UNSHUFFLED_CARDS, shuffle } from "./shared/cardReducers";
+import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
 import { startMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 
@@ -44,7 +44,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             playerId: players[0].id,
         },
         drawPiles: shuffledCards ?? emptyPiles,
-        discardPiles: shuffledCards ? emptyPiles : UNSHUFFLED_CARDS,
+        discardPiles: shuffledCards ? emptyPiles : unshuffledDecks(action.excludeCards || {}),
         players: Object.fromEntries(
             players.map((p, i) => [
                 p.id,

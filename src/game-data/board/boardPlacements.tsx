@@ -58,11 +58,11 @@ export const summerActions: BoardAction[] = [
         bonusLabel: <>Build one structure at a <Coins>1</Coins> discount</>,
         bonus: <Coins>1</Coins>,
         disabledReason: state => {
-            const hasBonus = Object.keys(state.players).length > 2;
-            const isFirst = state.workerPlacements.buildStructure.length === 0;
+            const hasBonus = state.tableOrder.length > 2 &&
+                !state.workerPlacements.buildStructure[0];
             return buildStructureDisabledReason(
                 state,
-                hasBonus && isFirst ? { kind: "discount", amount: 1 } : undefined
+                hasBonus ? { kind: "discount", amount: 1 } : undefined
             );
         },
     },
@@ -102,9 +102,9 @@ export const winterActions: BoardAction[] = [
         bonusLabel: <>Pay <Coins>3</Coins> to train <Worker /></>,
         bonus: <Coins>1</Coins>,
         disabledReason: state => {
-            const hasBonus = Object.keys(state.players).length > 2;
-            const isFirst = state.workerPlacements.trainWorker.length === 0;
-            return trainWorkerDisabledReason(state, hasBonus && isFirst ? 3 : 4);
+            const hasBonus = state.tableOrder.length > 2 &&
+                !state.workerPlacements.trainWorker[0];
+            return trainWorkerDisabledReason(state, hasBonus ? 3 : 4);
         },
     },
     {
@@ -138,4 +138,10 @@ export const yearRoundActions: BoardAction[] = [
         title: "Yoke: Uproot",
         disabledReason: state => structureUsedDisabledReason(state, "yoke") || uprootDisabledReason(state)
     }
+];
+
+export const allPlacements = [
+    ...summerActions,
+    ...winterActions,
+    ...yearRoundActions,
 ];

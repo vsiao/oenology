@@ -12,11 +12,15 @@ import {
 import { orderCards, OrderId } from "../orderCards";
 import { vineCards, VineId } from "../vineCards";
 
-export const UNSHUFFLED_CARDS: CardsByType = {
-    vine: Object.keys(vineCards) as VineId[],
-    summerVisitor: Object.keys(summerVisitorCards) as SummerVisitorId[],
-    order: Object.keys(orderCards) as OrderId[],
-    winterVisitor: Object.keys(winterVisitorCards) as WinterVisitorId[],
+export const unshuffledDecks = (exclude: { [K in string]?: boolean }): CardsByType => {
+    return {
+        vine: Object.keys(vineCards) as VineId[],
+        summerVisitor: Object.keys(summerVisitorCards)
+            .filter(id => !exclude[id]) as SummerVisitorId[],
+        order: Object.keys(orderCards) as OrderId[],
+        winterVisitor: Object.keys(winterVisitorCards)
+            .filter(id => !exclude[id]) as WinterVisitorId[],
+    };
 };
 
 export const shuffle = <T>(inCards: T[], random: () => number): T[] => {
@@ -116,6 +120,12 @@ export const removeCardsFromHand = (
     playerId = state.currentTurn.playerId
 ): GameState => {
     const player = state.players[playerId];
+    if (!cards.every(card => player.cardsInHand.some(({ id }) => id === card.id))) {
+        throw new Error(
+            `Unexpected state: tried to remove cards that weren't in the player's hand: ` +
+            `${cards.map(({ id }) => id)} playerId: ${playerId}`
+        );
+    }
     return updatePlayer(state, player.id, {
         cardsInHand: player.cardsInHand.filter(({ id }) =>
             cards.every((card) => card.id !== id)
