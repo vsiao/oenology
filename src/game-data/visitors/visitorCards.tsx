@@ -8,6 +8,22 @@ import WineGlass from "../../game-views/icons/WineGlass";
 import Rooster from "../../game-views/icons/Rooster";
 import Residuals from "../../game-views/icons/Residuals";
 
+export const UNIMPLEMENTED_CARDS = {
+    // summer
+    "entertainer": true,
+    "importer": true,
+    "planner": true,
+    "stonemason": true,
+    "weddingParty": true,
+    "wineCritic": true,
+    // winter
+    "caravan": true,
+    "craftsman": true,
+    "governor": true,
+    "innkeeper": true,
+    "manager": true,
+} as const;
+
 export interface VisitorCardData {
     season: "summer" | "winter";
     name: string;
