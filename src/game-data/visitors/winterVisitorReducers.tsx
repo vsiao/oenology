@@ -335,7 +335,7 @@ export const winterVisitorReducers: Record<
                             playerId: action.playerId,
                         });
                         return endMainAction(
-                            state.playerId !== state.currentTurn.playerId
+                            action.playerId !== state.currentTurn.playerId
                                 ? gainVP(1, state)
                                 : state,
                             action.playerId

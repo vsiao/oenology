@@ -1,6 +1,6 @@
 .OenologyGame {
     display: grid;
-    grid-template-columns: 1fr 525px;
+    grid-template-columns: 1fr 530px;
     grid-template-rows: 1fr 320px;
     grid-template-areas:
         "main sidebar"

@@ -28,9 +28,9 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                 })}>
                     {worker
                         ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
-                        : (i === 0 ? bonusDisplay : null)}
+                        : (i === 0 ? bonusDisplay : <>&nbsp;</>)}
                 </div>
-                {i === numSpots - 1 && workers.length > numSpots && (
+                {i === 0 && workers.length > numSpots && (
                     <div className="BoardPlacement-overflow">
                         {workers.slice(numSpots).map((w, i) =>
                             w && <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} />

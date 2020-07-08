@@ -10,10 +10,10 @@
 
 .ResidualsArrow {
     fill: #8e5823;
-    height: 1.6em;
+    height: 1.8em;
     position: absolute;
     transform: rotate(10deg) scale(-1, 1);
-    width: 1.6em;
+    width: 1.8em;
     z-index: 1;
 }
 

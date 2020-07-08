@@ -55,11 +55,16 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         <ul className="SidebarPlayer-fields">
             {Object.values(player.fields).map(field => {
                 const { red, white } = fieldYields(field);
-                return <li key={field.id} className="SidebarPlayer-field">
-                    {field.sold ? <span className="SidebarPlayer-fieldSold">SOLD</span> : <>
-                        {red > 0 ? <Grape color="red">{red}</Grape> : null}
-                        {white > 0 ? <Grape color="white">{white}</Grape> : null}
-                    </>}
+                return <li
+                    key={field.id}
+                    className={cx({
+                        "SidebarPlayer-field": true,
+                        "SidebarPlayer-field--harvested": field.harvested,
+                        "SidebarPlayer-field--sold": field.sold,
+                    })}
+                >
+                    {red > 0 ? <Grape color="red">{red}</Grape> : null}
+                    {white > 0 ? <Grape color="white">{white}</Grape> : null}
                 </li>;
             })}
         </ul>

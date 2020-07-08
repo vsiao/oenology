@@ -10,12 +10,12 @@
     left: 0;
     pointer-events: none;
     position: absolute;
-    width: 9em;
+    width: 12em;
 }
 
 .GameOverPrompt-table {
     margin: 1em;
-    padding-left: 8em;
+    padding-left: 11em;
     text-align: center;
 }
 
@@ -64,7 +64,7 @@
     padding-left: 2em;
     position: absolute;
     text-align: left;
-    width: 9em;
+    width: 12em;
     z-index: 1;
 }
 .GameOverPrompt-row + .GameOverPrompt-row .GameOverPrompt-rowHeader::after {
@@ -74,8 +74,12 @@
     height: 2px;
     position: absolute;
     right: 0;
-    width: 8em;
+    width: 11em;
     box-shadow: inset 0 1px #ddd;
+}
+
+.GameOverPrompt-vpIcon {
+    margin-right: .5em;
 }
 
 .GameOverPrompt-statsButton {
