@@ -46,7 +46,6 @@ import WineGlass from "../../game-views/icons/WineGlass";
 import {
     WakeUpChoiceData,
     chooseWakeUp,
-    endTurn,
     endVisitor,
     passToNextSeason,
     promptForWakeUpOrder,
@@ -213,9 +212,9 @@ export const summerVisitorReducers: Record<
                             ],
                         });
                     case 2:
-                        return endTurn(gainCoins(4, discardCards(action.cards!, state)));
+                        return endVisitor(gainCoins(4, discardCards(action.cards!, state)));
                     case 4:
-                        return endTurn(gainVP(3, discardCards(action.cards!, state)));
+                        return endVisitor(gainVP(3, discardCards(action.cards!, state)));
                     default:
                         return state;
                 }
@@ -681,7 +680,7 @@ export const summerVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 if (!action.cards) {
-                    return endTurn(state); // pass on optional vine planting
+                    return endVisitor(state); // pass on optional vine planting
                 }
                 const card = action.cards![0];
                 switch (card.type) {
@@ -865,7 +864,7 @@ export const summerVisitorReducers: Record<
                         numCards: 2,
                     });
                 } else {
-                    return endTurn(
+                    return endVisitor(
                         drawCards(discardCards(action.cards!, state), action._key!, {
                             vine: 1,
                             summerVisitor: 1,
