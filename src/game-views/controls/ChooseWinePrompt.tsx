@@ -25,9 +25,7 @@ const ChooseWinePrompt: React.FunctionComponent<Props> = props => {
 
     return <PromptStructure
         className="ChooseWinePrompt"
-        title={prompt.type === "chooseWine"
-            ? `Choose ${prompt.limit} wine${prompt.limit > 1 ? "s" : ""}`
-            : "Fill order"}
+        title={prompt.type === "chooseWine" ? "Choose a wine" : "Fill order"}
     >
         <div className="ChooseWinePrompt-wineSelector">
             <ul className="ChooseWinePrompt-wines">
@@ -65,8 +63,7 @@ const ChooseWinePrompt: React.FunctionComponent<Props> = props => {
 const isDisabled = (prompt: ChooseWinePromptState | FillOrderPromptState, selectedWines: WineSpec[]) => {
     switch (prompt.type) {
         case "chooseWine":
-            return selectedWines.length > prompt.limit ||
-                selectedWines.some(w => w.value < prompt.minValue);
+            return selectedWines.some(w => w.value < prompt.minValue);
 
         case "fillOrder":
             let winesLeft = selectedWines;

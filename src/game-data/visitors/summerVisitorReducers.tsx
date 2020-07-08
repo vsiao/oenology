@@ -36,6 +36,7 @@ import {
     numCardsDisabledReason,
     uprootDisabledReason,
     needWineDisabledReason,
+    needCardOfTypeDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -50,6 +51,7 @@ import {
     passToNextSeason,
     promptForWakeUpOrder,
     setPendingAction,
+    endTurn,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines } from "../shared/grapeWineReducers";
@@ -456,7 +458,53 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // entertainer: s => endVisitor(s),
+    entertainer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const cards = action.cards!;
+                switch (cards.length) {
+                    case 1:
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "ENTERTAINER_DRAW",
+                                    label: <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /></>,
+                                    disabledReason: moneyDisabledReason(state, 4),
+                                },
+                                {
+                                    id: "ENTERTAINER_DISCARD",
+                                    label: <>Discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP></>,
+                                    disabledReason: needWineDisabledReason(state) ||
+                                        needCardOfTypeDisabledReason(state, "visitor", { numCards: 3 }),
+                                },
+                            ],
+                        });
+                    case 3:
+                        return endVisitor(gainVP(3, discardCards(cards, state)));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ENTERTAINER_DRAW":
+                        return endVisitor(drawCards(payCoins(4, state), action._key!, { winterVisitor: 3 }));
+                    case "ENTERTAINER_DISCARD":
+                        return promptToChooseWine(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return promptToChooseCard(discardWines(state, action.wines), {
+                    title: "Discard 3 visitors",
+                    cards: state.players[state.currentTurn.playerId].cardsInHand
+                        .filter(({ type }) => type === "visitor")
+                        .map(id => ({ id })),
+                    numCards: 3,
+                });
+            default:
+                return state;
+        }
+    },
     grower: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -740,7 +788,7 @@ export const summerVisitorReducers: Record<
                     case "NEGOTIATOR_GRAPE":
                         return promptToChooseGrape(state, 1);
                     case "NEGOTIATOR_WINE":
-                        return promptToChooseWine(state, { limit: 1 });
+                        return promptToChooseWine(state);
                     default:
                         return state;
                 }
@@ -1353,6 +1401,34 @@ export const summerVisitorReducers: Record<
                     action.playerId !== state.currentTurn.playerId ? gainCoins(2, state) : state,
                     action.playerId
                 );
+            default:
+                return state;
+        }
+    },
+    wineCritic: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "WCRITIC_DRAW", label: <>Draw 2 <WinterVisitor /></>, },
+                        {
+                            id: "WCRITIC_DISCARD",
+                            label: <>Discard 1 <WineGlass /> of value 7 or more to gain <VP>4</VP></>,
+                            disabledReason: needWineDisabledReason(state, /* minValue */ 7),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "WCRITIC_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { winterVisitor: 2 }));
+                    case "WCRITIC_DISCARD":
+                        return promptToChooseWine(state, { minValue: 7 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endTurn(gainVP(4, discardWines(state, action.wines)));
             default:
                 return state;
         }

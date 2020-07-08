@@ -278,7 +278,7 @@ export const winterVisitorReducers: Record<
                     case "GOVERNESS_TRAIN":
                         return endVisitor(trainWorker(payCoins(3, state), { availableThisYear: true }));
                     case "GOVERNESS_DISCARD":
-                        return promptToChooseWine(state, { limit: 1 });
+                        return promptToChooseWine(state);
                     default:
                         return state;
                 }
@@ -507,7 +507,7 @@ export const winterVisitorReducers: Record<
                     case "JUDGE_DRAW":
                         return endVisitor(drawCards(state, action._key!, { summerVisitor: 2 }));
                     case "JUDGE_DISCARD":
-                        return promptToChooseWine(state, { minValue: 4, limit: 1 });
+                        return promptToChooseWine(state, { minValue: 4 });
                     default:
                         return state;
                 }
@@ -658,7 +658,7 @@ export const winterVisitorReducers: Record<
                     case "MVINTNER_UPGRADE":
                         return endVisitor(buildStructure(payCoins(cost, state), upgradeCellar));
                     case "MVINTNER_FILL":
-                        return promptToChooseWine(state, { limit: 1 });
+                        return promptToChooseWine(state);
                     default:
                         return state;
                 }
@@ -1037,7 +1037,7 @@ export const winterVisitorReducers: Record<
                     case "PROMOTER_GRAPE":
                         return promptToChooseGrape(state, 1);
                     case "PROMOTER_WINE":
-                        return promptToChooseWine(state, { limit: 1 });
+                        return promptToChooseWine(state);
                     default:
                         return state;
                 }
@@ -1163,7 +1163,7 @@ export const winterVisitorReducers: Record<
     taster: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptToChooseWine(state, { limit: 1 });
+                return promptToChooseWine(state);
             case "CHOOSE_WINE":
                 const wine = action.wines[0];
                 const stateAfterDiscard = discardWines(state, [wine]);

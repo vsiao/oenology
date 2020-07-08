@@ -46,7 +46,6 @@ export interface ChooseCardPromptState {
 export interface ChooseWinePromptState {
     type: "chooseWine";
     minValue: number;
-    limit: number;
 }
 
 export interface ChooseGrapePromptState {

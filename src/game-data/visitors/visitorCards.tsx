@@ -10,12 +10,10 @@ import Residuals from "../../game-views/icons/Residuals";
 
 export const UNIMPLEMENTED_CARDS = {
     // summer
-    "entertainer": true,
     "importer": true,
     "planner": true,
     "stonemason": true,
     "weddingParty": true,
-    "wineCritic": true,
     // winter
     "caravan": true,
     "craftsman": true,
@@ -86,10 +84,10 @@ export const summerVisitorCards = {
         "Cultivator",
         <>Plant 1 <Vine />. You may plant it on a field even if the total value of that field exceeds the max vine value.</>,
     ),
-    // entertainer: summerVisitorCard(
-    //     "Entertainer",
-    //     <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
-    // ),
+    entertainer: summerVisitorCard(
+        "Entertainer",
+        <>Pay <Coins>4</Coins> to draw 3 <WinterVisitor /> OR discard 1 <WineGlass /> and 3 visitor cards to gain <VP>3</VP>.</>
+    ),
     grower: summerVisitorCard(
         "Grower",
         <>Plant 1 <Vine />. Then, if you have planted a total of at least 6 <Vine />, gain <VP>2</VP>.</>
@@ -181,6 +179,10 @@ export const summerVisitorCards = {
     volunteerCrew: summerVisitorCard(
         "Volunteer Crew",
         <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
+    ),
+    wineCritic: summerVisitorCard(
+        "Wine Critic",
+        <>Draw 2 <WinterVisitor /> OR discard 1 <WineGlass /> of value 7 or more to gain <VP>4</VP>.</>
     ),
 };
 
