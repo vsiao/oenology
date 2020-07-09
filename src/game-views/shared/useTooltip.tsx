@@ -1,47 +1,26 @@
 import "./Tooltip.css";
 import cx from "classnames";
-import React, { useRef, useEffect, FunctionComponent, ReactNode, useState, RefObject, useMemo } from "react";
+import React, { useRef, useEffect, FunctionComponent, ReactNode, useState, RefObject, useMemo, createContext, useContext, useCallback } from "react";
 import * as ReactDOM from "react-dom";
 
 export const useTooltip = (side: AnchorSide, children: ReactNode): [
     RefObject<HTMLElement>,
     ReactNode,
 ] => {
-    const tooltip = useMemo(() => <Tooltip side={side}>{children}</Tooltip>, [side, children]);
-    return useAnchoredLayer(side, tooltip);
+    const tooltip = useMemo(() => <Tooltip>{children}</Tooltip>, [children]);
+    return useHoverLayer(side, tooltip);
 };
 
-const useAnchoredLayer = (side: AnchorSide, children: ReactNode): [
+const useHoverLayer = (side: AnchorSide, children: ReactNode): [
     RefObject<HTMLElement>,
     ReactNode,
 ] => {
     const anchorRef = useRef<HTMLElement>(null);
-   const [maybeLayer, setLayer] = useState<ReactNode>(null);
+    const [maybeLayer, mount, maybeUnmount] = useAnchoredLayer();
 
     useEffect(() => {
-        let container: HTMLDivElement | null = null;
-        const maybeUnmount = () => {
-            if (container) {
-                document.body.removeChild(container);
-                container = null;
-            }
-        };
-        const handleMouseEnter = (event: MouseEvent) => {
-            container = document.createElement("div");
-            document.body.appendChild(container);
-            setLayer(
-                ReactDOM.createPortal(
-                    <AnchoredLayer anchorNode={event.target as Element} side={side}>
-                        {children}
-                    </AnchoredLayer>,
-                    container
-                )
-            );
-        };
-        const handleMouseLeave = (event: MouseEvent) => {
-            setLayer(null);
-            maybeUnmount();
-        };
+        const handleMouseEnter = (event: MouseEvent) => mount(event.target as Element, side, children);
+        const handleMouseLeave = (event: MouseEvent) => maybeUnmount();
         if (anchorRef.current) {
             const anchorNode = anchorRef.current;
             anchorNode.addEventListener("mouseenter", handleMouseEnter);
@@ -53,10 +32,42 @@ const useAnchoredLayer = (side: AnchorSide, children: ReactNode): [
                 maybeUnmount();
             };
         }
-    }, [children, side]);
+    }, [mount, maybeUnmount, children, side]);
 
     return [anchorRef, maybeLayer];
 };
+
+export const useAnchoredLayer = (): [
+    ReactNode,
+    (anchorNode: Element, side: AnchorSide, children: ReactNode) => void,
+    () => void,
+] => {
+    const [maybeLayer, setLayer] = useState<ReactNode>(null);
+    const container = useRef<HTMLDivElement | null>(null);
+
+    const mount = useCallback((anchorNode: Element, side: AnchorSide, children: ReactNode) => {
+        container.current = document.createElement("div");
+        document.body.appendChild(container.current);
+        setLayer(
+            ReactDOM.createPortal(
+                <AnchoredLayer anchorNode={anchorNode} side={side}>
+                    {children}
+                </AnchoredLayer>,
+                container.current
+            )
+        );
+    }, []);
+    const maybeUnmount = useCallback(() => {
+        if (container.current) {
+            setLayer(null);
+            document.body.removeChild(container.current);
+            container.current = null;
+        }
+    }, []);
+    return [maybeLayer, mount, maybeUnmount];
+};
+
+const LayerSideContext = createContext<AnchorSide>("bottom");
 
 export type AnchorSide = "top" | "right" | "bottom" | "left";
 const AnchoredLayer: FunctionComponent<{
@@ -76,13 +87,15 @@ const AnchoredLayer: FunctionComponent<{
                 : side === "top" ? anchorRect.top : anchorRect.bottom,
         }}
     >
-        {children}
+        <LayerSideContext.Provider value={side}>
+            {children}
+        </LayerSideContext.Provider>
     </div>;
 };
 
-const Tooltip: FunctionComponent<{
-    side: AnchorSide;
-}> = ({ side, children, }) => {
+export const Tooltip: FunctionComponent<{}> = ({ children, }) => {
+    const side = useContext(LayerSideContext);
+
     return <div className={cx("Tooltip", `Tooltip--${side}`)}>
         {children}
     </div>;

@@ -9,17 +9,17 @@
 }
 
 .Tooltip {
-    background: black;
-    border-radius: .2em;
+    background: #333;
+    border-radius: .4em;
     color: white;
     font-size: .8em;
-    max-width: 12em;
+    max-width: 13em;
     padding: .4em .8em;
     position: absolute;
 }
 .Tooltip--top,
 .Tooltip--bottom {
-    margin: .4em 0;
+    margin: .6em 0;
 }
 .Tooltip--top {
     bottom: 50%;
@@ -29,7 +29,7 @@
 }
 .Tooltip--left,
 .Tooltip--right {
-    margin: 0 .4em;
+    margin: 0 .6em;
 }
 .Tooltip--left {
     right: 50%;
@@ -39,14 +39,14 @@
 }
 
 .Tooltip::after {
-    border: .4em solid black;
+    border: .6em solid #333;
     content: "";
     display: block;
     position: absolute;
 }
 .Tooltip--top::after,
 .Tooltip--bottom::after {
-    border-color: black transparent;
+    border-color: #333 transparent;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -60,7 +60,7 @@
 }
 .Tooltip--left::after,
 .Tooltip--right::after {
-    border-color: transparent black;
+    border-color: transparent #333;
     top: 50%;
     transform: translateY(-50%);
 }

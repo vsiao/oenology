@@ -6,6 +6,8 @@ import { CurrentTurn, WorkerPlacementTurnPendingAction } from "../game-data/Game
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { gameIsOver } from "../game-data/shared/sharedSelectors";
+import { Tooltip, useAnchoredLayer } from "./shared/useTooltip";
+import VisitorCard from "./cards/VisitorCard";
 
 interface Props {
     gameOver: boolean;
@@ -15,9 +17,33 @@ interface Props {
 }
 
 const StatusBanner: React.FunctionComponent<Props> = props => {
-    return <div className="StatusBanner">
-        {props.gameOver ? "Game over! Thanks for playing!" : renderStatus(props)}
-    </div>;
+    const ref = React.useRef<HTMLDivElement>(null);
+    const [maybeLayer, mount, maybeUnmount] = useAnchoredLayer();
+    React.useEffect(() => {
+        if (
+            ref.current &&
+            props.currentTurn.type === "workerPlacement" &&
+            props.currentTurn.pendingAction?.type === "playVisitor" &&
+            props.currentTurn.pendingAction.visitorId
+        ) {
+            const cardData = visitorCards[props.currentTurn.pendingAction.visitorId];
+            mount(
+                ref.current,
+                "bottom",
+                <Tooltip>
+                    <VisitorCard className="StatusBanner-visitorTip" cardData={cardData} />
+                </Tooltip>
+            );
+        }
+        return () => maybeUnmount();
+    }, [props.currentTurn, mount, maybeUnmount]);
+
+    return <>
+        <div ref={ref} className="StatusBanner">
+            {props.gameOver ? "Game over! Thanks for playing!" : renderStatus(props)}
+        </div>
+        {maybeLayer}
+    </>;
 };
 
 const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
