@@ -350,10 +350,12 @@ export const summerVisitorReducers: Record<
                     case "BUYER_PLACE_WHITE":
                         return endVisitor(payCoins(2, placeGrapes(state, { white: 1 })));
                     case "BUYER_DISCARD":
-                        return endVisitor(state); // TODO
+                        return promptToChooseWine(state);
                     default:
                         return state;
                 }
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(1, gainCoins(2, discardWines(state, action.wines))));
             default:
                 return state;
         }
@@ -1004,25 +1006,24 @@ export const summerVisitorReducers: Record<
                     upToN: 2,
                     title: "Retrieve up to 2 workers",
                     choices: allPlacements
-                        .map(({ type, bonusLabel, title }) =>
-                            state.workerPlacements[type]
-                                .map((w, i) =>
-                                    w && w.playerId === playerId
+                        .map(({ type, bonusLabel, title }) => {
+                            if (type === "playSummerVisitor") {
+                                // Must retrieve from *other* actions
+                                return [];
+                            }
+                            return state.workerPlacements[type]
+                                .map((w, i) => w && w.playerId === playerId
                                     ? {
                                         id: `${type}_${i}`,
                                         label: <>
-                                            <Worker
-                                                color={w.color}
-                                                workerType={w.type}
-                                                isTemp={w.isTemp}
-                                            />&nbsp;
-                                            {bonusLabel && hasBonus ? bonusLabel : title}
+                                            <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
+                                            &nbsp;{bonusLabel && hasBonus ? bonusLabel : title}
                                         </>,
                                     } as Choice
                                     : null
                                 )
                                 .filter((c: Choice | null): c is Choice => !!c)
-                        )
+                        })
                         .flat(),
                 });
             case "CHOOSE_ACTION_MULTI":

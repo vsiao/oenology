@@ -86,6 +86,9 @@ export const buildStructure = (
 };
 
 const editVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) => {
+    if (numVP === 0) {
+        return state;
+    }
     const playerState = state.players[playerId];
     return pushActivityLog(
         { type: "vp", playerId, delta: numVP },
