@@ -205,7 +205,8 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptToBuildStructure(state);
             case "BUILD_STRUCTURE":
-                state = buildStructure(state, action.structureId);
+                const { cost } = structures[action.structureId];
+                state = buildStructure(payCoins(cost, state), action.structureId);
                 const numBuilt = Object.values(state.players[state.currentTurn.playerId].structures)
                     .filter(built => built).length;
                 return endVisitor(numBuilt >= 6 ? gainVP(2, state) : state);
