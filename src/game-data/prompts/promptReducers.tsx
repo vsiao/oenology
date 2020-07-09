@@ -284,7 +284,10 @@ export const promptToPlaceWorker = (state: GameState) => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "placeWorker" });
+    return enqueueActionPrompt(state, {
+        type: "placeWorker",
+        key: state.lastPlaceWorkerActionKey || "",
+    });
 };
 
 export const promptToBuildStructure = (

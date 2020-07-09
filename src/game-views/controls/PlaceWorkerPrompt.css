@@ -36,6 +36,19 @@
     margin: -6px;
 }
 
+.PlaceWorkerPrompt-choice {
+    position: relative;
+}
+
 .PlaceWorkerPrompt-choiceButton {
     margin: 6px;
+}
+
+.PlaceWorkerPrompt-choiceNeedsGrande {
+    fill: #ccc;
+    font-size: .5em;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    top: 0;
 }

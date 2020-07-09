@@ -11,8 +11,8 @@ interface Props {
     disabled?: boolean;
 }
 
-const Worker: React.FunctionComponent<Props> = ({ workerType, color, isTemp, disabled }) => {
-    return <span className={cx("Worker", `Worker--${workerType}`)}>
+const Worker: React.FunctionComponent<Props> = ({ className, workerType, color, isTemp, disabled }) => {
+    return <span className={cx("Worker", `Worker--${workerType}`, className)}>
         &nbsp;
         <svg
             className={cx({

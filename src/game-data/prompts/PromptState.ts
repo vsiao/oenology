@@ -76,6 +76,11 @@ export interface MakeWinePromptState {
 
 export interface PlaceWorkerPromptState {
     type: "placeWorker";
+    // ##ForcePromptRemount
+    // Occasionally a player may have two consecutive turns.
+    // We want this prompt to remount in order to trigger animations
+    // for a better sense of progress.
+    key: string;
 }
 
 export interface BuildStructurePromptState {

@@ -81,6 +81,12 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
                         >
                             {placement.label}
                         </ChoiceButton>
+                        {!placement.disabledReason && requiresGrande
+                            ? <WorkerIcon
+                                className="PlaceWorkerPrompt-choiceNeedsGrande"
+                                workerType="grande"
+                            />
+                            : null}
                     </li>;
                 })}
             </ul>

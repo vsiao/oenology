@@ -252,7 +252,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 const placeWorker = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
         case "PLACE_WORKER": {
-            state = { ...state, lastActionKey: action._key } as unknown as GameState;
+            state = { ...state, lastPlaceWorkerActionKey: action._key };
             if (!action.placement) {
                 return passToNextSeason(state);
             }

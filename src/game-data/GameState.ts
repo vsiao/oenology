@@ -27,6 +27,9 @@ export default interface GameState {
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 
+    // Published key of the most-recently applied PlaceWorkerAction
+    lastPlaceWorkerActionKey?: string;
+
     // local state
     playerId: string | null;
     actionPrompts: PromptState[];
