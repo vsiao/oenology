@@ -1050,7 +1050,9 @@ export const summerVisitorReducers: Record<
                 const player = state.players[state.currentTurn.playerId];
                 const playerWorkers = player.workers.slice();
                 workers.forEach(type => {
-                    const i = playerWorkers.findIndex(w => (type === "temp" && w.isTemp) || w.type === type);
+                    const i = playerWorkers.findIndex(
+                        w => !w.available && ((type === "temp" && w.isTemp) || w.type === type)
+                    );
                     playerWorkers[i] = { ...playerWorkers[i], available: true };
                 });
                 return endVisitor(updatePlayer(payCoins(2, state), player.id, { workers: playerWorkers, }));

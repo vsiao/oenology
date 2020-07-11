@@ -323,7 +323,7 @@ export const winterVisitorReducers: Record<
                                         ? <>({playerName} gains <VP>1</VP>)</>
                                         : null}
                                 </>,
-                                disabledReason: trainWorkerDisabledReason(state, 1),
+                                disabledReason: trainWorkerDisabledReason(state, 1, state.playerId),
                             },
                             { id: "GSPEAKER_PASS", label: <>Pass</>, },
                         ],

@@ -292,8 +292,12 @@ export const uprootDisabledReason = (
 };
 
 const MAX_TRAINED_WORKERS = 6;
-export const trainWorkerDisabledReason = (state: GameState, cost: number): string | undefined => {
-    const playerState = state.players[state.currentTurn.playerId];
+export const trainWorkerDisabledReason = (
+    state: GameState,
+    cost: number,
+    playerId = state.currentTurn.playerId
+): string | undefined => {
+    const playerState = state.players[playerId];
     const trainedWorkers = playerState.workers.filter(w => !w.isTemp);
     if (trainedWorkers.length >= MAX_TRAINED_WORKERS) {
         return "You can't train any more workers.";
