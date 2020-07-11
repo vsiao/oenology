@@ -8,6 +8,11 @@ import { visitorCards } from "../game-data/visitors/visitorCards";
 import { gameIsOver } from "../game-data/shared/sharedSelectors";
 import { Tooltip, useAnchoredLayer } from "./shared/useTooltip";
 import VisitorCard from "./cards/VisitorCard";
+import { orderCards } from "../game-data/orderCards";
+import OrderCard from "./cards/OrderCard";
+import VineCard from "./cards/VineCard";
+import { vineCards } from "../game-data/vineCards";
+import XIcon from "./icons/XIcon";
 
 interface Props {
     gameOver: boolean;
@@ -20,20 +25,30 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
     const ref = React.useRef<HTMLDivElement>(null);
     const [maybeLayer, mount, maybeUnmount] = useAnchoredLayer();
     React.useEffect(() => {
-        if (
-            ref.current &&
-            props.currentTurn.type === "workerPlacement" &&
-            props.currentTurn.pendingAction?.type === "playVisitor" &&
-            props.currentTurn.pendingAction.visitorId
-        ) {
-            const cardData = visitorCards[props.currentTurn.pendingAction.visitorId];
-            mount(
-                ref.current,
-                "bottom",
-                <Tooltip>
-                    <VisitorCard className="StatusBanner-visitorTip" cardData={cardData} />
-                </Tooltip>
-            );
+        if (ref.current && props.currentTurn.type === "workerPlacement" && props.currentTurn.pendingAction) {
+            const { pendingAction } = props.currentTurn;
+            const renderCardTip = (card: React.ReactNode) => {
+                return <Tooltip className="StatusBanner-tooltip">
+                    {card}
+                    <button className="StatusBanner-hideTipButton" onClick={maybeUnmount}>
+                        <XIcon />
+                    </button>
+                </Tooltip>;
+            }
+
+            if (pendingAction?.type === "plantVine" && pendingAction.vineId) {
+                const cardData = vineCards[pendingAction.vineId];
+                const card = <VineCard className="StatusBanner-cardTip" cardData={cardData} />;
+                mount(ref.current, "bottom", renderCardTip(card));
+            } else if (pendingAction?.type === "playVisitor" && pendingAction.visitorId) {
+                const cardData = visitorCards[pendingAction.visitorId];
+                const card = <VisitorCard className="StatusBanner-cardTip" cardData={cardData} />;
+                mount(ref.current, "bottom", renderCardTip(card));
+            } else if (pendingAction?.type === "fillOrder" && pendingAction.orderId) {
+                const cardData = orderCards[pendingAction.orderId];
+                const card = <OrderCard className="StatusBanner-cardTip" cardData={cardData} />;
+                mount(ref.current, "bottom", renderCardTip(card));
+            }
         }
         return () => maybeUnmount();
     }, [props.currentTurn, mount, maybeUnmount]);

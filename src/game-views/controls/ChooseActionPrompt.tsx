@@ -8,8 +8,6 @@ import { ChooseActionPromptState, Choice } from "../../game-data/prompts/PromptS
 import { chooseAction, chooseActionMulti } from "../../game-data/prompts/promptActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import VisitorCard from "../cards/VisitorCard";
-import { visitorCards } from "../../game-data/visitors/visitorCards";
 
 interface Props {
     prompt: ChooseActionPromptState;
@@ -28,12 +26,6 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
             </div>
             :  null}
         <div className="ChooseActionPrompt-body">
-            {prompt.contextVisitor
-                ? <VisitorCard
-                      className="ChooseActionPrompt-contextCard"
-                      cardData={visitorCards[prompt.contextVisitor]}
-                  />
-                : null}
             <ul className="ChooseActionPrompt-choices">
                 {prompt.choices.map((choice, i) => {
                     const isSelected = selectedIds.some(id => id === choice.id);

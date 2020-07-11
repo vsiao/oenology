@@ -69,7 +69,7 @@ export type WorkerPlacementTurnPendingAction = (
     | { type: "sellGrapes"; }
     | { type: "buyField"; }
     | { type: "sellField"; }
-    | { type: "plantVine"; vineId?: VineId; bonusActivated?: true; }
+    | { type: "plantVine"; vineId?: VineId; }
     | { type: "buildStructure"; }
     | { type: "harvestField"; }
     | { type: "uproot"; }

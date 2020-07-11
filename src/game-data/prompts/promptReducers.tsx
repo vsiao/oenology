@@ -60,7 +60,6 @@ export const promptForAction = <DataT extends unknown = undefined>(
             </p>
             : description,
         playerId,
-        contextVisitor,
         choices,
         upToN,
     });
@@ -247,7 +246,7 @@ export const promptToChooseWine = (
     return enqueueActionPrompt(state, { type: "chooseWine", minValue, });
 };
 
-export const promptToChooseGrape = (state: GameState, limit?: number): GameState => {
+export const promptToChooseGrape = (state: GameState, limit?: 1): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }

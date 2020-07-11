@@ -350,12 +350,12 @@ export const summerVisitorReducers: Record<
                     case "BUYER_PLACE_WHITE":
                         return endVisitor(payCoins(2, placeGrapes(state, { white: 1 })));
                     case "BUYER_DISCARD":
-                        return promptToChooseWine(state);
+                        return promptToChooseGrape(state);
                     default:
                         return state;
                 }
-            case "CHOOSE_WINE":
-                return endVisitor(gainVP(1, gainCoins(2, discardWines(state, action.wines))));
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(1, gainCoins(2, discardGrapes(state, action.grapes))));
             default:
                 return state;
         }

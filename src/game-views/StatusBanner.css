@@ -7,6 +7,20 @@
     padding: 0 16px;
 }
 
-.StatusBanner-visitorTip {
+.StatusBanner-cardTip {
     margin: .5em 0;
+}
+
+.StatusBanner-hideTipButton {
+    background: transparent;
+    cursor: pointer;
+    fill: white;
+    font-size: .8em;
+    position: absolute;
+    right: .5em;
+    top: .5em;
+    visibility: hidden;
+}
+.StatusBanner-tooltip:hover .StatusBanner-hideTipButton {
+    visibility: visible;
 }

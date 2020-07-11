@@ -11,6 +11,7 @@
 .Tooltip {
     background: #333;
     border-radius: .4em;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .3);
     color: white;
     font-size: .8em;
     max-width: 13em;

@@ -93,10 +93,10 @@ const AnchoredLayer: FunctionComponent<{
     </div>;
 };
 
-export const Tooltip: FunctionComponent<{}> = ({ children, }) => {
+export const Tooltip: FunctionComponent<{ className?: string }> = ({ className, children, }) => {
     const side = useContext(LayerSideContext);
 
-    return <div className={cx("Tooltip", `Tooltip--${side}`)}>
+    return <div className={cx("Tooltip", `Tooltip--${side}`, className)}>
         {children}
     </div>;
 };

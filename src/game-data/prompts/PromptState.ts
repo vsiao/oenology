@@ -26,7 +26,6 @@ export interface ChooseActionPromptState {
     title: string;
     description: React.ReactNode;
     playerId: string;
-    contextVisitor?: VisitorId;
     choices: Choice[];
     upToN?: number;
 }
