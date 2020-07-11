@@ -13,10 +13,13 @@
     padding: 12px 1.6em 8px;
 }
 
-.PlayerMat-residualPayments,
 .PlayerMat-coins,
 .PlayerMat-victoryPoints {
-    margin-right: 8px;
+    margin-right: .5em;
+}
+
+.PlayerMat-residualPayments {
+    margin-right: .7em;
 }
 
 .PlayerMat-workers {

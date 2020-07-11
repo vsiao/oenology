@@ -17,6 +17,7 @@ import ChooseGrapePrompt from "./ChooseGrapePrompt";
 interface Props {
     actionPrompt: PromptState | undefined;
     playerId: string;
+    undoable: boolean;
 }
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
@@ -37,26 +38,26 @@ const ActionPrompt: React.FunctionComponent<Props> = props => {
 
 const renderPrompt = (
     prompt: PromptState,
-    props: Props,
+    { playerId, undoable }: Props,
 ): React.ReactNode => {
     switch (prompt.type) {
         case "buildStructure":
-            return <BuildStructurePrompt coupon={prompt.coupon} playerId={props.playerId} />;
+            return <BuildStructurePrompt coupon={prompt.coupon} playerId={playerId} undoable={undoable} />;
         case "chooseAction":
-            return <ChooseActionPrompt prompt={prompt} />;
+            return <ChooseActionPrompt prompt={prompt} undoable={undoable} />;
         case "chooseCard":
-            return <ChooseCardPrompt prompt={prompt} playerId={props.playerId} />;
+            return <ChooseCardPrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "chooseField":
-            return <ChooseFieldPrompt prompt={prompt} playerId={props.playerId} />;
+            return <ChooseFieldPrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "chooseGrape":
-            return <ChooseGrapePrompt prompt={prompt} playerId={props.playerId} />;
+            return <ChooseGrapePrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "chooseWine":
         case "fillOrder":
-            return <ChooseWinePrompt prompt={prompt} playerId={props.playerId} />;
+            return <ChooseWinePrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "makeWine":
-            return <MakeWinePrompt prompt={prompt} playerId={props.playerId} />;
+            return <MakeWinePrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "placeWorker":
-            return <PlaceWorkerPrompt playerId={props.playerId} />;
+            return <PlaceWorkerPrompt playerId={playerId} />;
         case "gameOver":
             return <GameOverPrompt />;
     }
@@ -66,6 +67,7 @@ const mapStateToProps = (state: AppState) => {
     return {
         actionPrompt: state.game!.actionPrompts[0],
         playerId: state.game!.playerId!,
+        undoable: state.game!.undoable,
     };
 };
 

@@ -13,6 +13,11 @@ import { papaCards, mamaCards } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 
 export const endTurn = (state: GameState): GameState => {
+    state = {
+        ...state,
+        undoable: false,
+        prevState: null,
+    };
     switch (state.currentTurn.type) {
         case "mamaPapa":
             return endMamaPapaTurn(state);
@@ -257,9 +262,7 @@ export const passToNextSeason = (
         return { ...pos, passed: true };
     }) as GameState["wakeUpOrder"];
 
-    return endWorkerPlacementTurn(
-        pushActivityLog({ type: "pass", playerId }, { ...state, wakeUpOrder })
-    );
+    return endTurn(pushActivityLog({ type: "pass", playerId }, { ...state, wakeUpOrder }));
 };
 
 export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(

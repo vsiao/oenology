@@ -7,6 +7,7 @@ import { UNIMPLEMENTED_CARDS } from "./visitors/visitorCards";
 export type GameAction = (
     | StartGameAction
     | PromptAction
+    | UndoAction
     | CHEAT_DrawCardAction
 ) & {
     // Every action should first be pushed to firebase to be
@@ -19,6 +20,7 @@ export const isGameAction = (action: Action): action is GameAction => {
     switch (action.type) {
         case "START_GAME":
         case "CHEAT_DRAW_CARD":
+        case "UNDO":
             return true;
         default:
             return isPromptAction(action);
@@ -40,6 +42,13 @@ export interface StartGameAction extends Action<"START_GAME"> {
 }
 export const startGame = (players: PlayerInit[]): StartGameAction => {
     return { type: "START_GAME", players, excludeCards: UNIMPLEMENTED_CARDS };
+};
+
+export interface UndoAction extends Action<"UNDO"> {
+    playerId: string;
+}
+export const undo = (playerId: string): GameAction => {
+    return { type: "UNDO", playerId };
 };
 
 export interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {

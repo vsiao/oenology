@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import cx from 'classnames';
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, undo } from "../../game-data/gameActions";
 import { WineColor, TokenMap } from "../../game-data/GameState";
 import { makeWine, GrapeSpec, WineIngredients } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
@@ -22,6 +22,7 @@ interface Props {
     cellarLimit: number;
     grapes: GrapeSpec[];
     onConfirm: (ingredients: WineIngredients[]) => void;
+    undo?: () => void;
 }
 
 const MakeWinePrompt: React.FunctionComponent<Props> = props => {
@@ -37,7 +38,11 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
         /* minValue */ props.prompt.asZymologist ? 4 : 1
     );
 
-    return <PromptStructure className="MakeWinePrompt" title={`Make up to ${props.prompt.upToN} wine`}>
+    return <PromptStructure
+        className="MakeWinePrompt"
+        title={`Make up to ${props.prompt.upToN} wine`}
+        onClose={props.undo}
+    >
         <div className="MakeWinePrompt-hints">
             <p className="MakeWinePrompt-formula"><Grape color="red" /> = <WineGlass color="red" /></p>
             <p className="MakeWinePrompt-formula"><Grape color="white" /> = <WineGlass color="white" /></p>
@@ -166,10 +171,13 @@ const wineFromGrapes = (
     };
 };
 
-const mapStateToProps = (
-    state: AppState,
-    { prompt, playerId }: { prompt: MakeWinePromptState; playerId: string; }
-) => {
+interface OwnProps {
+    prompt: MakeWinePromptState;
+    playerId: string;
+    undoable: boolean;
+}
+
+const mapStateToProps = (state: AppState, { prompt, playerId }: OwnProps) => {
     const currentPlayer = state.game!.players[playerId];
     const hasMediumCellar = currentPlayer.structures["mediumCellar"];
     const hasLargeCellar = currentPlayer.structures["largeCellar"];
@@ -180,10 +188,10 @@ const mapStateToProps = (
         playerId
     };
 };
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, { playerId, undoable }: OwnProps) => {
     return {
-        onConfirm: (grapes: WineIngredients[]) =>
-            dispatch(makeWine(grapes, ownProps.playerId)),
+        onConfirm: (grapes: WineIngredients[]) => dispatch(makeWine(grapes, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

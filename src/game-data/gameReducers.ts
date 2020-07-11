@@ -14,9 +14,27 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
                 action.players[0].id,
                 initGame(userId, action)
             );
+        case "UNDO":
+            if (!state.prevState) {
+                throw new Error("Unexpected state: nothing to undo");
+            }
+            // If the undo requester wasn't the last player to commit an action,
+            // don't do anything. This might happen if there's a race between the
+            // player undoing and someone else performing an action, perhaps in
+            // response to a visitor card.
+            return action.playerId === state.lastActionPlayerId
+                ? state.prevState
+                : state;
+
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
     }
+    state = {
+        ...state,
+        undoable: state.playerId === action.playerId,
+        lastActionPlayerId: action.playerId,
+        prevState: state,
+    };
     return board(prompt(state, action), action);
 };
 
@@ -73,6 +91,8 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             yokeUproot: []
         },
         activityLog: [],
+        undoable: false,
+        prevState: null,
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };

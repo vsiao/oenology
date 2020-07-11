@@ -27,6 +27,11 @@ export default interface GameState {
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 
+    // Undo state
+    undoable: boolean;
+    lastActionPlayerId?: string;
+    prevState: GameState | null;
+
     // Published key of the most-recently applied PlaceWorkerAction
     lastPlaceWorkerActionKey?: string;
 

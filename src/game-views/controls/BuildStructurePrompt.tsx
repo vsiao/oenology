@@ -2,7 +2,7 @@ import "./BuildStructurePrompt.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, undo } from "../../game-data/gameActions";
 import { buildStructure } from "../../game-data/prompts/promptActions";
 import { structures, StructureId, Coupon } from "../../game-data/structures";
 import { AppState } from "../../store/AppState";
@@ -18,12 +18,16 @@ interface Props {
         disabledReason: string | undefined;
     }[];
     onSelectStructure: (structureId: StructureId) => void;
+    undo?: () => void;
 }
 
 const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     const { structureOptions, onSelectStructure } = props;
 
-    return <PromptStructure title="Build a structure">
+    return <PromptStructure
+        title="Build a structure"
+        onClose={props.undo}
+    >
         <ul className="BuildStructurePrompt-choices">
             {structureOptions.map(({ id, label, disabledReason }) => {
                 return <li className="BuildStructurePrompt-choice" key={id}>
@@ -40,7 +44,13 @@ const BuildStructurePrompt: React.FunctionComponent<Props> = props => {
     </PromptStructure>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId: string; }) => {
+interface OwnProps {
+    coupon?: Coupon;
+    playerId: string;
+    undoable: boolean;
+}
+
+const mapStateToProps = (state: AppState, ownProps: OwnProps) => {
     const coupon = ownProps.coupon || { kind: "discount" , amount: 0 };
     return {
         structureOptions: Object.entries(structures)
@@ -58,10 +68,11 @@ const mapStateToProps = (state: AppState, ownProps: { coupon?: Coupon; playerId:
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>, { playerId, undoable }: OwnProps) => {
     return {
         onSelectStructure: (structureId: StructureId) =>
-            dispatch(buildStructure(structureId, ownProps.playerId)),
+            dispatch(buildStructure(structureId, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

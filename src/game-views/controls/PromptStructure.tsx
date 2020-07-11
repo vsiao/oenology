@@ -1,10 +1,12 @@
 import "./PromptStructure.css";
 import cx from "classnames";
 import * as React from "react";
+import XIcon from "../icons/XIcon";
 
 interface Props {
     className?: string;
     title: React.ReactNode;
+    onClose?: () => void;
 }
 
 const PromptStructure: React.FunctionComponent<Props> = props => {
@@ -14,10 +16,25 @@ const PromptStructure: React.FunctionComponent<Props> = props => {
         "PromptStructure--collapsed": collapsed
     }, props.className)}>
         <div className="PromptStructure-header" onClick={() => setCollapsed(!collapsed)}>
-            <svg className="PromptStructure-collapseIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 8.12">
-                <path d="M13 1.62L11.38 0 6.5 4.88 1.62 0 0 1.62l6.5 6.5 6.5-6.5z"/>
-            </svg>
-            {props.title}
+            <span className="PromptStructure-title">{props.title}</span>
+            <button
+                className="PromptStructure-collapseButton"
+                onClick={event => {
+                    event.stopPropagation();
+                    setCollapsed(!collapsed);
+                }}
+            />
+            {props.onClose
+                ? <button
+                    className="PromptStructure-closeButton"
+                    onClick={event => {
+                        event.stopPropagation();
+                        props.onClose!();
+                    }}
+                >
+                    <XIcon />
+                </button>
+                : null}
         </div>
         {props.children}
     </div>;

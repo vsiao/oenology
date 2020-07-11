@@ -12,12 +12,14 @@ import { vineCards } from "../../game-data/vineCards";
 import Grape from "../icons/Grape";
 import Coins from "../icons/Coins";
 import ChoiceButton from "./ChoiceButton";
+import { undo } from "../../game-data/gameActions";
 
 interface Props {
     prompt: ChooseFieldPromptState;
     fields: (Field & { disabledReason: string | undefined; })[];
     chooseFields: (fields: FieldId[]) => void;
     chooseVines: (vines: VineInField[]) => void;
+    undo?: () => void;
 }
 
 const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
@@ -25,11 +27,12 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
     fields,
     chooseFields,
     chooseVines,
+    undo,
 }) => {
     const [selectedVines, setSelectedVines] = React.useState<VineInField[]>([]);
     const [selectedFields, setSelectedFields] = React.useState<FieldId[]>([]);
 
-    return <PromptStructure title={renderTitle(prompt)}>
+    return <PromptStructure title={renderTitle(prompt)} onClose={undo}>
         <div className="ChooseFieldPrompt-fields">
             {fields.map(field => {
                 const isDisabled = field.disabledReason !== undefined;
@@ -139,10 +142,13 @@ const renderTitle = (prompt: ChooseFieldPromptState) => {
     }
 }
 
-const mapStateToProps = (
-    state: AppState,
-    { prompt, playerId }: { prompt: ChooseFieldPromptState; playerId: string; }
-) => {
+interface OwnProps {
+    prompt: ChooseFieldPromptState;
+    playerId: string;
+    undoable: boolean;
+}
+
+const mapStateToProps = (state: AppState, { prompt, playerId }: OwnProps) => {
     return {
         fields: Object.values(state.game!.players[playerId].fields).map(
             f => ({ ...f, disabledReason: prompt.disabledReasons[f.id] })
@@ -150,10 +156,11 @@ const mapStateToProps = (
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (dispatch: Dispatch, { playerId, undoable }: OwnProps) => {
     return {
-        chooseFields: (fields: FieldId[]) => dispatch(chooseField(fields, ownProps.playerId)),
-        chooseVines: (vines: VineInField[]) => dispatch(chooseVine(vines, ownProps.playerId)),
+        chooseFields: (fields: FieldId[]) => dispatch(chooseField(fields, playerId)),
+        chooseVines: (vines: VineInField[]) => dispatch(chooseVine(vines, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

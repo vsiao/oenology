@@ -3,7 +3,7 @@ import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, undo } from "../../game-data/gameActions";
 import { ChooseCardPromptState } from "../../game-data/prompts/PromptState";
 import { chooseCards } from "../../game-data/prompts/promptActions";
 import { CardId } from "../../game-data/GameState";
@@ -19,9 +19,10 @@ import ChoiceButton from "./ChoiceButton";
 interface Props {
     prompt: ChooseCardPromptState;
     onSelectCards: (cards: CardId[]) => void;
+    undo?: () => void;
 }
 
-const ChooseCardPrompt: React.FunctionComponent<Props> = ({ prompt, onSelectCards }) => {
+const ChooseCardPrompt: React.FunctionComponent<Props> = ({ prompt, onSelectCards, undo }) => {
     const [selectedCards, setSelectedCards] = React.useState<CardId[]>([]);
     const handleCardClick = (id: CardId) => {
         if (prompt.style === "oneClick") {
@@ -34,7 +35,7 @@ const ChooseCardPrompt: React.FunctionComponent<Props> = ({ prompt, onSelectCard
             );
         }
     };
-    return <PromptStructure title={prompt.title}>
+    return <PromptStructure title={prompt.title} onClose={undo}>
         <div className="ChooseCardPrompt-body">
             <ul className="ChooseCardPrompt-cards">
                 {prompt.cards.map((card, i) => {
@@ -88,9 +89,13 @@ const renderCard = (card: CardId) => {
     }
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (
+    dispatch: Dispatch<GameAction>,
+    { playerId, undoable }: { playerId: string; undoable: boolean; }
+) => {
     return {
-        onSelectCards: (cards: CardId[]) => dispatch(chooseCards(cards, ownProps.playerId)),
+        onSelectCards: (cards: CardId[]) => dispatch(chooseCards(cards, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

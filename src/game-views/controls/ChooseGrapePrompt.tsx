@@ -3,7 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
 import cx from 'classnames';
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, undo } from "../../game-data/gameActions";
 import { GrapeSpec, chooseGrape } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 import PromptStructure from "./PromptStructure";
@@ -16,6 +16,7 @@ interface Props {
     prompt: ChooseGrapePromptState;
     grapes: GrapeSpec[];
     onConfirm: (grapes: GrapeSpec[]) => void;
+    undo?: () => void;
 }
 
 const ChooseGrapePrompt: React.FunctionComponent<Props> = props => {
@@ -24,6 +25,7 @@ const ChooseGrapePrompt: React.FunctionComponent<Props> = props => {
     return <PromptStructure
         className="ChooseGrapePrompt"
         title="Choose grape(s)"
+        onClose={props.undo}
     >
         <div className="ChooseGrapePrompt-grapeSelector">
             <ul className="ChooseGrapePrompt-grapes">
@@ -61,10 +63,13 @@ const ChooseGrapePrompt: React.FunctionComponent<Props> = props => {
 const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     return { grapes: allGrapes(state.game!, ownProps.playerId) };
 };
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (
+    dispatch: Dispatch<GameAction>,
+    { playerId, undoable }: { playerId: string; undoable: boolean; }
+) => {
     return {
-        onConfirm: (grapes: GrapeSpec[]) =>
-            dispatch(chooseGrape(grapes, ownProps.playerId)),
+        onConfirm: (grapes: GrapeSpec[]) => dispatch(chooseGrape(grapes, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

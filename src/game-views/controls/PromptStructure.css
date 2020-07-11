@@ -48,31 +48,46 @@
     font-size: 1em;
     font-weight: 600;
     height: 2.4em;
-    padding: 0 1.6em;
+    padding-left: 1.6em;
+    padding-right: 1em;
     text-transform: uppercase;
 }
 
-.PromptStructure-collapseIcon {
-    animation: .5s ease-in-out PromptStructure-collapseIconBounce infinite alternate;
-    margin-right: 1em;
-    transition: 150ms transform;
-}
-.PromptStructure--collapsed .PromptStructure-collapseIcon {
-    animation: none;
-    transform: rotate(180deg);
+.PromptStructure-title {
+    margin-right: auto;
 }
 
-@keyframes PromptStructure-collapseIconBounce {
-    0% {
-        transform: translateY(10%);
-    }
-    100% {
-        transform: translateY(-10%);
-    }
+.PromptStructure-collapseButton,
+.PromptStructure-closeButton {
+    align-items: center;
+    background: transparent;
+    border-radius: .2em;
+    cursor: pointer;
+    display: flex;
+    font-size: .5em;
+    height: 2.8em;
+    justify-content: center;
+    position: relative;
+    width: 2.8em;
+}
+.PromptStructure-collapseButton:hover,
+.PromptStructure-closeButton:hover {
+    background: rgba(255, 255, 255, .3);
 }
 
-.PromptStructure-collapseIcon {
+.PromptStructure-collapseButton {
+    margin-left: 1em;
+}
+.PromptStructure-collapseButton::after {
+    background: white;
+    bottom: .7em;
+    content: "";
     display: block;
-    height: 1em;
-    width: 1em;
+    height: .4em;
+    position: absolute;
+    width: 60%;
+}
+.PromptStructure--collapsed .PromptStructure-collapseButton::after {
+    bottom: auto;
+    top: .7em;
 }
