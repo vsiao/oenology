@@ -2,6 +2,7 @@ import { Coupon } from "../structures";
 import { CardId, FieldId } from "../GameState";
 import { OrderId } from "../orderCards";
 import { VisitorId } from "../visitors/visitorCards";
+import { VineInField } from "./promptActions";
 
 export type PromptState =
     | ChooseActionPromptState
@@ -62,9 +63,11 @@ export interface ChooseFieldPromptState {
     kind:
         | "oneClick" // plant; buy/sell field
         | "harvest" // multi-field selection
-        | "uproot"; // multi-vine selection
+        | "uproot" // multi-vine selection
+        | "switch"; // two-vine swap
     disabledReasons: Record<FieldId, string | undefined>;
     numSelections: number;
+    submitDisabledReason?: (vines: VineInField[]) => string | undefined;
 }
 
 export interface MakeWinePromptState {

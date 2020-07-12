@@ -31,6 +31,10 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
 }) => {
     const [selectedVines, setSelectedVines] = React.useState<VineInField[]>([]);
     const [selectedFields, setSelectedFields] = React.useState<FieldId[]>([]);
+    const isSelectingVines = prompt.kind === "uproot" || prompt.kind === "switch";
+    const switchDisabledReason = prompt.kind === "switch"
+        ? prompt.submitDisabledReason!(selectedVines)
+        : undefined;
 
     return <PromptStructure title={renderTitle(prompt)} onClose={undo}>
         <div className="ChooseFieldPrompt-fields">
@@ -48,7 +52,7 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
                         "ChooseFieldPrompt-field--selected": isSelected,
                     })}
                     onClick={
-                        prompt.kind === "uproot" || isDisabled
+                        isSelectingVines || isDisabled
                             ? undefined
                             : () => {
                                 if (prompt.kind === "oneClick") {
@@ -71,11 +75,11 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
                                 key={vineId}
                                 className={cx({
                                     "ChooseFieldPrompt-vine": true,
-                                    "ChooseFieldPrompt-vine--choice": prompt.kind === "uproot",
-                                    "ChooseFieldPrompt-vine--selected": isVineSelected,
+                                    "ChooseFieldPrompt-vine--choice": isSelectingVines,
+                                    "ChooseFieldPrompt-vine--selected": isVineSelected
                                 })}
                                 onClick={
-                                    prompt.kind === "uproot"
+                                    isSelectingVines
                                         ? () => {
                                             setSelectedVines(
                                                 isVineSelected
@@ -105,21 +109,25 @@ const ChooseFieldPrompt: React.FunctionComponent<Props> = ({
                     ? <ChoiceButton
                         className="ChooseFieldPrompt-confirm"
                         onClick={() => {
-                            if (prompt.kind === "harvest") {
-                                chooseFields(selectedFields);
-                            } else {
+                            if (isSelectingVines) {
                                 chooseVines(selectedVines);
+                            } else {
+                                chooseFields(selectedFields);
                             }
                         }}
                         disabled={
-                            prompt.kind === "harvest"
-                                ? selectedFields.length === 0 || selectedFields.length > prompt.numSelections
-                                : selectedVines.length !== prompt.numSelections
+                            isSelectingVines
+                                ? selectedVines.length !== prompt.numSelections || !!switchDisabledReason
+                                : selectedFields.length === 0 || selectedFields.length > prompt.numSelections
                         }
+                        disabledReason={switchDisabledReason}
                     >
                         {prompt.kind === "harvest"
                             ? "Harvest"
-                            : "Uproot"}
+                            : prompt.kind === "switch"
+                                ? "Switch"
+                                : "Uproot"
+                        }
                     </ChoiceButton>
                     : null
             }
@@ -139,8 +147,10 @@ const renderTitle = (prompt: ChooseFieldPromptState) => {
             return prompt.numSelections === 1
                 ? "Uproot a vine"
                 : `Uproot ${prompt.numSelections} vines`;
+        case "switch":
+            return "Switch 2 vines on your fields";
     }
-}
+};
 
 interface OwnProps {
     prompt: ChooseFieldPromptState;

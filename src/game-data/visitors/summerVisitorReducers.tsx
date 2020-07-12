@@ -12,6 +12,7 @@ import {
     promptToUproot,
     promptToChooseGrape,
     promptToChooseWine,
+    promptToSwitchVines,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
@@ -37,6 +38,7 @@ import {
     uprootDisabledReason,
     needWineDisabledReason,
     needCardOfTypeDisabledReason,
+    switchVines,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -740,8 +742,7 @@ export const summerVisitorReducers: Record<
                                 { id: "LANDSCAPER_DRAW_PLANT", label: <>Draw 1 <Vine /> and plant up to 1 <Vine /></> },
                                 {
                                     id: "LANDSCAPER_SWITCH",
-                                    label: <>Switch 2 <Vine /> on your fields</>,
-                                    disabledReason: "Not implemented yet", // TODO
+                                    label: <>Switch 2 <Vine /> on your fields</>
                                 },
                             ],
                         });
@@ -758,12 +759,17 @@ export const summerVisitorReducers: Record<
                             { optional: true }
                         );
                     case "LANDSCAPER_SWITCH":
-                        return endVisitor(state); // TODO
+                        return promptToSwitchVines(state);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
                 return endVisitor(plantVineInField(action.fields[0], state));
+            case "CHOOSE_VINE":
+                const player = state.players[state.currentTurn.playerId];
+                return endVisitor(updatePlayer(state, player.id, {
+                    fields: switchVines(action.vines, player.fields)
+                }));
             default:
                 return state;
         }
@@ -1022,7 +1028,7 @@ export const summerVisitorReducers: Record<
                                     } as Choice
                                     : null
                                 )
-                                .filter((c: Choice | null): c is Choice => !!c)
+                                .filter((c: Choice | null): c is Choice => !!c);
                         })
                         .flat(),
                 });
