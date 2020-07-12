@@ -2,7 +2,7 @@
     background: #eee;
     cursor: pointer;
 }
-.BoardPlacement + .BoardPlacement {
+.BoardPlacement + .BoardPlacement .BoardPlacement-cell {
     box-shadow: 0 -1px #ccc;
 }
 

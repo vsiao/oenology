@@ -20,7 +20,7 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
     return <tr className="BoardPlacement">
         {new Array(numSpots).fill(0).map((_, i) => {
             const worker = workers[i];
-            return <td key={i} className="BoardPlacement-spotCell">
+            return <td key={i} className={cx("BoardPlacement-spotCell", "BoardPlacement-cell")}>
                 <div className={cx({
                     "BoardPlacement-spot": true,
                     [`BoardPlacement-spot--${season}`]: true,
@@ -38,7 +38,7 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                     </div>)}
             </td>;
         })}
-        <td className="BoardPlacement-title">
+        <td className={cx("BoardPlacement-title", "BoardPlacement-cell")}>
             {title}
         </td>
     </tr>;

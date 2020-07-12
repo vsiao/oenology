@@ -12,9 +12,12 @@
 
 .Worker-icon {
     height: 100%;
+    left: 50%;
     position: absolute;
     stroke: black;
     stroke-width: .4em;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
     width: 100%;
 }
 .Worker-icon--blue {

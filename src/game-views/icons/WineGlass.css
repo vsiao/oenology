@@ -12,6 +12,9 @@
     position: relative;
     width: 1.6em;
 }
+.WineGlass--any {
+    font-weight: normal;
+}
 .WineGlass--red {
     color: white;
     fill: #d80000;

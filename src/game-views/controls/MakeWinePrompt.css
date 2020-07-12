@@ -10,9 +10,11 @@
     font-size: .8em;
 }
 
-.MakeWinePrompt-grapeSelector {
-    border-bottom: 1px solid #ccc;
+.MakeWinePrompt-grapeSelector,
+.MakeWinePrompt-cart {
+    align-items: center;
     border-top: 1px solid #ccc;
+    display: flex;
     font-style: italic;
     padding: 1em 1.6em;
 }
@@ -46,15 +48,9 @@
     opacity: 0.7;
 }
 
-.MakeWinePrompt-addToCart {
-    margin-left: 1em;
-}
-
-.MakeWinePrompt-cart {
-    align-items: center;
-    display: inline-flex;
-    font-style: italic;
-    padding: 1em 1.6em;
+.MakeWinePrompt-addToCart,
+.MakeWinePrompt-makeWineButton {
+    margin-left: auto;
 }
 
 .MakeWinePrompt-wine + .MakeWinePrompt-wine {
@@ -82,6 +78,3 @@
     transform: rotate(45deg);
 }
 
-.MakeWinePrompt-makeWineButton {
-    margin-left: 1em;
-}

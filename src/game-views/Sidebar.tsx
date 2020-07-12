@@ -18,7 +18,7 @@ import WineGlass from "./icons/WineGlass";
 import Residuals from "./icons/Residuals";
 
 interface Props {
-    players: Record<string, PlayerState>;
+    players: PlayerState[];
     playerNameById: Record<string, string>;
     grapeOwner?: string;
     activityLog: ActivityLog;
@@ -27,7 +27,7 @@ interface Props {
 const Sidebar: React.FunctionComponent<Props> = props => {
     return <div className="Sidebar">
         <div className="Sidebar-players">
-            {Object.values(props.players).map(player => {
+            {props.players.map(player => {
                 return <SidebarPlayer key={player.id} player={player} hasGrape={player.id === props.grapeOwner} />;
             })}
         </div>
@@ -120,18 +120,13 @@ const renderYields = ({ red, white }: VineYields): React.ReactNode => {
     </>;
 };
 
-const mapStateToProps = (state: AppState): {
-    players: Record<string, PlayerState>;
-    playerNameById: Record<string, string>;
-    grapeOwner: string;
-    activityLog: ActivityLog;
-} => {
+const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     const grapeOwner = game.tableOrder[game.grapeIndex];
     return {
-        players: game.players,
+        players: game.tableOrder.map(id => game.players[id]),
         playerNameById: Object.fromEntries(
-            Object.entries(state.room.users).map(([id, user]) => [id, user.name])
+            Object.entries(game.players).map(([id, p]) => [id, p.name])
         ),
         grapeOwner,
         activityLog: game.activityLog,

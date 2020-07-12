@@ -149,10 +149,12 @@ interface OwnProps {
 }
 
 const mapStateToProps = (state: AppState, { prompt, playerId }: OwnProps) => {
+    const fields = state.game!.players[playerId].fields;
     return {
-        fields: Object.values(state.game!.players[playerId].fields).map(
-            f => ({ ...f, disabledReason: prompt.disabledReasons[f.id] })
-        ),
+        fields: Object.keys(fields).sort().map(id => {
+            const fieldId = id as FieldId;
+            return { ...fields[fieldId], disabledReason: prompt.disabledReasons[fieldId] };
+        }),
     };
 };
 

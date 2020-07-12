@@ -104,33 +104,39 @@ const MakeWinePrompt: React.FunctionComponent<Props> = props => {
             </ChoiceButton>
         </div>
         <div className="MakeWinePrompt-cart">
-            {cart.length === 0
-                ? "Cart is empty"
-                : <ul className="MakeWinePrompt-wineList">
-                    {cart.map(w => {
-                        return <li key={`${w.type}${w.cellarValue}`} className="MakeWinePrompt-wine">
-                            <button
-                                className="MakeWinePrompt-removeWineButton"
-                                onClick={() => {
-                                    setCart(cart.filter(w2 => w !== w2));
-                                    setAvailableGrapes([...availableGrapes, ...w.grapes]);
-                                    setCellar({
-                                        ...localCellar,
-                                        [w.type]: localCellar[w.type].map((v, i) => i === w.cellarValue - 1 ? false : v)
-                                    });
-                                }}
-                            >
-                                <WineGlass color={w.type}>{w.cellarValue}</WineGlass>
-                            </button>
-                        </li>;
-                    })}
-                </ul>}
+            <ul className="MakeWinePrompt-wineList">
+                {new Array(props.prompt.upToN).fill(null).map((_, i) => {
+                    const w = cart[i];
+                    if (!w) {
+                        return <li key={i} className="MakeWinePrompt-wine"><WineGlass>?</WineGlass></li>;
+                    }
+                    return <li key={`${w.type}${w.cellarValue}`} className="MakeWinePrompt-wine">
+                        <button
+                            className="MakeWinePrompt-removeWineButton"
+                            onClick={() => {
+                                setCart(cart.filter(w2 => w !== w2));
+                                setAvailableGrapes([...availableGrapes, ...w.grapes]);
+                                setCellar({
+                                    ...localCellar,
+                                    [w.type]: localCellar[w.type].map((v, i) => i === w.cellarValue - 1 ? false : v)
+                                });
+                            }}
+                        >
+                            <WineGlass color={w.type}>{w.cellarValue}</WineGlass>
+                        </button>
+                    </li>;
+                })}
+            </ul>
             <ChoiceButton
                 className="MakeWinePrompt-makeWineButton"
                 disabled={cart.length === 0}
                 onClick={() => props.onConfirm(cart)}
             >
-                Make wine!
+                {cart.length === 0
+                    ? "Make wine"
+                    : cart.length === 1
+                        ? "Make 1 wine"
+                        : `Make ${cart.length} wines`}
             </ChoiceButton>
         </div>
     </PromptStructure>;

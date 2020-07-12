@@ -42,6 +42,7 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
     return <PromptStructure title="Place a worker">
         <div className="PlaceWorkerPrompt-body">
             <div className="PlaceWorkerPrompt-workerTypeSelector">
+                Choose worker type:
                 {["grande" as const, "normal" as const].map(workerType =>
                     <button
                         key={workerType}

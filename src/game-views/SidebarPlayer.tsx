@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId, StructureState } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -40,138 +40,141 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <Coins className="SidebarPlayer-coins">{player.coins}</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">{player.victoryPoints}</VictoryPoints>
         </div>
-        <ul className="SidebarPlayer-workers">
-            {player.workers.map((worker, i) =>
-                <li key={i} className="SidebarPlayer-worker">
-                    <Worker
-                        workerType={worker.type}
-                        color={player.color}
-                        isTemp={worker.isTemp}
-                        disabled={!worker.available}
-                    />
-                </li>
-            )}
-        </ul>
-        <ul className="SidebarPlayer-fields">
-            {Object.values(player.fields).map(field => {
-                const { red, white } = fieldYields(field);
-                return <li
-                    key={field.id}
-                    className={cx({
-                        "SidebarPlayer-field": true,
-                        "SidebarPlayer-field--harvested": field.harvested,
-                        "SidebarPlayer-field--sold": field.sold,
-                    })}
-                >
-                    {red > 0 ? <Grape color="red">{red}</Grape> : null}
-                    {white > 0 ? <Grape color="white">{white}</Grape> : null}
-                </li>;
-            })}
-        </ul>
-        <div className="SidebarPlayer-grapesAndWine">
-            <div className="SidebarPlayer-crushPad">
-                <div className="SidebarPlayer-grapes">
-                    {player.crushPad.red.map((hasGrape, i) =>
-                        <div key={i} className="SidebarPlayer-grape">
-                            {hasGrape
-                                ? <Grape color="red">{i + 1}</Grape>
-                                : i + 1}
-                        </div>
-                    )}
+        <div className="SidebarPlayer-contents">
+            <ul className="SidebarPlayer-workers">
+                {player.workers.map((worker, i) =>
+                    <li key={i} className="SidebarPlayer-worker">
+                        <Worker
+                            workerType={worker.type}
+                            color={player.color}
+                            isTemp={worker.isTemp}
+                            disabled={!worker.available}
+                        />
+                    </li>
+                )}
+            </ul>
+            <ul className="SidebarPlayer-fields">
+                {Object.keys(player.fields).sort().map(fieldId => {
+                    const field = player.fields[fieldId as FieldId];
+                    const { red, white } = fieldYields(field);
+                    return <li
+                        key={field.id}
+                        className={cx({
+                            "SidebarPlayer-field": true,
+                            "SidebarPlayer-field--harvested": field.harvested,
+                            "SidebarPlayer-field--sold": field.sold,
+                        })}
+                    >
+                        {red > 0 ? <Grape color="red">{red}</Grape> : null}
+                        {white > 0 ? <Grape color="white">{white}</Grape> : null}
+                    </li>;
+                })}
+            </ul>
+            <div className="SidebarPlayer-grapesAndWine">
+                <div className="SidebarPlayer-crushPad">
+                    <div className="SidebarPlayer-grapes">
+                        {player.crushPad.red.map((hasGrape, i) =>
+                            <div key={i} className="SidebarPlayer-grape">
+                                {hasGrape
+                                    ? <Grape color="red">{i + 1}</Grape>
+                                    : i + 1}
+                            </div>
+                        )}
+                    </div>
+                    <div className="SidebarPlayer-grapes">
+                        {player.crushPad.white.map((hasGrape, i) =>
+                            <div key={i} className="SidebarPlayer-grape">
+                                {hasGrape
+                                    ? <Grape color="white">{i + 1}</Grape>
+                                    : i + 1}
+                            </div>
+                        )}
+                    </div>
                 </div>
-                <div className="SidebarPlayer-grapes">
-                    {player.crushPad.white.map((hasGrape, i) =>
-                        <div key={i} className="SidebarPlayer-grape">
-                            {hasGrape
-                                ? <Grape color="white">{i + 1}</Grape>
-                                : i + 1}
-                        </div>
-                    )}
+                <div className="SidebarPlayer-cellar">
+                    <div className="SidebarPlayer-wines">
+                        {player.cellar.red.map((hasWine, i) =>
+                            <div className="SidebarPlayer-wine" key={i}>
+                                {hasWine
+                                    ? <WineGlass color="red">{i + 1}</WineGlass>
+                                    : i + 1}
+                            </div>
+                        )}
+                    </div>
+                    <div className="SidebarPlayer-wines">
+                        {player.cellar.white.map((hasWine, i) =>
+                            <div className="SidebarPlayer-wine" key={i}>
+                                {hasWine
+                                    ? <WineGlass color="white">{i + 1}</WineGlass>
+                                    : i + 1}
+                            </div>
+                        )}
+                    </div>
+                    <div className="SidebarPlayer-wines">
+                        {player.cellar.blush.map((hasWine, i) => {
+                            if (i < 3) {
+                                return null;
+                            }
+                            return <div className="SidebarPlayer-wine" key={i}>
+                                {hasWine
+                                    ? <WineGlass color="blush">{i + 1}</WineGlass>
+                                    : i + 1}
+                            </div>;
+                        })}
+                    </div>
+                    <div className="SidebarPlayer-wines">
+                        {player.cellar.sparkling.map((hasWine, i) => {
+                            if (i < 6) {
+                                return null;
+                            }
+                            return <div className="SidebarPlayer-wine" key={i}>
+                                {hasWine
+                                    ? <WineGlass color="sparkling">{i + 1}</WineGlass>
+                                    : i + 1}
+                            </div>;
+                        })}
+                    </div>
+                    {hasMediumCellar
+                        ? null
+                        : <StructureTooltip id="mediumCellar" side="top">
+                            {ref =>
+                                <div
+                                    ref={ref as React.RefObject<HTMLDivElement>}
+                                    className="SidebarPlayer-mediumCellarOverlay"
+                                />}
+                        </StructureTooltip>}
+                    {hasLargeCellar
+                        ? null
+                        : <StructureTooltip id="largeCellar" side="top">
+                            {ref =>
+                                <div
+                                    ref={ref as React.RefObject<HTMLDivElement>}
+                                    className="SidebarPlayer-largeCellarOverlay"
+                                />}
+                        </StructureTooltip>}
                 </div>
             </div>
-            <div className="SidebarPlayer-cellar">
-                <div className="SidebarPlayer-wines">
-                    {player.cellar.red.map((hasWine, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>
-                            {hasWine
-                                ? <WineGlass color="red">{i + 1}</WineGlass>
-                                : i + 1}
-                        </div>
-                    )}
-                </div>
-                <div className="SidebarPlayer-wines">
-                    {player.cellar.white.map((hasWine, i) =>
-                        <div className="SidebarPlayer-wine" key={i}>
-                            {hasWine
-                                ? <WineGlass color="white">{i + 1}</WineGlass>
-                                : i + 1}
-                        </div>
-                    )}
-                </div>
-                <div className="SidebarPlayer-wines">
-                    {player.cellar.blush.map((hasWine, i) => {
-                        if (i < 3) {
-                            return null;
-                        }
-                        return <div className="SidebarPlayer-wine" key={i}>
-                            {hasWine
-                                ? <WineGlass color="blush">{i + 1}</WineGlass>
-                                : i + 1}
-                        </div>;
-                    })}
-                </div>
-                <div className="SidebarPlayer-wines">
-                    {player.cellar.sparkling.map((hasWine, i) => {
-                        if (i < 6) {
-                            return null;
-                        }
-                        return <div className="SidebarPlayer-wine" key={i}>
-                            {hasWine
-                                ? <WineGlass color="sparkling">{i + 1}</WineGlass>
-                                : i + 1}
-                        </div>;
-                    })}
-                </div>
-                {hasMediumCellar
-                    ? null
-                    : <StructureTooltip id="mediumCellar" side="top">
-                        {ref =>
-                            <div
-                                ref={ref as React.RefObject<HTMLDivElement>}
-                                className="SidebarPlayer-mediumCellarOverlay"
-                            />}
-                    </StructureTooltip>}
-                {hasLargeCellar
-                    ? null
-                    : <StructureTooltip id="largeCellar" side="top">
-                        {ref =>
-                            <div
-                                ref={ref as React.RefObject<HTMLDivElement>}
-                                className="SidebarPlayer-largeCellarOverlay"
-                            />}
-                    </StructureTooltip>}
-            </div>
+            <ul className="SidebarPlayer-structures">
+                {Object.entries(structures).map(([structureId, structure]) => {
+                    if (structureId === "mediumCellar" || structureId === "largeCellar") {
+                        return null;
+                    }
+                    const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
+                    return <StructureTooltip key={structureId} id={structureId as StructureId}>
+                        {anchorRef =>
+                            <li ref={anchorRef as React.RefObject<HTMLLIElement>}
+                                className={cx("SidebarPlayer-structure", {
+                                    "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
+                                    "SidebarPlayer-structure--used": isUsed
+                                })}
+                            >
+                                {structure.name}&nbsp;
+                                {structureId === "yoke" && isUsed && <Worker color={player.color} />}
+                            </li>}
+                    </StructureTooltip>;
+                })}
+            </ul>
         </div>
-        <ul className="SidebarPlayer-structures">
-            {Object.entries(structures).map(([structureId, structure]) => {
-                if (structureId === "mediumCellar" || structureId === "largeCellar") {
-                    return null;
-                }
-                const isUsed = playerStructures[structureId as StructureId] === StructureState.Used;
-                return <StructureTooltip key={structureId} id={structureId as StructureId}>
-                    {anchorRef =>
-                        <li ref={anchorRef as React.RefObject<HTMLLIElement>}
-                            className={cx("SidebarPlayer-structure", {
-                                "SidebarPlayer-structure--built": playerStructures[structureId as StructureId],
-                                "SidebarPlayer-structure--used": isUsed
-                            })}
-                        >
-                            {structure.name}&nbsp;
-                            {structureId === "yoke" && isUsed && <Worker color={player.color} />}
-                        </li>}
-                </StructureTooltip>;
-            })}
-        </ul>
     </div>;
 };
 

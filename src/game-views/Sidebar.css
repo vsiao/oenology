@@ -10,6 +10,9 @@
     .Sidebar {
         flex-direction: row;
     }
+    .Sidebar-players {
+        min-width: 530px;
+    }
 }
 
 .Sidebar-players {

@@ -55,6 +55,10 @@
     margin-right: .2em;
 }
 
+.SidebarPlayer-contents {
+    white-space: nowrap;
+}
+
 .SidebarPlayer-workers {
     display: inline-block;
     vertical-align: top;

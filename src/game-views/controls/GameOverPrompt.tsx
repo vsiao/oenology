@@ -72,12 +72,12 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                                     <VictoryPoints className="GameOverPrompt-vpIcon">{p.victoryPoints}</VictoryPoints>
                                     <strong>{p.name}</strong>
                                 </th>
-                                <td>{p.coinsGained}</td>
-                                <td>{p.vinesPlanted}</td>
-                                <td>{p.sVisitorsPlayed}</td>
-                                <td>{p.ordersFilled}</td>
-                                <td>{p.wVisitorsPlayed}</td>
-                                <td>{p.workersPlaced}</td>
+                                <td className="GameOverPrompt-statCell">{p.coinsGained}</td>
+                                <td className="GameOverPrompt-statCell">{p.vinesPlanted}</td>
+                                <td className="GameOverPrompt-statCell">{p.sVisitorsPlayed}</td>
+                                <td className="GameOverPrompt-statCell">{p.ordersFilled}</td>
+                                <td className="GameOverPrompt-statCell">{p.wVisitorsPlayed}</td>
+                                <td className="GameOverPrompt-statCell">{p.workersPlaced}</td>
                             </tr>)}
                     </tbody>
                 </table>
@@ -96,7 +96,7 @@ const renderVPGraph = (props: Props): React.ReactNode => {
         className="GameOverPrompt-graph"
         type="Line"
         data={{
-            labels: props.players[0].accumulatedVPByYear.slice(1).map((_, i) => `Year ${i}`),
+            labels: props.players[0].accumulatedVPByYear.map((_, i) => `Year ${i}`).slice(1),
             series: props.players.map((p, i) => ({
                 className: cx(`ct-series-${"abcdef".charAt(i)}`, `GameOverPrompt-line--${p.color}`),
                 name: p.name,
@@ -105,7 +105,7 @@ const renderVPGraph = (props: Props): React.ReactNode => {
         }}
         options={{
             fullWidth: true,
-            height: 240,
+            height: 280,
             width: 440,
         }}
     />;
