@@ -96,11 +96,11 @@ const renderVPGraph = (props: Props): React.ReactNode => {
         className="GameOverPrompt-graph"
         type="Line"
         data={{
-            labels: props.players[0].accumulatedVPByYear.slice(0, -2).map((_, i) => `Year ${i + 1}`),
+            labels: props.players[0].accumulatedVPByYear.slice(1).map((_, i) => `Year ${i}`),
             series: props.players.map((p, i) => ({
                 className: cx(`ct-series-${"abcdef".charAt(i)}`, `GameOverPrompt-line--${p.color}`),
                 name: p.name,
-                data: p.accumulatedVPByYear.slice(0, -1),
+                data: p.accumulatedVPByYear,
             })),
         }}
         options={{

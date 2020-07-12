@@ -141,7 +141,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 return state;
             }
             const playerId = state.currentTurn.playerId;
-            const sellValue = Math.ceil(action.grapes.reduce((sum, g) => sum += g.value, 0) / 3);
+            const sellValue = action.grapes.reduce((sum, g) => sum += Math.ceil(g.value / 3), 0);
 
             return endTurn(gainCoins(
                 sellValue,

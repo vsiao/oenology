@@ -8,7 +8,7 @@ import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-view
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
-import { needCardOfTypeDisabledReason } from "./sharedSelectors";
+import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
 import { papaCards, mamaCards } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 
@@ -381,12 +381,13 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 // ----------------------------------------------------------------------------
 
 const endYear = (state: GameState): GameState => {
-    state = pushActivityLog({ type: "season", season: `End of Year ${state.year}` }, state);
-
-    if (Object.values(state.players).some(p => p.victoryPoints >= 20)) {
+    if (Object.values(state.players).some(p => p.victoryPoints >= GAME_OVER_VP)) {
         // End of game
-        return displayGameOverPrompt(state);
+        return displayGameOverPrompt(
+            pushActivityLog({ type: "season", season: "Game Over!" }, state)
+        );
     }
+    state = pushActivityLog({ type: "season", season: `End of Year ${state.year}` }, state);
 
     const { wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];

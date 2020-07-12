@@ -302,7 +302,7 @@ export const trainWorkerDisabledReason = (
     if (trainedWorkers.length >= MAX_TRAINED_WORKERS) {
         return "You can't train any more workers.";
     }
-    return moneyDisabledReason(state, cost);
+    return moneyDisabledReason(state, cost, playerId);
 };
 
 export const moneyDisabledReason = (
@@ -313,9 +313,10 @@ export const moneyDisabledReason = (
     return state.players[playerId].coins < cost ? "You don't have enough money." : undefined;
 };
 
+export const GAME_OVER_VP = 20;
 export const gameIsOver = (state: GameState) => {
     return state.currentTurn.type === "workerPlacement"
         && state.currentTurn.season === "winter"
         && state.wakeUpOrder.every(pos => !pos || pos.passed)
-        && Object.values(state.players).some(p => p.victoryPoints >= 20);
+        && Object.values(state.players).some(p => p.victoryPoints >= GAME_OVER_VP);
 };

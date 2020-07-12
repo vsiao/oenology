@@ -1277,9 +1277,9 @@ export const winterVisitorReducers: Record<
                     case "UTEACHER_LOSE":
                         return endVisitor(trainWorker(loseVP(1, state)));
                     case "UTEACHER_GAIN":
-                        const numOpponents = Object.values(state.players)
-                            .filter(p => p.workers.length >= 6).length;
-                        return endVisitor(gainVP(numOpponents, state));
+                        const opponents = Object.values(state.players)
+                            .filter(p => p.id !== state.currentTurn.playerId && p.workers.length >= 6);
+                        return endVisitor(gainVP(opponents.length, state));
                     default:
                         return state;
                 }
