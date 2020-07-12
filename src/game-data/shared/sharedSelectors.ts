@@ -1,9 +1,9 @@
-import GameState, { Field, CardType, WineColor, StructureState } from "../GameState";
+import GameState, { Field, FieldId, CardType, WineColor, StructureState } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
 import { Coupon, structures, StructureId } from "../structures";
-import { GrapeSpec } from "../prompts/promptActions";
+import { GrapeSpec, VineInField } from "../prompts/promptActions";
 
 export const buildStructureDisabledReason = (
     state: GameState,
@@ -64,6 +64,28 @@ export const fieldYields = (field: Field): { red: number; white: number; } => {
             (w, v) => w + (vineCards[v].yields.white! || 0),
             0
         ),
+    };
+};
+
+export const switchVines = (
+    vines: VineInField[],
+    fields: Record<FieldId, Field>
+): Record<FieldId, Field> => {
+    if (vines.length !== 2) {
+        return fields;
+    }
+    const field0 = fields[vines[0].field];
+    const field1 = fields[vines[1].field];
+    return {
+        ...fields,
+        [field0.id]: {
+            ...field0,
+            vines: field0.vines.filter(id => id !== vines[0].id).concat(vines[1].id)
+        },
+        [field1.id]: {
+            ...field1,
+            vines: field1.vines.filter(id => id !== vines[1].id).concat(vines[0].id)
+        }
     };
 };
 
