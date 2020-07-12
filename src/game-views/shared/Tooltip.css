@@ -15,12 +15,12 @@
     color: white;
     font-size: .8em;
     max-width: 13em;
-    padding: .4em .8em;
+    padding: .5em .8em;
     position: absolute;
 }
 .Tooltip--top,
 .Tooltip--bottom {
-    margin: .6em 0;
+    margin: .5em 0;
 }
 .Tooltip--top {
     bottom: 50%;
@@ -30,7 +30,7 @@
 }
 .Tooltip--left,
 .Tooltip--right {
-    margin: 0 .6em;
+    margin: 0 .5em;
 }
 .Tooltip--left {
     right: 50%;
@@ -40,7 +40,7 @@
 }
 
 .Tooltip::after {
-    border: .6em solid #333;
+    border: .5em solid #333;
     content: "";
     display: block;
     position: absolute;

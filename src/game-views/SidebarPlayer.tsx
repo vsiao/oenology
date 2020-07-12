@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId, StructureState, FieldId } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -14,6 +14,7 @@ import { fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { StructureId, structures } from "../game-data/structures";
 import { AnchorSide, useTooltip } from "./shared/useTooltip";
+import { vineCards } from "../game-data/vineCards";
 
 interface Props {
     player: PlayerState;
@@ -57,17 +58,19 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 {Object.keys(player.fields).sort().map(fieldId => {
                     const field = player.fields[fieldId as FieldId];
                     const { red, white } = fieldYields(field);
-                    return <li
-                        key={field.id}
-                        className={cx({
-                            "SidebarPlayer-field": true,
-                            "SidebarPlayer-field--harvested": field.harvested,
-                            "SidebarPlayer-field--sold": field.sold,
-                        })}
-                    >
-                        {red > 0 ? <Grape color="red">{red}</Grape> : null}
-                        {white > 0 ? <Grape color="white">{white}</Grape> : null}
-                    </li>;
+                    return <FieldTooltip field={field} key={field.id}>
+                        {anchorRef => <li
+                            ref={anchorRef as React.RefObject<HTMLLIElement>}
+                            className={cx({
+                                "SidebarPlayer-field": true,
+                                "SidebarPlayer-field--harvested": field.harvested,
+                                "SidebarPlayer-field--sold": field.sold,
+                            })}
+                        >
+                            {red > 0 ? <Grape color="red">{red}</Grape> : null}
+                            {white > 0 ? <Grape color="white">{white}</Grape> : null}
+                        </li>}
+                    </FieldTooltip>;
                 })}
             </ul>
             <div className="SidebarPlayer-grapesAndWine">
@@ -178,6 +181,38 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
+const FieldTooltip: React.FunctionComponent<{
+    field: Field;
+    children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode;
+}> = ({ field, children }) => {
+    const tooltip = React.useMemo(() => {
+        return <>
+            Field value: {field.value}
+            {field.vines.length === 0
+                ? null
+                : <>
+                    <hr />
+                    <ul>
+                        {field.vines.map(id => {
+                            const vine = vineCards[id];
+                            const { red, white } = vine.yields;
+                            return <li key={id}>
+                                {vine.name}{" "}
+                                {(red || 0) > 0 ? <Grape color="red">{red}</Grape> : null}
+                                {(white || 0) > 0 ? <Grape color="white">{white}</Grape> : null}
+                            </li>
+                        })}
+                    </ul>
+                </>}
+        </>;
+    }, [field]);
+    const [anchorRef, maybeTooltip] = useTooltip("right", tooltip);
+    return <>
+        {children(anchorRef)}
+        {maybeTooltip}
+    </>;
+};
+
 const StructureTooltip: React.FunctionComponent<{
     id: StructureId;
     children: (anchorRef: React.RefObject<HTMLElement>) => React.ReactNode;
@@ -186,7 +221,7 @@ const StructureTooltip: React.FunctionComponent<{
     const structure = structures[id];
     const [anchorRef, maybeTooltip] = useTooltip(
         side,
-        structure.description + ` Costs ${structure.cost}.`
+        `${structure.description} Costs ${structure.cost}.`
     );
 
     return <>
