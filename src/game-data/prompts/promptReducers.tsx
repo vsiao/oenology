@@ -8,8 +8,8 @@ import { visitorCards } from "../visitors/visitorCards";
 import { removeCardsFromHand } from "../shared/cardReducers";
 import { VineId } from "../vineCards";
 import { setPendingAction } from "../shared/turnReducers";
-import { isPromptAction } from "./promptActions";
-import { plantVineInFieldDisabledReason, canFillOrderWithWines, allWines, plantVineDisabledReason } from "../shared/sharedSelectors";
+import { isPromptAction, VineInField } from "./promptActions";
+import { plantVineInFieldDisabledReason, canFillOrderWithWines, allWines, plantVineDisabledReason, fieldYields, switchVines } from "../shared/sharedSelectors";
 
 export const prompt = (state: GameState, action: GameAction) => {
     if (isPromptAction(action)) {
@@ -211,14 +211,46 @@ export const promptToUproot = (state: GameState, numVines = 1): GameState => {
     );
 };
 
+export const promptToSwitchVines = (state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    return promptToChooseField(
+        state,
+        field => {
+            return field.vines.length === 0
+                ? "There's nothing here to replant."
+                : undefined;
+        },
+        { kind: "switch", numSelections: 2 },
+        player.id,
+        vines => {
+            if (vines.length > 1) {
+                if (vines.length !== 2) return "You may switch 2 vines";
+                if (vines[0].field === vines[1].field) {
+                    return "Vines must be from different fields";
+                }
+                const fields = switchVines(vines, player.fields);
+                const field0 = fields[vines[0].field];
+                const field1 = fields[vines[1].field];
+                const { red: red0, white: white0 } = fieldYields(field0);
+                const { red: red1, white: white1 } = fieldYields(field1);
+                if (red0 + white0 > field0.value || red1 + white1 > field1.value) {
+                    return "Switching these vines would exceed a field's value";
+                }
+            }
+            return undefined;
+        }
+    );
+};
+
 export const promptToChooseField = (
     state: GameState,
     disabledReason: (field: Field) => string | undefined,
     { kind = "oneClick", numSelections = 1, }: {
-        kind?: "oneClick" | "harvest" | "uproot";
+        kind?: "oneClick" | "harvest" | "uproot" | "switch";
         numSelections?: number,
     } = {},
-    playerId = state.currentTurn.playerId
+    playerId = state.currentTurn.playerId,
+    submitDisabledReason?: (vines: VineInField[]) => string | undefined
 ): GameState => {
     if (state.playerId !== playerId) {
         return state;
@@ -233,6 +265,7 @@ export const promptToChooseField = (
             field6: disabledReason(fields.field6),
             field7: disabledReason(fields.field7),
         },
+        submitDisabledReason
     });
 };
 
