@@ -8,20 +8,27 @@ import { startMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
+    if (action.type === "START_GAME") {
+        return startMamaPapaTurn(action.players[0].id, initGame(userId, action));
+    }
+    if (
+        state.currentTurn.playerId !== action.playerId && (
+            state.currentTurn.type !== "workerPlacement" ||
+            state.currentTurn.pendingAction?.type !== "playVisitor" ||
+            state.currentTurn.pendingAction.actionPlayerId !== action.playerId
+        )
+    ) {
+        // It's not this player's turn. Reject the action.
+        return state;
+    }
     switch (action.type) {
-        case "START_GAME":
-            return startMamaPapaTurn(action.players[0].id, initGame(userId, action));
-
         case "UNDO":
             if (!state.prevState) {
                 // Somehow tried to undo more times than allowed. This might happen
                 // when double-clicking; we can just ignore it.
                 return state;
             }
-            // If the undo requester wasn't the last player to commit an action,
-            // don't do anything. This might happen if there's a race between the
-            // player undoing and someone else performing an action, perhaps in
-            // response to a visitor card.
+            // If the undo requester wasn't the last player to commit an action, don't do anything.
             return action.playerId === state.lastActionPlayerId
                 ? state.prevState
                 : state;
@@ -29,8 +36,11 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
     }
+
     state = {
         ...state,
+        // Actions are undoable by default when performed by the current player.
+        // In certain cases (ending a turn, drawing a card), this state will be cleared.
         undoable: state.playerId === action.playerId,
         lastActionPlayerId: action.playerId,
         prevState: state,

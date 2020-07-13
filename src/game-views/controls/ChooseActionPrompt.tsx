@@ -22,7 +22,7 @@ const ChooseActionPrompt: React.FunctionComponent<Props> = props => {
 
     return <PromptStructure
         title={prompt.title}
-        onClose={() => props.undo && props.undo(prompt.playerId)}
+        onClose={props.undo ? () => props.undo!(prompt.playerId) : undefined}
     >
         {prompt.description
             ? <div className="ChooseActionPrompt-description">
