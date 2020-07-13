@@ -5,10 +5,11 @@ import {
     subscribeToRoom,
     subscribeToGameLog,
     signIn,
+    getGameState,
 } from "./firebase";
-import { JoinGameAction } from "./appActions";
+import { JoinGameAction, hydrateGame } from "./appActions";
 import { appReducer } from "./appReducers";
-import { call, take, fork, actionChannel } from "redux-saga/effects";
+import { call, take, fork, actionChannel, put } from "redux-saga/effects";
 
 const sagaMiddleware = createSagaMiddleWare();
 const store = createStore(
@@ -30,9 +31,15 @@ sagaMiddleware.run(function* () {
 });
 
 function* gameSaga(action: JoinGameAction, userId: string) {
-    yield fork(subscribeToRoom, action.gameId, userId);
-    yield fork(subscribeToGameLog, action.gameId);
-    yield fork(publishGameLog, action.gameId);
+    const cachedGameState = yield call(getGameState, action.gameId);
+
+    if (cachedGameState) {
+        yield put(hydrateGame(cachedGameState));
+    } else {
+        yield fork(subscribeToRoom, action.gameId, userId);
+        yield fork(subscribeToGameLog, action.gameId);
+        yield fork(publishGameLog, action.gameId);
+    }
 }
 
 export default store;

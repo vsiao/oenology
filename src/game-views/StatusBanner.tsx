@@ -145,7 +145,7 @@ const mapStateToProps = (state: AppState) => {
         currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(
             Object.keys(game.players)
-                .map(playerId => [playerId, state.room.users[playerId].name])
+                .map(playerId => [playerId, game.players[playerId].name])
         ),
         playerId: game.playerId,
     };

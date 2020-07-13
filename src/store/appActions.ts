@@ -1,11 +1,13 @@
 import { Action } from "redux";
 import { GameAction } from "../game-data/gameActions";
 import { User } from "./AppState";
+import GameState from "../game-data/GameState";
 
 export type AppAction =
     | SetCurrentUserIdAction
     | SetCurrentUserNameAction
     | GameStatusAction
+    | HydrateGameAction
     | UpdateUserAction
     | JoinGameAction
     | GameAction;
@@ -31,14 +33,21 @@ export const joinGame = (gameId: string): AppAction => {
     return { type: "JOIN_GAME", gameId };
 };
 
-export interface GameStatusAction extends Action<"GAME_STATUS"> {
+interface GameStatusAction extends Action<"GAME_STATUS"> {
     status: string;
 }
 export const gameStatus = (status: string): AppAction => {
     return { type: "GAME_STATUS", status };
 };
 
-export interface UpdateUserAction extends Action<"UPDATE_USER"> {
+interface HydrateGameAction extends Action<"HYDRATE_GAME"> {
+    state: GameState;
+}
+export const hydrateGame = (state: GameState): AppAction => {
+    return { type: "HYDRATE_GAME", state };
+};
+
+interface UpdateUserAction extends Action<"UPDATE_USER"> {
     user: User;
 }
 export const setUser = (user: User): AppAction => {

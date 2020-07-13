@@ -20,6 +20,14 @@ export function* signIn() {
     return userId;
 }
 
+export function getGameState(gameId: string) {
+    return new Promise(resolve => {
+        firebase.database().ref(`rooms/${gameId}/game`).once("value", snap => {
+            resolve(snap.val());
+        });
+    });
+}
+
 function publishUserName(gameId: string, userId: string, action: SetCurrentUserNameAction) {
     const nameRef = firebase.database().ref(`rooms/${gameId}/users/${userId}/name`);
     nameRef.set(action.name);
