@@ -67,15 +67,16 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
         case "mamaPapa":
             return <span>{playerName} is choosing their mama and papa.</span>;
         case "wakeUpOrder":
-            return <span>{playerName} is picking their wake-up position.</span>;
+            return <span>{playerName} is choosing their wake-up position.</span>;
         case "fallVisitor":
-            return <span>{playerName} is picking their fall visitor.</span>;
+            return <span>{playerName} is welcoming visitor(s).</span>;
         case "workerPlacement":
             if (currentTurn.pendingAction !== null) {
                 return renderPendingActionStatus(
                     currentTurn.pendingAction,
-                    playerName,
-                    currentTurn.season
+                    currentTurn.playerId,
+                    currentTurn.season,
+                    playerNames
                 );
             }
             const isCurrentPlayerTurn = currentTurn.playerId === playerId;
@@ -89,9 +90,11 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
 
 const renderPendingActionStatus = (
     pendingAction: WorkerPlacementTurnPendingAction,
-    playerName: React.ReactNode,
-    season: "summer" | "winter"
+    currentTurnPlayerId: string,
+    season: "summer" | "winter",
+    playerNames: Record<string, string>
 ): React.ReactElement => {
+    const playerName = <strong>{playerNames[currentTurnPlayerId]}</strong>;
     switch (pendingAction.type) {
         case "buildStructure":
             return <span>{playerName} is building a structure.</span>;
@@ -109,11 +112,23 @@ const renderPendingActionStatus = (
             return <span>{playerName} is planting a <Vine />.</span>;
         case "playVisitor":
             const card = season === "summer" ? <SummerVisitor /> : <WinterVisitor />;
-            if (pendingAction.visitorId) {
-                const { name } = visitorCards[pendingAction.visitorId];
-                return <span>{playerName} is playing the <strong>{name}</strong> {card}.</span>;
+            if (!pendingAction.visitorId) {
+                return <span>{playerName} is playing a {card}.</span>;
             }
-            return <span>{playerName} is playing a {card}.</span>;
+            const { name } = visitorCards[pendingAction.visitorId];
+            return <span>
+                {playerName} played the <strong>{name}</strong> {card}. {
+                    !pendingAction.actionPlayerId
+                        ? null
+                        : <>
+                            It's {
+                                pendingAction.actionPlayerId === currentTurnPlayerId
+                                    ? "their"
+                                    : <><strong>{playerNames[pendingAction.actionPlayerId]}</strong>'s</>
+                            } turn to choose.
+                        </>
+                }
+            </span>;
         case "sellField":
             return <span>{playerName} is selling a field.</span>;
         case "sellGrapes":

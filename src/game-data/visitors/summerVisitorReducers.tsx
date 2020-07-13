@@ -54,6 +54,7 @@ import {
     promptForWakeUpOrder,
     setPendingAction,
     endTurn,
+    makeEndVisitorAction,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines } from "../shared/grapeWineReducers";
@@ -243,41 +244,29 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    banker: (state, action, pendingAction) => {
-        const bankerAction = pendingAction as PlayVisitorPendingAction & {
-            // list of players who have yet to decide whether to lose VP / gain coins
-            mainActions: string[];
-        };
-        const maybeEndVisitor = (state2: GameState, playerId: string) => {
-            const mainActions = bankerAction.mainActions.filter(id => id !== playerId);
-            state2 = setPendingAction({ ...bankerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endVisitor(state2) : state2;
-        };
+    banker: (state, action) => {
+        const endVisitorAction = makeEndVisitorAction("opponents", (s, playerId) => {
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
+                    { id: "BANKER_PASS", label: <>Pass</> },
+                ],
+            });
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const currentTurnPlayerId = state.currentTurn.playerId;
-                state = setPendingAction({
-                    ...bankerAction,
-                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
-                }, gainCoins(5, state));
-                return state.playerId === null || state.playerId === currentTurnPlayerId
-                    ? state
-                    : promptForAction(state, {
-                        playerId: state.playerId,
-                        choices: [
-                            { id: "BANKER_GAIN", label: <>Lose <VP>1</VP> to gain <Coins>3</Coins>.</> },
-                            { id: "BANKER_PASS", label: <>Pass</> },
-                        ],
-                    });
+                return endVisitorAction(gainCoins(5, state));
+
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "BANKER_GAIN":
-                        return maybeEndVisitor(
+                        return endVisitorAction(
                             gainCoins(3, loseVP(1, state, action.playerId), action.playerId),
                             action.playerId
                         );
                     case "BANKER_PASS":
-                        return maybeEndVisitor(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
@@ -532,20 +521,21 @@ export const summerVisitorReducers: Record<
     },
     handyman: (state, action) => {
         const coupon = { kind: "discount", amount: 2, } as const;
-        const promptPlayer = (state2: GameState, playerId: string): GameState => {
-            const playerName = state2.players[state2.currentTurn.playerId].name;
-            return promptForAction(state2, {
+
+        const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
+            const playerName = s.players[s.currentTurn.playerId].name;
+            return promptForAction(s, {
                 playerId,
                 choices: [
                     {
                         id: "HANDYMAN_BUILD",
                         label: <>
                             Build 1 structure at a <Coins>2</Coins> discount
-                            {playerId !== state2.currentTurn.playerId
+                            {playerId !== s.currentTurn.playerId
                                 ? <> (<strong>{playerName}</strong> gains <VP>1</VP>)</>
                                 : null}
                         </>,
-                        disabledReason: buildStructureDisabledReason(state2, coupon, playerId),
+                        disabledReason: buildStructureDisabledReason(s, coupon, playerId),
                     },
                     {
                         id: "HANDYMAN_PASS",
@@ -553,18 +543,10 @@ export const summerVisitorReducers: Record<
                     },
                 ],
             });
-        };
-        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
-            const i = state2.tableOrder.indexOf(currentPlayerId);
-            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
-            return nextPlayerId === state2.currentTurn.playerId
-                ? endVisitor(state2)
-                : promptPlayer(state2, nextPlayerId);
-        };
-
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptPlayer(state, state.currentTurn.playerId);
+                return endVisitorAction(state);
 
             case "BUILD_STRUCTURE":
                 const { cost } = structures[action.structureId];
@@ -573,7 +555,7 @@ export const summerVisitorReducers: Record<
                     action.structureId,
                     action.playerId
                 );
-                return maybePromptNextPlayer(
+                return endVisitorAction(
                     action.playerId !== state.currentTurn.playerId ? gainVP(1, state) : state,
                     action.playerId
                 );
@@ -583,7 +565,7 @@ export const summerVisitorReducers: Record<
                     case "HANDYMAN_BUILD":
                         return promptToBuildStructure(state, coupon, action.playerId);
                     case "HANDYMAN_PASS":
-                        return maybePromptNextPlayer(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
@@ -832,29 +814,23 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    organizer: (state, action, pendingAction) => {
-        const organizerAction = pendingAction as PlayVisitorPendingAction & { currentWakeUpPos: number; };
-
+    organizer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForWakeUpOrder(
-                    setPendingAction({
-                        ...organizerAction,
-                        currentWakeUpPos: state.wakeUpOrder.findIndex(
-                            pos => pos && pos.playerId === state.currentTurn.playerId
-                        ),
-                    }, state),
-                );
+                return promptForWakeUpOrder(state);
+
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "WAKE_UP":
-                        return passToNextSeason(chooseWakeUp(action.data as WakeUpChoiceData, action._key!, {
-                            ...state,
-                            // Clear the previous wake-up position
-                            wakeUpOrder: state.wakeUpOrder.map(
-                                (pos, i) => i === organizerAction.currentWakeUpPos ? null : pos
-                            ) as GameState["wakeUpOrder"],
-                        }));
+                        return passToNextSeason(
+                            chooseWakeUp(action.data as WakeUpChoiceData, action._key!, {
+                                ...state,
+                                // Clear the previous wake-up position
+                                wakeUpOrder: state.wakeUpOrder.map(
+                                    pos => pos && pos.playerId === state.currentTurn.playerId ? null : pos
+                                ) as GameState["wakeUpOrder"],
+                            })
+                        );
                     default:
                         return state;
                 }
@@ -1184,46 +1160,34 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    swindler: (state, action, pendingAction) => {
-        const swindlerAction = pendingAction as PlayVisitorPendingAction & {
-            // list of players who have yet to decide whether to give coins
-            mainActions: string[];
-        };
-        const maybeEndVisitor = (state2: GameState, playerId: string) => {
-            const mainActions = swindlerAction.mainActions.filter(id => id !== playerId);
-            state2 = setPendingAction({ ...swindlerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endVisitor(state2) : state2;
-        };
+    swindler: (state, action) => {
+        const endVisitorAction = makeEndVisitorAction("opponents", (s, playerId) => {
+            const playerName = <strong>{s.players[s.currentTurn.playerId].name}</strong>;
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    {
+                        id: "SWINDLER_GIVE",
+                        label: <>Give {playerName} <Coins>2</Coins>.</>,
+                        disabledReason: moneyDisabledReason(s, 2, playerId),
+                    },
+                    { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
+                ],
+            });
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const currentTurnPlayerId = state.currentTurn.playerId;
-                state = setPendingAction({
-                    ...swindlerAction,
-                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
-                }, state);
-                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
-                return state.playerId === null || state.playerId === currentTurnPlayerId
-                    ? state
-                    : promptForAction(state, {
-                        playerId: state.playerId,
-                        choices: [
-                            {
-                                id: "SWINDLER_GIVE",
-                                label: <>Give {playerName} <Coins>2</Coins>.</>,
-                                disabledReason: moneyDisabledReason(state, 2, state.playerId),
-                            },
-                            { id: "SWINDLER_PASS", label: <>Pass ({playerName} gains <VP>1</VP>)</> },
-                        ],
-                    });
+                return endVisitorAction(state);
+
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "SWINDLER_GIVE":
-                        return maybeEndVisitor(
+                        return endVisitorAction(
                             gainCoins(2, payCoins(2, state, action.playerId)),
                             action.playerId
                         );
                     case "SWINDLER_PASS":
-                        return maybeEndVisitor(gainVP(1, state), action.playerId);
+                        return endVisitorAction(gainVP(1, state), action.playerId);
                     default:
                         return state;
                 }
@@ -1310,41 +1274,30 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    vendor: (state, action, pendingAction) => {
-        const vendorAction = pendingAction as PlayVisitorPendingAction & {
-            // list of players who have yet to decide whether to draw
-            mainActions: string[];
-        };
-        const maybeEndVisitor = (state2: GameState, playerId: string) => {
-            const mainActions = vendorAction.mainActions.filter(id => id !== playerId);
-            state2 = setPendingAction({ ...vendorAction, mainActions }, state2);
-            return mainActions.length === 0 ? endVisitor(state2) : state2;
-        };
+    vendor: (state, action) => {
+        const endVisitorAction = makeEndVisitorAction("opponents", (s, playerId) => {
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
+                    { id: "VENDOR_PASS", label: <>Pass</> },
+                ],
+            });
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const currentTurnPlayerId = state.currentTurn.playerId;
-                state = setPendingAction({
-                    ...vendorAction,
-                    mainActions: Object.keys(state.players).filter(id => id !== currentTurnPlayerId),
-                }, drawCards(state, action._key!, { vine: 1, order: 1, winterVisitor: 1, }));
-                return state.playerId === null || state.playerId === currentTurnPlayerId
-                    ? state
-                    : promptForAction(state, {
-                        playerId: state.playerId,
-                        choices: [
-                            { id: "VENDOR_DRAW", label: <>Draw 1 <SummerVisitor /></> },
-                            { id: "VENDOR_PASS", label: <>Pass</> },
-                        ],
-                    });
+                state = drawCards(state, action._key!, { vine: 1, order: 1, winterVisitor: 1, });
+                return endVisitorAction(state);
+
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "VENDOR_DRAW":
-                        return maybeEndVisitor(
+                        return endVisitorAction(
                             drawCards(state, action._key!, { summerVisitor: 1 }, action.playerId),
                             action.playerId
                         );
                     case "VENDOR_PASS":
-                        return maybeEndVisitor(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
@@ -1354,20 +1307,20 @@ export const summerVisitorReducers: Record<
 
     },
     volunteerCrew: (state, action) => {
-        const promptPlayer = (state2: GameState, playerId: string): GameState => {
-            const playerName = state2.players[state2.currentTurn.playerId].name;
-            return promptForAction(state2, {
+        const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
+            const playerName = s.players[s.currentTurn.playerId].name;
+            return promptForAction(s, {
                 playerId,
                 choices: [
                     {
                         id: "VCREW_PLANT",
                         label: <>
                             Plant 1 <Vine />
-                            {playerId !== state2.currentTurn.playerId
+                            {playerId !== s.currentTurn.playerId
                                 ? <> (<strong>{playerName}</strong> gains <Coins>2</Coins>)</>
                                 : null}
                         </>,
-                        disabledReason: plantVinesDisabledReason(state, { playerId })
+                        disabledReason: plantVinesDisabledReason(s, { playerId })
                     },
                     {
                         id: "VCREW_PASS",
@@ -1375,21 +1328,13 @@ export const summerVisitorReducers: Record<
                     },
                 ],
             });
-        };
-        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
-            const i = state2.tableOrder.indexOf(currentPlayerId);
-            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
-            return nextPlayerId === state2.currentTurn.playerId
-                ? endVisitor(state2)
-                : promptPlayer(state2, nextPlayerId);
-        };
-
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        return promptPlayer(state, state.currentTurn.playerId);
+                        return endVisitorAction(state);
                     case "vine":
                         return promptToPlant(state, card.id, { playerId: action.playerId });
                     default:
@@ -1400,13 +1345,13 @@ export const summerVisitorReducers: Record<
                     case "VCREW_PLANT":
                         return promptToChooseVineCard(state, { playerId: action.playerId });
                     case "VCREW_PASS":
-                        return maybePromptNextPlayer(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fields[0], state, action.playerId);
-                return maybePromptNextPlayer(
+                return endVisitorAction(
                     action.playerId !== state.currentTurn.playerId ? gainCoins(2, state) : state,
                     action.playerId
                 );

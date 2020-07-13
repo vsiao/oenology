@@ -51,14 +51,14 @@ export const promptForAction = <DataT extends unknown = undefined>(
     return enqueueActionPrompt(state, {
         type: "chooseAction",
         title,
-        description: contextVisitor
+        description: description || (contextVisitor
             ? <p>
                 {state.currentTurn.playerId === state.playerId
                     ? "You"
                     : <strong>{state.players[state.currentTurn.playerId].name}</strong>
                 } played the <strong>{visitorCards[contextVisitor].name}</strong>.
             </p>
-            : description,
+            : null),
         playerId,
         choices,
         upToN,

@@ -43,7 +43,7 @@ import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
-import { endVisitor, setPendingAction } from "../shared/turnReducers";
+import { endVisitor, setPendingAction, makeEndVisitorAction } from "../shared/turnReducers";
 import { discardCards, drawCards, removeCardsFromHand, addCardsToHand } from "../shared/cardReducers";
 import {
     ageCellar,
@@ -289,60 +289,43 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    guestSpeaker: (state, action, pendingAction) => {
-        const gspeakerAction = pendingAction as PlayVisitorPendingAction & {
-            // list of players who have yet to compelte their main action (train worker or pass)
-            mainActions: string[];
-        };
-        const endMainAction = (state2: GameState, playerId: string) => {
-            const mainActions = gspeakerAction.mainActions.filter((id) => id !== playerId);
-            state2 = setPendingAction({ ...gspeakerAction, mainActions }, state2);
-            return mainActions.length === 0 ? endVisitor(state2) : state2;
-        };
+    guestSpeaker: (state, action) => {
+        const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
+            const playerName = <strong>{s.players[s.currentTurn.playerId].name}</strong>;
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    {
+                        id: "GSPEAKER_TRAIN",
+                        label: <>
+                            Pay <Coins>1</Coins> to train 1 <Worker />
+                            {playerId !== s.currentTurn.playerId
+                                ? <>({playerName} gains <VP>1</VP>)</>
+                                : null}
+                        </>,
+                        disabledReason: trainWorkerDisabledReason(s, 1, playerId),
+                    },
+                    { id: "GSPEAKER_PASS", label: <>Pass</>, },
+                ],
+            });
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                state = setPendingAction(
-                    { ...gspeakerAction, mainActions: Object.keys(state.players), },
-                    state
-                );
-                if (state.playerId === null) {
-                    return state;
-                }
-                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
-
-                return promptForAction(
-                    state,
-                    {
-                        playerId: state.playerId,
-                        choices: [
-                            {
-                                id: "GSPEAKER_TRAIN",
-                                label: <>
-                                    Pay <Coins>1</Coins> to train 1 <Worker />
-                                    {state.playerId !== state.currentTurn.playerId
-                                        ? <>({playerName} gains <VP>1</VP>)</>
-                                        : null}
-                                </>,
-                                disabledReason: trainWorkerDisabledReason(state, 1, state.playerId),
-                            },
-                            { id: "GSPEAKER_PASS", label: <>Pass</>, },
-                        ],
-                    }
-                );
+                return endVisitorAction(state);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "GSPEAKER_TRAIN":
                         state = trainWorker(payCoins(1, state, action.playerId), {
                             playerId: action.playerId,
                         });
-                        return endMainAction(
+                        return endVisitorAction(
                             action.playerId !== state.currentTurn.playerId
                                 ? gainVP(1, state)
                                 : state,
                             action.playerId
                         );
                     case "GSPEAKER_PASS":
-                        return endMainAction(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
@@ -725,118 +708,100 @@ export const winterVisitorReducers: Record<
         }
     },
     mentor: (state, action, pendingAction) => {
-        interface MentorPendingAction extends PlayVisitorPendingAction {
-            // list of players who have yet to complete their main action (make wine, or pass)
-            mainActions: string[];
-            // number of reactionary choices left for the current turn player
-            // ie. to choose what to draw for each opponent who makes wine
-            reactions: number;
-        }
-        const mentorAction = pendingAction as MentorPendingAction;
-        const maybeEndVisitor = (state2: GameState) => {
-            const { mainActions, reactions } = (state2.currentTurn as WorkerPlacementTurn)
-                .pendingAction as MentorPendingAction;
-            return mainActions.length === 0 && reactions === 0 ? endVisitor(state2) : state2;
-        };
-        const endMainAction = (state2: GameState, playerId: string) => {
-            const mainActions = mentorAction.mainActions.filter((id) => id !== playerId);
-            return maybeEndVisitor(setPendingAction({ ...mentorAction, mainActions }, state2));
-        };
-
+        const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
+            const playerName = <strong>{s.players[s.currentTurn.playerId].name}</strong>;
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    {
+                        id: "MENTOR_MAKE",
+                        label: (
+                            <>
+                                Make up to 2 <WineGlass />
+                                {playerId !== s.currentTurn.playerId
+                                    ? <>({playerName} draws 1 <Vine /> or 1 <SummerVisitor />)</>
+                                    : null}
+                            </>
+                        ),
+                        disabledReason: needGrapesDisabledReason(s, playerId),
+                    },
+                    { id: "MENTOR_PASS", label: <>Pass</>, },
+                ],
+            });
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                state = setPendingAction(
-                    { ...mentorAction, mainActions: Object.keys(state.players), reactions: 0, },
-                    state
-                );
-                if (state.playerId === null) {
-                    return state;
-                }
-                const playerName = <strong>{state.players[state.currentTurn.playerId].name}</strong>;
-
-                return promptForAction(
-                    state,
-                    {
-                        playerId: state.playerId,
-                        choices: [
-                            {
-                                id: "MENTOR_MAKE",
-                                label: (
-                                    <>
-                                        Make up to 2 <WineGlass />
-                                        {state.playerId !== state.currentTurn.playerId
-                                            ? <>({playerName} draws 1 <Vine /> or 1 <SummerVisitor />)</>
-                                            : null}
-                                    </>
-                                ),
-                                disabledReason: needGrapesDisabledReason(state, state.playerId),
-                            },
-                            { id: "MENTOR_PASS", label: <>Pass</>, },
-                        ],
-                    }
-                );
+                return endVisitorAction(state);
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "MENTOR_MAKE":
-                        state = promptToMakeWine(state, /* upToN */ 2, action.playerId);
-                        return action.playerId !== state.currentTurn.playerId
-                            ? promptForAction(
-                                setPendingAction(
-                                    { ...mentorAction, reactions: mentorAction.reactions + 1 },
-                                    state
-                                ),
-                                {
-                                    choices: [
-                                        { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
-                                        { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, },
-                                    ],
-                                }
-                            )
-                            : state;
+                        return promptToMakeWine(state, /* upToN */ 2, action.playerId);
 
                     case "MENTOR_PASS":
-                        return endMainAction(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
 
                     case "MENTOR_DRAW_VINE":
                     case "MENTOR_DRAW_VISITOR":
-                        return maybeEndVisitor(
+                        return endVisitorAction(
                             drawCards(
-                                setPendingAction(
-                                    { ...mentorAction, reactions: mentorAction.reactions - 1 },
-                                    state
-                                ),
+                                state,
                                 action._key!,
                                 action.choice === "MENTOR_DRAW_VINE"
                                     ? { vine: 1 }
                                     : { summerVisitor: 1 }
-                            )
+                            ),
+                            pendingAction.lastActionPlayerId
                         );
                     default:
                         return state;
                 }
             case "MAKE_WINE":
-                return endMainAction(
-                    makeWineFromGrapes(state, action.ingredients, action.playerId),
-                    action.playerId
+                state = makeWineFromGrapes(state, action.ingredients, action.playerId);
+                if (action.playerId === state.currentTurn.playerId) {
+                    return endVisitorAction(state);
+                }
+                return promptForAction(
+                    setPendingAction(
+                        {
+                            ...pendingAction,
+                            lastActionPlayerId: action.playerId,
+                            actionPlayerId: state.currentTurn.playerId,
+                        },
+                        state
+                    ),
+                    {
+                        description: <p>
+                            <strong>{state.players[action.playerId].name}</strong> made some wine.
+                        </p>,
+                        choices: [
+                            { id: "MENTOR_DRAW_VINE", label: <>Draw 1 <Vine /></>, },
+                            { id: "MENTOR_DRAW_VISITOR", label: <>Draw 1 <SummerVisitor /></>, },
+                        ],
+                    }
                 );
             default:
                 return state;
         }
     },
     motivator: (state, action) => {
-        const promptPlayer = (state2: GameState, playerId: string): GameState => {
-            const playerName = state2.players[state2.currentTurn.playerId].name;
-            return promptForAction(state2, {
+        const endVisitorAction = makeEndVisitorAction("activePlayers", (s, playerId) => {
+            const playerName = s.players[s.currentTurn.playerId].name;
+            const placedGrande = Object.values(s.workerPlacements)
+                .some(placements =>
+                    placements.some(w => w && w.playerId === playerId && w.type === "grande")
+                );
+            return promptForAction(s, {
                 playerId,
                 choices: [
                     {
                         id: "MOTIVATOR_RETRIEVE",
                         label: <>
-                            Retrieve <Worker workerType="grande" color={state.players[playerId].color} />
-                            {playerId !== state2.currentTurn.playerId
+                            Retrieve <Worker workerType="grande" color={s.players[playerId].color} />
+                            {playerId !== s.currentTurn.playerId
                                 ? <> (<strong>{playerName}</strong> gains <VP>1</VP>)</>
                                 : null}
                         </>,
+                        disabledReason: placedGrande ? undefined : "You haven't placed your grande worker.",
                     },
                     {
                         id: "MOTIVATOR_PASS",
@@ -844,28 +809,10 @@ export const winterVisitorReducers: Record<
                     },
                 ],
             });
-        };
-        const maybePromptNextPlayer = (state2: GameState, currentPlayerId: string): GameState => {
-            const i = state2.tableOrder.indexOf(currentPlayerId);
-            const nextPlayerId = state2.tableOrder[(i + 1) % state2.tableOrder.length];
-            if (nextPlayerId === state2.currentTurn.playerId) {
-                return endVisitor(state2);
-            }
-            const active = state2.wakeUpOrder.some(pos =>
-                pos !== null && (pos.playerId === nextPlayerId) && !pos.passed
-            );
-            const placedGrande = Object.values(state2.workerPlacements)
-                .some(placements =>
-                    placements.some(w => w && w.playerId === nextPlayerId && w.type === "grande")
-                );
-            return placedGrande && active
-                ? promptPlayer(state2, nextPlayerId)
-                : maybePromptNextPlayer(state2, nextPlayerId);
-        };
-
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptPlayer(state, state.currentTurn.playerId);
+                return endVisitorAction(state);
 
             case "CHOOSE_ACTION":
                 switch (action.choice) {
@@ -882,7 +829,7 @@ export const winterVisitorReducers: Record<
                                 ])
                             ) as GameState["workerPlacements"],
                         };
-                        return maybePromptNextPlayer(
+                        return endVisitorAction(
                             updatePlayer(state, player.id, {
                                 workers: player.workers.map(w =>
                                     w.type === "grande" ? { ...w, available: true } : w
@@ -891,7 +838,7 @@ export const winterVisitorReducers: Record<
                             player.id
                         );
                     case "MOTIVATOR_PASS":
-                        return maybePromptNextPlayer(state, action.playerId);
+                        return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }

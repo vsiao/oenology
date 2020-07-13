@@ -10,13 +10,13 @@ import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     switch (action.type) {
         case "START_GAME":
-            return startMamaPapaTurn(
-                action.players[0].id,
-                initGame(userId, action)
-            );
+            return startMamaPapaTurn(action.players[0].id, initGame(userId, action));
+
         case "UNDO":
             if (!state.prevState) {
-                throw new Error("Unexpected state: nothing to undo");
+                // Somehow tried to undo more times than allowed. This might happen
+                // when double-clicking; we can just ignore it.
+                return state;
             }
             // If the undo requester wasn't the last player to commit an action,
             // don't do anything. This might happen if there's a race between the

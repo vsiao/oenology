@@ -308,6 +308,45 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
     return startWorkerPlacementTurn(season, nextPlayerId, state);
 };
 
+export const makeEndVisitorAction = (
+    type: "allPlayers" | "activePlayers" | "opponents",
+    prompt: (state: GameState, playerId: string) => GameState
+): (state: GameState, playerId?: string) => GameState => {
+    return (state, playerId) => {
+        const actionOrder = state.wakeUpOrder.filter(pos => {
+            if (!pos) {
+                return false
+            }
+            switch (type) {
+                case "opponents":
+                    return pos.playerId !== state.currentTurn.playerId;
+                case "activePlayers":
+                    return !pos.passed;
+                default:
+                    return true;
+            }
+        });
+        const i = playerId === undefined
+            ? -1
+            : actionOrder.findIndex(pos => pos && pos.playerId === playerId);
+
+        if (i === actionOrder.length - 1) {
+            return endVisitor(state);
+        }
+        const nextPlayerId = actionOrder[i + 1]!.playerId;
+        const pendingAction = (state.currentTurn as WorkerPlacementTurn)
+            .pendingAction! as PlayVisitorPendingAction;
+        return prompt(
+            setPendingAction({
+                ...pendingAction,
+                lastActionPlayerId: pendingAction.actionPlayerId,
+                actionPlayerId: nextPlayerId,
+            }, state),
+            nextPlayerId
+        );
+    };
+};
+
 /**
  * Called when a visitor's action is finished resolving. Ending a visitor
  * is not necessarily the end of a turn because we may be playing multiple

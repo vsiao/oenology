@@ -66,6 +66,13 @@ export interface WorkerPlacementTurn {
 export interface PlayVisitorPendingAction {
     type: "playVisitor";
     visitorId?: VisitorId;
+
+    // Indicates the player currently taking an action, for visitors
+    // which require opponents to take action
+    actionPlayerId?: string;
+    lastActionPlayerId?: string;
+
+    // Can play an additional visitor due to placement bonus
     hasBonus: boolean;
 }
 export type WorkerPlacementTurnPendingAction = (
