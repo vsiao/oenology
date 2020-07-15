@@ -23,7 +23,7 @@ const OenologyGame: React.FunctionComponent<Props> = props => {
     return <div className="OenologyGame">
         {isPlaying
             ? <><GameBoard /><PlayerMat /><Sidebar /> </>
-            : <Lobby />}
+            : <Lobby gameId={gameId} />}
     </div>;
 };
 

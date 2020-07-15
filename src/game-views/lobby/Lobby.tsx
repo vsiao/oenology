@@ -5,8 +5,8 @@ import { AppState, User } from "../../store/AppState";
 import ChoiceButton from "../controls/ChoiceButton";
 import { PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
-import { startGame } from "../../game-data/gameActions";
 import { setCurrentUserName } from "../../store/appActions";
+import { startGame } from "../../store/firebase";
 
 interface Props {
     currentUserId: string | null;
@@ -77,7 +77,7 @@ const mapStateToProps = (state: AppState) => {
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch) => {
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) => {
     const colors: PlayerColor[] = [
         "purple",
         "orange",
@@ -92,10 +92,9 @@ const mapDispatchToProps = (dispatch: Dispatch) => {
             if (users.length > 6) {
                 throw new Error("Can't have more than 6 players");
             }
-            dispatch(
-                startGame(
-                    users.map(({ id, name }, i) => ({ id, name, color: colors[i] }))
-                )
+            startGame(
+                ownProps.gameId,
+                users.map(({ id, name }, i) => ({ id, name, color: colors[i] }))
             );
         },
     };

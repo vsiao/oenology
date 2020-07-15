@@ -4,7 +4,7 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction } from "../game-data/gameActions";
+import { isGameAction, startGame as startGameAction, PlayerInit } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction } from "./appActions";
 
 firebase.initializeApp(firebaseConfig);
@@ -72,6 +72,19 @@ export function* subscribeToRoom(gameId: string, userId: string) {
     while (true) {
         yield put(yield take(firebaseEventChannel));
     }
+}
+
+export function startGame(gameId: string, players: PlayerInit[]) {
+    const ref = firebase.database().ref();
+    ref.child(".info/serverTimeOffset").once("value", snap => {
+        const nowMs = new Date().getTime() + snap.val();
+        const startGameKey = ref.child(`gameLogs/${gameId}`).push().key;
+        ref.update({
+            [`gameLogs/${gameId}/${startGameKey}`]: startGameAction(players),
+            [`rooms/${gameId}/gameStartedAt`]: new Date(nowMs).toJSON(),
+            [`rooms/${gameId}/gameStatus`]: "inProgress",
+        });
+    });
 }
 
 export function* publishGameLog(gameId: string) {
