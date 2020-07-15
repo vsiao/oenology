@@ -1,12 +1,13 @@
 import './App.css';
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { BrowserRouter, Route } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { Dispatch } from 'redux';
 import { CHEAT_drawCard } from './game-data/gameActions';
 import OenologyGame from './game-views/OenologyGame';
 import { AppState } from './store/AppState';
 import { AppAction } from './store/appActions';
+import Home from './game-views/lobby/Home';
 
 interface Props {
     currentPlayerId: string | null;
@@ -31,9 +32,14 @@ const App: React.FunctionComponent<Props> = props => {
                     }}
                 />
             </header>
-            <Route path="/game/:gameId">
-                <OenologyGame />
-            </Route>
+            <Switch>
+                <Route path="/game/:gameId">
+                    <OenologyGame />
+                </Route>
+                <Route path="/">
+                    <Home />
+                </Route>
+            </Switch>
         </div>
     </BrowserRouter>;
 };

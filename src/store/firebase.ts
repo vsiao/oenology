@@ -20,9 +20,26 @@ export function* signIn() {
     return userId;
 }
 
+export function fetchRecentGames() {
+    return new Promise(resolve => {
+        firebase
+            .database()
+            .ref("rooms")
+            .orderByChild("gameStartedAt")
+            .limitToLast(10)
+            .once("value", snap => {
+                const rooms: unknown[] = [];
+                snap.forEach(child => {
+                    rooms.push({ ...child.val(), key: child.key })
+                });
+                resolve(rooms.reverse());
+            });
+    });
+}
+
 export function getGameState(gameId: string) {
     return new Promise(resolve => {
-        firebase.database().ref(`rooms/${gameId}/game`).once("value", snap => {
+        firebase.database().ref(`gameStates/${gameId}`).once("value", snap => {
             resolve(snap.val());
         });
     });

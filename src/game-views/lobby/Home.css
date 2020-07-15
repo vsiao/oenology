@@ -1,0 +1,18 @@
+.Home {
+    text-align: center;
+}
+
+.Home-recentGamesTable {
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.Home-recentGame {
+    border: 1px solid #ddd;
+    border-width: 1px 0;
+    height: 3.2em;
+}
+
+.Home-recentGameCell {
+    padding: 0 .5em;
+}
