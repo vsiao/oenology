@@ -6,9 +6,12 @@ export interface AppState {
     game: GameState | null;
 }
 
+export type GameStatus = "inProgress" | "completed";
+
 interface RoomState {
     gameId: string | null;
-    status?: string | null;
+    gameStartedAt?: string;
+    gameStatus?: GameStatus | null;
     users: Record<string, User>;
 }
 

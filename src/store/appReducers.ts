@@ -58,7 +58,7 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
                 ...state,
                 room: {
                     ...state.room!,
-                    status: action.status,
+                    gameStatus: action.status,
                 },
             };
         case "HYDRATE_GAME":

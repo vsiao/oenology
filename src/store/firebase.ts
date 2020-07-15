@@ -2,10 +2,11 @@ import "firebase/auth";
 import "firebase/database";
 import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
-import { take, put, call, fork, throttle } from "redux-saga/effects";
+import { take, put, call, fork, throttle, select } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction, startGame as startGameAction, PlayerInit } from "../game-data/gameActions";
+import { isGameAction, startGame as startGameAction, EndGameAction, PlayerInit } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction } from "./appActions";
+import GameState from "../game-data/GameState";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -104,11 +105,31 @@ export function startGame(gameId: string, players: PlayerInit[]) {
     });
 }
 
+function endGame(action: EndGameAction, gameId: string, gameState: GameState) {
+    const ref = firebase.database().ref();
+    ref.child(".info/serverTimeOffset").once("value", snap => {
+        const nowMs = new Date().getTime() + snap.val();
+        const endGameKey = ref.child(`gameLogs/${gameId}`).push().key;
+        const { playerId, ...denormalizedGameState } = gameState;
+        ref.update({
+            [`gameLogs/${gameId}/${endGameKey}`]: action,
+            [`gameStates/${gameId}`]: denormalizedGameState,
+            [`rooms/${gameId}/gameEndedAt`]: new Date(nowMs).toJSON(),
+            [`rooms/${gameId}/gameStatus`]: "completed",
+        });
+    });
+}
+
 export function* publishGameLog(gameId: string) {
     while (true) {
         const gameAction = yield take(isGameAction);
         if (!gameAction._key) {
-            firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
+            if (gameAction.type === "END_GAME") {
+                const gameState = yield select(state => state.game);
+                endGame(gameAction, gameId, gameState);
+            } else {
+                firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
+            }
         }
     }
 }

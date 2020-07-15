@@ -278,7 +278,7 @@ const placeWorker = (state: GameState, action: GameAction): GameState => {
                 type: action.workerType,
                 playerId: state.currentTurn.playerId,
                 color: player.color,
-                isTemp: player.workers[workerIndex].isTemp,
+                isTemp: !!player.workers[workerIndex].isTemp,
             };
             state = {
                 ...updatePlayer(state, player.id, {

@@ -59,7 +59,7 @@ const renderPrompt = (
         case "placeWorker":
             return <PlaceWorkerPrompt playerId={playerId} />;
         case "gameOver":
-            return <GameOverPrompt />;
+            return <GameOverPrompt playerId={playerId} />;
     }
 };
 

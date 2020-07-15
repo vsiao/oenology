@@ -758,7 +758,7 @@ export const winterVisitorReducers: Record<
             case "MAKE_WINE":
                 state = makeWineFromGrapes(state, action.ingredients, action.playerId);
                 if (action.playerId === state.currentTurn.playerId) {
-                    return endVisitorAction(state);
+                    return endVisitorAction(state, action.playerId);
                 }
                 return promptForAction(
                     setPendingAction(

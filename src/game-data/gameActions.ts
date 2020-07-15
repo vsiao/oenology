@@ -8,6 +8,7 @@ export type GameAction = (
     | StartGameAction
     | PromptAction
     | UndoAction
+    | EndGameAction
     | CHEAT_DrawCardAction
 ) & {
     // Every action should first be pushed to firebase to be
@@ -20,6 +21,7 @@ export const isGameAction = (action: Action): action is GameAction => {
     switch (action.type) {
         case "START_GAME":
         case "CHEAT_DRAW_CARD":
+        case "END_GAME":
         case "UNDO":
             return true;
         default:
@@ -40,21 +42,28 @@ export interface StartGameAction extends Action<"START_GAME"> {
     shuffledCards?: CardsByType; // deprecated; see #PreGameShuffle
     excludeCards?: { [Id in string]?: true };
 }
-export const startGame = (players: PlayerInit[]): StartGameAction => {
+export const startGame = (players: PlayerInit[]): GameAction => {
     return { type: "START_GAME", players, excludeCards: UNIMPLEMENTED_CARDS };
 };
 
-export interface UndoAction extends Action<"UNDO"> {
+interface UndoAction extends Action<"UNDO"> {
     playerId: string;
 }
 export const undo = (playerId: string): GameAction => {
     return { type: "UNDO", playerId };
 };
 
-export interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {
+export interface EndGameAction extends Action<"END_GAME"> {
+    playerId: string;
+}
+export const endGame = (playerId: string): GameAction => {
+    return { type: "END_GAME", playerId };
+};
+
+interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {
     id: string;
     playerId: string;
 }
-export const CHEAT_drawCard = (id: string, playerId: string): CHEAT_DrawCardAction => {
+export const CHEAT_drawCard = (id: string, playerId: string): GameAction => {
     return { type: "CHEAT_DRAW_CARD", id, playerId, };
 };

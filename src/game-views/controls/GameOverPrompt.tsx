@@ -12,6 +12,8 @@ import Coins from "../icons/Coins";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "../icons/Card";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
 import Worker from "../icons/Worker";
+import { Dispatch } from "redux";
+import { endGame } from "../../game-data/gameActions";
 
 interface PlayerWithStats extends PlayerState {
     coinsGained: number;
@@ -24,11 +26,20 @@ interface PlayerWithStats extends PlayerState {
 }
 interface Props {
     players: PlayerWithStats[]; // Ordered by win conditions
+    shouldEndGame: boolean;
+    endGame: () => void;
 }
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
     const [isScrolled, setIsScrolled] = React.useState(false);
     const [showStats, setShowStats] = React.useState(true);
+
+    const { shouldEndGame, endGame } = props;
+    React.useEffect(() => {
+        if (shouldEndGame) {
+            endGame();
+        }
+    }, [shouldEndGame, endGame]);
 
     const handleScroll = (event: React.UIEvent) => {
         const nowScrolled = (event.target as HTMLDivElement).scrollLeft > 5;
@@ -189,7 +200,15 @@ const mapStateToProps = (state: AppState) => {
             return crushPadValue(game, p1.id) - crushPadValue(game, p2.id);
         }
     });
-    return { players };
+    return {
+        players,
+        shouldEndGame: game.playerId === game.currentTurn.playerId
+            && state.room.gameStatus !== "completed",
+    };
 };
 
-export default connect(mapStateToProps)(GameOverPrompt);
+const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string }) => {
+    return { endGame: () => dispatch(endGame(ownProps.playerId)) };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(GameOverPrompt);

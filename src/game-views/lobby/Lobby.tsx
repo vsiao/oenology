@@ -69,7 +69,7 @@ const Lobby: React.FunctionComponent<Props> = ({
 const mapStateToProps = (state: AppState) => {
     return {
         currentUserId: state.userId,
-        gameStatus: state.room.status,
+        gameStatus: state.room.gameStatus,
         users: Object.fromEntries(
             Object.entries(state.room.users)
                 .filter(([_, u]) => u.status === "connected")

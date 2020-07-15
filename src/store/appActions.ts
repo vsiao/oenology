@@ -1,6 +1,6 @@
 import { Action } from "redux";
 import { GameAction } from "../game-data/gameActions";
-import { User } from "./AppState";
+import { User, GameStatus } from "./AppState";
 import GameState from "../game-data/GameState";
 
 export type AppAction =
@@ -34,9 +34,9 @@ export const joinGame = (gameId: string): AppAction => {
 };
 
 interface GameStatusAction extends Action<"GAME_STATUS"> {
-    status: string;
+    status: GameStatus | null;
 }
-export const gameStatus = (status: string): AppAction => {
+export const gameStatus = (status: GameStatus | null): AppAction => {
     return { type: "GAME_STATUS", status };
 };
 

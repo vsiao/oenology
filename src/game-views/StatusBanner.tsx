@@ -71,7 +71,7 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
         case "fallVisitor":
             return <span>{playerName} is welcoming visitor(s).</span>;
         case "workerPlacement":
-            if (currentTurn.pendingAction !== null) {
+            if (currentTurn.pendingAction) {
                 return renderPendingActionStatus(
                     currentTurn.pendingAction,
                     currentTurn.playerId,

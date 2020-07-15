@@ -445,7 +445,6 @@ const endYear = (state: GameState): GameState => {
                     {
                         ...playerState,
                         // Retrieve workers
-                        tempWorker: undefined,
                         workers: playerState.workers
                             .filter(w => !w.isTemp)
                             .map(w => ({ ...w, available: true })),
