@@ -1,8 +1,10 @@
 .Lobby-main {
     align-items: center;
     display: flex;
+    flex-direction: column;
     grid-area: main;
     justify-content: center;
+    position: relative;
 }
 
 .Lobby-nameLabel {
@@ -18,6 +20,37 @@
     margin-top: .2em;
     outline: none;
     width: 8em;
+}
+
+.Lobby-shareBanner {
+    align-items: center;
+    background: #61dafb;
+    display: flex;
+    height: 3em;
+    justify-content: center;
+    width: 100%;
+    position: absolute;
+    top: 0;
+}
+
+.Lobby-shareLink {
+    background: none;
+    border: none;
+    color: black;
+}
+
+.Lobby-copyLinkButton {
+    border-radius: .2em;
+    cursor: pointer;
+    font-size: .8em;
+    font-weight: 600;
+    height: 2em;
+    margin-left: 1em;
+    text-align: center;
+    width: 5em;
+}
+.Lobby-copyLinkButton:hover {
+    background: #ddd;
 }
 
 .Lobby-controls {

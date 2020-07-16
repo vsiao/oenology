@@ -1,6 +1,6 @@
 import "./Home.css";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { fetchRecentGames } from "../../store/firebase";
+import { fetchRecentGames, createRoom } from "../../store/firebase";
 
 interface GameRoom {
     key: string;
@@ -18,6 +18,11 @@ const Home: FunctionComponent<{}> = props => {
     }, [])
 
     return <div className="Home">
+        <h1 className="Home-title"><em>Make wine—with friends!</em></h1>
+        <button className="Home-newGame" onClick={handleNewGameClick}>
+            New Game
+        </button>
+
         <h2>Recent Games</h2>
         <table className="Home-recentGamesTable">
             <tbody>
@@ -27,11 +32,21 @@ const Home: FunctionComponent<{}> = props => {
     </div>;
 };
 
+const handleNewGameClick = () => {
+    createRoom().then(roomId => window.location.href = `/game/${roomId}`);
+};
+
 const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
     return <tr className="Home-recentGame">
         <td className="Home-recentGameCell">
             {room.gameStartedAt
-                ? new Date(room.gameStartedAt).toLocaleString()
+                ? new Date(room.gameStartedAt).toLocaleString("en-US", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "numeric",
+                })
                 : null}{" "}
         </td>
         <td className="Home-recentGameCell">

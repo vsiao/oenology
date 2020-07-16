@@ -7,6 +7,7 @@ import { firebaseConfig } from "./config";
 import { isGameAction, startGame as startGameAction, EndGameAction, PlayerInit } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction } from "./appActions";
 import GameState from "../game-data/GameState";
+import shortid from "shortid";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -42,6 +43,19 @@ export function getGameState(gameId: string) {
     return new Promise(resolve => {
         firebase.database().ref(`gameStates/${gameId}`).once("value", snap => {
             resolve(snap.val());
+        });
+    });
+}
+
+export function createRoom() {
+    return new Promise<string>(resolve => {
+        const ref = firebase.database().ref();
+        ref.child(".info/serverTimeOffset").once("value", snap => {
+            const nowMs = new Date().getTime() + snap.val();
+            const roomId = shortid.generate();
+            ref.child(`rooms/${roomId}/createdAt`)
+                .set(new Date(nowMs).toJSON())
+                .then(() => resolve(roomId));
         });
     });
 }

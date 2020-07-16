@@ -2,6 +2,21 @@
     text-align: center;
 }
 
+.Home-title {
+    margin-top: 2em;
+}
+
+.Home-newGame {
+    background: #61dafb;
+    border-radius: .2em;
+    cursor: pointer;
+    font-size: 1.6em;
+    font-weight: 600;
+    height: 2em;
+    margin-bottom: 3em;
+    padding: 0 1em;
+}
+
 .Home-recentGamesTable {
     border-collapse: collapse;
     margin: 0 auto;
