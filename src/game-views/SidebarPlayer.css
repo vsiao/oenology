@@ -133,7 +133,6 @@
 }
 
 .SidebarPlayer-cellar {
-    box-shadow: inset 0 1px 0 0 #ccc;
     position: relative;
     z-index: 0;
 }
@@ -141,9 +140,30 @@
 .SidebarPlayer-wines {
     display: flex;
     justify-content: flex-end;
-    pointer-events: none;
     position: relative;
+}
+.SidebarPlayer-wines:first-child {
+    box-shadow: inset 0 1px 0 0 #ccc;
+}
+.SidebarPlayer-wines:hover {
+    background: #eee;
+}
+
+.SidebarPlayer-wine {
+    pointer-events: none;
     z-index: 1;
+}
+
+.SidebarPlayer-wineToken--placeholder {
+    display: none;
+    opacity: .3;
+}
+.SidebarPlayer-wines:hover .SidebarPlayer-wineToken--placeholder {
+    display: inline-flex;
+}
+
+.SidebarPlayer-wines:hover .SidebarPlayer-winePlaceholder {
+    display: none;
 }
 
 .SidebarPlayer-mediumCellarOverlay,
@@ -172,6 +192,14 @@
     position: absolute;
     width: 100%;
     z-index: 1;
+}
+.SidebarPlayer-largeCellarOverlay::before {
+    content: "";
+    height: 100%;
+    position: absolute;
+    right: 100%;
+    top: 0;
+    width: .5em;
 }
 
 .SidebarPlayer-mediumCellarOverlay {

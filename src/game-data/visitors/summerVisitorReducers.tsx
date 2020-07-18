@@ -795,7 +795,11 @@ export const summerVisitorReducers: Record<
                 return promptForAction(state, {
                     choices: [
                         { id: "NGUIDE_GAIN", label: <>Gain <Coins>3</Coins></>, },
-                        { id: "NGUIDE_MAKE", label: <>Make up to 2 <WineGlass /></>, },
+                        {
+                            id: "NGUIDE_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
                     ],
                 });
             case "CHOOSE_ACTION":

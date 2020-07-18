@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId, StructureState, FieldId, Field } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -95,48 +95,10 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     </div>
                 </div>
                 <div className="SidebarPlayer-cellar">
-                    <div className="SidebarPlayer-wines">
-                        {player.cellar.red.map((hasWine, i) =>
-                            <div className="SidebarPlayer-wine" key={i}>
-                                {hasWine
-                                    ? <WineGlass color="red">{i + 1}</WineGlass>
-                                    : i + 1}
-                            </div>
-                        )}
-                    </div>
-                    <div className="SidebarPlayer-wines">
-                        {player.cellar.white.map((hasWine, i) =>
-                            <div className="SidebarPlayer-wine" key={i}>
-                                {hasWine
-                                    ? <WineGlass color="white">{i + 1}</WineGlass>
-                                    : i + 1}
-                            </div>
-                        )}
-                    </div>
-                    <div className="SidebarPlayer-wines">
-                        {player.cellar.blush.map((hasWine, i) => {
-                            if (i < 3) {
-                                return null;
-                            }
-                            return <div className="SidebarPlayer-wine" key={i}>
-                                {hasWine
-                                    ? <WineGlass color="blush">{i + 1}</WineGlass>
-                                    : i + 1}
-                            </div>;
-                        })}
-                    </div>
-                    <div className="SidebarPlayer-wines">
-                        {player.cellar.sparkling.map((hasWine, i) => {
-                            if (i < 6) {
-                                return null;
-                            }
-                            return <div className="SidebarPlayer-wine" key={i}>
-                                {hasWine
-                                    ? <WineGlass color="sparkling">{i + 1}</WineGlass>
-                                    : i + 1}
-                            </div>;
-                        })}
-                    </div>
+                    <CellarRow type="red" wines={player.cellar.red} />
+                    <CellarRow type="white" wines={player.cellar.white} />
+                    <CellarRow type="blush" wines={player.cellar.blush} />
+                    <CellarRow type="sparkling" wines={player.cellar.sparkling} />
                     {hasMediumCellar
                         ? null
                         : <StructureTooltip id="mediumCellar" side="top">
@@ -211,6 +173,60 @@ const FieldTooltip: React.FunctionComponent<{
         {children(anchorRef)}
         {maybeTooltip}
     </>;
+};
+
+const CellarRow: React.FunctionComponent<{
+    type: WineColor;
+    wines: TokenMap
+}> = ({ type, wines }) => {
+    const [anchorRef, maybeLayer] = useTooltip(
+        "left",
+        React.useMemo(() => {
+            switch (type) {
+                case "red":
+                    return <>
+                        Red wine<hr />
+                        <Grape color="red" /> = <WineGlass color="red" />
+                    </>;
+                case "white":
+                    return <>
+                        White wine<hr />
+                        <Grape color="white" /> = <WineGlass color="white" />
+                    </>;
+                case "blush":
+                    return <>
+                        Blush wine<br />
+                        <em>requires Medium Cellar</em><hr />
+                        <Grape color="red" /> + <Grape color="white" /> = <WineGlass color="blush" />
+                    </>;
+                case "sparkling":
+                    return <>
+                        Sparkling wine<br />
+                        <em>requires Large Cellar</em><hr />
+                        <Grape color="red" /> + <Grape color="red" /> + <Grape color="white" /> = <WineGlass color="sparkling" />
+                    </>;
+            }
+        }, [type])
+    );
+
+    return <div
+        ref={anchorRef as React.RefObject<HTMLDivElement>}
+        className={cx("SidebarPlayer-wines", `SidebarPlayer-wines--${type}`)}
+    >
+        {wines.map((hasWine, i) => {
+            if ((type === "blush" && i < 3) || (type === "sparkling" && i < 6)) {
+                return null;
+            }
+            return <div className="SidebarPlayer-wine" key={i}>
+                <WineGlass
+                    className={cx({ "SidebarPlayer-wineToken--placeholder": !hasWine, })}
+                    color={type}
+                >{i + 1}</WineGlass>
+                {hasWine ? null : <span className="SidebarPlayer-winePlaceholder">{i + 1}</span>}
+            </div>;
+        })}
+        {maybeLayer}
+    </div>;
 };
 
 const StructureTooltip: React.FunctionComponent<{

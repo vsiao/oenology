@@ -24,8 +24,8 @@
     display: inline-flex;
 }
 
-.MakeWinePrompt-grape + .MakeWinePrompt-grape {
-    margin-left: .5em;
+.MakeWinePrompt-grape {
+    margin-right: .5em;
 }
 .MakeWinePrompt-grapeButton {
     background: none;
