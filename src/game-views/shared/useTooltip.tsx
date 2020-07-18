@@ -7,7 +7,7 @@ export const useTooltip = (side: AnchorSide, children: ReactNode): [
     RefObject<HTMLElement>,
     ReactNode,
 ] => {
-    const tooltip = useMemo(() => <Tooltip>{children}</Tooltip>, [children]);
+    const tooltip = useMemo(() => children && <Tooltip>{children}</Tooltip>, [children]);
     return useHoverLayer(side, tooltip);
 };
 

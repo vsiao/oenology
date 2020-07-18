@@ -16,6 +16,8 @@ import Card from "./icons/Card";
 import { default as VP } from "./icons/VictoryPoints";
 import WineGlass from "./icons/WineGlass";
 import Residuals from "./icons/Residuals";
+import { useTooltip } from "./shared/useTooltip";
+import VisitorCard from "./cards/VisitorCard";
 
 interface Props {
     players: PlayerState[];
@@ -48,21 +50,33 @@ const ActivityLogItem: React.FunctionComponent<{
     playerNameById: Record<string, string>;
 }> = ({ event, playerNameById }) => {
     const [isMounted, setIsMounted] = React.useState(false);
-    const nodeRef = React.useRef<HTMLDivElement>(null);
+    const [nodeRef, maybeLayer] = useTooltip(
+        "left",
+        React.useMemo(() => {
+            if (event.type === "visitor") {
+                return <VisitorCard className="Sidebar-visitorTip" cardData={visitorCards[event.visitorId]} />;
+            }
+            return null;
+        }, [event])
+    );
+
     React.useEffect(() => {
         // Force a reflow so that the adding a new class on next render will trigger a transition
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         nodeRef.current && nodeRef.current.scrollTop;
         setIsMounted(true);
-    }, []);
+    }, [nodeRef]);
 
-    return <div ref={nodeRef} className={cx({
-        "Sidebar-activityLogItem": true,
-        "Sidebar-activityLogItem--enter": isMounted,
-        "Sidebar-activityLogItem--seasonSeparator": event.type === "season",
-    })}>
-        {renderActivity(event, playerNameById)}
-    </div>;
+    return <>
+        <div ref={nodeRef as React.RefObject<HTMLDivElement>} className={cx({
+            "Sidebar-activityLogItem": true,
+            "Sidebar-activityLogItem--enter": isMounted,
+            "Sidebar-activityLogItem--seasonSeparator": event.type === "season",
+        })}>
+            {renderActivity(event, playerNameById)}
+        </div>
+        {maybeLayer}
+    </>;
 };
 
 const renderActivity = (

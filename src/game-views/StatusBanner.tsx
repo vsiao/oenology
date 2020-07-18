@@ -34,7 +34,7 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
                         <XIcon />
                     </button>
                 </Tooltip>;
-            }
+            };
 
             if (pendingAction?.type === "plantVine" && pendingAction.vineId) {
                 const cardData = vineCards[pendingAction.vineId];

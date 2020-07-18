@@ -1,6 +1,6 @@
 .Sidebar {
     background: #ddd;
-    border-left: 4px solid #282c34;
+    border-left: 3px solid #282c34;
     display: flex;
     flex-direction: column;
     grid-area: sidebar;
@@ -35,6 +35,10 @@
     justify-content: flex-end;
     line-height: 2em;
     padding: 1em .5em;
+}
+
+.Sidebar-visitorTip {
+    margin: .5em 0;
 }
 
 .Sidebar-activityLogItem {

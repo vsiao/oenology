@@ -8,11 +8,16 @@ import { AppState } from "../store/AppState";
 import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement } from "../game-data/GameState";
 import Rooster from "./icons/Rooster";
 import StatusBanner from "./StatusBanner";
+import { Vine, Order, SummerVisitor, WinterVisitor } from "./icons/Card";
+import Coins from "./icons/Coins";
+import VictoryPoints from "./icons/VictoryPoints";
+import Worker from "./icons/Worker";
+import { useTooltip } from "./shared/useTooltip";
 
 type Season = "spring" | "summer" | "fall" | "winter";
 interface Props {
     season: Season;
-    wakeUpOrder: ({ current: boolean; passed?: boolean; color: PlayerColor; } | null)[];
+    wakeUpOrder: (WakeUpPosition | null)[];
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
 }
 
@@ -41,15 +46,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
         <StatusBanner />
         <ol className="GameBoard-wakeUpOrder">
             {props.wakeUpOrder.map((pos, i) =>
-                <li key={i} className={cx({
-                    "GameBoard-wakeUpPosition": true,
-                    "GameBoard-wakeUpPosition--current": pos && pos.current,
-                    "GameBoard-wakeUpPosition--passed": pos && pos.passed,
-                })}>
-                    <div className="GameBoard-roosterContainer">
-                        {pos ? <Rooster color={pos.color} /> : i + 1}
-                    </div>
-                </li>
+                <WakeUpPosition key={i} pos={pos} season={season} i={i} />
             )}
         </ol>
         <div className="GameBoard-actionsScroller" ref={scrollableRef}>
@@ -91,6 +88,61 @@ const GameBoard: React.FunctionComponent<Props> = props => {
             </div>
         </div>
     </div>;
+};
+
+interface WakeUpPosition {
+    current: boolean;
+    passed?: boolean;
+    color: PlayerColor;
+}
+
+const WakeUpPosition: React.FunctionComponent<{
+    pos: WakeUpPosition | null;
+    season: Season;
+    i: number;
+}> = ({ pos, season, i }) => {
+    const [anchorRef, maybeLayer] = useTooltip(
+        "right",
+        React.useMemo(() => {
+            const bonus = renderWakeUpBonus(i);
+            return <>Wake-up bonus: {bonus || "(none)"}</>;
+        }, [i])
+    )
+
+    return <li
+        ref={anchorRef as React.RefObject<HTMLLIElement>}
+        className={cx({
+            "GameBoard-wakeUpPosition": true,
+            "GameBoard-wakeUpPosition--current": pos && pos.current,
+            "GameBoard-wakeUpPosition--passed": pos && pos.passed,
+        })}
+    >
+        <div className="GameBoard-roosterContainer">
+            {pos
+                ? <Rooster color={pos.color} />
+                : season === "spring" ? renderWakeUpBonus(i) : i+1}
+        </div>
+        {maybeLayer}
+    </li>;
+};
+
+const renderWakeUpBonus = (i: number): React.ReactNode => {
+    switch (i) {
+        case 0:
+            return null;
+        case 1:
+            return <Vine />;
+        case 2:
+            return <Order />;
+        case 3:
+            return <Coins>1</Coins>;
+        case 4:
+            return <><SummerVisitor /> or <WinterVisitor /></>;
+        case 5:
+            return <VictoryPoints>1</VictoryPoints>;
+        case 6:
+            return <Worker isTemp={true} />;
+    }
 };
 
 const mapStateToProps = (state: AppState) => {

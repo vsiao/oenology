@@ -11,16 +11,17 @@
 .Tooltip {
     background: #333;
     border-radius: .4em;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, .3);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .5), 0 1px 6px rgba(0, 0, 0, .3);
+    box-sizing: border-box;
     color: white;
     font-size: .8em;
-    max-width: 13em;
+    max-width: 16em;
     padding: .5em .8em;
     position: absolute;
 }
 .Tooltip--top,
 .Tooltip--bottom {
-    margin: .5em 0;
+    margin: 5px 0;
 }
 .Tooltip--top {
     bottom: 50%;
@@ -30,7 +31,7 @@
 }
 .Tooltip--left,
 .Tooltip--right {
-    margin: 0 .5em;
+    margin: 0 5px;
 }
 .Tooltip--left {
     right: 50%;
@@ -40,36 +41,37 @@
 }
 
 .Tooltip::after {
-    border: .5em solid #333;
+    background: #333;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .5);
+    box-sizing: border-box;
+    clip-path: polygon(-10% -10%, 110% -10%, 110% 110%);
     content: "";
     display: block;
+    height: 8px;
     position: absolute;
+    width: 8px;
 }
 .Tooltip--top::after,
 .Tooltip--bottom::after {
-    border-color: #333 transparent;
     left: 50%;
-    transform: translateX(-50%);
 }
 .Tooltip--top::after {
-    border-bottom-width: 0;
-    top: 100%;
+    bottom: -4px;
+    transform: translateX(-50%) rotate(135deg);
 }
 .Tooltip--bottom::after {
-    border-top-width: 0;
-    bottom: 100%;
+    top: -4px;
+    transform: translateX(-50%) rotate(315deg);
 }
 .Tooltip--left::after,
 .Tooltip--right::after {
-    border-color: transparent #333;
     top: 50%;
-    transform: translateY(-50%);
 }
 .Tooltip--left::after {
-    border-right-width: 0;
-    left: 100%;
+    right: -4px;
+    transform: translateY(-50%) rotate(45deg);
 }
 .Tooltip--right::after {
-    border-left-width: 0;
-    right: 100%;
+    left: -4px;
+    transform: translateY(-50%) rotate(225deg);
 }
