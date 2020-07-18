@@ -53,7 +53,6 @@ import {
     passToNextSeason,
     promptForWakeUpOrder,
     setPendingAction,
-    endTurn,
     makeEndVisitorAction,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
@@ -1382,7 +1381,7 @@ export const summerVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endTurn(gainVP(4, discardWines(state, action.wines)));
+                return endVisitor(gainVP(4, discardWines(state, action.wines)));
             default:
                 return state;
         }

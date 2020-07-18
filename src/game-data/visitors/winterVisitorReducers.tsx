@@ -628,7 +628,6 @@ export const winterVisitorReducers: Record<
                                 {
                                     id: "MVINTNER_FILL",
                                     label: <>Age 1 <WineGlass /> and fill 1 <Order /></>,
-                                    disabledReason: fillOrderDisabledReason(state),
                                 },
                             ],
                         });
@@ -997,7 +996,7 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    queen: (state, action) => {
+    queen: (state, action, pendingAction) => {
         const { tableOrder } = state;
         const i = tableOrder.indexOf(state.currentTurn.playerId);
         const playerId = tableOrder[(i + tableOrder.length - 1) % tableOrder.length];
@@ -1007,22 +1006,28 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 const cards = action.cards!;
                 if (cards.length === 1) {
-                    return promptForAction(state, {
-                        playerId,
-                        choices: [
-                            { id: "QUEEN_LOSE", label: <>Lose <VP>1</VP></>, },
-                            {
-                                id: "QUEEN_GIVE",
-                                label: <>Give {playerName} 2 <Card /></>,
-                                disabledReason: numCardsDisabledReason(state, 2, playerId),
-                            },
-                            {
-                                id: "QUEEN_PAY",
-                                label: <>Pay {playerName} <Coins>3</Coins></>,
-                                disabledReason: moneyDisabledReason(state, 3, playerId),
-                            },
-                        ],
-                    });
+                    return promptForAction(
+                        setPendingAction({
+                            ...pendingAction,
+                            actionPlayerId: playerId,
+                        }, state),
+                        {
+                            playerId,
+                            choices: [
+                                { id: "QUEEN_LOSE", label: <>Lose <VP>1</VP></>, },
+                                {
+                                    id: "QUEEN_GIVE",
+                                    label: <>Give {playerName} 2 <Card /></>,
+                                    disabledReason: numCardsDisabledReason(state, 2, playerId),
+                                },
+                                {
+                                    id: "QUEEN_PAY",
+                                    label: <>Pay {playerName} <Coins>3</Coins></>,
+                                    disabledReason: moneyDisabledReason(state, 3, playerId),
+                                },
+                            ],
+                        }
+                    );
                 } else {
                     return endVisitor(
                         addCardsToHand(cards, removeCardsFromHand(cards, state, playerId))
