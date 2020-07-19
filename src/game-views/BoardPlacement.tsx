@@ -48,7 +48,7 @@ const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction; })
     const numSpots = Math.ceil(Object.keys(state.game!.players).length / 2);
     return {
         numSpots,
-        bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : null,
+        bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : <>&nbsp;</>,
     };
 };
 

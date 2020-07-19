@@ -1,11 +1,35 @@
 .GameBoard {
     display: grid;
     grid-template-areas:
-        "banner banner"
+        "season banner"
         "order actions";
-    grid-template-columns: auto 4fr;
+    grid-template-columns: 5em 4fr;
     grid-template-rows: 2em 1fr;
     overflow: auto;
+}
+
+.GameBoard-season {
+    align-items: center;
+    border-right: 1px solid rgba(0, 0, 0, .3);
+    box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
+    display: flex;
+    font-weight: 600;;
+    grid-area: season;
+    justify-content: center;
+    text-transform: capitalize;
+}
+.GameBoard--spring .GameBoard-season {
+    background: #40a746;
+}
+.GameBoard--summer .GameBoard-season {
+    background: gold;
+}
+.GameBoard--fall .GameBoard-season {
+    background: peru;
+}
+.GameBoard--winter .GameBoard-season {
+    background: royalblue;
+    color: white;
 }
 
 .GameBoard-wakeUpOrder {
@@ -17,7 +41,6 @@
     list-style-type: none;
     margin: 0;
     padding-left: 0;
-    width: 5em;
 }
 .GameBoard-wakeUpPosition {
     align-items: center;
@@ -32,6 +55,7 @@
 }
 .GameBoard-wakeUpPosition--current .GameBoard-roosterContainer {
     animation: .5s ease-in-out GameBoard-roosterBounce infinite alternate;
+    will-change: transform;
 }
 .GameBoard-wakeUpPosition--passed {
     background: #ddd;
@@ -39,10 +63,10 @@
 
 @keyframes GameBoard-roosterBounce {
     0% {
-        transform: rotate(-10deg) translateX(-.1em);
+        transform: rotate(-10deg) translate3d(-.1em, 0, 0);
     }
     100% {
-        transform: rotate(10deg) translateX(.2em);
+        transform: rotate(10deg) translate3d(.2em, 0, 0);
     }
 }
 
@@ -78,7 +102,27 @@
 .GameBoard-summerActions,
 .GameBoard-winterActions {
     padding: 24px;
+    position: relative;
     width: 50%;
+}
+.GameBoard-summerActions::after,
+.GameBoard-winterActions::after {
+    background: black;
+    content: "";
+    display: block;
+    height: 100%;
+    left: 0;
+    opacity: .05;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    transition: .2s opacity linear;
+    width: 100%;
+    z-index: 1;
+}
+.GameBoard--summer .GameBoard-summerActions::after,
+.GameBoard--winter .GameBoard-winterActions::after {
+    opacity: 0;
 }
 
 .GameBoard-actionsTable {

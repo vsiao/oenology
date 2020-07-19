@@ -42,13 +42,14 @@ const GameBoard: React.FunctionComponent<Props> = props => {
         }
     }, [season, summerRef, winterRef]);
 
-    return <div className="GameBoard">
+    return <div className={cx("GameBoard", `GameBoard--${season}`)}>
         <StatusBanner />
         <ol className="GameBoard-wakeUpOrder">
             {props.wakeUpOrder.map((pos, i) =>
                 <WakeUpPosition key={i} pos={pos} season={season} i={i} />
             )}
         </ol>
+        <span className="GameBoard-season">{season}</span>
         <div className="GameBoard-actionsScroller" ref={scrollableRef}>
             <div className="GameBoard-seasons">
                 <div className="GameBoard-summerActions" ref={summerRef}>

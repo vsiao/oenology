@@ -9,7 +9,8 @@
     flex-direction: column;
     font-size: 1em;
     margin: 1.6em;
-    max-width: calc(100% - 3.2em);
+    margin-left: 6.6em;
+    max-width: calc(100% - 8.2em);
     overflow: hidden;
     pointer-events: all;
     position: absolute;
@@ -35,6 +36,12 @@
     opacity: 0;
     transform: translateY(20%);
     transition: 150ms transform ease-in, 150ms opacity ease-in;
+}
+@media (max-width: 1280px) {
+    .PromptStructure {
+        margin: 1em;
+        max-width: calc(100% - 2em);
+    }
 }
 
 .PromptStructure-header {
