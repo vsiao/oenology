@@ -6,21 +6,23 @@ import { Dispatch } from "redux";
 import { GameAction } from "../../game-data/gameActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
+import GameState, { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
 import WorkerIcon from "../icons/Worker";
 import { summerActions, winterActions, yearRoundActions } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 
+interface ActionChoice {
+    type: WorkerPlacement | null;
+    label: React.ReactNode;
+    disabledReason: string | undefined;
+    hasSpace: boolean;
+}
+
 interface Props {
     color: PlayerColor;
     workers: Worker[];
-    placements: {
-        type: WorkerPlacement | null;
-        label: React.ReactNode;
-        disabledReason: string | undefined;
-        hasSpace: boolean;
-    }[];
+    placements: ActionChoice[];
     defaultWorkerType: WorkerType;
     onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) => void;
 }
@@ -97,48 +99,66 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
     const game = state.game!;
-    const numPlayers = Object.keys(game.players).length;
-    const numSpots = Math.ceil(numPlayers / 2);
     const player = game.players[ownProps.playerId];
     return {
         color: player.color,
         workers: player.workers,
-        placements: [
-            ...(
-                (game.currentTurn as WorkerPlacementTurn).season === "summer"
-                    ? summerActions
-                    : winterActions)
-                .map(({ type, bonusLabel, title, disabledReason, }) => {
-                    const placements = game.workerPlacements[type];
-                    return {
-                        type,
-                        label: bonusLabel && numPlayers > 2 && !placements[0]
-                            ? bonusLabel
-                            : title,
-                        disabledReason: disabledReason && disabledReason(game),
-                        hasSpace: placements.length < numSpots ||
-                            placements.slice(0, numSpots).some(w => !w),
-                    };
-                }
-            ),
-            ...yearRoundActions.map(({ type, title, disabledReason, }) => ({
-                type,
-                label: title,
-                disabledReason: disabledReason && disabledReason(game),
-                hasSpace: true,
-            })),
-            {
-                type: null,
-                label: "Pass",
-                disabledReason: undefined,
-                hasSpace: true,
-            },
-        ],
+        placements: actionsForCurrentTurn(game),
         defaultWorkerType:
             player.workers.filter(({ type }) => type === "normal").some(w => w.available)
                 ? "normal" as const
                 : "grande" as const,
     };
+};
+
+const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
+    const numPlayers = Object.keys(game.players).length;
+    const numSpots = Math.ceil(numPlayers / 2);
+
+    const currentTurn = game.currentTurn as WorkerPlacementTurn;
+    if (
+        currentTurn.pendingAction &&
+        currentTurn.pendingAction.type === "playVisitor" &&
+        currentTurn.pendingAction.visitorId === "planner"
+    ) {
+        // The Planner visitor allows the player to place a worker in any future season.
+        return winterActions.map(({ type, label }) => {
+            const placements = game.workerPlacements[type];
+            return {
+                type,
+                label: label(game),
+                disabledReason: undefined,
+                hasSpace: placements.length < numSpots ||
+                    placements.slice(0, numSpots).some(w => !w),
+            };
+        });
+    }
+
+    return [
+        ...(currentTurn.season === "summer" ? summerActions : winterActions)
+            .map(({ type, label, disabledReason, }) => {
+                const placements = game.workerPlacements[type];
+                return {
+                    type,
+                    label: label(game),
+                    disabledReason: disabledReason && disabledReason(game),
+                    hasSpace: placements.length < numSpots ||
+                        placements.slice(0, numSpots).some(w => !w),
+                };
+            }),
+        ...yearRoundActions.map(({ type, label, disabledReason, }) => ({
+            type,
+            label: label(game),
+            disabledReason: disabledReason && disabledReason(game),
+            hasSpace: true,
+        })),
+        {
+            type: null,
+            label: "Pass",
+            disabledReason: undefined,
+            hasSpace: true,
+        },
+    ];
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {

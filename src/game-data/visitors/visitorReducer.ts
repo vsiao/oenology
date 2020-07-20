@@ -15,7 +15,7 @@ export const visitor = (state: GameState, action: GameAction) => {
     const { currentTurn } = state;
     if (
         currentTurn.type !== "workerPlacement" ||
-        currentTurn.pendingAction === null ||
+        !currentTurn.pendingAction ||
         currentTurn.pendingAction.type !== "playVisitor"
     ) {
         throw new Error("Unexpected state for visitor reducer")

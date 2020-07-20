@@ -56,11 +56,12 @@ export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
     season: "summer" | "winter";
+    isPlannerTurn?: boolean;
 
     // Non-null if the player has chosen to play a worker in a position
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
-    pendingAction: WorkerPlacementTurnPendingAction | null;
+    pendingAction?: WorkerPlacementTurnPendingAction;
 }
 
 export interface PlayVisitorPendingAction {

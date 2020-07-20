@@ -9,14 +9,14 @@ import { AppState } from "../store/AppState";
 
 interface Props {
     title: React.ReactNode;
+    icons: React.ReactNode[];
     numSpots: number;
-    bonusDisplay: React.ReactNode;
     season: string;
     workers: (BoardWorker | null)[];
 }
 
 const BoardPlacement: React.FunctionComponent<Props> = props => {
-    const { title, numSpots, bonusDisplay, season, workers } = props;
+    const { title, numSpots, icons, season, workers } = props;
     return <tr className="BoardPlacement">
         {new Array(numSpots).fill(0).map((_, i) => {
             const worker = workers[i];
@@ -28,7 +28,7 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                 })}>
                     {worker
                         ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
-                        : (i === 0 ? bonusDisplay : <>&nbsp;</>)}
+                        : (icons[i] || <>&nbsp;</>)}
                 </div>
                 {i === 0 && workers.length > numSpots && (
                     <div className="BoardPlacement-overflow">
@@ -44,11 +44,13 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
     </tr>;
 };
 
-const mapStateToProps = (state: AppState, ownProps: { placement: BoardAction; }) => {
-    const numSpots = Math.ceil(Object.keys(state.game!.players).length / 2);
+const mapStateToProps = (state: AppState, { placement }: { placement: BoardAction; }) => {
+    const game = state.game!;
+    const numSpots = Math.ceil(Object.keys(game.players).length / 2);
     return {
+        title: placement.label(game, -1),
         numSpots,
-        bonusDisplay: numSpots > 1 ? ownProps.placement.bonus : <>&nbsp;</>,
+        icons: new Array(numSpots).fill(null).map((_, i) => placement.boardIcon(game, i)),
     };
 };
 

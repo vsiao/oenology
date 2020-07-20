@@ -3,6 +3,8 @@ import GameState, {
     PlayerState,
     WorkerPlacementTurn,
     StructureState,
+    WorkerPlacement,
+    WorkerType,
 } from "../GameState";
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
@@ -150,6 +152,46 @@ export const trainWorker = (
             ],
         })
     );
+};
+
+export const placeWorker = (type: WorkerType, placement: WorkerPlacement, state: GameState): [GameState, number] => {
+    const player = state.players[state.currentTurn.playerId];
+    const workerIndex = player.workers.reduce(
+        (previousValue, worker, currentIndex) =>
+            worker.available && worker.type === type
+                ? currentIndex
+                : previousValue,
+        null as number | null
+    );
+    if (workerIndex === null) {
+        throw new Error("Unexpected state: no available workers");
+    }
+    state = pushActivityLog({ type: "placeWorker", playerId: player.id, }, state);
+    const placements = state.workerPlacements[placement].slice();
+    let placementIdx = placements.findIndex(w => w === null);
+    if (placementIdx < 0) {
+        placementIdx = placements.length;
+    }
+    placements[placementIdx] = {
+        type,
+        playerId: state.currentTurn.playerId,
+        color: player.color,
+        isTemp: !!player.workers[workerIndex].isTemp,
+    };
+    return [
+        {
+            ...updatePlayer(state, player.id, {
+                workers: player.workers.map(
+                    (w, i) => i === workerIndex ? { ...w, available: false } : w
+                ),
+            }),
+            workerPlacements: {
+                ...state.workerPlacements,
+                [placement]: placements,
+            },
+        },
+        placementIdx,
+    ];
 };
 
 export const markStructureUsed = (structureId: StructureId, state: GameState, playerId = state.currentTurn.playerId): GameState => {

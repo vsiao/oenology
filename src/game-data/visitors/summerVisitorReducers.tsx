@@ -13,6 +13,7 @@ import {
     promptToChooseGrape,
     promptToChooseWine,
     promptToSwitchVines,
+    promptToPlaceWorker,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { SummerVisitorId } from "./visitorCards";
@@ -27,6 +28,7 @@ import {
     uprootVinesFromFields,
     gainResiduals,
     updatePlayer,
+    placeWorker,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -912,7 +914,16 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    // planner: s => endVisitor(s),
+    planner: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToPlaceWorker(state);
+            case "PLACE_WORKER":
+                return endVisitor(placeWorker(action.workerType, action.placement!, state)[0]);
+            default:
+                return state;
+        }
+    },
     planter: (state, action, pendingAction) => {
         const planterAction = pendingAction as PlayVisitorPendingAction & {
             isDiscarding?: boolean;
@@ -986,12 +997,11 @@ export const summerVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const playerId = state.currentTurn.playerId;
-                const hasBonus = state.tableOrder.length > 2;
                 return promptForAction(state, {
                     upToN: 2,
                     title: "Retrieve up to 2 workers",
                     choices: allPlacements
-                        .map(({ type, bonusLabel, title }) => {
+                        .map(({ type, label }) => {
                             if (type === "playSummerVisitor") {
                                 // Must retrieve from *other* actions
                                 return [];
@@ -1002,7 +1012,7 @@ export const summerVisitorReducers: Record<
                                         id: `${type}_${i}`,
                                         label: <>
                                             <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
-                                            &nbsp;{bonusLabel && hasBonus ? bonusLabel : title}
+                                            &nbsp;{label(state, i)}
                                         </>,
                                     } as Choice
                                     : null

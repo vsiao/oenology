@@ -61,7 +61,6 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                         {summerActions.map(action =>
                             <BoardPlacement
                                 key={action.type}
-                                title={action.title}
                                 placement={action}
                                 season="summer"
                                 workers={workerPlacements[action.type]}
@@ -78,7 +77,6 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                         {winterActions.map(action =>
                             <BoardPlacement
                                 key={action.type}
-                                title={action.title}
                                 placement={action}
                                 season="winter"
                                 workers={workerPlacements[action.type]}

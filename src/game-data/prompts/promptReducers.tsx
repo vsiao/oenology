@@ -44,7 +44,7 @@ export const promptForAction = <DataT extends unknown = undefined>(
         return state;
     }
     const contextVisitor = state.currentTurn.type === "workerPlacement" &&
-        state.currentTurn.pendingAction !== null &&
+        state.currentTurn.pendingAction &&
         state.currentTurn.pendingAction.type === "playVisitor"
         ? state.currentTurn.pendingAction.visitorId
         : undefined;

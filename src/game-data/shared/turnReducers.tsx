@@ -1,5 +1,14 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurnPendingAction, WorkerPlacementTurn, WakeUpPosition, PlayVisitorPendingAction, StructureState, PlayerState, CardType } from "../GameState";
+import GameState, {
+    CardType,
+    PlayVisitorPendingAction,
+    PlayerState,
+    StructureState,
+    WakeUpPosition,
+    WorkerPlacement,
+    WorkerPlacementTurn,
+    WorkerPlacementTurnPendingAction,
+} from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard, displayGameOverPrompt } from "../prompts/promptReducers";
@@ -11,6 +20,7 @@ import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
 import { papaCards, mamaCards } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
+import { boardActions } from "../board/boardPlacements";
 
 export const endTurn = (state: GameState): GameState => {
     state = {
@@ -234,6 +244,58 @@ export const promptForWakeUpOrder = (state: GameState) => {
 // Worker placement turns
 // ----------------------------------------------------------------------------
 
+const startPlannerTurn = (
+    season: "summer" | "winter",
+    playerId: string,
+    state: GameState
+): GameState => {
+    state = {
+        ...state,
+        currentTurn: { type: "workerPlacement", playerId, isPlannerTurn: true, season },
+    };
+    const plannerPlacement = Object.entries(state.workerPlacements)
+        .find(([placement, workers]) =>
+            boardActions[placement as WorkerPlacement].season === season &&
+            workers.some(w => w && w.playerId === playerId)
+        );
+
+    if (!plannerPlacement) {
+        return endPlannerTurn(state);
+    }
+    const placement = boardActions[plannerPlacement[0] as WorkerPlacement];
+    const workerIdx = state.workerPlacements[placement.type].findIndex(w => w?.playerId === playerId);
+    const disabledReason = placement.disabledReason && placement.disabledReason(state, workerIdx);
+
+    return promptForAction(state, {
+        description: <p>You placed a worker with the <strong>Planner</strong>.</p>,
+        choices: [
+            {
+                id: "PLANNER_ACT",
+                data: { placement: placement.type, idx: workerIdx },
+                label: placement.label(state, workerIdx),
+                disabledReason,
+            },
+            { id: "PLANNER_PASS", label: "Pass" },
+        ],
+    });
+};
+
+const endPlannerTurn = (state: GameState): GameState => {
+    const { currentTurn, wakeUpOrder } = state;
+    const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
+    const i = compactWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
+    const season = (currentTurn as WorkerPlacementTurn).season;
+
+    if (i === compactWakeUpOrder.length - 1) {
+        // Begin season
+        return startWorkerPlacementTurn(season, compactWakeUpOrder[0].playerId, state);
+    } else {
+        const nextPlayerId =
+            compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
+        return startPlannerTurn(season, nextPlayerId, state);
+    }
+};
+
 const startWorkerPlacementTurn = (
     season: "summer" | "winter",
     playerId: string,
@@ -241,7 +303,7 @@ const startWorkerPlacementTurn = (
 ) => {
     state = {
         ...state,
-        currentTurn: { type: "workerPlacement", playerId, pendingAction: null, season },
+        currentTurn: { type: "workerPlacement", playerId, season },
     };
     const player = state.players[playerId];
     if (player.workers.every(w => !w.available)) {
@@ -279,6 +341,9 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
 };
 
 const endWorkerPlacementTurn = (state: GameState): GameState => {
+    if ((state.currentTurn as WorkerPlacementTurn).isPlannerTurn) {
+        return endPlannerTurn(state);
+    }
     const { currentTurn, wakeUpOrder } = state;
     const season = (currentTurn as WorkerPlacementTurn).season;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
@@ -403,7 +468,7 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 
     if (i === compactWakeUpOrder.length - 1) {
         // end of season
-        return startWorkerPlacementTurn(
+        return startPlannerTurn(
             "winter",
             compactWakeUpOrder[0].playerId,
             pushActivityLog({ type: "season", season: `Winter (Year ${state.year})` }, state)

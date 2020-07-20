@@ -11,7 +11,6 @@ import Residuals from "../../game-views/icons/Residuals";
 export const UNIMPLEMENTED_CARDS = {
     // summer
     "importer": true,
-    "planner": true,
     "stonemason": true,
     "weddingParty": true,
     // winter
@@ -132,10 +131,10 @@ export const summerVisitorCards = {
         "Peddler",
         <>Discard 2 <Card /> to draw 1 of each type of card.</>
     ),
-    // planner: summervisitorcard(
-    //     "planner",
-    //     <>place a worker on an action in a future season. take the action at the beginning of that season.</>,
-    // ),
+    planner: summerVisitorCard(
+        "Planner",
+        <>Place a worker on an action in a future season. Take the action at the beginning of that season.</>,
+    ),
     planter: summerVisitorCard(
         "Planter",
         <>Plant up to 2 <Vine /> and gain <Coins>1</Coins> OR uproot and discard 1 <Vine /> to gain <VP>2</VP>.</>
