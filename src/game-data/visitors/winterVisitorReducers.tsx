@@ -145,6 +145,76 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    craftsman: (state, action, pendingAction) => {
+        const player = state.players[state.currentTurn.playerId];
+        const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
+        const cost = structures[upgradeCellar].cost;
+
+        type ChoiceId = "CRAFTSMAN_DRAW" | "CRAFTSMAN_BUILD" | "CRAFTSMAN_GAIN";
+        interface CraftsmanAction extends PlayVisitorPendingAction {
+            usedChoices: { [K in ChoiceId]?: true };
+        }
+        const promptCraftsmanAction = (state2: GameState, craftsmanAction: CraftsmanAction): GameState => {
+            return promptForAction(
+                state2,
+                {
+                    choices: [
+                        { id: "CRAFTSMAN_DRAW", label: <>Draw 1 <Order /></>, },
+                        {
+                            id: "CRAFTSMAN_BUILD",
+                            label: <>Upgrade cellar at regular cost</>,
+                            disabledReason: player.structures.largeCellar
+                                ? "Your cellar is fully upgraded."
+                                : moneyDisabledReason(state, cost),
+                        },
+                        { id: "CRAFTSMAN_GAIN", label: <>Gain <VP>1</VP></>, },
+                    ].filter(choice => !craftsmanAction.usedChoices[choice.id as ChoiceId]),
+                }
+            );
+        };
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const craftsmanAction =
+                (state2.currentTurn as WorkerPlacementTurn).pendingAction as CraftsmanAction;
+
+            return Object.keys(craftsmanAction.usedChoices).length === 2
+                ? endVisitor(state2)
+                : promptCraftsmanAction(state2, craftsmanAction);
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS": {
+                const craftsmanAction: CraftsmanAction = {
+                    ...pendingAction,
+                    usedChoices: {},
+                };
+                return promptCraftsmanAction(
+                    setPendingAction(craftsmanAction, state),
+                    craftsmanAction
+                );
+            }
+            case "CHOOSE_ACTION":
+                const craftsmanAction = pendingAction as CraftsmanAction;
+                state = setPendingAction({
+                    ...craftsmanAction,
+                    usedChoices: {
+                        ...craftsmanAction.usedChoices,
+                        [action.choice]: true,
+                    },
+                }, state);
+                switch (action.choice) {
+                    case "CRAFTSMAN_DRAW":
+                        return maybeEndVisitor(drawCards(state, action._key!, { order: 1 }));
+                    case "CRAFTSMAN_BUILD":
+                        return maybeEndVisitor(buildStructure(payCoins(cost, state), upgradeCellar));
+                    case "CRAFTSMAN_GAIN":
+                        return maybeEndVisitor(gainVP(1, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     crushExpert: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":

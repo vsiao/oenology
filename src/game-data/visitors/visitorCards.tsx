@@ -15,7 +15,6 @@ export const UNIMPLEMENTED_CARDS = {
     "weddingParty": true,
     // winter
     "caravan": true,
-    "craftsman": true,
     "innkeeper": true,
     "manager": true,
 } as const;
@@ -199,6 +198,10 @@ export const winterVisitorCards = {
     bottler: winterVisitorCard(
         "Bottler",
         <>Make up to 3 <WineGlass />. Gain <VP>1</VP> for each type of wine you make.</>
+    ),
+    craftsman: winterVisitorCard(
+        "Craftsman",
+        <>Choose 2: Draw 1 <Order />, upgrade your cellar at the regular cost, or gain <VP>1</VP>.</>
     ),
     crushExpert: winterVisitorCard(
         "Crush Expert",
