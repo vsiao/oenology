@@ -16,7 +16,6 @@ export const UNIMPLEMENTED_CARDS = {
     // winter
     "caravan": true,
     "craftsman": true,
-    "governor": true,
     "innkeeper": true,
     "manager": true,
 } as const;
@@ -225,10 +224,10 @@ export const winterVisitorCards = {
         "Guest Speaker",
         <>All players may pay <Coins>1</Coins> to train 1 <Worker />. Gain <VP>1</VP> for each opponent who does this.</>
     ),
-    // governor: winterVisitorCard(
-    //     "Governor",
-    //     <>Choose up to 3 opponents to each give you 1 <SummerVisitor />. Gain <VP>1</VP> for each of them who cannot.</>
-    // ),
+    governor: winterVisitorCard(
+        "Governor",
+        <>Choose up to 3 opponents to each give you 1 <SummerVisitor />. Gain <VP>1</VP> for each of them who cannot.</>
+    ),
     harvestExpert: winterVisitorCard(
         "Harvest Expert",
         <>Harvest 1 field and either draw 1 <Vine /> or pay <Coins>1</Coins> to build a yoke.</>

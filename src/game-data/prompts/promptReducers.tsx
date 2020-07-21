@@ -144,12 +144,17 @@ export const promptToChooseVineCard = (
 export const promptToChooseVisitor = (
     season: "summer" | "winter",
     state: GameState,
-    optional = false
+    {
+        optional = false,
+        title = `Play ${optional ? "another" : "a"} visitor`,
+        playerId = state.currentTurn.playerId,
+    }: { optional?: boolean; title?: string; playerId?: string } = {}
 ): GameState => {
     return promptToChooseCard(state, {
-        title: `Play ${optional ? "another" : "a"} visitor`,
+        title,
         style: "oneClick",
-        cards: state.players[state.currentTurn.playerId].cardsInHand
+        playerId,
+        cards: state.players[playerId].cardsInHand
             .filter(card => card.type === "visitor" &&
                 visitorCards[card.id].season === season)
             .map(id => ({

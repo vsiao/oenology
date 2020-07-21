@@ -431,7 +431,7 @@ export const endVisitor = (state: GameState): GameState => {
         return promptToChooseVisitor(
             currentTurn.season,
             setPendingAction({ type: "playVisitor", hasBonus: false }, state),
-            /* bonus */ true
+            { optional: true }
         );
     }
     return endTurn(state);

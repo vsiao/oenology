@@ -25,9 +25,10 @@ import {
     promptToHarvest,
     promptToChooseCard,
     promptToChooseGrape,
+    promptToChooseVisitor,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
-import { WinterVisitorId } from "./visitorCards";
+import { WinterVisitorId, visitorCards } from "./visitorCards";
 import {
     fillOrderDisabledReason,
     moneyDisabledReason,
@@ -333,13 +334,102 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    // governor: (state, action, pendingAction) => {
-    //     switch (action.type) {
-    //         case "CHOOSE_CARDS":
-    //         default:
-    //             return state;
-    //     }
-    // },
+    governor: (state, action, pendingAction) => {
+        interface GovernorAction extends PlayVisitorPendingAction {
+            actionOrder: string[];
+        }
+        const endVisitorAction = (state2: GameState, playerId?: string) => {
+            const governorAction = (state2.currentTurn as WorkerPlacementTurn)
+                .pendingAction! as GovernorAction;
+            const actionOrder = governorAction.actionOrder;
+            const i = playerId === undefined
+                ? -1
+                : actionOrder.findIndex(id => id === playerId);
+            if (i === actionOrder.length - 1) {
+                return endVisitor(state2);
+            }
+            const nextPlayerId = actionOrder[i + 1];
+            const hasSummerVisitors = state2.players[nextPlayerId].cardsInHand
+                .some(card => card.type === "visitor" && visitorCards[card.id].season === "summer");
+
+            state2 = setPendingAction({
+                ...governorAction,
+                lastActionPlayerId: governorAction.actionPlayerId,
+                actionPlayerId: nextPlayerId,
+            }, state2);
+
+            if (hasSummerVisitors) {
+                return promptToChooseVisitor("summer", state2, {
+                    playerId: nextPlayerId,
+                    title: "Choose 1 card to give",
+                });
+            } else {
+                return promptForAction(state2, {
+                    playerId: nextPlayerId,
+                    choices: [
+                        {
+                            id: "GOVERNOR_GIVE",
+                            label: <>Give 1 <SummerVisitor /></>,
+                            disabledReason: needCardOfTypeDisabledReason(state2, "summerVisitor", {
+                                playerId: nextPlayerId
+                            }),
+                        },
+                        {
+                            id: "GOVERNOR_PASS",
+                            label: <>
+                                Pass (
+                                    <strong>{state.players[state.currentTurn.playerId].name}</strong>
+                                    {" "}gains <VP>1</VP>
+                                )
+                            </>,
+                        },
+                    ],
+                });
+            }
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.playerId === state.currentTurn.playerId) {
+                    return promptForAction(state, {
+                        title: "Choose opponents",
+                        upToN: 3,
+                        choices: Object.values(state.players)
+                            .filter(p => p.id !== state.currentTurn.playerId)
+                            .map(p => ({
+                                id: p.id,
+                                label: <strong>{p.name}</strong>
+                            })),
+                    })
+                } else {
+                    return endVisitorAction(
+                        addCardsToHand(
+                            action.cards!,
+                            removeCardsFromHand(action.cards!, state, action.playerId)
+                        ),
+                        action.playerId
+                    );
+                }
+            case "CHOOSE_ACTION_MULTI":
+                const opponents = action.choices;
+                const actionOrder = state.wakeUpOrder
+                    .filter(pos => pos && opponents.includes(pos.playerId))
+                    .map(pos => pos!.playerId);
+                return endVisitorAction(
+                    setPendingAction({ ...pendingAction, actionOrder }, state)
+                );
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "GOVERNOR_GIVE":
+                        throw new Error("Unexpected state: should prompt to choose card directly");
+                    case "GOVERNOR_PASS":
+                        return endVisitorAction(gainVP(1, state), action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     harvestExpert: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
