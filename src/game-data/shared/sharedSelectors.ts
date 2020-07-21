@@ -27,7 +27,7 @@ export const structureDisabledReason = (
         return "Already built";
     }
     if (id === "largeCellar" && !player.structures.mediumCellar) {
-        return "Must build medium cellar first";
+        return "Must build Medium Cellar first";
     }
     const baseCost = structures[id as StructureId].cost;
     switch (coupon.kind) {

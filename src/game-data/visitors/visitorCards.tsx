@@ -11,8 +11,6 @@ import Residuals from "../../game-views/icons/Residuals";
 export const UNIMPLEMENTED_CARDS = {
     // summer
     "importer": true,
-    "stonemason": true,
-    "weddingParty": true,
     // winter
     "caravan": true,
     "innkeeper": true,
@@ -149,6 +147,10 @@ export const summerVisitorCards = {
         "Sponsor",
         <>Draw 2 <Vine /> OR gain <Coins>3</Coins>. You may lose <VP>1</VP> to do both.</>
     ),
+    stonemason: summerVisitorCard(
+        "Stonemason",
+        <>Pay <Coins>8</Coins> to build any 2 structures (ignore their regular costs).</>
+    ),
     surveyor: summerVisitorCard(
         "Surveyor",
         <>Gain <Coins>2</Coins> for each empty field you own OR gain <VP>1</VP> for each planted field you own.</>
@@ -176,6 +178,10 @@ export const summerVisitorCards = {
     volunteerCrew: summerVisitorCard(
         "Volunteer Crew",
         <>All players may plant 1 <Vine />. Gain <Coins>2</Coins> for each opponent who does this.</>
+    ),
+    weddingParty: summerVisitorCard(
+        "Wedding Party",
+        <>Pay up to 3 opponents <Coins>2</Coins> each. Gain <VP>1</VP> for each of those opponents.</>
     ),
     wineCritic: summerVisitorCard(
         "Wine Critic",

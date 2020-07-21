@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -40,6 +40,7 @@ import {
     uprootDisabledReason,
     needWineDisabledReason,
     needCardOfTypeDisabledReason,
+    structureDisabledReason,
     switchVines,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
@@ -1111,6 +1112,64 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
+    sponsor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
+                        { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        { id: "SPONSOR_BOTH", label: <>Do both (lose <VP>1</VP>)</>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SPONSOR_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { vine: 2 }));
+                    case "SPONSOR_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    case "SPONSOR_BOTH":
+                        return endVisitor(
+                            gainCoins(3, drawCards(loseVP(1, state), action._key!, { vine: 2 }))
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    stonemason: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    title: "Build any 2 structures",
+                    upToN: 2,
+                    choices: Object.entries(state.players[state.currentTurn.playerId].structures)
+                        .filter(([_, state]) => state === StructureState.Unbuilt)
+                        .map(([id]) => {
+                            const { name, cost } = structures[id as StructureId];
+                            return {
+                                id,
+                                label: <>{name} <Coins>{cost}</Coins></>,
+                                disabledReason: moneyDisabledReason(state, 8) ||
+                                    structureDisabledReason(state, id as StructureId, {
+                                        kind: "voucher",
+                                        upToCost: maxStructureCost
+                                    }),
+                            };
+                        }),
+                });
+            case "CHOOSE_ACTION_MULTI":
+                state = payCoins(8, state);
+                action.choices.forEach(id => {
+                    state = buildStructure(state, id as StructureId)
+                });
+                return endVisitor(state);
+            default:
+                return state;
+        }
+    },
     surveyor: (state, action) => {
         const fields = Object.values(state.players[state.currentTurn.playerId].fields);
         let numEmptyAndOwned = 0;
@@ -1139,33 +1198,6 @@ export const summerVisitorReducers: Record<
                         return endVisitor(gainCoins(2 * numEmptyAndOwned, state));
                     case "SURVEYOR_PLANTED":
                         return endVisitor(gainVP(numPlantedAndOwned, state));
-                    default:
-                        return state;
-                }
-            default:
-                return state;
-        }
-    },
-    sponsor: (state, action) => {
-        switch (action.type) {
-            case "CHOOSE_CARDS":
-                return promptForAction(state, {
-                    choices: [
-                        { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
-                        { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins></>, },
-                        { id: "SPONSOR_BOTH", label: <>Do both (lose <VP>1</VP>)</>, },
-                    ],
-                });
-            case "CHOOSE_ACTION":
-                switch (action.choice) {
-                    case "SPONSOR_DRAW":
-                        return endVisitor(drawCards(state, action._key!, { vine: 2 }));
-                    case "SPONSOR_GAIN":
-                        return endVisitor(gainCoins(3, state));
-                    case "SPONSOR_BOTH":
-                        return endVisitor(
-                            gainCoins(3, drawCards(loseVP(1, state), action._key!, { vine: 2 }))
-                        );
                     default:
                         return state;
                 }
@@ -1368,6 +1400,28 @@ export const summerVisitorReducers: Record<
                     action.playerId !== state.currentTurn.playerId ? gainCoins(2, state) : state,
                     action.playerId
                 );
+            default:
+                return state;
+        }
+    },
+    weddingParty: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    title: "Choose opponents",
+                    upToN: 3,
+                    choices: Object.values(state.players)
+                        .filter(p => p.id !== state.currentTurn.playerId)
+                        .map(p => ({
+                            id: p.id,
+                            label: <strong>{p.name}</strong>
+                        })),
+                });
+            case "CHOOSE_ACTION_MULTI":
+                action.choices.forEach(opponentId => {
+                    state = gainCoins(2, payCoins(2, state), opponentId);
+                });
+                return endVisitor(gainVP(action.choices.length, state));
             default:
                 return state;
         }
