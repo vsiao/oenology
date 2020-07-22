@@ -288,25 +288,33 @@ export const winterVisitorReducers: Record<
     exporter: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForAction(state, {
-                    choices: [
-                        {
-                            id: "EXPORTER_MAKE",
-                            label: <>Make up to 2 <WineGlass /></>,
-                            disabledReason: needGrapesDisabledReason(state)
-                        },
-                        {
-                            id: "EXPORTER_FILL",
-                            label: <>Fill 1 <Order /></>,
-                            disabledReason: fillOrderDisabledReason(state)
-                        },
-                        {
-                            id: "EXPORTER_DISCARD",
-                            label: <>Discard 1 <Grape /> to gain <VP>2</VP></>,
-                            disabledReason: needGrapesDisabledReason(state)
-                        }
-                    ]
-                });
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "EXPORTER_MAKE",
+                                    label: <>Make up to 2 <WineGlass /></>,
+                                    disabledReason: needGrapesDisabledReason(state)
+                                },
+                                {
+                                    id: "EXPORTER_FILL",
+                                    label: <>Fill 1 <Order /></>,
+                                    disabledReason: fillOrderDisabledReason(state)
+                                },
+                                {
+                                    id: "EXPORTER_DISCARD",
+                                    label: <>Discard 1 <Grape /> to gain <VP>2</VP></>,
+                                    disabledReason: needGrapesDisabledReason(state)
+                                }
+                            ]
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "EXPORTER_MAKE":
