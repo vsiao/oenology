@@ -22,6 +22,27 @@
     width: 8em;
 }
 
+.Lobby-howto {
+    background: #eee;
+    border-radius: 4px;
+    margin-top: 5vh;
+    padding: 1.6em;
+    width: 15em;
+}
+
+.Lobby-howtoHeader {
+    margin: 0 0 1em;
+}
+
+.Lobby-howtoList {
+    margin: 0;
+    padding-left: 1.5em;
+}
+
+.Lobby-howtoItem + .Lobby-howtoItem {
+    margin-top: .5em;
+}
+
 .Lobby-shareBanner {
     align-items: center;
     background: #61dafb;
@@ -55,7 +76,31 @@
 
 .Lobby-controls {
     border-top: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
     grid-area: bottom;
+    min-width: 1px;
+}
+
+.Lobby-exampleHeader {
+    margin: 16px 26px 0;
+}
+
+.Lobby-cards {
+    display: flex;
+    min-height: 240px;
+    overflow-x: auto;
+    padding: 8px 1.6em 1em;
+}
+.Lobby-cards::after {
+    content: "";
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.6em;
+}
+
+.Lobby-card + .Lobby-card {
+    margin-left: 16px;
 }
 
 .Lobby-sidebar {

@@ -7,6 +7,15 @@ import { PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
 import { setCurrentUserName } from "../../store/appActions";
 import { startGame } from "../../store/firebase";
+import VineCard from "../cards/VineCard";
+import { vineCards } from "../../game-data/vineCards";
+import { orderCards } from "../../game-data/orderCards";
+import OrderCard from "../cards/OrderCard";
+import { visitorCards } from "../../game-data/visitors/visitorCards";
+import VisitorCard from "../cards/VisitorCard";
+import { Vine, Order } from "../icons/Card";
+import Grape from "../icons/Grape";
+import WineGlass from "../icons/WineGlass";
 
 interface Props {
     gameId: string;
@@ -41,6 +50,20 @@ const Lobby: React.FunctionComponent<Props> = ({
                             onChange={e => setName(e.target.value)}
                         />
                     </label>
+                    <div className="Lobby-howto">
+                        <h4 className="Lobby-howtoHeader">
+                            Winemaking for Dummies™
+                            {/* <br /><em>from grape to glass</em> */}
+                        </h4>
+                        <ol className="Lobby-howtoList">
+                            <li className="Lobby-howtoItem">Plant <Vine /></li>
+                            <li className="Lobby-howtoItem">
+                                Harvest field—<Grape color="red">1</Grape><Grape color="white">5</Grape>
+                            </li>
+                            <li className="Lobby-howtoItem">Make wine—<WineGlass color="blush">6</WineGlass></li>
+                            <li className="Lobby-howtoItem">Fill <Order /></li>
+                        </ol>
+                    </div>
                     <div className="Lobby-shareBanner">
                         <a href={gameUrl} className="Lobby-shareLink">
                             {gameUrl}
@@ -68,7 +91,21 @@ const Lobby: React.FunctionComponent<Props> = ({
                 </>
                 : null}
         </div>
-        <div className="Lobby-controls"></div>
+        <div className="Lobby-controls">
+            {gameStatus === null && <>
+                <h3 className="Lobby-exampleHeader">Example cards</h3>
+                <ul className="Lobby-cards">
+                    <li className="Lobby-card"><VineCard cardData={vineCards.pin1} /></li>
+                    <li className="Lobby-card"><VineCard cardData={vineCards.cha1} /></li>
+                    <li className="Lobby-card"><OrderCard cardData={orderCards.r2w2b5} /></li>
+                    <li className="Lobby-card"><OrderCard cardData={orderCards.s9} /></li>
+                    <li className="Lobby-card"><VisitorCard cardData={visitorCards.contractor} /></li>
+                    <li className="Lobby-card"><VisitorCard cardData={visitorCards.buyer} /></li>
+                    <li className="Lobby-card"><VisitorCard cardData={visitorCards.guestSpeaker} /></li>
+                    <li className="Lobby-card"><VisitorCard cardData={visitorCards.promoter} /></li>
+                </ul>
+            </>}
+        </div>
         <div className="Lobby-sidebar">
             {gameStatus === null
                 ? <>
