@@ -1140,32 +1140,42 @@ export const summerVisitorReducers: Record<
         }
     },
     stonemason: (state, action) => {
-        switch (action.type) {
-            case "CHOOSE_CARDS":
-                return promptForAction(state, {
-                    title: "Build any 2 structures",
-                    upToN: 2,
-                    choices: Object.entries(state.players[state.currentTurn.playerId].structures)
-                        .filter(([_, state]) => state === StructureState.Unbuilt)
+        interface StonemasonAction extends PlayVisitorPendingAction {
+            structuresBuilt: number;
+        }
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const pendingAction = (state2.currentTurn as WorkerPlacementTurn)
+                .pendingAction! as StonemasonAction;
+            const structuresBuilt = (pendingAction.structuresBuilt ?? -1) + 1;
+            if (structuresBuilt === 2) {
+                return endVisitor(payCoins(8, state2));
+            }
+            return promptForAction(
+                setPendingAction({ ...pendingAction, structuresBuilt }, state2),
+                {
+                    title: structuresBuilt === 0 ? "Build any 2 structures" : "Build another structure",
+                    choices: Object.entries(state2.players[state2.currentTurn.playerId].structures)
+                        .filter(([_, s]) => s === StructureState.Unbuilt)
                         .map(([id]) => {
                             const { name, cost } = structures[id as StructureId];
                             return {
                                 id,
                                 label: <>{name} <Coins>{cost}</Coins></>,
-                                disabledReason: moneyDisabledReason(state, 8) ||
-                                    structureDisabledReason(state, id as StructureId, {
+                                disabledReason: moneyDisabledReason(state2, 8) ||
+                                    structureDisabledReason(state2, id as StructureId, {
                                         kind: "voucher",
                                         upToCost: maxStructureCost
                                     }),
                             };
                         }),
-                });
-            case "CHOOSE_ACTION_MULTI":
-                state = payCoins(8, state);
-                action.choices.forEach(id => {
-                    state = buildStructure(state, id as StructureId)
-                });
-                return endVisitor(state);
+                }
+            );
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return maybeEndVisitor(state);
+            case "CHOOSE_ACTION":
+                return maybeEndVisitor(buildStructure(state, action.choice as StructureId));
             default:
                 return state;
         }

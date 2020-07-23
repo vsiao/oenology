@@ -25,9 +25,7 @@ const ActionPrompt: React.FunctionComponent<Props> = props => {
         {props.actionPrompt === undefined
             ? null
             : <CSSTransition
-                key={props.actionPrompt.type === "placeWorker"
-                    ? props.actionPrompt.key // #ForcePromptRemount
-                    : props.actionPrompt.type}
+                key={JSON.stringify(props.actionPrompt)} // #ForcePromptRemount
                 timeout={300}
                 classNames="PromptStructure"
             >
