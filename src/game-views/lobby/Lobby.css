@@ -120,6 +120,16 @@
     padding: 0 1em;
 }
 
+.Lobby-hostTag {
+    background: #333;
+    border-radius: .2em;
+    color: white;
+    font-size: .8em;
+    margin-left: 1em;
+    padding: .2em .5em;
+    text-transform: uppercase;
+}
+
 .Lobby-startGame {
     margin: 1em;
 }

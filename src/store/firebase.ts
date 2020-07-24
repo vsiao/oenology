@@ -90,7 +90,10 @@ export function* subscribeToRoom(gameId: string, userId: string) {
                 return;
             }
             userRef.onDisconnect().update({ status: "disconnected" }).then(() => {
-                userRef.update({ status: "connected" });
+                userRef.update({
+                    status: "connected",
+                    connectedAt: firebase.database.ServerValue.TIMESTAMP,
+                });
             });
         });
 

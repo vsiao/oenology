@@ -19,4 +19,5 @@ export interface User {
     id: string;
     name: string;
     status: "connected" | "disconnected";
+    connectedAt: number;
 }

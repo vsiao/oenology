@@ -111,19 +111,22 @@ const Lobby: React.FunctionComponent<Props> = ({
                 ? <>
                     <h3 className="Lobby-usersHeader">Waiting for players…</h3>
                     <ul className="Lobby-users">
-                        {users.map(u =>
+                        {users.map((u, i) =>
                             <li key={u.id} className="Lobby-user">
                                 {u.name || <em>…</em>}
+                                {i === 0 && <span className="Lobby-hostTag">host</span>}
                             </li>
                         )}
                     </ul>
-                    <ChoiceButton
-                        className="Lobby-startGame"
-                        onClick={() => startGame(users)}
-                        disabled={users.length < 2 || users.length > 6}
-                    >
-                        Start Game
-                    </ChoiceButton>
+                    {currentUser === users[0]
+                        ? <ChoiceButton
+                            className="Lobby-startGame"
+                            onClick={() => startGame(users)}
+                            disabled={users.length < 2 || users.length > 6}
+                        >
+                            Start Game
+                        </ChoiceButton>
+                        : null}
                 </>
                 : null}
         </div>
@@ -134,7 +137,9 @@ const mapStateToProps = (state: AppState) => {
     return {
         currentUser: state.room.users[state.userId!],
         gameStatus: state.room.gameStatus,
-        users: Object.values(state.room.users).filter(u => u.status === "connected"),
+        users: Object.values(state.room.users)
+            .filter(u => u.status === "connected")
+            .sort((u1, u2) => u1.connectedAt - u2.connectedAt),
     };
 };
 
