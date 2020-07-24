@@ -122,6 +122,11 @@
     vertical-align: top;
 }
 
+.SidebarPlayer-grapes:hover,
+.SidebarPlayer-wines:hover {
+    background: #eee;
+}
+
 .SidebarPlayer-grape,
 .SidebarPlayer-wine {
     align-items: center;
@@ -130,6 +135,21 @@
     height: 2em;
     justify-content: center;
     width: 2em;
+}
+
+.SidebarPlayer-grapeToken--placeholder,
+.SidebarPlayer-wineToken--placeholder {
+    display: none;
+    opacity: .3;
+}
+.SidebarPlayer-grapes:hover .SidebarPlayer-grapeToken--placeholder,
+.SidebarPlayer-wines:hover .SidebarPlayer-wineToken--placeholder {
+    display: inline-flex;
+}
+
+.SidebarPlayer-grapes:hover .SidebarPlayer-grapePlaceholder,
+.SidebarPlayer-wines:hover .SidebarPlayer-winePlaceholder {
+    display: none;
 }
 
 .SidebarPlayer-cellar {
@@ -145,25 +165,10 @@
 .SidebarPlayer-wines:first-child {
     box-shadow: inset 0 1px 0 0 #ccc;
 }
-.SidebarPlayer-wines:hover {
-    background: #eee;
-}
 
 .SidebarPlayer-wine {
     pointer-events: none;
     z-index: 1;
-}
-
-.SidebarPlayer-wineToken--placeholder {
-    display: none;
-    opacity: .3;
-}
-.SidebarPlayer-wines:hover .SidebarPlayer-wineToken--placeholder {
-    display: inline-flex;
-}
-
-.SidebarPlayer-wines:hover .SidebarPlayer-winePlaceholder {
-    display: none;
 }
 
 .SidebarPlayer-mediumCellarOverlay,

@@ -4,13 +4,15 @@ import { GrapeColor } from "../../game-data/GameState";
 import "./Grape.css";
 
 interface Props {
+    className?: string;
     color?: GrapeColor;
 }
 
 const Grape: React.FunctionComponent<Props> = props => {
-    return <span className={cx("Grape", {
+    return <span className={cx({
+        "Grape": true,
         [`Grape--${props.color}`]: props.color
-    })}>
+    }, props.className)}>
         {props.children || <>&nbsp;</>}
     </span>;
 };

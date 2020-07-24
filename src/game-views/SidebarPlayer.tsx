@@ -1,7 +1,7 @@
 import "./SidebarPlayer.css";
 import * as React from "react";
 import cx from "classnames";
-import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -75,24 +75,8 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             </ul>
             <div className="SidebarPlayer-grapesAndWine">
                 <div className="SidebarPlayer-crushPad">
-                    <div className="SidebarPlayer-grapes">
-                        {player.crushPad.red.map((hasGrape, i) =>
-                            <div key={i} className="SidebarPlayer-grape">
-                                {hasGrape
-                                    ? <Grape color="red">{i + 1}</Grape>
-                                    : i + 1}
-                            </div>
-                        )}
-                    </div>
-                    <div className="SidebarPlayer-grapes">
-                        {player.crushPad.white.map((hasGrape, i) =>
-                            <div key={i} className="SidebarPlayer-grape">
-                                {hasGrape
-                                    ? <Grape color="white">{i + 1}</Grape>
-                                    : i + 1}
-                            </div>
-                        )}
-                    </div>
+                    <CrushPadRow type="red" grapes={player.crushPad.red} />
+                    <CrushPadRow type="white" grapes={player.crushPad.white} />
                 </div>
                 <div className="SidebarPlayer-cellar">
                     <CellarRow type="red" wines={player.cellar.red} />
@@ -175,9 +159,34 @@ const FieldTooltip: React.FunctionComponent<{
     </>;
 };
 
+const CrushPadRow: React.FunctionComponent<{
+    type: GrapeColor;
+    grapes: TokenMap;
+}> = ({ type, grapes }) => {
+    const [anchorRef, maybeLayer] = useTooltip(
+        "left",
+        `${type === "red" ? "Red" : "White"} crush pad`
+    );
+    return <div
+        ref={anchorRef as React.RefObject<HTMLDivElement>}
+        className="SidebarPlayer-grapes"
+    >
+        {grapes.map((hasGrape, i) =>
+            <div key={i} className="SidebarPlayer-grape">
+                <Grape
+                    className={cx({ "SidebarPlayer-grapeToken--placeholder": !hasGrape, })}
+                    color={type}
+                >{i + 1}</Grape>
+                {hasGrape ? null : <span className="SidebarPlayer-grapePlaceholder">{i + 1}</span>}
+            </div>
+        )}
+        {maybeLayer}
+    </div>;
+};
+
 const CellarRow: React.FunctionComponent<{
     type: WineColor;
-    wines: TokenMap
+    wines: TokenMap;
 }> = ({ type, wines }) => {
     const [anchorRef, maybeLayer] = useTooltip(
         "left",
