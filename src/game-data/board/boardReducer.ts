@@ -1,38 +1,30 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn, StructureState, WorkerPlacement } from "../GameState";
+import GameState, { WorkerPlacementTurn } from "../GameState";
 import {
     buildStructure,
     gainCoins,
     payCoins,
-    trainWorker,
     gainVP,
     plantVineInField,
     updatePlayer,
     pushActivityLog,
-    markStructureUsed,
     uprootVineFromField,
     placeWorker,
 } from "../shared/sharedReducers";
 import {
-    promptForAction,
-    promptToBuildStructure,
     promptToChooseField,
-    promptToChooseOrderCard,
     promptToChooseVineCard,
-    promptToChooseVisitor,
     promptToFillOrder,
-    promptToMakeWine,
     promptToPlant,
-    promptToHarvest,
-    promptToUproot,
     promptToChooseGrape
 } from "../prompts/promptReducers";
-import { buyFieldDisabledReason, needGrapesDisabledReason, plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
+import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData, chooseMamaPapa } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
+import { boardAction } from "./boardActionReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
@@ -259,7 +251,7 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
             }
             let placementIdx;
             [state, placementIdx] = placeWorker(action.workerType, action.placement, state);
-            return doPlacement(
+            return boardAction(
                 action.placement,
                 state,
                 action._key!,
@@ -270,7 +262,7 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
             switch (action.choice) {
                 case "PLANNER_ACT":
                     const { placement, idx } = action.data as any;
-                    return doPlacement(
+                    return boardAction(
                         placement,
                         state,
                         action._key!,
@@ -283,104 +275,6 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
                     return state;
             }
         default:
-            return state;
-    }
-};
-
-const doPlacement = (
-    placement: WorkerPlacement,
-    state: GameState,
-    seed: string,
-    hasBonus: boolean
-): GameState => {
-    const player = state.players[state.currentTurn.playerId];
-
-    switch (placement) {
-        case "buildStructure":
-            return promptToBuildStructure(
-                setPendingAction({ type: "buildStructure", hasBonus }, state),
-                hasBonus ? { kind: "discount", amount: 1 } : undefined
-            );
-        case "buySell":
-            return promptForAction(setPendingAction({ type: "buySell", hasBonus }, state), {
-                choices: [
-                    {
-                        id: "BOARD_SELL_GRAPES",
-                        label: "Sell grape(s)",
-                        disabledReason: needGrapesDisabledReason(state),
-                    },
-                    {
-                        id: "BOARD_BUY_FIELD",
-                        label: "Buy a field",
-                        disabledReason: buyFieldDisabledReason(state),
-                    },
-                    {
-                        id: "BOARD_SELL_FIELD",
-                        label: "Sell a field",
-                        disabledReason: Object.values(state.players[player.id].fields)
-                            .every(fields => fields.sold || fields.vines.length > 0)
-                            ? "You don't have any fields to sell."
-                            : undefined,
-                    },
-                ],
-            });
-        case "drawOrder": {
-            return endTurn(drawCards(state, seed, { order: hasBonus ? 2 : 1 }));
-        }
-        case "drawVine": {
-            return endTurn(drawCards(state, seed, { vine: hasBonus ? 2 : 1 }));
-        }
-        case "fillOrder":
-            return promptToChooseOrderCard(setPendingAction({ type: "fillOrder", hasBonus }, state));
-        case "gainCoin":
-            return endTurn(gainCoins(1, state));
-        case "giveTour": {
-            const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
-                Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
-            return endTurn(gainCoins(hasBonus ? 3 : 2, tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state));
-        }
-        case "harvestField": {
-            return promptToHarvest(
-                setPendingAction({ type: "harvestField", hasBonus }, state),
-                hasBonus ? 2 : 1
-            );
-        }
-        case "makeWine": {
-            return promptToMakeWine(
-                setPendingAction({ type: "makeWine", hasBonus }, state),
-                /* upToN */ hasBonus ? 3 : 2
-            );
-        }
-        case "plantVine":
-            return promptToChooseVineCard(
-                setPendingAction({ type: "plantVine", hasBonus }, state)
-            );
-        case "playSummerVisitor": {
-            return promptToChooseVisitor(
-                "summer",
-                setPendingAction({ type: "playVisitor", hasBonus }, state)
-            );
-        }
-        case "playWinterVisitor": {
-            return promptToChooseVisitor(
-                "winter",
-                setPendingAction({ type: "playVisitor", hasBonus }, state)
-            );
-        }
-        case "trainWorker": {
-            return endTurn(trainWorker(payCoins(hasBonus ? 3 : 4, state)));
-        }
-        case "yokeHarvest":
-            return promptToHarvest(
-                setPendingAction({ type: "harvestField", hasBonus }, markStructureUsed("yoke", state))
-            );
-        case "yokeUproot":
-            return promptToUproot(
-                setPendingAction({ type: "uproot", hasBonus }, markStructureUsed("yoke", state))
-            );
-        default:
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const exhaustivenessCheck: never = placement;
             return state;
     }
 };

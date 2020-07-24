@@ -62,6 +62,11 @@ export interface WorkerPlacementTurn {
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
     pendingAction?: WorkerPlacementTurnPendingAction;
+
+    // The Manager visitor allows an action from a prior season.
+    // While resolving the prior-season action, the Manager's
+    // pendingAction will be stored here.
+    managerPendingAction?: PlayVisitorPendingAction;
 }
 
 export interface PlayVisitorPendingAction {

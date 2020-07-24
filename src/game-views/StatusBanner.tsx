@@ -2,7 +2,7 @@ import "./StatusBanner.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { AppState } from "../store/AppState";
-import { CurrentTurn, WorkerPlacementTurnPendingAction } from "../game-data/GameState";
+import { CurrentTurn, WorkerPlacementTurnPendingAction, WorkerPlacementTurn } from "../game-data/GameState";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { gameIsOver } from "../game-data/shared/sharedSelectors";
@@ -73,9 +73,7 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
         case "workerPlacement":
             if (currentTurn.pendingAction) {
                 return renderPendingActionStatus(
-                    currentTurn.pendingAction,
-                    currentTurn.playerId,
-                    currentTurn.season,
+                    currentTurn,
                     playerNames
                 );
             }
@@ -89,12 +87,13 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
 };
 
 const renderPendingActionStatus = (
-    pendingAction: WorkerPlacementTurnPendingAction,
-    currentTurnPlayerId: string,
-    season: "summer" | "winter",
+    currentTurn: WorkerPlacementTurn,
     playerNames: Record<string, string>
 ): React.ReactElement => {
-    const playerName = <strong>{playerNames[currentTurnPlayerId]}</strong>;
+    const { season, playerId } = currentTurn;
+    const pendingAction = currentTurn.pendingAction as WorkerPlacementTurnPendingAction;
+    const playerName = <strong>{playerNames[playerId]}</strong>;
+
     switch (pendingAction.type) {
         case "buildStructure":
             return <span>{playerName} is building a structure.</span>;
@@ -111,7 +110,11 @@ const renderPendingActionStatus = (
         case "plantVine":
             return <span>{playerName} is planting a <Vine />.</span>;
         case "playVisitor":
-            const card = season === "summer" ? <SummerVisitor /> : <WinterVisitor />;
+            // A pending Manager action implies that we're playing a visitor
+            // in a prior season (ie. summer)
+            const card = season === "summer" || currentTurn.managerPendingAction
+                ? <SummerVisitor />
+                : <WinterVisitor />;
             if (!pendingAction.visitorId) {
                 return <span>{playerName} is playing a {card}.</span>;
             }
@@ -122,7 +125,7 @@ const renderPendingActionStatus = (
                         ? null
                         : <>
                             It's {
-                                pendingAction.actionPlayerId === currentTurnPlayerId
+                                pendingAction.actionPlayerId === playerId
                                     ? "their"
                                     : <><strong>{playerNames[pendingAction.actionPlayerId]}</strong>'s</>
                             } turn to choose.

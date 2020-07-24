@@ -198,6 +198,11 @@ export const winterActions: BoardAction[] = [
     boardActions.fillOrder,
 ];
 
+export const seasonalActions = [
+    ...summerActions,
+    ...winterActions,
+];
+
 export const yearRoundActions: BoardAction[] = [
     boardActions.yokeHarvest,
     boardActions.yokeUproot,

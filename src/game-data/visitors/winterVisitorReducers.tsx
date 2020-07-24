@@ -14,7 +14,7 @@ import {
     loseVP,
     updatePlayer,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap, WorkerPlacement } from "../GameState";
 import {
     promptForAction,
     promptToMakeWine,
@@ -58,6 +58,8 @@ import {
     discardGrapes,
 } from "../shared/grapeWineReducers";
 import { Choice } from "../prompts/PromptState";
+import { seasonalActions } from "../board/boardPlacements";
+import { boardAction } from "../board/boardActionReducer";
 
 export const winterVisitorReducers: Record<
     WinterVisitorId,
@@ -379,7 +381,7 @@ export const winterVisitorReducers: Record<
                         label: <>
                             Pay <Coins>1</Coins> to train 1 <Worker />
                             {playerId !== s.currentTurn.playerId
-                                ? <>({playerName} gains <VP>1</VP>)</>
+                                ? <> ({playerName} gains <VP>1</VP>)</>
                                 : null}
                         </>,
                         disabledReason: trainWorkerDisabledReason(s, 1, playerId),
@@ -733,6 +735,35 @@ export const winterVisitorReducers: Record<
                 return maybeEndVisitor(harvestFields(state, action.fields));
             case "MAKE_WINE":
                 return maybeEndVisitor(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
+    manager: (state, action, pendingAction) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: seasonalActions
+                        .filter(a => a.season !== "winter")
+                        .map(a => ({
+                            id: a.type,
+                            label: a.label(state, -1),
+                            disabledReason: a.disabledReason(state, -1),
+                        }))
+                });
+            case "CHOOSE_ACTION":
+                return boardAction(
+                    action.choice as WorkerPlacement,
+                    {
+                        ...state,
+                        currentTurn: {
+                            ...state.currentTurn as WorkerPlacementTurn,
+                            managerPendingAction: pendingAction,
+                        },
+                    },
+                    action._key!,
+                    /* hasBonus */ false
+                );
             default:
                 return state;
         }

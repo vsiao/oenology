@@ -341,11 +341,20 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
 };
 
 const endWorkerPlacementTurn = (state: GameState): GameState => {
-    if ((state.currentTurn as WorkerPlacementTurn).isPlannerTurn) {
+    const currentTurn = state.currentTurn as WorkerPlacementTurn;
+    if (currentTurn.isPlannerTurn) {
         return endPlannerTurn(state);
+    } else if (currentTurn.managerPendingAction) {
+        // Restore Manager state; end the visitor
+        return endVisitor(
+            setPendingAction(currentTurn.managerPendingAction, {
+                ...state,
+                currentTurn: { ...currentTurn, managerPendingAction: undefined }
+            })
+        );
     }
-    const { currentTurn, wakeUpOrder } = state;
-    const season = (currentTurn as WorkerPlacementTurn).season;
+    const { wakeUpOrder } = state;
+    const season = currentTurn.season;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
 
     if (compactWakeUpOrder.every((p) => p.passed)) {

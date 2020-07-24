@@ -14,7 +14,6 @@ export const UNIMPLEMENTED_CARDS = {
     // winter
     "caravan": true,
     "innkeeper": true,
-    "manager": true,
 } as const;
 
 export interface VisitorCardData {
@@ -256,6 +255,10 @@ export const winterVisitorCards = {
     laborer: winterVisitorCard(
         "Laborer",
         <>Harvest up to 2 fields OR make up to 3 <WineGlass />. You may lose <VP>1</VP> to do both.</>
+    ),
+    manager: winterVisitorCard(
+        "Manager",
+        <>Take any action (no bonus) from a previous season without placing a worker.</>
     ),
     marketer: winterVisitorCard(
         "Marketer",
