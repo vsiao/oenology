@@ -55,7 +55,7 @@ const renderPrompt = (
         case "makeWine":
             return <MakeWinePrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "placeWorker":
-            return <PlaceWorkerPrompt playerId={playerId} />;
+            return <PlaceWorkerPrompt playerId={playerId} undoable={undoable} />;
         case "gameOver":
             return <GameOverPrompt playerId={playerId} />;
     }

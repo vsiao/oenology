@@ -82,7 +82,7 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
                 It's {isCurrentPlayerTurn ? "your" : <>{playerName}'s</>} turn.
             </span>;
         case "endOfYearDiscard":
-            return <span>{playerName} is discarding cards.</span>;
+            return <span>{playerName} is discarding down to 7 cards.</span>;
     }
 };
 

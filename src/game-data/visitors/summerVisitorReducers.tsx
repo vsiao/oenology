@@ -297,7 +297,11 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
-                        { id: "BROKER_GAIN", label: <>Pay <Coins>9</Coins> to gain <VP>3</VP></>, },
+                        {
+                            id: "BROKER_GAIN",
+                            label: <>Pay <Coins>9</Coins> to gain <VP>3</VP></>,
+                            disabledReason: moneyDisabledReason(state, 9),
+                        },
                         { id: "BROKER_LOSE", label: <>Lose <VP>2</VP> to gain <Coins>6</Coins></>, },
                     ],
                 });

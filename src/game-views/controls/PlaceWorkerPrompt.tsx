@@ -3,7 +3,7 @@ import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { GameAction } from "../../game-data/gameActions";
+import { GameAction, undo } from "../../game-data/gameActions";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import GameState, { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
@@ -25,6 +25,7 @@ interface Props {
     placements: ActionChoice[];
     defaultWorkerType: WorkerType;
     onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) => void;
+    undo?: () => void;
 }
 
 const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
@@ -32,16 +33,21 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
     workers,
     placements,
     defaultWorkerType,
-    onPlaceWorker
+    onPlaceWorker,
+    undo,
 }) => {
     const [selectedWorkerType, setWorkerType] = React.useState<WorkerType>(defaultWorkerType);
+    const noAvailableWorkers = workers
+        .filter(({ type }) => type === selectedWorkerType)
+        .every(w => !w.available);
+
     React.useEffect(() => {
-        if (workers.filter(({ type }) => type === selectedWorkerType).every(w => !w.available)) {
+        if (noAvailableWorkers) {
             setWorkerType(defaultWorkerType);
         }
-    }, [workers, selectedWorkerType, setWorkerType, defaultWorkerType]);
+    }, [noAvailableWorkers, setWorkerType, defaultWorkerType]);
 
-    return <PromptStructure title="Place a worker">
+    return <PromptStructure title="Place a worker" onClose={undo}>
         <div className="PlaceWorkerPrompt-body">
             <div className="PlaceWorkerPrompt-workerTypeSelector">
                 Choose worker type:
@@ -79,7 +85,9 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
                         <ChoiceButton
                             className="PlaceWorkerPrompt-choiceButton"
                             disabledReason={placement.disabledReason ||
-                                (requiresGrande ? "No space. Use a grande worker?" : undefined)}
+                                (requiresGrande ? "No space. Use a grande worker?" : undefined) ||
+                                (noAvailableWorkers ? "No available workers." : undefined)
+                            }
                             onClick={() => onPlaceWorker(placement.type, selectedWorkerType)}
                         >
                             {placement.label}
@@ -161,10 +169,14 @@ const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
     ];
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<GameAction>, ownProps: { playerId: string; }) => {
+const mapDispatchToProps = (
+    dispatch: Dispatch<GameAction>,
+    { playerId, undoable }: { playerId: string; undoable: boolean }
+) => {
     return {
         onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) =>
-            dispatch(placeWorker(placement, workerType, ownProps.playerId))
+            dispatch(placeWorker(placement, workerType, playerId)),
+        undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };
 

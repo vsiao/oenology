@@ -556,10 +556,11 @@ const beginEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
     if (cards.length <= END_OF_YEAR_HAND_LIMIT) {
         return endEOYDiscardTurn(state);
     }
+    const numCards = cards.length - END_OF_YEAR_HAND_LIMIT;
     return promptToChooseCard(state, {
-        title: "Discard down to 7 cards",
+        title: `Discard ${numCards} cards`,
         cards: cards.map(id => ({ id })),
-        numCards: cards.length - END_OF_YEAR_HAND_LIMIT,
+        numCards,
     });
 };
 
