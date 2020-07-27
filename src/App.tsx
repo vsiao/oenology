@@ -19,7 +19,7 @@ const App: React.FunctionComponent<Props> = props => {
     return <BrowserRouter>
         <div className="App">
             <header className="App-header">
-                oenology
+                <a className="App-homeLink" href="/">oenology</a>
                 <input type="text"
                     className="App-cheatBox"
                     value={drawCardInputValue}

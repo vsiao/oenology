@@ -16,6 +16,11 @@
   padding: 0 16px;
 }
 
+.App-homeLink {
+  color: white;
+  text-decoration: none;
+}
+
 .App-cheatBox {
   background: transparent;
   border: 0;
