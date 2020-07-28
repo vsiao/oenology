@@ -3,6 +3,7 @@ import { Action } from "redux";
 import { PlayerColor, CardsByType } from "./GameState";
 import { MamaId, PapaId } from "./mamasAndPapas";
 import { UNIMPLEMENTED_CARDS } from "./visitors/visitorCards";
+import { GameOptions } from "../store/AppState";
 
 export type GameAction = (
     | StartGameAction
@@ -39,11 +40,12 @@ export interface StartGameAction extends Action<"START_GAME"> {
         mama?: MamaId; // deprecated; see #PreGameShuffle
         papa?: PapaId; // deprecated; see #PreGameShuffle
     })[];
+    options: GameOptions;
     shuffledCards?: CardsByType; // deprecated; see #PreGameShuffle
     excludeCards?: { [Id in string]?: true };
 }
-export const startGame = (players: PlayerInit[]): GameAction => {
-    return { type: "START_GAME", players, excludeCards: UNIMPLEMENTED_CARDS };
+export const startGame = (players: PlayerInit[], options: GameOptions): GameAction => {
+    return { type: "START_GAME", options, players, excludeCards: UNIMPLEMENTED_CARDS };
 };
 
 interface UndoAction extends Action<"UNDO"> {

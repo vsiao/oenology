@@ -20,7 +20,15 @@ import {
 } from "../prompts/promptReducers";
 import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
-import { endTurn, setPendingAction, chooseWakeUp, passToNextSeason, WakeUpChoiceData, chooseMamaPapa } from "../shared/turnReducers";
+import {
+    MamaPapaChoiceData,
+    WakeUpChoiceData,
+    chooseMamaPapa,
+    chooseWakeUp,
+    endTurn,
+    passToNextSeason,
+    setPendingAction,
+} from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
@@ -30,7 +38,12 @@ export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
         case "mamaPapa":
             if (action.type === "CHOOSE_ACTION") {
-                return endTurn(chooseMamaPapa(action.choice, action._key!, state));
+                return chooseMamaPapa(
+                    action.choice,
+                    action.data as MamaPapaChoiceData,
+                    action._key!,
+                    state
+                );
             }
             return state;
 

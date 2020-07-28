@@ -2,12 +2,13 @@ import "firebase/auth";
 import "firebase/database";
 import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
-import { take, put, call, fork, throttle, select } from "redux-saga/effects";
+import { take, put, call, fork, throttle, select, takeEvery } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
 import { isGameAction, startGame as startGameAction, EndGameAction, PlayerInit } from "../game-data/gameActions";
-import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction } from "./appActions";
+import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
 import GameState from "../game-data/GameState";
 import shortid from "shortid";
+import { GameOptions } from "./AppState";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -69,11 +70,20 @@ function* throttledPublishUserName(gameId: string, userId: string) {
     yield throttle(1000, "SET_CURRENT_USER_NAME", publishUserName, gameId, userId);
 }
 
+function publishGameOption(gameId: string, action: SetGameOptionAction) {
+    const ref = firebase.database().ref(`rooms/${gameId}/gameOptions/${action.option}`);
+    ref.set(action.value);
+}
+
 export function* subscribeToRoom(gameId: string, userId: string) {
+    yield takeEvery("SET_GAME_OPTION", publishGameOption, gameId);
     yield fork(throttledPublishUserName, gameId, userId);
 
     const firebaseEventChannel = eventChannel(emit => {
         const roomRef = firebase.database().ref(`rooms/${gameId}`);
+
+        const gameOptionsRef = roomRef.child("gameOptions");
+        gameOptionsRef.on("value", snap => emit(gameOptions(snap.val())));
 
         const gameStatusRef = roomRef.child("gameStatus");
         gameStatusRef.on("value", snap => emit(gameStatus(snap.val())));
@@ -109,13 +119,13 @@ export function* subscribeToRoom(gameId: string, userId: string) {
     }
 }
 
-export function startGame(gameId: string, players: PlayerInit[]) {
+export function startGame(gameId: string, players: PlayerInit[], options: GameOptions) {
     const ref = firebase.database().ref();
     ref.child(".info/serverTimeOffset").once("value", snap => {
         const nowMs = new Date().getTime() + snap.val();
         const startGameKey = ref.child(`gameLogs/${gameId}`).push().key;
         ref.update({
-            [`gameLogs/${gameId}/${startGameKey}`]: startGameAction(players),
+            [`gameLogs/${gameId}/${startGameKey}`]: startGameAction(players, options),
             [`rooms/${gameId}/gameStartedAt`]: new Date(nowMs).toJSON(),
             [`rooms/${gameId}/gameStatus`]: "inProgress",
         });

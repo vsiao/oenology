@@ -65,7 +65,7 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
     const playerName = <strong>{playerNames[currentTurn.playerId]}</strong>;
     switch (currentTurn.type) {
         case "mamaPapa":
-            return <span>{playerName} is choosing their mama and papa.</span>;
+            return <span>{playerName} is choosing their inheritance.</span>;
         case "wakeUpOrder":
             return <span>{playerName} is choosing their wake-up position.</span>;
         case "fallVisitor":

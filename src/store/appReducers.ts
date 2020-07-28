@@ -45,12 +45,31 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
                 },
             };
         }
+        case "SET_GAME_OPTION":
+            return {
+                ...state,
+                room: {
+                    ...state.room,
+                    gameOptions: {
+                        ...state.room.gameOptions,
+                        [action.option]: action.value,
+                    },
+                },
+            };
         case "JOIN_GAME":
             return {
                 ...state,
                 room: {
                     gameId: action.gameId,
                     users: {}
+                },
+            };
+        case "GAME_OPTIONS":
+            return {
+                ...state,
+                room: {
+                    ...state.room,
+                    gameOptions: action.options,
                 },
             };
         case "GAME_STATUS":

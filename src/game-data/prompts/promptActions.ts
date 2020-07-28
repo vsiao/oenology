@@ -35,7 +35,7 @@ export const isPromptAction = (action: Action): action is PromptAction => {
     }
 };
 
-interface ChooseAction extends Action<"CHOOSE_ACTION"> {
+export interface ChooseAction extends Action<"CHOOSE_ACTION"> {
     choice: string;
     data?: unknown;
     playerId: string;

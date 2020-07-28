@@ -136,8 +136,8 @@ export interface PlayerState {
     crushPad: Record<GrapeColor, TokenMap>;
     cellar: Record<WineColor, TokenMap>;
     structures: Record<StructureId, StructureState>;
-    mama: MamaId;
-    papa: PapaId;
+    mamas: MamaId[];
+    papas: PapaId[];
 }
 
 export type WorkerType = "grande" | "normal";

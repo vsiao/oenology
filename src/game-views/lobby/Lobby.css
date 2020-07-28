@@ -106,9 +106,6 @@
 .Lobby-sidebar {
     background: #ddd;
     grid-area: sidebar;
-}
-
-.Lobby-usersHeader {
     padding: 0 1em;
 }
 
@@ -117,7 +114,6 @@
     display: flex;
     font-weight: 600;
     height: 2em;
-    padding: 0 1em;
 }
 
 .Lobby-hostTag {
@@ -130,7 +126,37 @@
     text-transform: uppercase;
 }
 
+.Lobby-gameOptionsHeader {
+    margin-top: 2em;
+}
+
+.Lobby-gameOptions {
+    border-collapse: collapse;
+    font-size: .8em;
+}
+
+.Lobby-gameOption + .Lobby-gameOption {
+    margin-top: .5em;
+}
+
+.Lobby-optionLabel {
+    align-items: center;
+    display: inline-flex;
+}
+
+.Lobby-optionCheckbox {
+    margin: 0 .8em 0 0;
+}
+
+.Lobby-comingSoonOption {
+    color: #999;
+}
+
+.Lobby-comingSoon {
+    font-style: italic;
+}
+
 .Lobby-startGame {
-    margin: 1em;
+    margin-top: 2em;
 }
 

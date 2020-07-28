@@ -18,7 +18,7 @@ import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
-import { papaCards, mamaCards } from "../mamasAndPapas";
+import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 import { boardActions } from "../board/boardPlacements";
 
@@ -50,57 +50,143 @@ export const endTurn = (state: GameState): GameState => {
 // Set-up turns
 // ----------------------------------------------------------------------------
 
-export const startMamaPapaTurn = (playerId: string, state: GameState): GameState => {
+export const beginMamaPapaTurn = (playerId: string, state: GameState): GameState => {
     state = { ...state, currentTurn: { type: "mamaPapa", playerId }, };
-    const player = state.players[state.currentTurn.playerId];
-    const mama = mamaCards[player.mama];
-    const papa = papaCards[player.papa];
+    const { mamas, papas } = state.players[state.currentTurn.playerId];
 
-    return promptForAction(state, {
-        title: "Choose your inheritance",
+    if (mamas.length > 1) {
+        return promptChooseMamaPapa(state, mamas, papas);
+    }
+    return promptMamaDraw(state, 0, 0);
+};
+
+const promptChooseMamaPapa = (state: GameState, mamas: MamaId[], papas: PapaId[]): GameState => {
+    const renderPapaDescription = (papa: PapaCard) => {
+        return <p>
+            Papa <strong>{papa.name}</strong> offers {
+                papa.coins
+                    ? <><Coins>{papa.coins}</Coins> and</>
+                    : null
+            } a choice: {renderPapaChoice(papa.choiceA)} or gain <Coins>{papa.choiceB}</Coins>{
+                papa.coins ? " extra" : null
+            }.
+        </p>;
+    };
+    return promptForAction<MamaPapaChoiceData>(state, {
+        title: "Choose your Mama & Papa",
         description: <>
-            <p>
-                Mama <strong>{mama.name}</strong>:
-                    Draw {Object.entries(mama.cards).map(([type, num]) =>
-                new Array<CardType>(num || 0).fill(type as CardType).map((t, i) =>
-                    <Card key={i} type={t} />
-                ))}
-                {mama.coins ? <> and gain <Coins>{mama.coins}</Coins>.</> : null}
-            </p>
-            <p>
-                Papa <strong>{papa.name}</strong>: {
-                    papa.coins
-                        ? <>Gain <Coins>{papa.coins}</Coins> and choose 1:</>
-                        : <>Choose 1:</>
-                }
-            </p>
+            {renderMamaDescription(mamaCards[mamas[0]])}
+            {renderMamaDescription(mamaCards[mamas[1]])}
+            {renderPapaDescription(papaCards[papas[0]])}
+            {renderPapaDescription(papaCards[papas[1]])}
         </>,
+        choices: ([[0, 0], [0, 1], [1, 0], [1, 1]] as const).map(([mamaChoice, papaChoice]) => {
+            const mama = mamaCards[mamas[mamaChoice]];
+            const papa = papaCards[papas[papaChoice]];
+            return {
+                id: "MAMA_PAPA",
+                data: { mamaChoice, papaChoice },
+                label: <><strong>{mama.name}</strong> and <strong>{papa.name}</strong></>,
+            };
+        })
+    });
+};
+
+const renderMamaCards = (mama: MamaCard) => {
+    return Object.entries(mama.cards).map(([type, num]) =>
+        new Array<CardType>(num || 0).fill(type as CardType).map((t, i) =>
+            <Card key={i} type={t} />
+        ));
+};
+const renderMamaDescription = (mama: MamaCard) => {
+    return <p>
+        Mama <strong>{mama.name}</strong> offers {renderMamaCards(mama)}
+        {mama.coins ? <> and <Coins>{mama.coins}</Coins></> : null}.
+    </p>;
+};
+const promptMamaDraw = (state: GameState, mamaChoice: number, papaChoice: number): GameState => {
+    const mama = mamaCards[state.players[state.currentTurn.playerId].mamas[mamaChoice]];
+
+    return promptForAction<MamaPapaChoiceData>(state, {
+        title: "Choose your inheritance",
+        description: renderMamaDescription(mama),
+        choices: [{
+            id: "MAMA",
+            data: { mamaChoice, papaChoice },
+            label: <>Draw {renderMamaCards(mama)} {
+                mama.coins ? <> and gain <Coins>{mama.coins}</Coins></> : null
+            }</>,
+        }],
+    });
+};
+
+const promptToChooseInheritance = (
+    state: GameState,
+    mamaChoice: number,
+    papaChoice: number
+): GameState => {
+    const papa = papaCards[state.players[state.currentTurn.playerId].papas[papaChoice]];
+    const data: MamaPapaChoiceData = { mamaChoice, papaChoice };
+
+    return promptForAction<MamaPapaChoiceData>(state, {
+        title: "Choose your inheritance",
+        description: <p>
+            Papa <strong>{papa.name}</strong> offers {
+                papa.coins
+                    ? <><Coins>{papa.coins}</Coins> and a choice:</>
+                    : <>a choice:</>
+            }
+        </p>,
         choices: [
-            { id: "PAPA_A", label: renderPapaChoice(papa.choiceA), },
-            { id: "PAPA_B", label: <>Gain <Coins>{papa.choiceB}</Coins></>, },
+            { id: "PAPA_A", data, label: renderPapaChoice(papa.choiceA), },
+            {
+                id: "PAPA_B",
+                data,
+                label: papa.coins
+                    ? <>Gain an extra <Coins>{papa.choiceB}</Coins></>
+                    : <>Gain <Coins>{papa.choiceB}</Coins></>,
+            },
         ],
     });
 };
 
-export const chooseMamaPapa = (choice: string, seed: string, state: GameState): GameState => {
-    const player = state.players[state.currentTurn.playerId];
-    const mama = mamaCards[player.mama];
-    const papa = papaCards[player.papa];
+export interface MamaPapaChoiceData {
+    mamaChoice: number;
+    papaChoice: number;
+}
 
-    state = drawCards(gainCoins(mama.coins, state), seed, mama.cards);
+export const chooseMamaPapa = (
+    choice: string,
+    { mamaChoice = 0, papaChoice = 0 }: Partial<MamaPapaChoiceData> = {},
+    seed: string,
+    state: GameState
+): GameState => {
+    const { mamas, papas } = state.players[state.currentTurn.playerId];
+    const mamaId = mamas[mamaChoice];
+    const papaId = papas[papaChoice];
+    const mama = mamaCards[mamaId];
+    const papa = papaCards[papaId];
+
     switch (choice) {
+        case "MAMA_PAPA":
+            return promptMamaDraw(state, mamaChoice, papaChoice);
+
+        case "MAMA":
+            state = drawCards(gainCoins(mama.coins, state), seed, mama.cards);
+            return promptToChooseInheritance(state, mamaChoice, papaChoice);
+
         case "PAPA_A":
             state = gainCoins(papa.coins, state);
             switch (papa.choiceA) {
                 case "victoryPoint":
-                    return gainVP(1, state);
+                    return endTurn(gainVP(1, state));
                 case "worker":
-                    return trainWorker(state, { availableThisYear: true, });
+                    return endTurn(trainWorker(state, { availableThisYear: true, }));
                 default:
-                    return buildStructure(state, papa.choiceA);
+                    return endTurn(buildStructure(state, papa.choiceA));
             }
         case "PAPA_B":
-            return gainCoins(papa.coins + papa.choiceB, state);
+            return endTurn(gainCoins(papa.coins + papa.choiceB, state));
         default:
             return state;
     }
@@ -124,7 +210,7 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
     if (nextIndex === 0) {
         return beginNewYear(state);
     }
-    return startMamaPapaTurn(tableOrder[nextIndex], state);
+    return beginMamaPapaTurn(tableOrder[nextIndex], state);
 };
 
 //

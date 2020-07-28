@@ -4,12 +4,12 @@ import { GameAction, PlayerInit, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
-import { startMamaPapaTurn } from "./shared/turnReducers";
+import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
-        return startMamaPapaTurn(action.players[0].id, initGame(userId, action));
+        return beginMamaPapaTurn(action.players[0].id, initGame(userId, action));
     }
     if (
         state.currentTurn.playerId !== action.playerId && (
@@ -76,8 +76,10 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
         players: Object.fromEntries(
             players.map((p, i) => [
                 p.id,
-                // #PreGameShuffle
-                initPlayer(p, p.mama ?? mamas[i], p.papa ?? papas[i])
+                action.options && action.options.multiInheritance
+                    ? initPlayer(p, [mamas[2*i], mamas[2*i+1]], [papas[2*i], papas[2*i+1]])
+                    // #PreGameShuffle
+                    : initPlayer(p, [p.mama ?? mamas[i]], [p.papa ?? papas[i]])
             ])
         ),
         tableOrder: players.map(({ id }) => id),
@@ -110,8 +112,8 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
 
 const initPlayer = (
     { id, name, color }: PlayerInit,
-    mama: MamaId,
-    papa: PapaId
+    mamas: MamaId[],
+    papas: PapaId[]
 ): PlayerState => {
     return {
         id,
@@ -152,7 +154,7 @@ const initPlayer = (
             mediumCellar: StructureState.Unbuilt,
             largeCellar: StructureState.Unbuilt
         },
-        mama,
-        papa,
+        mamas,
+        papas,
     };
 };

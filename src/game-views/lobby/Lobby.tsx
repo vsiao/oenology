@@ -1,11 +1,11 @@
 import "./Lobby.css";
 import * as React from "react";
 import { connect } from "react-redux";
-import { AppState, User } from "../../store/AppState";
+import { AppState, User, GameOptions } from "../../store/AppState";
 import ChoiceButton from "../controls/ChoiceButton";
 import { PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
-import { setCurrentUserName } from "../../store/appActions";
+import { setCurrentUserName, setGameOption } from "../../store/appActions";
 import { startGame } from "../../store/firebase";
 import VineCard from "../cards/VineCard";
 import { vineCards } from "../../game-data/vineCards";
@@ -22,20 +22,25 @@ interface Props {
     currentUser?: User;
     users: User[];
     gameStatus: string | null | undefined;
+    gameOptions: GameOptions;
     setName: (name: string) => void;
-    startGame: (players: User[]) => void;
+    setOption: (option: string, value: string | number | boolean) => void;
+    startGame: (players: User[], options: GameOptions) => void;
 }
 
 const Lobby: React.FunctionComponent<Props> = ({
     gameId,
     currentUser,
     users,
+    gameOptions,
     gameStatus,
     setName,
+    setOption,
     startGame
 }) => {
     const [copiedToClipboard, setCopiedToClipboard] = React.useState(false);
     const gameUrl = `https://make-wine.web.app/game/${gameId}`;
+    const isHost = currentUser === users[0];
     return <>
         <div className="Lobby-main">
             {gameStatus === null
@@ -118,10 +123,27 @@ const Lobby: React.FunctionComponent<Props> = ({
                             </li>
                         )}
                     </ul>
-                    {currentUser === users[0]
+                    <h3 className="Lobby-gameOptionsHeader">Options</h3>
+                    <ul className="Lobby-gameOptions">
+                        <li className="Lobby-gameOption">
+                            <label className="Lobby-optionLabel">
+                                <input
+                                    className="Lobby-optionCheckbox"
+                                    type="checkbox"
+                                    disabled={!isHost}
+                                    checked={gameOptions.multiInheritance}
+                                    onChange={() => setOption("multiInheritance", !gameOptions.multiInheritance)}
+                                />
+                                Mama &amp; Papa: Choose from 2
+                            </label>
+                        </li>
+                        {renderComingSoonOption("Tuscany board")}
+                        {renderComingSoonOption("Visit from the Rhine Valley")}
+                    </ul>
+                    {isHost
                         ? <ChoiceButton
                             className="Lobby-startGame"
-                            onClick={() => startGame(users)}
+                            onClick={() => startGame(users, gameOptions)}
                             disabled={users.length < 2 || users.length > 6}
                         >
                             Start Game
@@ -133,9 +155,26 @@ const Lobby: React.FunctionComponent<Props> = ({
     </>;
 };
 
+const renderComingSoonOption = (label: string) => {
+    return <li className="Lobby-gameOption">
+        <label className="Lobby-optionLabel">
+            <input
+                className="Lobby-optionCheckbox"
+                type="checkbox"
+                disabled={true}
+                checked={false}
+            />
+            <span className="Lobby-comingSoonOption">
+                <em className="Lobby-comingSoon">Coming Soon</em>—{label}
+            </span>
+        </label>
+    </li>;
+};
+
 const mapStateToProps = (state: AppState) => {
     return {
         currentUser: state.room.users[state.userId!],
+        gameOptions: state.room.gameOptions || {},
         gameStatus: state.room.gameStatus,
         users: Object.values(state.room.users)
             .filter(u => u.status === "connected")
@@ -154,10 +193,13 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) =>
     ];
     return {
         setName: (name: string) => dispatch(setCurrentUserName(name)),
-        startGame: (users: User[]) => {
+        setOption: (option: string, value: string | number | boolean) =>
+            dispatch(setGameOption(option, value)),
+        startGame: (users: User[], options: GameOptions) => {
             startGame(
                 ownProps.gameId,
-                users.map(({ id, name }, i) => ({ id, name, color: colors[i] }))
+                users.map(({ id, name }, i) => ({ id, name, color: colors[i] })),
+                options
             );
         },
     };

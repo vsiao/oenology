@@ -8,8 +8,13 @@ export interface AppState {
 
 export type GameStatus = "inProgress" | "completed";
 
+export interface GameOptions {
+    multiInheritance?: boolean;
+}
+
 interface RoomState {
     gameId: string | null;
+    gameOptions?: GameOptions;
     gameStartedAt?: string;
     gameStatus?: GameStatus | null;
     users: Record<string, User>;

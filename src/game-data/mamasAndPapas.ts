@@ -1,7 +1,7 @@
 import { CardType } from "./GameState";
 import { StructureId } from "./structures";
 
-interface MamaCard {
+export interface MamaCard {
     name: string;
     cards: { [K in CardType]?: number };
     coins: number;
@@ -36,7 +36,7 @@ export const mamaCards = {
     teruyo: mama("Teruyo", { vine: 2, winterVisitor: 1, }),
 };
 
-interface PapaCard {
+export interface PapaCard {
     name: string;
     coins: number;
 
