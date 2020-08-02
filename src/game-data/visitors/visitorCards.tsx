@@ -98,6 +98,10 @@ export const summerVisitorCards = {
         "Horticulturist",
         <>Plant 1 <Vine /> even without the required structure(s) OR uproot and discard 2 <Vine /> to gain <VP>3</VP>.</>
     ),
+    // importer: summerVisitorCard(
+    //     "Importer",
+    //     <>Draw 3 <WinterVisitor /> unless all opponents combine to give you 3 visitor cards (total).</>
+    // ),
     landscaper: summerVisitorCard(
         "Landscaper",
         <>Draw 1 <Vine /> and plant up to 1 <Vine /> OR switch 2 <Vine /> on your fields.</>,
@@ -188,6 +192,163 @@ export const summerVisitorCards = {
     ),
 };
 
+export const rhineSummerVisitorCards = {
+    // accountant: summerVisitorCard(
+    //     "Accountant",
+    //     <>Draw 1 <Vine />, 1 <SummerVisitor />, 1 <WinterVisitor /> and gain <Coins>1</Coins>. Each opponent may draw 1 <SummerVisitor />.</>
+    // ),
+    // administrator: summerVisitorCard(
+    //     "Administrator",
+    //     <>Place the <Worker /> with which you played this card on an action in a future season. Take the action at the beginning of that season.</>
+    // ),
+    // agent: summerVisitorCard(
+    //     "Agent",
+    //     <>Discard 2 <Card /> to gain <Coins>5</Coins> OR pay <Coins>2</Coins> to draw 2 <WinterVisitor /> or 2 <Vine />.</>
+    // ),
+    // ampelograph: summerVisitorCard(
+    //     "Ampelograph",
+    //     <>Plant 1 <Vine />. You may plant it on a field even if it exceeds the max vine value; if it doesn't, also gain <Coins>2</Coins>.</>
+    // ),
+    // banker: summerVisitorCards.banker,
+    // botanist: summerVisitorCard(
+    //     "Botanist",
+    //     <>Gain <Grape>2</Grape> OR discard 1 <Grape /> to draw 4 <Vine />.</>
+    // ),
+    // brickMason: summerVisitorCard(
+    //     "Brick Mason",
+    //     <>Pay <Coins>9</Coins> to build any 2 structures OR destroy a structure to gain <VP>1</VP> and <Order />.</>
+    // ),
+    // cicerone: summerVisitorCard(
+    //     "Cicerone",
+    //     <>Gain <Coins>4</Coins>, harvest 1 field, or discard 1 <Grape /> to draw 3 <Order />.</>
+    // ),
+    // contractor: summerVisitorCards.contractor,
+    // dismantler: summerVisitorCard(
+    //     "Dismantler",
+    //     <>Destroy 1 of your structures, then gain <WineGlass>X</WineGlass>, where X is the cost of the structure.</>
+    // ),
+    // docent: summerVisitorCard(
+    //     "Docent",
+    //     <>Gain <Coins>3</Coins> OR make up to 3 <WineGlass />.</>
+    // ),
+    // earlyBuyer: summerVisitorCard(
+    //     "Early Buyer",
+    //     <>Fill 1 <Order /> and gain <Coins>2</Coins>. If you have no more than <VP>5</VP>, gain <Coins>4</Coins> instead.</>
+    // ),
+    // embezzler: summerVisitorCard(
+    //     "Embezzler",
+    //     <>Lose <VP>2</VP> or discard 3 <Card /> to either gain <Coins>6</Coins> or draw 3 <Order />.</>
+    // ),
+    // fortuneTeller: summerVisitorCard(
+    //     "Fortune Teller",
+    //     <>Draw 2 <WinterVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
+    // ),
+    // freelancer: summerVisitorCard(
+    //     "Freelancer",
+    //     <>Draw 1 <Card /> OR lose <VP>2</VP> to build 1 structure for free.</>
+    // ),
+    // friendlyHelper: summerVisitorCard(
+    //     "Friendly Helper",
+    //     <>Upgrade your cellar at a <Coins>3</Coins> discount OR gain <WineGlass>1</WineGlass>.</>
+    // ),
+    // grapeBuyer: summerVisitorCard(
+    //     "Grape Buyer",
+    //     <>Pay <Coins>3</Coins> to gain <Grape color="white">1</Grape> and <Grape color="red">1</Grape> OR pay <Coins>5</Coins> to gain <Grape color="white">4</Grape> and <Grape color="red">4</Grape>.</>
+    // ),
+    // grapeMerchant: summerVisitorCard(
+    //     "Grape Merchant",
+    //     <>Sell up to 3 <Grape /> for triple their price OR discard 2 <Grape /> to gain <WineGlass color="blush">6</WineGlass> even if you don't have the Medium Cellar.</>
+    // ),
+    // greenskeeper: summerVisitorCard(
+    //     "Greenskeeper",
+    //     <>Gain <Coins>2</Coins> and plant 1 <Vine />. If any player already has at least <VP>10</VP>, plant 1 additional <Vine /> ignoring the fields maximum.</>
+    // ),
+    // miller: summerVisitorCard(
+    //     "Miller",
+    //     <>If you have a windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a windmill.</>
+    // ),
+    // oldGeneral: summerVisitorCard(
+    //     "Old General",
+    //     <>Place 1 STAR_TOKEN. Each opponent who has all 6 STAR_TOKEN on the map must retrieve 3 of their STAR_TOKEN.</>
+    // ),
+    // owner: summerVisitorCard(
+    //     "Owner",
+    //     <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have the Windmill, gain <VP>1</VP>.</>
+    // ),
+    // peasant: summerVisitorCard(
+    //     "Peasant",
+    //     <>Draw <Order />. The plant 1 <Vine /> even if you don't have the required structure(s) OR gain <Coins>2</Coins>.</>
+    // ),
+    // philanthropist: summerVisitorCard(
+    //     "Philanthropist",
+    //     <>Gain <Coins>3</Coins> OR draw 1 <Order /> and 1 <WinterVisitor />.</>
+    // ),
+    // plantDealer: summerVisitorCard(
+    //     "Plant Dealer",
+    //     <>Draw 4 <Vine /> and discard 2 of them.</>
+    // ),
+    // plantReorganizer: summerVisitorCard(
+    //     "Plant Reorganizer",
+    //     <>Draw 1 <Vine /> and 1 <Card />, then uproot any 1 <Vine /> and plant 1 <Vine />.</>
+    // ),
+    // premiumWineDealer: summerVisitorCard(
+    //     "Premium Wine Dealer",
+    //     <>Gain <Coins>3</Coins> OR pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass> or <WineGlass color="blush">7</WineGlass> even if you don't have a Large Cellar.</>
+    // ),
+    // reorganizer: summerVisitorCard(
+    //     "Reorganizer",
+    //     <>Discard 2 <Card /> to gain either <Coins>5</Coins> or <Grape>2</Grape>.</>
+    // ),
+    // sculptor: summerVisitorCard(
+    //     "Sculptor",
+    //     <>Gain <Coins>1</Coins> per field you own, lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass>, or plant up to 2 <Vine />.</>
+    // ),
+    // sommelier: summerVisitorCard(
+    //     "Sommelier",
+    //     <>If you have the Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build the Tasting Room.</>
+    // ),
+    // sonInLaw: summerVisitorCard(
+    //     "Son-in-law",
+    //     <>Lay this card on a field. For the remainder of the game you may choose to harvest this field in addition to your first action each winter, but only to a total grape value of 3.</>
+    // ),
+    // structureReorganizer: summerVisitorCard(
+    //     "Structure Reorganizer",
+    //     <>Draw 1 <Card />. Then you may destroy 1 of your structures. If you do, you may build 1 structure for free.</>
+    // ),
+    // subsidizer: summerVisitorCard(
+    //     "Subsidizer",
+    //     <>Build 1 structure at a <Coins>2</Coins> discount, plant up to 2 <Vine />, or plant 1 <Vine /> even if you don't have the required structure(s).</>
+    // ),
+    // supporter: summerVisitorCard(
+    //     "Supporter",
+    //     <>Choose 2: Draw 1 <Vine />, gain <Coins>2</Coins>, or draw 1 <Order />.</>
+    // ),
+    // traveller: summerVisitorCard(
+    //     "Traveller",
+    //     <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have the Tasting Room, also gain <Coins>3</Coins>.</>
+    // ),
+    // vineTrader: summerVisitorCard(
+    //     "Vine Trader",
+    //     <>Discard any number of <Vine /> to gain <Coins>3</Coins> for each. Then draw any number of <Vine /> for <Coins>2</Coins> each and/or any number of <WinterVisitor /> for <Coins>4</Coins> each.</>
+    // ),
+    // wineEngineer: summerVisitorCard(
+    //     "Wine Engineer",
+    //     <>Pay <Coins>2</Coins> to either gain <WineGlass>4</WineGlass> in your cellar or to age 1 or 2 <Grape /> up to 3 times.</>
+    // ),
+    // wineLover: summerVisitorCard(
+    //     "Wine Lover",
+    //     <>If you have a Tasting Room, gain <Residuals>1</Residuals> or <Grape>4</Grape>. Otherwise lose <Residuals>2</Residuals> to build a Tasting Room for free and gain <WineGlass>1</WineGlass>.</>
+    // ),
+    // wineTrader: summerVisitorCard(
+    //     "Wine Trader",
+    //     <>Gain <Grape>1</Grape> OR pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass> or <WineGlass color="white">7</WineGlass> even if you don't have the Large Cellar.</>
+    // ),
+    // writer: summerVisitorCard(
+    //     "Writer",
+    //     <>Discard 1 <WineGlass /> to gain <Residuals>2</Residuals> OR lose <Residuals>2</Residuals> to gain either <Grape>4</Grape> or <WineGlass>4</WineGlass>.</>
+    // ),
+};
+
 const winterVisitorCard = (name: string, description: React.ReactNode) =>
     visitorCard("winter", name, description);
 
@@ -204,6 +365,10 @@ export const winterVisitorCards = {
         "Bottler",
         <>Make up to 3 <WineGlass />. Gain <VP>1</VP> for each type of wine you make.</>
     ),
+    // caravan: winterVisitorCard(
+    //     "Caravan",
+    //     <>Turn the top card of each deck face up. Draw 2 of those cards and discard the others.</>
+    // ),
     craftsman: winterVisitorCard(
         "Craftsman",
         <>Choose 2: Draw 1 <Order />, upgrade your cellar at the regular cost, or gain <VP>1</VP>.</>
@@ -244,6 +409,10 @@ export const winterVisitorCards = {
         "Harvester",
         <>Harvest up to 2 fields and choose 1: Gain <Coins>2</Coins> or gain <VP>1</VP>.</>
     ),
+    // innkeeper: winterVisitorCard(
+    //     "Innkeeper",
+    //     <>As you play this card, put the top card of 2 different discard piles into your hand.</>
+    // ),
     jackOfAllTrades: winterVisitorCard(
         "Jack-of-all-trades",
         <>Choose 2: Harvest 1 field, make up to 2 <WineGlass />, or fill 1 <Order /></>
