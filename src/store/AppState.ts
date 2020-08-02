@@ -10,6 +10,7 @@ export type GameStatus = "inProgress" | "completed";
 
 export interface GameOptions {
     multiInheritance?: boolean;
+    rhineVisitors?: boolean;
 }
 
 interface RoomState {

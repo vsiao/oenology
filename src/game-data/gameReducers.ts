@@ -72,7 +72,9 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             playerId: players[0].id,
         },
         drawPiles: shuffledCards ?? emptyPiles,
-        discardPiles: shuffledCards ? emptyPiles : unshuffledDecks(action.excludeCards || {}),
+        discardPiles: shuffledCards
+            ? emptyPiles
+            : unshuffledDecks(action.excludeCards || {}, action.options),
         players: Object.fromEntries(
             players.map((p, i) => [
                 p.id,

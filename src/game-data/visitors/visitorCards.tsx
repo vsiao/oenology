@@ -30,8 +30,8 @@ const visitorCard = (
     return { season, name, description, };
 };
 
-export type SummerVisitorId = keyof typeof summerVisitorCards;
-export type WinterVisitorId = keyof typeof winterVisitorCards;
+export type SummerVisitorId = keyof typeof summerVisitorCards | keyof typeof rhineSummerVisitorCards;
+export type WinterVisitorId = keyof typeof winterVisitorCards | keyof typeof rhineWinterVisitorCards;
 export type VisitorId = SummerVisitorId | WinterVisitorId;
 
 const summerVisitorCard = (name: string, description: React.ReactNode) =>
@@ -209,7 +209,7 @@ export const rhineSummerVisitorCards = {
     //     "Ampelograph",
     //     <>Plant 1 <Vine />. You may plant it on a field even if it exceeds the max vine value; if it doesn't, also gain <Coins>2</Coins>.</>
     // ),
-    // banker: summerVisitorCards.banker,
+    banker: summerVisitorCards.banker,
     // botanist: summerVisitorCard(
     //     "Botanist",
     //     <>Gain <Grape>2</Grape> OR discard 1 <Grape /> to draw 4 <Vine />.</>
@@ -222,7 +222,7 @@ export const rhineSummerVisitorCards = {
     //     "Cicerone",
     //     <>Gain <Coins>4</Coins>, harvest 1 field, or discard 1 <Grape /> to draw 3 <Order />.</>
     // ),
-    // contractor: summerVisitorCards.contractor,
+    contractor: summerVisitorCards.contractor,
     // dismantler: summerVisitorCard(
     //     "Dismantler",
     //     <>Destroy 1 of your structures, then gain <WineGlass>X</WineGlass>, where X is the cost of the structure.</>
@@ -507,7 +507,154 @@ export const winterVisitorCards = {
     ),
 };
 
+export const rhineWinterVisitorCards = {
+    // advertiser: winterVisitorCard(
+    //     "Advertiser",
+    //     <>Discard 1 <Grape /> or 1 <WineGlass /> to gain <VP>1</VP> and <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to draw 3 <Order />.</>
+    // ),
+    // bargainer: winterVisitorCard(
+    //     "Bargainer",
+    //     <>Draw 3 <Order />.</>
+    // ),
+    // brideToBe: winterVisitorCard(
+    //     "Bride-to-be",
+    //     <>Gain <Coins>3</Coins> OR make 1 <WineGlass color="sparkling" /> with any 2 <Grape /> (instead of 2 <Grape color="red" /> and 1 <Grape color="white" />).</>
+    // ),
+    // bureaucrat: winterVisitorCard(
+    //     "Bureaucrat",
+    //     <>If you have the fewest <VP /> (no ties), gain <Coins>5</Coins>. Otherwise pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order />.</>
+    // ),
+    // cellarman: winterVisitorCard(
+    //     "Cellarman",
+    //     <>Pay <Coins>4</Coins> to gain <Grape color="red">1</Grape> and <Grape color="white">1</Grape> OR fill 1 <Order /> and then gain <Coins>3</Coins>.</>
+    // ),
+    // cellarmaster: winterVisitorCard(
+    //     "Cellarmaster",
+    //     <>Discard 1 <WineGlass /> to gain <Coins>4</Coins>. If it is the most valuable wine in any player's cellar, gain also <VP>2</VP></>
+    // ),
+    // cheapBuyer: winterVisitorCard(
+    //     "Cheap Buyer",
+    //     <>Increase the value of 1 or 2 <WineGlass /> by a combined total of 2, then fill 1 <Order />.</>
+    // ),
+    // chemist: winterVisitorCard(
+    //     "Chemist",
+    //     <>Plant 2 <Vine /> OR harvest a field, devaluing the harvested grapes by 1 each to gain <VP>1</VP>.</>
+    // ),
+    craftsman: winterVisitorCards.craftsman,
+    // duchess: winterVisitorCard(
+    //     "Duchess",
+    //     <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to fill 2 <Order />.</>
+    // ),
+    // eliteOenologist: winterVisitorCard(
+    //     "Elite Oenologist",
+    //     <>Age all <WineGlass /> in your cellar twice OR upgrade your cellar at a <Coins>4</Coins> discount.</>
+    // ),
+    // endorser: winterVisitorCard(
+    //     "Endorser",
+    //     <>Discard 1 <Grape /> or 1 <WineGlass /> to either gain <VP>1</VP> and <Residuals>1</Residuals> or draw 3 <Order />.</>
+    // ),
+    // enthusiast: winterVisitorCard(
+    //     "Enthusiast",
+    //     <>Draw 2 <SummerVisitor /> OR fill 1 <Order /> and draw 1 <Order />.</>
+    // ),
+    // estateAgent: winterVisitorCard(
+    //     "Estate Agent",
+    //     <>Draw X <Card />, where X is the number of fields you own.</>
+    // ),
+    // grapeVendor: winterVisitorCard(
+    //     "Grape Vendor",
+    //     <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have the Tasting Room.</>
+    // ),
+    // grapeWhisperer: winterVisitorCard(
+    //     "Grape Whisperer",
+    //     <>Harvest up to 2 fields and gain <Coins>2</Coins>.</>
+    // ),
+    harvestExpert: winterVisitorCards.harvestExpert,
+    // hiredHand: winterVisitorCard(
+    //     "Hired Hand",
+    //     <>Choose 2: Harvest 1 field, make up to 2 <WineGlass />, gain <Coins>2</Coins>, or fill 1 <Order />.</>
+    // ),
+    // influencer: winterVisitorCard(
+    //     "Influencer",
+    //     <>Place 1 STAR_TOKEN, then move up to 3 STAR_TOKEN owned by any player.</>
+    // ),
+    laborer: winterVisitorCards.laborer,
+    // lecturer: winterVisitorCard(
+    //     "Lecturer",
+    //     <>Make up to 3 <WineGlass /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
+    // ),
+    // lobbyist: winterVisitorCard(
+    //     "Lobbyist",
+    //     <>Pay <Coins>X</Coins> to return X STAR_TOKEN from the map to their owners. If any player has at least <VP>20</VP>, you lose <VP>3</VP>.</>
+    // ),
+    // lovebirds: winterVisitorCard(
+    //     "Lovebirds",
+    //     <>Gain <Coins>1</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
+    // ),
+    // middleman: winterVisitorCard(
+    //     "Middleman",
+    //     <>Draw 3 <Vine />, then discard 1 <Vine /> or pay <Coins>2</Coins> OR fill 1 <Order />, even if the type(s) of wine doesn't match the <Order /> (values matter).</>
+    // ),
+    // premiumBuyer: winterVisitorCard(
+    //     "Premium Buyer",
+    //     <>Fill 1 <Order />. If all of the <WineGlass /> used to fill the wine order were at least 2 higher than the necessary value, gain <VP>2</VP>.</>
+    // ),
+    // researcher: winterVisitorCard(
+    //     "Researcher",
+    //     <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
+    // ),
+    // rhineSailor: winterVisitorCard(
+    //     "Rhine Sailor",
+    //     <>Discard 3 <Card /> to draw 3 <WinterVisitor /> and gain <Coins>1</Coins>.</>
+    // ),
+    // schoolTeacher: winterVisitorCard(
+    //     "School Teacher",
+    //     <>Pay <Coins>4</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VP>2</VP>.</>
+    // ),
+    // shipper: winterVisitorCard(
+    //     "Shipper",
+    //     <>Make up to 3 <WineGlass />, fill 1 <Order />, or gain <Coins>3</Coins>.</>
+    // ),
+    // skeptic: winterVisitorCard(
+    //     "Skeptic",
+    //     <>Upgrade your cellar to the next level at a <Coins>3</Coins> discount OR age 2 <WineGlass /> and fill 1 <Order />.</>
+    // ),
+    // specialHarvester: winterVisitorCard(
+    //     "Special Harvester",
+    //     <>Harvest 1 field and make 1 <WineGlass /> OR harvest each <Vine /> on a field as if it were its own field.</>
+    // ),
+    supervisor: winterVisitorCards.supervisor,
+    // theologian: winterVisitorCard(
+    //     "Theologian",
+    //     <>Harvest 1 field and get <Grape>1</Grape> extra OR fill 1 <Order /> and then you may discard <WineGlass color="red">X</WineGlass> to gain either <Coins>X</Coins> or <VP>2</VP>.</>
+    // ),
+    // trainer: winterVisitorCard(
+    //     "Trainer",
+    //     <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR lose an available <Worker /> to gain <VP>2</VP>.</>
+    // ),
+    // tutor: winterVisitorCard(
+    //     "Tutor",
+    //     <>Lose <VP>1</VP> and pay <Coins>1</Coins> to train 1 <Worker /> OR lose 1 <Worker /> to discard X <Card /> and draw X <Card />.</>
+    // ),
+    uncertifiedOenologist: winterVisitorCards.uncertifiedOenologist,
+    // virtuoso: winterVisitorCard(
+    //     "Virtuoso",
+    //     <>Take any action from a previous season without placing a <Worker />. Choose any bonus on that action (even if it's blocked).</>
+    // ),
+    // wineStoreOwner: winterVisitorCard(
+    //     "Wine Store Owner",
+    //     <>Discard <WineGlass>X</WineGlass> to gain X <Order /> OR pay <Coins>X</Coins> to gain <WineGlass>X</WineGlass>.</>
+    // ),
+    // winterAgent: winterVisitorCard(
+    //     "Winter Agent",
+    //     <>Draw 2 <SummerVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
+    // ),
+    zymologist: winterVisitorCards.zymologist,
+};
+
 export const visitorCards = {
     ...summerVisitorCards,
+    ...rhineSummerVisitorCards,
     ...winterVisitorCards,
+    ...rhineWinterVisitorCards,
 };

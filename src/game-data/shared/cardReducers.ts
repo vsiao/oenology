@@ -8,17 +8,24 @@ import {
     summerVisitorCards,
     visitorCards,
     winterVisitorCards,
+    rhineSummerVisitorCards,
+    rhineWinterVisitorCards,
 } from "../visitors/visitorCards";
 import { orderCards, OrderId } from "../orderCards";
 import { vineCards, VineId } from "../vineCards";
 
-export const unshuffledDecks = (exclude: { [K in string]?: boolean }): CardsByType => {
+export const unshuffledDecks = (
+    exclude: { [K in string]?: boolean },
+    options: { rhineVisitors?: boolean }
+): CardsByType => {
     return {
         vine: Object.keys(vineCards) as VineId[],
-        summerVisitor: Object.keys(summerVisitorCards)
+        summerVisitor: Object
+            .keys(options.rhineVisitors ? rhineSummerVisitorCards : summerVisitorCards)
             .filter(id => !exclude[id]) as SummerVisitorId[],
         order: Object.keys(orderCards) as OrderId[],
-        winterVisitor: Object.keys(winterVisitorCards)
+        winterVisitor: Object
+            .keys(options.rhineVisitors ? rhineWinterVisitorCards : winterVisitorCards)
             .filter(id => !exclude[id]) as WinterVisitorId[],
     };
 };
