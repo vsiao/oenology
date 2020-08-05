@@ -92,6 +92,15 @@ export const promptToChooseCard = (
     return enqueueActionPrompt(state, { type: "chooseCard", title, style, cards, optional, numCards });
 };
 
+export const promptToDiscard = (numCards: number, state: GameState): GameState => {
+    return promptToChooseCard(state, {
+        title: `Discard ${numCards} cards`,
+        style: "selector",
+        numCards,
+        cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),
+    });
+};
+
 export const promptToChooseOrderCard = (state: GameState): GameState => {
     const player = state.players[state.currentTurn.playerId];
     return promptToChooseCard(state, {

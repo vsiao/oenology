@@ -11,7 +11,7 @@ import GameState, {
 } from "../GameState";
 import { ageAll, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
-import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, promptToChooseCard, displayGameOverPrompt } from "../prompts/promptReducers";
+import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, displayGameOverPrompt, promptToDiscard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
@@ -643,11 +643,7 @@ const beginEOYDiscardTurn = (playerId: string, state: GameState): GameState => {
         return endEOYDiscardTurn(state);
     }
     const numCards = cards.length - END_OF_YEAR_HAND_LIMIT;
-    return promptToChooseCard(state, {
-        title: `Discard ${numCards} cards`,
-        cards: cards.map(id => ({ id })),
-        numCards,
-    });
+    return promptToDiscard(numCards, state);
 };
 
 const endEOYDiscardTurn = (state: GameState): GameState => {

@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -14,9 +14,9 @@ import {
     promptToChooseWine,
     promptToSwitchVines,
     promptToPlaceWorker,
-    promptToChooseField,
     promptToFillOrder,
     promptToChooseOrderCard,
+    promptToDiscard,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
@@ -68,7 +68,6 @@ import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
-import { stat } from "fs";
 
 export const summerVisitorReducers: Record<
     keyof typeof summerVisitorCards,
@@ -203,8 +202,6 @@ export const summerVisitorReducers: Record<
         }
     },
     auctioneer: (state, action) => {
-        const player = state.players[state.currentTurn.playerId];
-
         switch (action.type) {
             case "CHOOSE_CARDS":
                 switch (action.cards!.length) {
@@ -233,17 +230,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "AUCTIONEER_2":
-                        return promptToChooseCard(state, {
-                            title: "Discard 2 cards",
-                            cards: player.cardsInHand.map(id => ({ id })),
-                            numCards: 2,
-                        });
+                        return promptToDiscard(2, state);
                     case "AUCTIONEER_4":
-                        return promptToChooseCard(state, {
-                            title: "Discard 4 cards",
-                            cards: player.cardsInHand.map(id => ({ id })),
-                            numCards: 4,
-                        });
+                        return promptToDiscard(4, state);
                     default:
                         return state;
                 }
@@ -905,11 +894,7 @@ export const summerVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 if (action.cards!.length === 1) {
-                    return promptToChooseCard(state, {
-                        title: "Discard 2 cards",
-                        cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),
-                        numCards: 2,
-                    });
+                    return promptToDiscard(2, state);
                 } else {
                     return endVisitor(
                         drawCards(discardCards(action.cards!, state), action._key!, {
@@ -1508,12 +1493,7 @@ export const rhineSummerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "AGENT_DISCARD":
-                        return promptToChooseCard(state, {
-                            title: "Discard 2 cards",
-                            style: "selector",
-                            numCards: 2,
-                            cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),
-                        });
+                        return promptToDiscard(2, state);
                     case "AGENT_DRAW_VISITOR":
                         return endVisitor(
                             drawCards(payCoins(2, state), action._key!, { winterVisitor: 2 })
@@ -1675,6 +1655,93 @@ export const rhineSummerVisitorReducers: Record<
                         ? gainCoins(4, state)
                         : gainCoins(2, state)
                 );
+            default:
+                return state;
+        }
+    },
+    embezzler: (state, action) => {
+        const promptToGainOrDraw = (state2: GameState) => {
+            return promptForAction(state2, {
+                choices: [
+                    { id: "EMBEZZLER_GAIN", label: <>Gain <Coins>6</Coins></>, },
+                    { id: "EMBEZZLER_DRAW", label: <>Draw 3 <Order /></>, },
+                ],
+            });
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.cards!.length === 1) {
+                    return promptForAction(state, {
+                        choices: [
+                            { id: "EMBEZZLER_LOSE", label: <>Lose <VP>2</VP></>, },
+                            {
+                                id: "EMBEZZLER_DISCARD",
+                                label: <>Discard 3 <Card /></>,
+                                disabledReason: numCardsDisabledReason(state, 3),
+                            },
+                        ],
+                    });
+                } else {
+                    return promptToGainOrDraw(discardCards(action.cards!, state));
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "EMBEZZLER_LOSE":
+                        return promptToGainOrDraw(loseVP(2, state));
+                    case "EMBEZZLER_DISCARD":
+                        return promptToDiscard(3, state);
+                    case "EMBEZZLER_GAIN":
+                        return endVisitor(gainCoins(6, state));
+                    case "EMBEZZLER_DRAW":
+                        return endVisitor(drawCards(state, action._key!,  { order: 3 }));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    fortuneTeller: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return endVisitor(
+                    drawCards(state, action._key!, {
+                        winterVisitor: 2,
+                        order: Object.values(state.players).some(p => p.victoryPoints >= 5) ? 1 : 0,
+                    })
+                );
+            default:
+                return state;
+        }
+    },
+    freelancer: (state, action) => {
+        const coupon: Coupon = { kind: "voucher", upToCost: maxStructureCost };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        ...(["vine", "summerVisitor", "order", "winterVisitor"] as CardType[]).map(type =>
+                            ({ id: "FREELANCER_DRAW", data: type, label: <>Draw 1 <Card type={type} /></>, })
+                        ),
+                        {
+                            id: "FREELANCER_BUILD",
+                            label: <>Lose <VP>2</VP> to build 1 structure for free</>,
+                            disabledReason: buildStructureDisabledReason(state, coupon),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "FREELANCER_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { [action.data as CardType]: 1 }));
+                    case "FREELANCER_BUILD":
+                        return promptToBuildStructure(state, coupon);
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                return endVisitor(buildStructure(state, action.structureId));
             default:
                 return state;
         }

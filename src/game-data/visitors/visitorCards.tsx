@@ -235,18 +235,18 @@ export const rhineSummerVisitorCards = {
         "Early Buyer",
         <>Fill 1 <Order /> and gain <Coins>2</Coins>. If you have no more than <VP>5</VP>, gain <Coins>4</Coins> instead.</>
     ),
-    // embezzler: summerVisitorCard(
-    //     "Embezzler",
-    //     <>Lose <VP>2</VP> or discard 3 <Card /> to either gain <Coins>6</Coins> or draw 3 <Order />.</>
-    // ),
-    // fortuneTeller: summerVisitorCard(
-    //     "Fortune Teller",
-    //     <>Draw 2 <WinterVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
-    // ),
-    // freelancer: summerVisitorCard(
-    //     "Freelancer",
-    //     <>Draw 1 <Card /> OR lose <VP>2</VP> to build 1 structure for free.</>
-    // ),
+    embezzler: summerVisitorCard(
+        "Embezzler",
+        <>Lose <VP>2</VP> or discard 3 <Card /> to either gain <Coins>6</Coins> or draw 3 <Order />.</>
+    ),
+    fortuneTeller: summerVisitorCard(
+        "Fortune Teller",
+        <>Draw 2 <WinterVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
+    ),
+    freelancer: summerVisitorCard(
+        "Freelancer",
+        <>Draw 1 <Card /> OR lose <VP>2</VP> to build 1 structure for free.</>
+    ),
     // friendlyHelper: summerVisitorCard(
     //     "Friendly Helper",
     //     <>Upgrade your cellar at a <Coins>3</Coins> discount OR gain <WineGlass>1</WineGlass>.</>
