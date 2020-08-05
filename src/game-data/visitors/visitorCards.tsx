@@ -218,23 +218,23 @@ export const rhineSummerVisitorCards = {
     //     "Brick Mason",
     //     <>Pay <Coins>9</Coins> to build any 2 structures OR destroy a structure to gain <VP>1</VP> and <Order />.</>
     // ),
-    // cicerone: summerVisitorCard(
-    //     "Cicerone",
-    //     <>Gain <Coins>4</Coins>, harvest 1 field, or discard 1 <Grape /> to draw 3 <Order />.</>
-    // ),
+    cicerone: summerVisitorCard(
+        "Cicerone",
+        <>Gain <Coins>4</Coins>, harvest 1 field, or discard 1 <Grape /> to draw 3 <Order />.</>
+    ),
     contractor: summerVisitorCards.contractor,
     // dismantler: summerVisitorCard(
     //     "Dismantler",
     //     <>Destroy 1 of your structures, then gain <WineGlass>X</WineGlass>, where X is the cost of the structure.</>
     // ),
-    // docent: summerVisitorCard(
-    //     "Docent",
-    //     <>Gain <Coins>3</Coins> OR make up to 3 <WineGlass />.</>
-    // ),
-    // earlyBuyer: summerVisitorCard(
-    //     "Early Buyer",
-    //     <>Fill 1 <Order /> and gain <Coins>2</Coins>. If you have no more than <VP>5</VP>, gain <Coins>4</Coins> instead.</>
-    // ),
+    docent: summerVisitorCard(
+        "Docent",
+        <>Gain <Coins>3</Coins> OR make up to 3 <WineGlass />.</>
+    ),
+    earlyBuyer: summerVisitorCard(
+        "Early Buyer",
+        <>Fill 1 <Order /> and gain <Coins>2</Coins>. If you have no more than <VP>5</VP>, gain <Coins>4</Coins> instead.</>
+    ),
     // embezzler: summerVisitorCard(
     //     "Embezzler",
     //     <>Lose <VP>2</VP> or discard 3 <Card /> to either gain <Coins>6</Coins> or draw 3 <Order />.</>

@@ -14,6 +14,9 @@ import {
     promptToChooseWine,
     promptToSwitchVines,
     promptToPlaceWorker,
+    promptToChooseField,
+    promptToFillOrder,
+    promptToChooseOrderCard,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
@@ -60,11 +63,12 @@ import {
     makeEndVisitorAction,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines } from "../shared/grapeWineReducers";
+import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
+import { stat } from "fs";
 
 export const summerVisitorReducers: Record<
     keyof typeof summerVisitorCards,
@@ -1584,5 +1588,95 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    cicerone: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "CICERONE_GAIN", label: <>Gain <Coins>4</Coins></>, },
+                        {
+                            id: "CICERONE_HARVEST",
+                            label: <>Harvest 1 field</>,
+                            disabledReason: harvestFieldDisabledReason(state),
+                        },
+                        {
+                            id: "CICERONE_DRAW",
+                            label: <>Discard 1 <Grape /> to draw 3 <Order /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CICERONE_GAIN":
+                        return endVisitor(gainCoins(4, state));
+                    case "CICERONE_HARVEST":
+                        return promptToHarvest(state);
+                    case "CICERONE_DRAW":
+                        return promptToChooseGrapes(state, 1);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return endVisitor(harvestField(state, action.fields[0]));
+            case "CHOOSE_GRAPE":
+                return endVisitor(
+                    drawCards(discardGrapes(state, action.grapes), action._key!, { order: 3 })
+                );
+            default:
+                return state;
+        }
+    },
     contractor: summerVisitorReducers.contractor,
+    docent: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "DOCENT_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        {
+                            id: "DOCENT_MAKE",
+                            label: <>Make up to 3 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "DOCENT_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    case "DOCENT_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 3);
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
+    earlyBuyer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptToChooseOrderCard(state);
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                state = fillOrder(action.wines, state);
+                return endVisitor(
+                    state.players[state.currentTurn.playerId].victoryPoints <= 5
+                        ? gainCoins(4, state)
+                        : gainCoins(2, state)
+                );
+            default:
+                return state;
+        }
+    },
 };
