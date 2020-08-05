@@ -201,19 +201,19 @@ export const rhineSummerVisitorCards = {
     //     "Administrator",
     //     <>Place the <Worker /> with which you played this card on an action in a future season. Take the action at the beginning of that season.</>
     // ),
-    // agent: summerVisitorCard(
-    //     "Agent",
-    //     <>Discard 2 <Card /> to gain <Coins>5</Coins> OR pay <Coins>2</Coins> to draw 2 <WinterVisitor /> or 2 <Vine />.</>
-    // ),
-    // ampelograph: summerVisitorCard(
-    //     "Ampelograph",
-    //     <>Plant 1 <Vine />. You may plant it on a field even if it exceeds the max vine value; if it doesn't, also gain <Coins>2</Coins>.</>
-    // ),
+    agent: summerVisitorCard(
+        "Agent",
+        <>Discard 2 <Card /> to gain <Coins>5</Coins> OR pay <Coins>2</Coins> to draw 2 <WinterVisitor /> or 2 <Vine />.</>
+    ),
+    ampelograph: summerVisitorCard(
+        "Ampelograph",
+        <>Plant 1 <Vine />. You may plant it on a field even if it exceeds the max vine value; if it doesn't, also gain <Coins>2</Coins>.</>
+    ),
     banker: summerVisitorCards.banker,
-    // botanist: summerVisitorCard(
-    //     "Botanist",
-    //     <>Gain <Grape>2</Grape> OR discard 1 <Grape /> to draw 4 <Vine />.</>
-    // ),
+    botanist: summerVisitorCard(
+        "Botanist",
+        <>Gain <Grape>2</Grape> OR discard 1 <Grape /> to draw 4 <Vine />.</>
+    ),
     // brickMason: summerVisitorCard(
     //     "Brick Mason",
     //     <>Pay <Coins>9</Coins> to build any 2 structures OR destroy a structure to gain <VP>1</VP> and <Order />.</>

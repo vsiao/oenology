@@ -94,6 +94,8 @@ const renderActivity = (
             return <>{player} {event.delta < 0 ? "paid" : "gained"} <Coins>{Math.abs(event.delta)}</Coins></>;
         case "discard":
             return <>{player} discarded {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
+        case "discardGrapes":
+            return <>{player} discarded {event.grapes.map((g, i) => <Grape key={i} color={g.color}>{g.value}</Grape>)}</>;
         case "draw":
             return <>{player} drew {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
         case "fill":
@@ -122,8 +124,6 @@ const renderActivity = (
             return <>{player} played <strong>{visitorCards[event.visitorId].name}</strong></>;
         case "vp":
             return <>{player} {event.delta < 0 ? "lost" : "gained"} <VP>{Math.abs(event.delta)}</VP></>;
-        default:
-            return JSON.stringify(event);
     }
 };
 

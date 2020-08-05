@@ -58,7 +58,6 @@ const Lobby: React.FunctionComponent<Props> = ({
                     <div className="Lobby-howto">
                         <h4 className="Lobby-howtoHeader">
                             Winemaking for Dummies™
-                            {/* <br /><em>from grape to glass</em> */}
                         </h4>
                         <ol className="Lobby-howtoList">
                             <li className="Lobby-howtoItem">Plant <Vine /></li>
@@ -131,14 +130,25 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     className="Lobby-optionCheckbox"
                                     type="checkbox"
                                     disabled={!isHost}
-                                    checked={gameOptions.multiInheritance}
+                                    checked={gameOptions.multiInheritance ?? false}
                                     onChange={() => setOption("multiInheritance", !gameOptions.multiInheritance)}
                                 />
                                 Mama &amp; Papa: Choose from 2
                             </label>
                         </li>
+                        <li className="Lobby-gameOption">
+                            <label className="Lobby-optionLabel">
+                                <input
+                                    className="Lobby-optionCheckbox"
+                                    type="checkbox"
+                                    disabled={!isHost}
+                                    checked={gameOptions.rhineVisitors ?? false}
+                                    onChange={() => setOption("rhineVisitors", !gameOptions.rhineVisitors)}
+                                />
+                                Visit from the Rhine Valley
+                            </label>
+                        </li>
                         {renderComingSoonOption("Tuscany board")}
-                        {renderComingSoonOption("Visit from the Rhine Valley")}
                     </ul>
                     {isHost
                         ? <ChoiceButton

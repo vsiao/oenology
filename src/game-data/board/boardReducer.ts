@@ -16,7 +16,7 @@ import {
     promptToChooseVineCard,
     promptToFillOrder,
     promptToPlant,
-    promptToChooseGrape
+    promptToChooseGrapes,
 } from "../prompts/promptReducers";
 import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
@@ -184,7 +184,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                         }
                     );
                 case "BOARD_SELL_GRAPES":
-                    return promptToChooseGrape(
+                    return promptToChooseGrapes(
                         setPendingAction({ type: "sellGrapes", hasBonus: pendingAction.hasBonus }, state)
                     );
                 default:

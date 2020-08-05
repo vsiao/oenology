@@ -12,6 +12,7 @@ export type ActivityLogEvent =
     | BuySellFieldEvent
     | CoinsEvent
     | DiscardEvent
+    | DiscardGrapesEvent
     | DrawEvent
     | FillEvent
     | HarvestEvent
@@ -43,6 +44,9 @@ interface CoinsEvent extends LogEvent<"coins"> {
 }
 interface DiscardEvent extends LogEvent<"discard"> {
     cards: CardType[];
+}
+interface DiscardGrapesEvent extends LogEvent<"discardGrapes"> {
+    grapes: GrapeSpec[];
 }
 interface DrawEvent extends LogEvent<"draw"> {
     cards: CardType[];

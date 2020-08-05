@@ -10,13 +10,13 @@ import {
     promptToPlant,
     promptToChooseCard,
     promptToUproot,
-    promptToChooseGrape,
+    promptToChooseGrapes,
     promptToChooseWine,
     promptToSwitchVines,
     promptToPlaceWorker,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
-import { SummerVisitorId } from "./visitorCards";
+import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
 import {
     buildStructure,
     gainCoins,
@@ -42,6 +42,7 @@ import {
     needCardOfTypeDisabledReason,
     structureDisabledReason,
     switchVines,
+    fieldYields,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -66,7 +67,7 @@ import { allPlacements } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 
 export const summerVisitorReducers: Record<
-    SummerVisitorId,
+    keyof typeof summerVisitorCards,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     agriculturist: (state, action) => {
@@ -347,7 +348,7 @@ export const summerVisitorReducers: Record<
                     case "BUYER_PLACE_WHITE":
                         return endVisitor(payCoins(2, placeGrapes(state, { white: 1 })));
                     case "BUYER_DISCARD":
-                        return promptToChooseGrape(state);
+                        return promptToChooseGrapes(state, 1);
                     default:
                         return state;
                 }
@@ -782,7 +783,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "NEGOTIATOR_GRAPE":
-                        return promptToChooseGrape(state, 1);
+                        return promptToChooseGrapes(state, 1);
                     case "NEGOTIATOR_WINE":
                         return promptToChooseWine(state);
                     default:
@@ -1468,4 +1469,120 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
+};
+
+export const rhineSummerVisitorReducers: Record<
+    keyof typeof rhineSummerVisitorCards,
+    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+> = {
+    agent: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.cards?.length === 1) {
+                    return promptForAction(state, {
+                        choices: [
+                            {
+                                id: "AGENT_DISCARD",
+                                label: <>Discard 2 <Card /> to gain <Coins>5</Coins></>,
+                                disabledReason: numCardsDisabledReason(state, 2),
+                            },
+                            {
+                                id: "AGENT_DRAW_VISITOR",
+                                label: <>Pay <Coins>2</Coins> to draw 2 <WinterVisitor /></>,
+                                disabledReason: moneyDisabledReason(state, 2),
+                            },
+                            {
+                                id: "AGENT_DRAW_VINE",
+                                label: <>Pay <Coins>2</Coins> to draw 2 <Vine /></>,
+                                disabledReason: moneyDisabledReason(state, 2),
+                            },
+                        ],
+                    });
+                } else {
+                    return endVisitor(gainCoins(5, discardCards(action.cards!, state)));
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "AGENT_DISCARD":
+                        return promptToChooseCard(state, {
+                            title: "Discard 2 cards",
+                            style: "selector",
+                            numCards: 2,
+                            cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),
+                        });
+                    case "AGENT_DRAW_VISITOR":
+                        return endVisitor(
+                            drawCards(payCoins(2, state), action._key!, { winterVisitor: 2 })
+                        );
+                    case "AGENT_DRAW_VINE":
+                        return endVisitor(
+                            drawCards(payCoins(2, state), action._key!, { vine: 2 })
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    ampelograph: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptToChooseVineCard(state, { bypassFieldLimit: true });
+                    case "vine":
+                        return promptToPlant(state, card.id, { bypassFieldLimit: true });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                const fieldId = action.fields[0]
+                state = plantVineInField(fieldId, state);
+                const field = state.players[state.currentTurn.playerId].fields[fieldId];
+                const yields = fieldYields(field);
+
+                return endVisitor(
+                    yields.red + yields.white <= field.value ? gainCoins(2, state) : state
+                );
+            default:
+                return state;
+        }
+    },
+    banker: summerVisitorReducers.banker,
+    botanist: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "BOTANIST_GAIN_RED", label: <>Gain <Grape color="red">2</Grape></>, },
+                        { id: "BOTANIST_GAIN_WHITE", label: <>Gain <Grape color="white">2</Grape></>, },
+                        {
+                            id: "BOTANIST_DISCARD",
+                            label: <>Discard 1 <Grape /> to draw 4 <Vine /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BOTANIST_GAIN_RED":
+                        return endVisitor(placeGrapes(state, { red: 2 }));
+                    case "BOTANIST_GAIN_WHITE":
+                        return endVisitor(placeGrapes(state, { white: 2 }));
+                    case "BOTANIST_DISCARD":
+                        return promptToChooseGrapes(state, 1);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                return endVisitor(
+                    drawCards(discardGrapes(state, action.grapes), action._key!, { vine: 4 })
+                );
+            default:
+                return state;
+        }
+    },
+    contractor: summerVisitorReducers.contractor,
 };

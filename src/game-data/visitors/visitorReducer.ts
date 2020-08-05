@@ -1,14 +1,16 @@
 import GameState from "../GameState";
 import { GameAction } from "../gameActions";
-import { summerVisitorReducers } from "./summerVisitorReducers";
-import { winterVisitorReducers } from "./winterVisitorReducers";
+import { summerVisitorReducers, rhineSummerVisitorReducers } from "./summerVisitorReducers";
+import { winterVisitorReducers, rhineWinterVisitorReducers } from "./winterVisitorReducers";
 import { pushActivityLog } from "../shared/sharedReducers";
 import { removeCardsFromHand } from "../shared/cardReducers";
 import { setPendingAction, endTurn } from "../shared/turnReducers";
 
 const visitorReducers = {
     ...summerVisitorReducers,
+    ...rhineSummerVisitorReducers,
     ...winterVisitorReducers,
+    ...rhineWinterVisitorReducers,
 };
 
 export const visitor = (state: GameState, action: GameAction) => {

@@ -24,11 +24,11 @@ import {
     promptToFillOrder,
     promptToHarvest,
     promptToChooseCard,
-    promptToChooseGrape,
+    promptToChooseGrapes,
     promptToChooseVisitor,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
-import { WinterVisitorId, visitorCards } from "./visitorCards";
+import { visitorCards, winterVisitorCards, rhineWinterVisitorCards } from "./visitorCards";
 import {
     fillOrderDisabledReason,
     moneyDisabledReason,
@@ -62,7 +62,7 @@ import { seasonalActions } from "../board/boardPlacements";
 import { boardAction } from "../board/boardActionReducer";
 
 export const winterVisitorReducers: Record<
-    WinterVisitorId,
+    keyof typeof winterVisitorCards,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     assessor: (state, action) => {
@@ -324,7 +324,7 @@ export const winterVisitorReducers: Record<
                     case "EXPORTER_FILL":
                         return promptToChooseOrderCard(state);
                     case "EXPORTER_DISCARD":
-                        return promptToChooseGrape(state, 1);
+                        return promptToChooseGrapes(state, 1);
                     default:
                         return state;
                 }
@@ -1181,7 +1181,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROMOTER_GRAPE":
-                        return promptToChooseGrape(state, 1);
+                        return promptToChooseGrapes(state, 1);
                     case "PROMOTER_WINE":
                         return promptToChooseWine(state);
                     default:
@@ -1453,4 +1453,16 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+};
+
+export const rhineWinterVisitorReducers: Record<
+    keyof typeof rhineWinterVisitorCards,
+    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+> = {
+    craftsman: winterVisitorReducers.craftsman,
+    harvestExpert: winterVisitorReducers.harvestExpert,
+    laborer: winterVisitorReducers.laborer,
+    supervisor: winterVisitorReducers.supervisor,
+    uncertifiedOenologist: winterVisitorReducers.uncertifiedOenologist,
+    zymologist: winterVisitorReducers.zymologist,
 };

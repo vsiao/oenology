@@ -109,7 +109,10 @@ export const discardGrapes = (state: GameState, grapes: GrapeSpec[]) => {
             [g.color]: crushPad[g.color].map((hasWine, i) => hasWine && g.value !== i + 1),
         };
     });
-    return updatePlayer(state, state.currentTurn.playerId, { crushPad });
+    return pushActivityLog(
+        { type: "discardGrapes", playerId: player.id, grapes },
+        updatePlayer(state, state.currentTurn.playerId, { crushPad })
+    );
 };
 
 export const makeWineFromGrapes = (
