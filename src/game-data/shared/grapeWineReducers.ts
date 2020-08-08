@@ -115,6 +115,23 @@ export const discardGrapes = (state: GameState, grapes: GrapeSpec[]) => {
     );
 };
 
+export const gainWine = (
+    wine: WineSpec,
+    state: GameState
+): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const idx = devaluedIndex(wine.value, player.cellar[wine.color]);
+    return pushActivityLog(
+        { type: "gainWine", playerId: player.id, wine },
+        updatePlayer(state, player.id, {
+            cellar: {
+                ...player.cellar,
+                [wine.color]: player.cellar[wine.color].map((w, i) => i === idx || w) as TokenMap,
+            },
+        })
+    );
+};
+
 export const makeWineFromGrapes = (
     state: GameState,
     wine: WineIngredients[],

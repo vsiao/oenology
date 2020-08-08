@@ -15,6 +15,7 @@ export type ActivityLogEvent =
     | DiscardGrapesEvent
     | DrawEvent
     | FillEvent
+    | GainWineEvent
     | HarvestEvent
     | MakeWineEvent
     | PassEvent
@@ -53,6 +54,9 @@ interface DrawEvent extends LogEvent<"draw"> {
 }
 interface FillEvent extends LogEvent<"fill"> {
     wines: WineSpec[];
+}
+interface GainWineEvent extends LogEvent<"gainWine"> {
+    wine: WineSpec;
 }
 interface PlantEvent extends LogEvent<"plant"> {
     vineId: VineId;

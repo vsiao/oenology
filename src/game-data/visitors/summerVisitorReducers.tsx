@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType, WineColor } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -46,6 +46,7 @@ import {
     structureDisabledReason,
     switchVines,
     fieldYields,
+    cardTypesInPlay,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -63,7 +64,7 @@ import {
     makeEndVisitorAction,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder } from "../shared/grapeWineReducers";
+import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements } from "../board/boardPlacements";
@@ -1721,7 +1722,7 @@ export const rhineSummerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptForAction(state, {
                     choices: [
-                        ...(["vine", "summerVisitor", "order", "winterVisitor"] as CardType[]).map(type =>
+                        ...cardTypesInPlay(state).map(type =>
                             ({ id: "FREELANCER_DRAW", data: type, label: <>Draw 1 <Card type={type} /></>, })
                         ),
                         {
@@ -1742,6 +1743,110 @@ export const rhineSummerVisitorReducers: Record<
                 }
             case "BUILD_STRUCTURE":
                 return endVisitor(buildStructure(state, action.structureId));
+            default:
+                return state;
+        }
+    },
+    friendlyHelper: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+        const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
+        const cost = structures[upgradeCellar].cost - 3;
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "FHELPER_UPGRADE",
+                            label: <>Upgrade cellar at a <Coins>3</Coins> discount</>,
+                            disabledReason: player.structures.largeCellar
+                                ? "Your cellar is fully upgraded."
+                                : moneyDisabledReason(state, cost),
+                        },
+                        ...(["red", "white"] as WineColor[]).map(color =>
+                            ({
+                                id: "FHELPER_GAIN",
+                                data: color,
+                                label: <>Gain <WineGlass color={color}>1</WineGlass></>,
+                            })
+                        ),
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "FHELPER_UPGRADE":
+                        return endVisitor(buildStructure(payCoins(cost, state), upgradeCellar));
+                    case "FHELPER_GAIN":
+                        return endVisitor(
+                            gainWine({ color: action.data as WineColor, value: 1 }, state)
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    grapeBuyer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "GBUYER_GAIN1",
+                            label: <>Pay <Coins>3</Coins> to gain <Grape color="white">1</Grape> and <Grape color="red">1</Grape></>,
+                            disabledReason: moneyDisabledReason(state, 3),
+                        },
+                        {
+                            id: "GBUYER_GAIN4",
+                            label: <>Pay <Coins>5</Coins> to gain <Grape color="white">4</Grape> and <Grape color="red">4</Grape></>,
+                            disabledReason: moneyDisabledReason(state, 5),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "GBUYER_GAIN1":
+                        return endVisitor(placeGrapes(payCoins(3, state), { red: 1, white: 1 }));
+                    case "GBUYER_GAIN4":
+                        return endVisitor(placeGrapes(payCoins(5, state), { red: 4, white: 4 }));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    greenskeeper: (state, action, pendingAction) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (!action.cards) {
+                    // Passed on bonus vine plant
+                    return endVisitor(state);
+                }
+                const card = action.cards[0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptToChooseVineCard(gainCoins(2, state));
+                    case "vine":
+                        return promptToPlant(state, card.id, {
+                            bypassFieldLimit: pendingAction.hasBonus,
+                        });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                state = plantVineInField(action.fields[0], state);
+
+                const hasBonus = !pendingAction.hasBonus &&
+                    Object.values(state.players).some(p => p.victoryPoints >= 10);
+                if (hasBonus && plantVinesDisabledReason(state) === undefined) {
+                    return promptToChooseVineCard(
+                        setPendingAction({ ...pendingAction, hasBonus: true }, state),
+                        { optional: true, bypassFieldLimit: true }
+                    );
+                }
+                return endVisitor(state);
             default:
                 return state;
         }

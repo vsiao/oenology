@@ -100,6 +100,8 @@ const renderActivity = (
             return <>{player} drew {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
         case "fill":
             return <>{player} filled a {event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)} order</>;
+        case "gainWine":
+            return <>{player} gained a <WineGlass color={event.wine.color}>{event.wine.value}</WineGlass></>;
         case "buySellField":
             return <>{player} {event.buy ? "bought" : "sold"} a field</>;
         case "harvest":

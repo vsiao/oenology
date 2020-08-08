@@ -247,22 +247,22 @@ export const rhineSummerVisitorCards = {
         "Freelancer",
         <>Draw 1 <Card /> OR lose <VP>2</VP> to build 1 structure for free.</>
     ),
-    // friendlyHelper: summerVisitorCard(
-    //     "Friendly Helper",
-    //     <>Upgrade your cellar at a <Coins>3</Coins> discount OR gain <WineGlass>1</WineGlass>.</>
-    // ),
-    // grapeBuyer: summerVisitorCard(
-    //     "Grape Buyer",
-    //     <>Pay <Coins>3</Coins> to gain <Grape color="white">1</Grape> and <Grape color="red">1</Grape> OR pay <Coins>5</Coins> to gain <Grape color="white">4</Grape> and <Grape color="red">4</Grape>.</>
-    // ),
+    friendlyHelper: summerVisitorCard(
+        "Friendly Helper",
+        <>Upgrade your cellar at a <Coins>3</Coins> discount OR gain <WineGlass>1</WineGlass>.</>
+    ),
+    grapeBuyer: summerVisitorCard(
+        "Grape Buyer",
+        <>Pay <Coins>3</Coins> to gain <Grape color="white">1</Grape> and <Grape color="red">1</Grape> OR pay <Coins>5</Coins> to gain <Grape color="white">4</Grape> and <Grape color="red">4</Grape>.</>
+    ),
     // grapeMerchant: summerVisitorCard(
     //     "Grape Merchant",
     //     <>Sell up to 3 <Grape /> for triple their price OR discard 2 <Grape /> to gain <WineGlass color="blush">6</WineGlass> even if you don't have the Medium Cellar.</>
     // ),
-    // greenskeeper: summerVisitorCard(
-    //     "Greenskeeper",
-    //     <>Gain <Coins>2</Coins> and plant 1 <Vine />. If any player already has at least <VP>10</VP>, plant 1 additional <Vine /> ignoring the fields maximum.</>
-    // ),
+    greenskeeper: summerVisitorCard(
+        "Greenskeeper",
+        <>Gain <Coins>2</Coins> and plant 1 <Vine />. If any player already has at least <VP>10</VP>, plant 1 additional <Vine /> ignoring the fields maximum.</>
+    ),
     // miller: summerVisitorCard(
     //     "Miller",
     //     <>If you have a windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a windmill.</>

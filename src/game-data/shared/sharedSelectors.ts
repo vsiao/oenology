@@ -226,6 +226,10 @@ export const fillOrderDisabledReason = (state: GameState, playerId = state.curre
         }) ? undefined : "You can't fill any of your orders.");
 };
 
+export const cardTypesInPlay = (state: GameState): CardType[] => {
+    return ["vine", "summerVisitor", "order", "winterVisitor"];
+};
+
 export const numCardsDisabledReason = (
     state: GameState,
     numCards: number,
