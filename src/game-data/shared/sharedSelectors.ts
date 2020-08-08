@@ -346,3 +346,9 @@ export const gameIsOver = (state: GameState) => {
         && state.wakeUpOrder.every(pos => !pos || pos.passed)
         && Object.values(state.players).some(p => p.victoryPoints >= GAME_OVER_VP);
 };
+
+export const residualPaymentsDisabledReason = (state: GameState, n: number): string | undefined => {
+    return state.players[state.currentTurn.playerId].residuals >= n
+        ? undefined
+        : "You don't have enough residual payments.";
+};

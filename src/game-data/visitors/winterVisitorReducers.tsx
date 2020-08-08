@@ -2,7 +2,7 @@ import * as React from "react";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import Card, { SummerVisitor, Vine, Order } from "../../game-views/icons/Card";
+import Card, { SummerVisitor, Vine, Order, WinterVisitor } from "../../game-views/icons/Card";
 import {
     buildStructure,
     gainVP,
@@ -38,6 +38,7 @@ import {
     numCardsDisabledReason,
     harvestFieldDisabledReason,
     needCardOfTypeDisabledReason,
+    residualPaymentsDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -60,6 +61,7 @@ import {
 import { Choice } from "../prompts/PromptState";
 import { seasonalActions } from "../board/boardPlacements";
 import { boardAction } from "../board/boardActionReducer";
+import ActionPrompt from "../../game-views/controls/ActionPrompt";
 
 export const winterVisitorReducers: Record<
     keyof typeof winterVisitorCards,
@@ -1053,10 +1055,7 @@ export const winterVisitorReducers: Record<
                         {
                             id: "NOBLE_LOSE",
                             label: <>Lose <Residuals>2</Residuals> to gain <VP>2</VP></>,
-                            disabledReason:
-                                state.players[state.currentTurn.playerId].residuals < 2
-                                    ? "You don't have enough residual payments."
-                                    : undefined,
+                            disabledReason: residualPaymentsDisabledReason(state, 2),
                         },
                     ],
                 });
@@ -1459,6 +1458,136 @@ export const rhineWinterVisitorReducers: Record<
     keyof typeof rhineWinterVisitorCards,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
+    advertiser: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "ADVERTISER_GRAPE",
+                            label: <>Discard 1 <Grape /> to gain <VP>1</VP> and <Residuals>1</Residuals></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        {
+                            id: "ADVERTISER_WINE",
+                            label: <>Discard 1 <WineGlass /> to gain <VP>1</VP> and <Residuals>1</Residuals></>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                        {
+                            id: "ADVERTISER_DRAW",
+                            label: <>Lose <Residuals>2</Residuals> to draw 3 <Order /></>,
+                            disabledReason: residualPaymentsDisabledReason(state, 2),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ADVERTISER_GRAPE":
+                        return promptToChooseGrapes(state, 1);
+                    case "ADVERTISER_WINE":
+                        return promptToChooseWine(state);
+                    case "ADVERTISER_DRAW":
+                        return endVisitor(
+                            drawCards(loseResiduals(2, state), action._key!, { order: 3 })
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardGrapes(state, action.grapes))));
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(1, gainResiduals(1, discardWines(state, action.wines))));
+            default:
+                return state;
+        }
+    },
+    bargainer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return endVisitor(drawCards(state, action._key!, { order: 3 }));
+            default:
+                return state;
+        }
+    },
+    bureaucrat: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const vp = state.players[state.currentTurn.playerId].victoryPoints;
+                const fewestVP = Object.values(state.players)
+                    .filter(p => p.id !== state.currentTurn.playerId)
+                    .every(p => p.victoryPoints > vp);
+
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "BUREAUCRAT_GAIN",
+                            label: <>Gain <Coins>5</Coins></>,
+                            disabledReason: fewestVP ? undefined : "You have too many victory points.",
+                        },
+                        {
+                            id: "BUREAUCRAT_DRAW",
+                            label: <>Pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order /></>,
+                            disabledReason: moneyDisabledReason(state, 1),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BUREAUCRAT_GAIN":
+                        return endVisitor(gainCoins(5, state));
+                    case "BUREAUCRAT_DRAW":
+                        return endVisitor(
+                            drawCards(payCoins(1, state), action._key!, { vine: 1, winterVisitor: 1, order: 1 })
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    cellarman: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "CELLARMAN_PAY",
+                                    label: <>
+                                        Pay <Coins>4</Coins> to gain <Grape color="red">1</Grape> and <Grape color="white">1</Grape>
+                                    </>,
+                                    disabledReason: moneyDisabledReason(state, 4),
+                                },
+                                {
+                                    id: "CELLARMAN_FILL",
+                                    label: <>Fill 1 <Order /> and then gain <Coins>3</Coins>.</>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CELLARMAN_PAY":
+                        return endVisitor(placeGrapes(payCoins(4, state), { red: 1, white: 1 }));
+                    case "CELLARMAN_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(gainCoins(3, fillOrder(action.wines, state)));
+            default:
+                return state;
+        }
+    },
     craftsman: winterVisitorReducers.craftsman,
     harvestExpert: winterVisitorReducers.harvestExpert,
     laborer: winterVisitorReducers.laborer,

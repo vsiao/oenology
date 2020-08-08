@@ -508,26 +508,26 @@ export const winterVisitorCards = {
 };
 
 export const rhineWinterVisitorCards = {
-    // advertiser: winterVisitorCard(
-    //     "Advertiser",
-    //     <>Discard 1 <Grape /> or 1 <WineGlass /> to gain <VP>1</VP> and <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to draw 3 <Order />.</>
-    // ),
-    // bargainer: winterVisitorCard(
-    //     "Bargainer",
-    //     <>Draw 3 <Order />.</>
-    // ),
+    advertiser: winterVisitorCard(
+        "Advertiser",
+        <>Discard 1 <Grape /> or 1 <WineGlass /> to gain <VP>1</VP> and <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to draw 3 <Order />.</>
+    ),
+    bargainer: winterVisitorCard(
+        "Bargainer",
+        <>Draw 3 <Order />.</>
+    ),
     // brideToBe: winterVisitorCard(
     //     "Bride-to-be",
     //     <>Gain <Coins>3</Coins> OR make 1 <WineGlass color="sparkling" /> with any 2 <Grape /> (instead of 2 <Grape color="red" /> and 1 <Grape color="white" />).</>
     // ),
-    // bureaucrat: winterVisitorCard(
-    //     "Bureaucrat",
-    //     <>If you have the fewest <VP /> (no ties), gain <Coins>5</Coins>. Otherwise pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order />.</>
-    // ),
-    // cellarman: winterVisitorCard(
-    //     "Cellarman",
-    //     <>Pay <Coins>4</Coins> to gain <Grape color="red">1</Grape> and <Grape color="white">1</Grape> OR fill 1 <Order /> and then gain <Coins>3</Coins>.</>
-    // ),
+    bureaucrat: winterVisitorCard(
+        "Bureaucrat",
+        <>If you have the fewest <VP /> (no ties), gain <Coins>5</Coins>. Otherwise pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order />.</>
+    ),
+    cellarman: winterVisitorCard(
+        "Cellarman",
+        <>Pay <Coins>4</Coins> to gain <Grape color="red">1</Grape> and <Grape color="white">1</Grape> OR fill 1 <Order /> and then gain <Coins>3</Coins>.</>
+    ),
     // cellarmaster: winterVisitorCard(
     //     "Cellarmaster",
     //     <>Discard 1 <WineGlass /> to gain <Coins>4</Coins>. If it is the most valuable wine in any player's cellar, gain also <VP>2</VP></>
