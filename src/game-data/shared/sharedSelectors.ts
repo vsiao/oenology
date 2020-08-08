@@ -249,7 +249,7 @@ export const needCardOfTypeDisabledReason = (
         numCards?: number;
     } = {}
 ) => {
-    const hasCard = state.players[playerId].cardsInHand.some(card => {
+    const matchingCards = state.players[playerId].cardsInHand.filter(card => {
         if (card.type === "visitor") {
             const { season } = visitorCards[card.id];
             switch (type) {
@@ -265,18 +265,18 @@ export const needCardOfTypeDisabledReason = (
         }
         return card.type === type;
     });
-    if (hasCard) {
+    if (matchingCards.length >= numCards) {
         return undefined;
     }
     switch (type) {
         case "order":
-            return "You don't have any order cards.";
+            return "You don't have enough order cards.";
         case "summerVisitor":
-            return "You don't have any summer visitors.";
+            return "You don't have enough summer visitors.";
         case "vine":
-            return "You don't have any vine cards.";
+            return "You don't have enough vine cards.";
         case "winterVisitor":
-            return "You don't have any winter visitors.";
+            return "You don't have enough winter visitors.";
     }
 };
 

@@ -541,14 +541,14 @@ export const rhineWinterVisitorCards = {
     //     <>Plant 2 <Vine /> OR harvest a field, devaluing the harvested grapes by 1 each to gain <VP>1</VP>.</>
     // ),
     craftsman: winterVisitorCards.craftsman,
-    // duchess: winterVisitorCard(
-    //     "Duchess",
-    //     <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to fill 2 <Order />.</>
-    // ),
-    // eliteOenologist: winterVisitorCard(
-    //     "Elite Oenologist",
-    //     <>Age all <WineGlass /> in your cellar twice OR upgrade your cellar at a <Coins>4</Coins> discount.</>
-    // ),
+    duchess: winterVisitorCard(
+        "Duchess",
+        <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals> OR lose <Residuals>2</Residuals> to fill 2 <Order />.</>
+    ),
+    eliteOenologist: winterVisitorCard(
+        "Elite Oenologist",
+        <>Age all <WineGlass /> in your cellar twice OR upgrade your cellar at a <Coins>4</Coins> discount.</>
+    ),
     // endorser: winterVisitorCard(
     //     "Endorser",
     //     <>Discard 1 <Grape /> or 1 <WineGlass /> to either gain <VP>1</VP> and <Residuals>1</Residuals> or draw 3 <Order />.</>

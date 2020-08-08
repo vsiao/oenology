@@ -39,6 +39,8 @@ import {
     harvestFieldDisabledReason,
     needCardOfTypeDisabledReason,
     residualPaymentsDisabledReason,
+    plantVineDisabledReason,
+    plantVinesDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -61,7 +63,6 @@ import {
 import { Choice } from "../prompts/PromptState";
 import { seasonalActions } from "../board/boardPlacements";
 import { boardAction } from "../board/boardActionReducer";
-import ActionPrompt from "../../game-views/controls/ActionPrompt";
 
 export const winterVisitorReducers: Record<
     keyof typeof winterVisitorCards,
@@ -1588,7 +1589,119 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    // chemist: (state, action) => {
+    //     switch (action.type) {
+    //         case "CHOOSE_CARDS":
+    //             const card = action.cards![0];
+    //             switch (card.type) {
+    //                 case "visitor":
+    //                     return promptForAction(state, {
+    //                         choices: [
+    //                             {
+    //                                 id: "CHEMIST_PLANT",
+    //                                 label: <>Plant 2 <Vine /></>,
+    //                                 disabledReason: plantVinesDisabledReason(state),
+    //                             },
+    //                             {
+    //                                 id: "CHEMIST_HARVEST",
+    //                                 label: <>Harvest devalued grapes to gain <VP>1</VP></>,
+    //                                 disabledReason: harvestFieldDisabledReason(state),
+    //                             }
+    //                         ]
+    //                     })
+    //             }
+    //     }
+    // },
     craftsman: winterVisitorReducers.craftsman,
+    duchess: (state, action, pendingAction) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "DUCHESS_GAIN",
+                                    label: <>Pay <Coins>1</Coins> to gain <Residuals>1</Residuals></>,
+                                    disabledReason: moneyDisabledReason(state, 1),
+                                },
+                                {
+                                    id: "DUCHESS_LOSE",
+                                    label: <>Lose <Residuals>2</Residuals> to fill 2 <Order /></>,
+                                    disabledReason: fillOrderDisabledReason(state) ||
+                                        needCardOfTypeDisabledReason(state, "order", { numCards: 2 }),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "DUCHESS_GAIN":
+                        return endVisitor(gainResiduals(1, payCoins(1, state)));
+                    case "DUCHESS_LOSE":
+                        return promptToChooseOrderCard(loseResiduals(2, state));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                state = fillOrder(action.wines, state);
+
+                if (!pendingAction.hasBonus) {
+                    return promptToChooseOrderCard(
+                        setPendingAction({ ...pendingAction, hasBonus: true }, state)
+                    );
+                }
+                return endVisitor(state);
+            default:
+                return state;
+        }
+    },
+    eliteOenologist: (state, action) => {
+        const player = state.players[state.currentTurn.playerId];
+        const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
+        const cost = structures[upgradeCellar].cost - 4;
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "EOENOLOGIST_AGE",
+                            label: <>Age all <WineGlass /> in your cellar twice</>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                        {
+                            id: "EOENOLOGIST_UPGRADE",
+                            label: <>Upgrade your cellar at a <Coins>4</Coins> discount</>,
+                            disabledReason: player.structures.largeCellar
+                                ? "Your cellar is fully upgraded."
+                                : moneyDisabledReason(state, cost),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "EOENOLOGIST_AGE":
+                        return endVisitor(updatePlayer(state, player.id, {
+                            cellar: ageCellar(player.cellar, player.structures, 2),
+                        }));
+                    case "EOENOLOGIST_UPGRADE":
+                        return endVisitor(buildStructure(
+                            payCoins(cost, state),
+                            player.structures.mediumCellar ? "largeCellar" : "mediumCellar"
+                        ));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     harvestExpert: winterVisitorReducers.harvestExpert,
     laborer: winterVisitorReducers.laborer,
     supervisor: winterVisitorReducers.supervisor,
