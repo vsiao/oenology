@@ -39,8 +39,6 @@ import {
     harvestFieldDisabledReason,
     needCardOfTypeDisabledReason,
     residualPaymentsDisabledReason,
-    plantVineDisabledReason,
-    plantVinesDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -1698,6 +1696,100 @@ export const rhineWinterVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    endorser: (state, action) => {
+        const promptGainOrDraw = (state2: GameState): GameState => {
+            return promptForAction(state2, {
+                choices: [
+                    { id: "ENDORSER_GAIN", label: <>Gain <VP>1</VP> and <Residuals>1</Residuals></>, },
+                    { id: "ENDORSER_DRAW", label: <>Draw 3 <Order /></>, },
+                ],
+            });
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "ENDORSER_GRAPE",
+                            label: <>Discard 1 <Grape /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        {
+                            id: "ENDORSER_WINE",
+                            label: <>Discard 1 <WineGlass /></>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ENDORSER_GRAPE":
+                        return promptToChooseGrapes(state, 1);
+                    case "ENDORSER_WINE":
+                        return promptToChooseWine(state);
+                    case "ENDORSER_GAIN":
+                        return endVisitor(gainResiduals(1, gainVP(1, state)));
+                    case "ENDORSER_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { order: 3 }));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                return promptGainOrDraw(discardGrapes(state, action.grapes));
+            case "CHOOSE_WINE":
+                return promptGainOrDraw(discardWines(state, action.wines));
+            default:
+                return state;
+        }
+    },
+    enthusiast: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "ENTHUSIAST_DRAW", label: <>Draw 2 <SummerVisitor /></>, },
+                                {
+                                    id: "ENTHUSIAST_FILL",
+                                    label: <>Fill 1 <Order /> and draw 1 <Order /></>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "ENTHUSIAST_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { summerVisitor: 2 }));
+                    case "ENTHUSIAST_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(
+                    drawCards(fillOrder(action.wines, state), action._key!, { order: 1 })
+                );
+            default:
+               return state;
+        }
+    },
+    grapeWhisperer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToHarvest(state, 2);
+            case "CHOOSE_FIELD":
+                return endVisitor(gainCoins(2, harvestFields(state, action.fields)));
             default:
                 return state;
         }

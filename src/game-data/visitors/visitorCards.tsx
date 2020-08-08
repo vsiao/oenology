@@ -549,14 +549,14 @@ export const rhineWinterVisitorCards = {
         "Elite Oenologist",
         <>Age all <WineGlass /> in your cellar twice OR upgrade your cellar at a <Coins>4</Coins> discount.</>
     ),
-    // endorser: winterVisitorCard(
-    //     "Endorser",
-    //     <>Discard 1 <Grape /> or 1 <WineGlass /> to either gain <VP>1</VP> and <Residuals>1</Residuals> or draw 3 <Order />.</>
-    // ),
-    // enthusiast: winterVisitorCard(
-    //     "Enthusiast",
-    //     <>Draw 2 <SummerVisitor /> OR fill 1 <Order /> and draw 1 <Order />.</>
-    // ),
+    endorser: winterVisitorCard(
+        "Endorser",
+        <>Discard 1 <Grape /> or 1 <WineGlass /> to either gain <VP>1</VP> and <Residuals>1</Residuals> or draw 3 <Order />.</>
+    ),
+    enthusiast: winterVisitorCard(
+        "Enthusiast",
+        <>Draw 2 <SummerVisitor /> OR fill 1 <Order /> and draw 1 <Order />.</>
+    ),
     // estateAgent: winterVisitorCard(
     //     "Estate Agent",
     //     <>Draw X <Card />, where X is the number of fields you own.</>
@@ -565,10 +565,10 @@ export const rhineWinterVisitorCards = {
     //     "Grape Vendor",
     //     <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have the Tasting Room.</>
     // ),
-    // grapeWhisperer: winterVisitorCard(
-    //     "Grape Whisperer",
-    //     <>Harvest up to 2 fields and gain <Coins>2</Coins>.</>
-    // ),
+    grapeWhisperer: winterVisitorCard(
+        "Grape Whisperer",
+        <>Harvest up to 2 fields and gain <Coins>2</Coins>.</>
+    ),
     harvestExpert: winterVisitorCards.harvestExpert,
     // hiredHand: winterVisitorCard(
     //     "Hired Hand",
