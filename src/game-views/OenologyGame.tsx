@@ -1,4 +1,5 @@
 import "./OenologyGame.css";
+import { AnimateSharedLayout } from "framer-motion";
 import * as React from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "./Sidebar";
@@ -22,7 +23,7 @@ const OenologyGame: React.FunctionComponent<Props> = props => {
 
     return <div className="OenologyGame">
         {isPlaying
-            ? <><GameBoard /><PlayerMat /><Sidebar /> </>
+            ? <AnimateSharedLayout><GameBoard /><PlayerMat /><Sidebar /></AnimateSharedLayout>
             : <Lobby gameId={gameId} />}
     </div>;
 };

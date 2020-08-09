@@ -32,6 +32,9 @@
 
 .SidebarPlayer-playerName {
     font-weight: 600;
+    min-width: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .SidebarPlayer-cards {
@@ -44,14 +47,18 @@
     width: 1em;
 }
 
-.SidebarPlayer-residualPayments,
 .SidebarPlayer-coins,
 .SidebarPlayer-victoryPoints {
     margin-left: .5em;
 }
 
+.SidebarPlayer-grapeToken,
+.SidebarPlayer-rooster,
 .SidebarPlayer-residualPayments {
     margin-left: 1em;
+}
+
+.SidebarPlayer-residualPayments {
     margin-right: .2em;
 }
 

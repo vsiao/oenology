@@ -6,6 +6,7 @@
     border-radius: .2em;
     box-sizing: border-box;
     display: inline-flex;
+    flex-shrink: 0;
     height: 1.6em;
     justify-content: center;
     transform: rotate(-4deg);

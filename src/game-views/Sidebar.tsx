@@ -21,6 +21,7 @@ import VisitorCard from "./cards/VisitorCard";
 
 interface Props {
     players: PlayerState[];
+    playersInWakeUpOrder: Record<string, boolean>;
     playerNameById: Record<string, string>;
     grapeOwner?: string;
     activityLog: ActivityLog;
@@ -30,7 +31,12 @@ const Sidebar: React.FunctionComponent<Props> = props => {
     return <div className="Sidebar">
         <div className="Sidebar-players">
             {props.players.map(player => {
-                return <SidebarPlayer key={player.id} player={player} hasGrape={player.id === props.grapeOwner} />;
+                return <SidebarPlayer
+                    key={player.id}
+                    player={player}
+                    inWakeUpOrder={props.playersInWakeUpOrder[player.id]}
+                    hasGrape={player.id === props.grapeOwner}
+                />;
             })}
         </div>
         <div className="Sidebar-activityLog">
@@ -141,6 +147,9 @@ const mapStateToProps = (state: AppState) => {
     const grapeOwner = game.tableOrder[game.grapeIndex];
     return {
         players: game.tableOrder.map(id => game.players[id]),
+        playersInWakeUpOrder: Object.fromEntries(
+            game.wakeUpOrder.filter(w => w).map(w => [w!.playerId, true])
+        ),
         playerNameById: Object.fromEntries(
             Object.entries(game.players).map(([id, p]) => [id, p.name])
         ),

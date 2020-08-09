@@ -40,7 +40,7 @@ export interface StartGameAction extends Action<"START_GAME"> {
         mama?: MamaId; // deprecated; see #PreGameShuffle
         papa?: PapaId; // deprecated; see #PreGameShuffle
     })[];
-    options: GameOptions;
+    options?: GameOptions;
     shuffledCards?: CardsByType; // deprecated; see #PreGameShuffle
     excludeCards?: { [Id in string]?: true };
 }

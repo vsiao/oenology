@@ -1,10 +1,10 @@
 .Rooster {
-    height: 2em;
+    flex-shrink: 0;
+    height: 1.6em;
     stroke: black;
     stroke-width: .8em;
-    transform: scaleX(-1);
     vertical-align: bottom;
-    width: 2em;
+    width: 1.6em;
 }
 .Rooster--blue {
     fill: royalblue;

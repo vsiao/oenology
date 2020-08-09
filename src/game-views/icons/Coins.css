@@ -6,6 +6,7 @@
     box-sizing: border-box;
     color: black;
     display: inline-flex;
+    flex-shrink: 0;
     font-weight: 600;
     height: 1.8em;
     justify-content: center;

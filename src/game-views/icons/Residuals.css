@@ -3,6 +3,7 @@
     color: black;
     display: inline-flex;
     filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, .3));
+    flex-shrink: 0;
     height: 1.6em;
     justify-content: center;
     position: relative;

@@ -1,9 +1,17 @@
+import cx from "classnames";
+import { motion } from "framer-motion"
 import * as React from "react";
 import "./GrapeToken.css";
 
-const GrapeToken: React.FunctionComponent = () => {
-    return <svg
-        className="GrapeToken"
+interface Props {
+	className?: string;
+}
+
+const GrapeToken: React.FunctionComponent<Props> = ({ className }) => {
+    return <motion.svg
+		layout
+		layoutId="grapeToken"
+        className={cx("GrapeToken", className)}
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"
         viewBox="0 0 465.107 465.107"
@@ -59,7 +67,7 @@ const GrapeToken: React.FunctionComponent = () => {
 			c-0.447,3.097-0.756,6.243-0.756,9.462C274.29,290.261,283.15,308.047,297.066,320.15z"/>
         <path d="M457.516,174.153c0,0-50.422-148.257-110.557-74.807
 			C286.816,172.795,415.516,202.603,457.516,174.153z"/>
-    </svg>;
+    </motion.svg>;
 };
 
 export default GrapeToken;

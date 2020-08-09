@@ -15,9 +15,11 @@ import { visitorCards } from "../game-data/visitors/visitorCards";
 import { StructureId, structures } from "../game-data/structures";
 import { AnchorSide, useTooltip } from "./shared/useTooltip";
 import { vineCards } from "../game-data/vineCards";
+import Rooster from "./icons/Rooster";
 
 interface Props {
     player: PlayerState;
+    inWakeUpOrder: boolean;
     hasGrape?: boolean;
 }
 
@@ -36,7 +38,10 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     </li>
                 )}
             </ul>
-            {props.hasGrape && <GrapeToken />}
+            {props.hasGrape && <GrapeToken className="SidebarPlayer-grapeToken" />}
+            {props.inWakeUpOrder
+                ? null
+                : <Rooster className="SidebarPlayer-rooster" color={player.color} />}
             <Residuals className="SidebarPlayer-residualPayments">{player.residuals}</Residuals>
             <Coins className="SidebarPlayer-coins">{player.coins}</Coins>
             <VictoryPoints className="SidebarPlayer-victoryPoints">{player.victoryPoints}</VictoryPoints>

@@ -5,7 +5,80 @@
         "order actions";
     grid-template-columns: 5em 4fr;
     grid-template-rows: 2em 1fr;
+}
+
+.GameBoard-wakeUpOrder {
+    border-right: 1px solid #aaa;
+    box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
+    display: flex;
+    flex-direction: column;
+    grid-area: order;
+    list-style-type: none;
+    margin: 0;
+    padding-left: 0;
+}
+.GameBoard-wakeUpPosition {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    height: 40px;
+    justify-content: center;
+    white-space: nowrap;
+}
+.GameBoard-wakeUpPosition + .GameBoard-wakeUpPosition {
+    border-top: 1px solid #ccc;
+}
+.GameBoard-wakeUpPosition--passed {
+    background: #ddd;
+}
+
+.GameBoard-currentPlayer {
+    height: 3.2em;
+    position: absolute;
+    width: 3.2em;
+}
+
+.GameBoard-currentPlayerIndicator {
+    box-sizing: border-box;
+    border-width: 3px;
+    border-style: solid;
+    border-radius: 50%;
+    display: block;
+    height: 100%;
+    width: 100%;
+}
+.GameBoard-currentPlayerIndicator--blue {
+    border-color: royalblue;
+}
+.GameBoard-currentPlayerIndicator--green {
+    border-color: seagreen;
+}
+.GameBoard-currentPlayerIndicator--orange {
+    border-color: darkorange;
+}
+.GameBoard-currentPlayerIndicator--purple {
+    border-color: purple;
+}
+.GameBoard-currentPlayerIndicator--red {
+    border-color: firebrick;
+}
+.GameBoard-currentPlayerIndicator--yellow {
+    border-color: gold;
+}
+
+.GameBoard-actionsScroller {
+    grid-area: actions;
     overflow: auto;
+}
+
+.GameBoard-seasons {
+    display: flex;
+    height: 100%;
+}
+@media (max-width: 1280px) {
+    .GameBoard-seasons {
+        width: 200%;
+    }
 }
 
 .GameBoard-season {
@@ -30,59 +103,6 @@
 .GameBoard--winter .GameBoard-season {
     background: royalblue;
     color: white;
-}
-
-.GameBoard-wakeUpOrder {
-    border-right: 1px solid #aaa;
-    box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
-    display: flex;
-    flex-direction: column;
-    grid-area: order;
-    list-style-type: none;
-    margin: 0;
-    padding-left: 0;
-}
-.GameBoard-wakeUpPosition {
-    align-items: center;
-    display: flex;
-    flex: 1 1 auto;
-    height: 40px;
-    justify-content: center;
-    white-space: nowrap;
-}
-.GameBoard-wakeUpPosition + .GameBoard-wakeUpPosition {
-    border-top: 1px solid #ccc;
-}
-.GameBoard-wakeUpPosition--current .GameBoard-roosterContainer {
-    animation: .5s ease-in-out GameBoard-roosterBounce infinite alternate;
-    will-change: transform;
-}
-.GameBoard-wakeUpPosition--passed {
-    background: #ddd;
-}
-
-@keyframes GameBoard-roosterBounce {
-    0% {
-        transform: rotate(-10deg) translate3d(-.1em, 0, 0);
-    }
-    100% {
-        transform: rotate(10deg) translate3d(.2em, 0, 0);
-    }
-}
-
-.GameBoard-actionsScroller {
-    grid-area: actions;
-    overflow: auto;
-}
-
-.GameBoard-seasons {
-    display: flex;
-    height: 100%;
-}
-@media (max-width: 1280px) {
-    .GameBoard-seasons {
-        width: 200%;
-    }
 }
 
 .GameBoard-summerHeader,

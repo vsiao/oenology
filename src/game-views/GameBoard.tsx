@@ -1,5 +1,6 @@
 import "./GameBoard.css";
 import cx from "classnames";
+import { motion } from "framer-motion";
 import * as React from "react";
 import { connect } from "react-redux";
 import { summerActions, winterActions } from "../game-data/board/boardPlacements";
@@ -95,6 +96,15 @@ interface WakeUpPosition {
     color: PlayerColor;
 }
 
+const colors: Record<PlayerColor, string> = {
+    blue: "#4169e1", // royalblue
+    green: "#2e8b57", // seagreen
+    orange: "#ff8c00", // darkorange
+    purple: "#800080", // purple
+    red: "#b22222", // firebrick
+    yellow: "#ffd700", // gold
+};
+
 const WakeUpPosition: React.FunctionComponent<{
     pos: WakeUpPosition | null;
     season: Season;
@@ -116,11 +126,30 @@ const WakeUpPosition: React.FunctionComponent<{
             "GameBoard-wakeUpPosition--passed": pos && pos.passed,
         })}
     >
-        <div className="GameBoard-roosterContainer">
-            {pos
-                ? <Rooster color={pos.color} />
-                : season === "spring" ? renderWakeUpBonus(i) : i+1}
-        </div>
+        {pos
+            ? <Rooster color={pos.color} />
+            : season === "spring" ? renderWakeUpBonus(i) : i+1}
+        {pos && pos.current
+            ? <motion.span
+                layout
+                layoutId="currentTurn"
+                className="GameBoard-currentPlayer"
+            >
+                <motion.span
+                    className="GameBoard-currentPlayerIndicator"
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        borderColor: colors[pos.color],
+                    }}
+                    initial={false}
+                    transition={{
+                        ease: "easeInOut",
+                        loop: Infinity,
+                        repeatDelay: .5,
+                    }}
+                />
+            </motion.span>
+            : null}
         {maybeLayer}
     </li>;
 };
@@ -136,7 +165,7 @@ const renderWakeUpBonus = (i: number): React.ReactNode => {
         case 3:
             return <Coins>1</Coins>;
         case 4:
-            return <><SummerVisitor /> or <WinterVisitor /></>;
+            return <span><SummerVisitor /> or <WinterVisitor /></span>;
         case 5:
             return <VictoryPoints>1</VictoryPoints>;
         case 6:
