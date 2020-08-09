@@ -143,12 +143,18 @@ export const trainWorker = (
         availableThisYear?: boolean;
     } = {}
 ): GameState => {
+    const workers = state.players[playerId].workers;
+    const lastWorkerId = workers.reduce(
+        (previousValue, worker, currentIndex) =>
+            !worker.isTemp && worker.type === "normal" ? currentIndex : previousValue,
+        -1
+    );
     return pushActivityLog(
         { type: "trainWorker", playerId },
         updatePlayer(state, playerId, {
             workers: [
-                ...state.players[playerId].workers,
-                { type: "normal", available: availableThisYear },
+                ...workers,
+                { type: "normal", id: lastWorkerId + 1, available: availableThisYear },
             ],
         })
     );
@@ -174,6 +180,7 @@ export const placeWorker = (type: WorkerType, placement: WorkerPlacement, state:
     }
     placements[placementIdx] = {
         type,
+        id: player.workers[workerIndex].id,
         playerId: state.currentTurn.playerId,
         color: player.color,
         isTemp: !!player.workers[workerIndex].isTemp,

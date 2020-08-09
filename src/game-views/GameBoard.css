@@ -23,6 +23,7 @@
     flex: 1 1 auto;
     height: 40px;
     justify-content: center;
+    position: relative;
     white-space: nowrap;
 }
 .GameBoard-wakeUpPosition + .GameBoard-wakeUpPosition {
@@ -68,7 +69,7 @@
 
 .GameBoard-actionsScroller {
     grid-area: actions;
-    overflow: auto;
+    overflow: hidden;
 }
 
 .GameBoard-seasons {
@@ -76,6 +77,9 @@
     height: 100%;
 }
 @media (max-width: 1280px) {
+    .GameBoard-actionsScroller {
+        overflow-x: auto;
+    }
     .GameBoard-seasons {
         width: 200%;
     }

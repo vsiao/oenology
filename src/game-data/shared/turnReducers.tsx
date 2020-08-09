@@ -266,7 +266,7 @@ export const chooseWakeUp = (
             return updatePlayer(state, player.id, {
                 workers: [
                     ...player.workers,
-                    { type: "normal", available: true, isTemp: true }
+                    { type: "normal", id: 999, available: true, isTemp: true }
                 ],
             });
         default:

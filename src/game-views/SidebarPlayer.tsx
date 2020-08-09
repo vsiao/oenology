@@ -1,6 +1,7 @@
 import "./SidebarPlayer.css";
-import * as React from "react";
 import cx from "classnames";
+import * as React from "react";
+import { motion } from "framer-motion";
 import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
@@ -54,8 +55,20 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                             workerType={worker.type}
                             color={player.color}
                             isTemp={worker.isTemp}
-                            disabled={!worker.available}
+                            disabled={true}
                         />
+                        {worker.available &&
+                            <motion.div
+                                className="SidebarPlayer-animatedWorker"
+                                layout
+                                layoutId={`${player.color}_${worker.type}${worker.id}`}
+                            >
+                                <Worker
+                                    workerType={worker.type}
+                                    color={player.color}
+                                    isTemp={worker.isTemp}
+                                />
+                            </motion.div>}
                     </li>
                 )}
             </ul>

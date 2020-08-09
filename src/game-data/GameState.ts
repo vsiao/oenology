@@ -143,11 +143,13 @@ export interface PlayerState {
 export type WorkerType = "grande" | "normal";
 export interface Worker {
     type: WorkerType;
+    id: number;
     available: boolean;
     isTemp?: boolean;
 }
 export interface BoardWorker {
     type: WorkerType,
+    id: number;
     playerId: string,
     color: PlayerColor;
     isTemp?: boolean;

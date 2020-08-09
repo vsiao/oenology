@@ -132,7 +132,7 @@ const WakeUpPosition: React.FunctionComponent<{
         {pos && pos.current
             ? <motion.span
                 layout
-                layoutId="currentTurn"
+                layoutId="currentPlayer"
                 className="GameBoard-currentPlayer"
             >
                 <motion.span

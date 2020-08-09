@@ -1018,7 +1018,7 @@ export const summerVisitorReducers: Record<
                         .flat(),
                 });
             case "CHOOSE_ACTION_MULTI":
-                const workers: (WorkerType | "temp")[] = [];
+                const workers: { type: WorkerType | "temp", id: number }[] = [];
                 action.choices.forEach(id => {
                     const parts = id.split("_");
                     const placement = parts[0] as WorkerPlacement;
@@ -1032,7 +1032,10 @@ export const summerVisitorReducers: Record<
                                 if (!w || i !== index) {
                                     return w;
                                 }
-                                workers.push(w.isTemp ? "temp" : w.type);
+                                workers.push({
+                                    type: w.isTemp ? "temp" : w.type,
+                                    id: w.id,
+                                });
                                 return null;
                             }),
                         },
@@ -1040,9 +1043,9 @@ export const summerVisitorReducers: Record<
                 });
                 const player = state.players[state.currentTurn.playerId];
                 const playerWorkers = player.workers.slice();
-                workers.forEach(type => {
+                workers.forEach(({ type, id }) => {
                     const i = playerWorkers.findIndex(
-                        w => !w.available && ((type === "temp" && w.isTemp) || w.type === type)
+                        w => ((type === "temp" && w.isTemp) || w.type === type) && w.id === id
                     );
                     playerWorkers[i] = { ...playerWorkers[i], available: true };
                 });

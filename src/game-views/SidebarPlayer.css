@@ -47,11 +47,6 @@
     width: 1em;
 }
 
-.SidebarPlayer-coins,
-.SidebarPlayer-victoryPoints {
-    margin-left: .5em;
-}
-
 .SidebarPlayer-grapeToken,
 .SidebarPlayer-rooster,
 .SidebarPlayer-residualPayments {
@@ -62,6 +57,11 @@
     margin-right: .2em;
 }
 
+.SidebarPlayer-coins,
+.SidebarPlayer-victoryPoints {
+    margin-left: .5em;
+}
+
 .SidebarPlayer-contents {
     white-space: nowrap;
 }
@@ -70,13 +70,20 @@
     display: inline-block;
     vertical-align: top;
 }
+
 .SidebarPlayer-worker {
     align-items: center;
     display: flex;
     font-weight: 600;
     justify-content: center;
-    padding: .1em;
+    margin: .1em;
+    position: relative;
     width: 2em;
+}
+
+.SidebarPlayer-animatedWorker {
+    position: absolute;
+    top: 0;
 }
 
 .SidebarPlayer-fields {

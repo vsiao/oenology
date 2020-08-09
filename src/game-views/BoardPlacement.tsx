@@ -1,9 +1,10 @@
-import * as React from "react";
 import cx from "classnames";
+import { motion } from "framer-motion";
+import * as React from "react";
+import { connect } from "react-redux";
 import "./BoardPlacement.css";
 import Worker from "./icons/Worker";
 import { BoardWorker } from "../game-data/GameState";
-import { connect } from "react-redux";
 import { BoardAction } from "../game-data/board/boardPlacements";
 import { AppState } from "../store/AppState";
 
@@ -27,13 +28,17 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                     "BoardPlacement-spot--taken": !!worker,
                 })}>
                     {worker
-                        ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
+                        ? <motion.div layout layoutId={`${worker.color}_${worker.type}${worker.id}`}>
+                            <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
+                        </motion.div>
                         : (icons[i] || <>&nbsp;</>)}
                 </div>
                 {i === 0 && workers.length > numSpots && (
                     <div className="BoardPlacement-overflow">
                         {workers.slice(numSpots).map((w, i) =>
-                            w && <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} />
+                            w && <motion.div key={`${w.color}${i}`} layout layoutId={`${w.color}_${w.type}${w.id}`}>
+                                <Worker workerType={w.type} color={w.color} />
+                            </motion.div>
                         )}
                     </div>)}
             </td>;

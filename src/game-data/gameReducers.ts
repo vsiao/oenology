@@ -125,9 +125,9 @@ const initPlayer = (
         residuals: 0,
         victoryPoints: 0,
         workers: [
-            { type: "grande", available: true },
-            { type: "normal", available: true },
-            { type: "normal", available: true },
+            { type: "grande", id: 0, available: true },
+            { type: "normal", id: 1, available: true },
+            { type: "normal", id: 2, available: true },
         ],
         cardsInHand: [
         ],
