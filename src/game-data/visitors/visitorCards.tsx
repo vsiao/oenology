@@ -570,27 +570,27 @@ export const rhineWinterVisitorCards = {
         <>Harvest up to 2 fields and gain <Coins>2</Coins>.</>
     ),
     harvestExpert: winterVisitorCards.harvestExpert,
-    // hiredHand: winterVisitorCard(
-    //     "Hired Hand",
-    //     <>Choose 2: Harvest 1 field, make up to 2 <WineGlass />, gain <Coins>2</Coins>, or fill 1 <Order />.</>
-    // ),
+    hiredHand: winterVisitorCard(
+        "Hired Hand",
+        <>Choose 2: Harvest 1 field, make up to 2 <WineGlass />, gain <Coins>2</Coins>, or fill 1 <Order />.</>
+    ),
     // influencer: winterVisitorCard(
     //     "Influencer",
     //     <>Place 1 STAR_TOKEN, then move up to 3 STAR_TOKEN owned by any player.</>
     // ),
     laborer: winterVisitorCards.laborer,
-    // lecturer: winterVisitorCard(
-    //     "Lecturer",
-    //     <>Make up to 3 <WineGlass /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
-    // ),
+    lecturer: winterVisitorCard(
+        "Lecturer",
+        <>Make up to 3 <WineGlass /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
+    ),
     // lobbyist: winterVisitorCard(
     //     "Lobbyist",
     //     <>Pay <Coins>X</Coins> to return X STAR_TOKEN from the map to their owners. If any player has at least <VP>20</VP>, you lose <VP>3</VP>.</>
     // ),
-    // lovebirds: winterVisitorCard(
-    //     "Lovebirds",
-    //     <>Gain <Coins>1</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
-    // ),
+    lovebirds: winterVisitorCard(
+        "Lovebirds",
+        <>Gain <Coins>1</Coins> and draw 1 <SummerVisitor /> OR draw 1 <Order /> and make up to 2 <WineGlass />.</>
+    ),
     // middleman: winterVisitorCard(
     //     "Middleman",
     //     <>Draw 3 <Vine />, then discard 1 <Vine /> or pay <Coins>2</Coins> OR fill 1 <Order />, even if the type(s) of wine doesn't match the <Order /> (values matter).</>

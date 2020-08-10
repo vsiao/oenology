@@ -1795,7 +1795,160 @@ export const rhineWinterVisitorReducers: Record<
         }
     },
     harvestExpert: winterVisitorReducers.harvestExpert,
+    hiredHand: (state, action, pendingAction) => {
+        type ChoiceId = "HHAND_HARVEST" | "HHAND_MAKE" | "HHAND_GAIN" | "HHAND_FILL";
+        interface HiredHandAction extends PlayVisitorPendingAction {
+            usedChoices: { [K in ChoiceId]?: true };
+        }
+        const promptHiredHandAction = (state2: GameState, hiredHandAction: HiredHandAction): GameState => {
+            return promptForAction(
+                state2,
+                {
+                    choices: [
+                        {
+                            id: "HHAND_HARVEST",
+                            label: <>Harvest 1 field</>,
+                            disabledReason: harvestFieldDisabledReason(state),
+                        },
+                        {
+                            id: "HHAND_MAKE",
+                            label: <>Make up to 2 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        { id: "HHAND_GAIN", label: <>Gain <Coins>2</Coins></>, },
+                        {
+                            id: "HHAND_FILL",
+                            label: <>Fill 1 <Order /></>,
+                            disabledReason: fillOrderDisabledReason(state),
+                        },
+                    ].filter(choice => !hiredHandAction.usedChoices[choice.id as ChoiceId]),
+                }
+            );
+        };
+        const maybeEndVisitor = (state2: GameState): GameState => {
+            const hiredHandAction =
+                (state2.currentTurn as WorkerPlacementTurn).pendingAction as HiredHandAction;
+
+            return Object.keys(hiredHandAction.usedChoices).length === 2
+                ? endVisitor(state2)
+                : promptHiredHandAction(state2, hiredHandAction);
+        };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        const hiredHandAction: HiredHandAction = {
+                            ...pendingAction,
+                            usedChoices: {},
+                        };
+                        return promptHiredHandAction(
+                            setPendingAction(hiredHandAction, state),
+                            hiredHandAction
+                        );
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                const hiredHandAction = pendingAction as HiredHandAction;
+                state = setPendingAction({
+                    ...hiredHandAction,
+                    usedChoices: {
+                        ...hiredHandAction.usedChoices,
+                        [action.choice]: true,
+                    },
+                }, state);
+                switch (action.choice) {
+                    case "HHAND_HARVEST":
+                        return promptToHarvest(state);
+                    case "HHAND_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 2);
+                    case "HHAND_GAIN":
+                        return maybeEndVisitor(gainCoins(2, state));
+                    case "HHAND_FILL":
+                        return promptToChooseOrderCard(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return maybeEndVisitor(harvestField(state, action.fields[0]));
+            case "MAKE_WINE":
+                return maybeEndVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "CHOOSE_WINE":
+                return maybeEndVisitor(fillOrder(action.wines, state));
+            default:
+                return state;
+        }
+    },
     laborer: winterVisitorReducers.laborer,
+    lecturer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "LECTURER_MAKE",
+                            label: <>Make up to 3 <WineGlass /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        {
+                            id: "LECTURER_TRAIN",
+                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 3),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "LECTURER_MAKE":
+                        return endVisitor(promptToMakeWine(state, /* upToN */ 3));
+                    case "LECTURER_TRAIN":
+                        return endVisitor(trainWorker(payCoins(3, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    lovebirds: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "LOVEBIRDS_GAIN",
+                            label: <>Gain <Coins>1</Coins> and draw 1 <SummerVisitor /></>,
+                        },
+                        {
+                            id: "LOVEBIRDS_MAKE",
+                            label: <>Draw 1 <Order /> and make up to 2 <WineGlass /></>,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "LOVEBIRDS_GAIN":
+                        return endVisitor(
+                            drawCards(gainCoins(1, state), action._key!, { summerVisitor: 1 })
+                        );
+                    case "LOVEBIRDS_MAKE":
+                        return promptToMakeWine(
+                            drawCards(state, action._key!, { order: 1 }),
+                            /* upToN */ 2
+                        );
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
     supervisor: winterVisitorReducers.supervisor,
     uncertifiedOenologist: winterVisitorReducers.uncertifiedOenologist,
     zymologist: winterVisitorReducers.zymologist,
