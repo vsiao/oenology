@@ -14,7 +14,7 @@ import {
     loseVP,
     updatePlayer,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, WorkerPlacement } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, WorkerPlacement, CardType } from "../GameState";
 import {
     promptForAction,
     promptToMakeWine,
@@ -40,6 +40,7 @@ import {
     harvestFieldDisabledReason,
     needCardOfTypeDisabledReason,
     residualPaymentsDisabledReason,
+    cardTypesInPlay,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -1700,6 +1701,80 @@ export const rhineWinterVisitorReducers: Record<
                 );
             default:
                return state;
+        }
+    },
+    estateAgent: (state, action, pendingAction) => {
+        const numFields = Object.values(state.players[state.currentTurn.playerId].fields)
+            .filter(f => !f.sold)
+            .length;
+        const eaAction = pendingAction as PlayVisitorPendingAction & { numDrawn: number; };
+        const maybeEndVisitor = (state2: GameState) => {
+            if (eaAction.numDrawn === numFields) {
+                return endVisitor(state2);
+            }
+            const numDrawn = (eaAction.numDrawn ?? 0) + 1;
+            return promptForAction(
+                setPendingAction({ ...eaAction, numDrawn }, state2),
+                {
+                    title: `Draw a card (${numDrawn} of ${numFields})`,
+                    choices: cardTypesInPlay(state2).map(type => ({
+                        id: "EAGENT_DRAW",
+                        data: type,
+                        label: <>Draw <Card type={type} /></>,
+                    })),
+                }
+            );
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return maybeEndVisitor(state);
+            case "CHOOSE_ACTION":
+                if (action.choice !== "EAGENT_DRAW") {
+                    return state;
+                }
+                return maybeEndVisitor(
+                    drawCards(state, action._key!, {
+                        [action.data as CardType]: 1,
+                    })
+                );
+            default:
+                return state;
+        }
+    },
+    grapeVendor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToChooseGrapes(state, 1);
+            case "CHOOSE_GRAPE":
+                const value = action.grapes[0].value;
+                return promptForAction(discardGrapes(state, action.grapes), {
+                    choices: [
+                        {
+                            id: "GVENDOR_GAIN",
+                            data: value,
+                            label: <>Gain <Coins>{value}</Coins></>,
+                        },
+                        {
+                            id: "GVENDOR_DRAW",
+                            data: Math.ceil(value / 2),
+                            label: <>Draw {Math.ceil(value / 2)} <WinterVisitor /></>,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                const bonusGain = state.players[state.currentTurn.playerId].structures.tastingRoom ? 4 : 0;
+                switch (action.choice) {
+                    case "GVENDOR_GAIN":
+                        return endVisitor(gainCoins(action.data as number + bonusGain, state));
+                    case "GVENDOR_DRAW":
+                        return endVisitor(
+                            drawCards(state, action._key!, { winterVisitor: action.data as number })
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
         }
     },
     grapeWhisperer: (state, action) => {

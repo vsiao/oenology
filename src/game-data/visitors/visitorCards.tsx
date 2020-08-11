@@ -27,7 +27,7 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     plantDealer: true,
     sculptor: true,
     sonInLaw: true,
-    structureReorganizer: true,
+    structureReorganizer: true, // tuscany
     subsidizer: true,
     vineTrader: true,
     wineEngineer: true,
@@ -38,8 +38,6 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     cellarmaster: true,
     cheapBuyer: true,
     chemist: true,
-    estateAgent: true,
-    grapeVendor: true,
     influencer: true, // tuscany
     lobbyist: true, // tuscany
     middleman: true,
@@ -592,14 +590,14 @@ export const rhineWinterVisitorCards = {
         "Enthusiast",
         <>Draw 2 <SummerVisitor /> OR fill 1 <Order /> and draw 1 <Order />.</>
     ),
-    // estateAgent: winterVisitorCard(
-    //     "Estate Agent",
-    //     <>Draw X <Card />, where X is the number of fields you own.</>
-    // ),
-    // grapeVendor: winterVisitorCard(
-    //     "Grape Vendor",
-    //     <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have the Tasting Room.</>
-    // ),
+    estateAgent: winterVisitorCard(
+        "Estate Agent",
+        <>Draw X <Card />, where X is the number of fields you own.</>
+    ),
+    grapeVendor: winterVisitorCard(
+        "Grape Vendor",
+        <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have the Tasting Room.</>
+    ),
     grapeWhisperer: winterVisitorCard(
         "Grape Whisperer",
         <>Harvest up to 2 fields and gain <Coins>2</Coins>.</>
