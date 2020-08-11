@@ -1964,5 +1964,116 @@ export const rhineSummerVisitorReducers: Record<
             default:
                 return state;
         }
-    }
+    },
+    plantReorganizer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: cardTypesInPlay(state).map(type => ({
+                                id: "PREORGANIZER_DRAW",
+                                data: type,
+                                label: <>Draw <Vine /><Card type={type} /></>,
+                                disabledReason: uprootDisabledReason(state),
+                            })),
+                        });
+                    case "vine":
+                        return promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                if (action.choice !== "PREORGANIZER_DRAW") {
+                    return state;
+                }
+                const type = action.data as CardType;
+                return promptToUproot(drawCards(state, action._key!, {
+                    [type]: 1,
+                    vine: type === "vine" ? 2 : 1,
+                }));
+            case "CHOOSE_VINE":
+                return promptToChooseVineCard(uprootVineFromField(action.vines[0], state));
+            case "CHOOSE_FIELD":
+                return endVisitor(plantVineInField(action.fields[0], state));
+            default:
+                return state;
+        }
+    },
+    premiumWineDealer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const cellar = state.players[state.currentTurn.playerId].cellar;
+                return promptForAction(state, {
+                    choices: [
+                        { id: "PWDEALER_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        {
+                            id: "PWDEALER_SPARKLING",
+                            label: <>Pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass></>,
+                            disabledReason: moneyDisabledReason(state, 9) ||
+                                cellar.sparkling[6] ? "You already have one." : undefined,
+                        },
+                        {
+                            id: "PWDEALER_BLUSH",
+                            label: <>Pay <Coins>9</Coins> to gain <WineGlass color="blush">7</WineGlass></>,
+                            disabledReason: moneyDisabledReason(state, 9) ||
+                                cellar.blush[6] ? "You already have one." : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "PWDEALER_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    case "PWDEALER_SPARKLING":
+                        return endVisitor(
+                            gainWine({ color: "sparkling", value: 7 }, payCoins(9, state))
+                        );
+                    case "PWDEALER_BLUSH":
+                        return endVisitor(
+                            gainWine({ color: "blush", value: 7 }, payCoins(9, state))
+                        );
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    reorganizer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.cards!.length === 1) {
+                    return promptToDiscard(2, state);
+                } else {
+                    return promptForAction(state, {
+                        choices: [
+                            { id: "REORGANIZER_GAIN", label: <>Gain <Coins>5</Coins></>, },
+                            {
+                                id: "REORGANIZER_RED",
+                                label: <>Gain <Grape color="red">2</Grape></>,
+                            },
+                            {
+                                id: "REORGANIZER_WHITE",
+                                label: <>Gain <Grape color="red">2</Grape></>,
+                            },
+                        ],
+                    });
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "REORGANIZER_GAIN":
+                        return endVisitor(gainCoins(5, state));
+                    case "REORGANIZER_RED":
+                        return endVisitor(placeGrapes(state, { red: 2 }));
+                    case "REORGANIZER_WHITE":
+                        return endVisitor(placeGrapes(state, { white: 2 }));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
 };

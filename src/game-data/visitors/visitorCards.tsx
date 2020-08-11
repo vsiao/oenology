@@ -306,18 +306,18 @@ export const rhineSummerVisitorCards = {
     //     "Plant Dealer",
     //     <>Draw 4 <Vine /> and discard 2 of them.</>
     // ),
-    // plantReorganizer: summerVisitorCard(
-    //     "Plant Reorganizer",
-    //     <>Draw 1 <Vine /> and 1 <Card />, then uproot any 1 <Vine /> and plant 1 <Vine />.</>
-    // ),
-    // premiumWineDealer: summerVisitorCard(
-    //     "Premium Wine Dealer",
-    //     <>Gain <Coins>3</Coins> OR pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass> or <WineGlass color="blush">7</WineGlass> even if you don't have a Large Cellar.</>
-    // ),
-    // reorganizer: summerVisitorCard(
-    //     "Reorganizer",
-    //     <>Discard 2 <Card /> to gain either <Coins>5</Coins> or <Grape>2</Grape>.</>
-    // ),
+    plantReorganizer: summerVisitorCard(
+        "Plant Reorganizer",
+        <>Draw 1 <Vine /> and 1 <Card />, then uproot any 1 <Vine /> and plant 1 <Vine />.</>
+    ),
+    premiumWineDealer: summerVisitorCard(
+        "Premium Wine Dealer",
+        <>Gain <Coins>3</Coins> OR pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass> or <WineGlass color="blush">7</WineGlass> even if you don't have a Large Cellar.</>
+    ),
+    reorganizer: summerVisitorCard(
+        "Reorganizer",
+        <>Discard 2 <Card /> to gain either <Coins>5</Coins> or <Grape>2</Grape>.</>
+    ),
     // sculptor: summerVisitorCard(
     //     "Sculptor",
     //     <>Gain <Coins>1</Coins> per field you own, lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass>, or plant up to 2 <Vine />.</>
