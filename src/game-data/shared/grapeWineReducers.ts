@@ -1,5 +1,5 @@
-import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn } from "../GameState";
-import { WineSpec, OrderId, orderCards } from "../orderCards";
+import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn, PlayVisitorPendingAction } from "../GameState";
+import { WineSpec, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
 import { WineIngredients, GrapeSpec } from "../prompts/promptActions";
 import { fieldYields, canFillOrderWithWines } from "./sharedSelectors";
@@ -193,7 +193,7 @@ export const fillOrder = (
         asPremiumBuyer?: boolean;
     } = {}
 ): GameState => {
-    const orderId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).orderId as OrderId;
+    const orderId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as PlayVisitorPendingAction).orderId;
     if (!orderId) {
         throw new Error("Unexpected state: should've chosen an order before filling");
     }

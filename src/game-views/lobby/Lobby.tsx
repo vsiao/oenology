@@ -145,7 +145,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     checked={gameOptions.rhineVisitors ?? false}
                                     onChange={() => setOption("rhineVisitors", !gameOptions.rhineVisitors)}
                                 />
-                                Visit from the Rhine Valley
+                                Visit from the Rhine Valley (BETA)
                             </label>
                         </li>
                         {renderComingSoonOption("Tuscany board")}

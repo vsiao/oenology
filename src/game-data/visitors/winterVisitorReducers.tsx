@@ -747,7 +747,8 @@ export const winterVisitorReducers: Record<
                                 {
                                     id: "MVINTNER_FILL",
                                     label: <>Age 1 <WineGlass /> and fill 1 <Order /></>,
-                                    disabledReason: needCardOfTypeDisabledReason(state, "order"),
+                                    disabledReason: needWineDisabledReason(state) ||
+                                        needCardOfTypeDisabledReason(state, "order"),
                                 },
                             ],
                         });
@@ -1317,6 +1318,9 @@ export const winterVisitorReducers: Record<
         }
     },
     uncertifiedTeacher: (state, action) => {
+        const opponentsWith6 = Object.values(state.players)
+            .filter(p => p.id !== state.currentTurn.playerId && p.workers.length >= 6)
+            .length;
         switch (action.type) {
             case "CHOOSE_CARDS":
                 return promptForAction(state, {
@@ -1328,7 +1332,10 @@ export const winterVisitorReducers: Record<
                         },
                         {
                             id: "UTEACHER_GAIN",
-                            label: <>Gain <VP>1</VP> for each opponent who has a total of 6 <Worker /></>,
+                            label: <>Gain <VP>1</VP> for each opponent who has at least 6 <Worker /></>,
+                            disabledReason: opponentsWith6 > 0
+                                ? undefined
+                                : "There aren't any opponents with 6 workers.",
                         },
                     ],
                 });
@@ -1337,9 +1344,7 @@ export const winterVisitorReducers: Record<
                     case "UTEACHER_LOSE":
                         return endVisitor(trainWorker(loseVP(1, state)));
                     case "UTEACHER_GAIN":
-                        const opponents = Object.values(state.players)
-                            .filter(p => p.id !== state.currentTurn.playerId && p.workers.length >= 6);
-                        return endVisitor(gainVP(opponents.length, state));
+                        return endVisitor(gainVP(opponentsWith6, state));
                     default:
                         return state;
                 }
@@ -1437,7 +1442,9 @@ export const rhineWinterVisitorReducers: Record<
                         {
                             id: "BUREAUCRAT_DRAW",
                             label: <>Pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order /></>,
-                            disabledReason: moneyDisabledReason(state, 1),
+                            disabledReason: fewestVP
+                                ? "You don't have enough victory points."
+                                : moneyDisabledReason(state, 1),
                         },
                     ],
                 });
@@ -1987,7 +1994,8 @@ export const rhineWinterVisitorReducers: Record<
                                 {
                                     id: "SKEPTIC_FILL",
                                     label: <>Age 2 <WineGlass /> and fill 1 <Order /></>,
-                                    disabledReason: needCardOfTypeDisabledReason(state, "order"),
+                                    disabledReason: needWineDisabledReason(state) ||
+                                        needCardOfTypeDisabledReason(state, "order"),
                                 },
                             ],
                         });

@@ -73,6 +73,10 @@ export interface PlayVisitorPendingAction {
     type: "playVisitor";
     visitorId?: VisitorId;
 
+    // If the visitor allows planting or filling an order
+    vineId?: VineId;
+    orderId?: OrderId;
+
     // Indicates the player currently taking an action, for visitors
     // which require opponents to take action
     actionPlayerId?: string;

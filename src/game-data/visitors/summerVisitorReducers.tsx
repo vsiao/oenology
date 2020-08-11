@@ -2033,13 +2033,13 @@ export const rhineSummerVisitorReducers: Record<
                             id: "PWDEALER_SPARKLING",
                             label: <>Pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass></>,
                             disabledReason: moneyDisabledReason(state, 9) ||
-                                cellar.sparkling[6] ? "You already have one." : undefined,
+                                (cellar.sparkling[6] ? "You already have one." : undefined),
                         },
                         {
                             id: "PWDEALER_BLUSH",
                             label: <>Pay <Coins>9</Coins> to gain <WineGlass color="blush">7</WineGlass></>,
                             disabledReason: moneyDisabledReason(state, 9) ||
-                                cellar.blush[6] ? "You already have one." : undefined,
+                                (cellar.blush[6] ? "You already have one." : undefined),
                         },
                     ],
                 });
@@ -2112,7 +2112,7 @@ export const rhineSummerVisitorReducers: Record<
                             id: "SOMMELIER_BUILD",
                             label: <>Pay <Coins>2</Coins> to build the Tasting Room</>,
                             disabledReason: moneyDisabledReason(state, 2) ||
-                                builtTRoom ? "You already built the Tasting Room." : undefined,
+                                (builtTRoom ? "You already built the Tasting Room." : undefined),
                         },
                     ],
                 });
@@ -2214,7 +2214,7 @@ export const rhineSummerVisitorReducers: Record<
                             id: "WLOVER_BUILD",
                             label: <>Lose <Residuals>2</Residuals> to build a Tasting Room and gain <WineGlass>1</WineGlass></>,
                             disabledReason: residualPaymentsDisabledReason(state, 2) ||
-                                tRoomBuilt ? undefined : "You already have a a Tasting Room.",
+                                (tRoomBuilt ? undefined : "You already have a a Tasting Room."),
                         },
                     ],
                 });

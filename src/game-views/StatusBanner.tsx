@@ -36,17 +36,23 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
                 </Tooltip>;
             };
 
-            if (pendingAction?.type === "plantVine" && pendingAction.vineId) {
+            if (
+                (pendingAction?.type === "plantVine" || pendingAction?.type === "playVisitor")
+                    && pendingAction.vineId
+            ) {
                 const cardData = vineCards[pendingAction.vineId];
                 const card = <VineCard className="StatusBanner-cardTip" cardData={cardData} />;
+                mount(ref.current, "bottom", renderCardTip(card));
+            } else if (
+                (pendingAction?.type === "fillOrder" || pendingAction?.type === "playVisitor")
+                    && pendingAction.orderId
+            ) {
+                const cardData = orderCards[pendingAction.orderId];
+                const card = <OrderCard className="StatusBanner-cardTip" cardData={cardData} />;
                 mount(ref.current, "bottom", renderCardTip(card));
             } else if (pendingAction?.type === "playVisitor" && pendingAction.visitorId) {
                 const cardData = visitorCards[pendingAction.visitorId];
                 const card = <VisitorCard className="StatusBanner-cardTip" cardData={cardData} />;
-                mount(ref.current, "bottom", renderCardTip(card));
-            } else if (pendingAction?.type === "fillOrder" && pendingAction.orderId) {
-                const cardData = orderCards[pendingAction.orderId];
-                const card = <OrderCard className="StatusBanner-cardTip" cardData={cardData} />;
                 mount(ref.current, "bottom", renderCardTip(card));
             }
         }

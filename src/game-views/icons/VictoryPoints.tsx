@@ -8,7 +8,7 @@ interface Props {
 
 const VictoryPoints: React.FunctionComponent<Props> = props => {
    return <span className={cx("VictoryPoints", props.className)}>
-       {props.children}
+       {props.children ?? <>&nbsp;</>}
     </span>;
 };
 

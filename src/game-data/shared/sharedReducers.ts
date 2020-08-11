@@ -5,10 +5,10 @@ import GameState, {
     StructureState,
     WorkerPlacement,
     WorkerType,
+    PlayVisitorPendingAction,
 } from "../GameState";
 import { ActivityLogEvent } from "../ActivityLog";
 import { StructureId } from "../structures";
-import { VineId } from "../vineCards";
 import { addCardsToHand } from "./cardReducers";
 import { VineInField } from "../prompts/promptActions";
 
@@ -21,7 +21,7 @@ export const plantVineInField = (
     state: GameState,
     playerId = state.currentTurn.playerId
 ): GameState => {
-    const vineId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).vineId as VineId;
+    const vineId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as PlayVisitorPendingAction).vineId;
     if (!vineId) {
         throw new Error("Unexpected state: should've chosen a vine before planting");
     }
