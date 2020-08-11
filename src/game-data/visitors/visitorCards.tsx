@@ -10,13 +10,29 @@ import Residuals from "../../game-views/icons/Residuals";
 
 export const UNIMPLEMENTED_CARDS = {
     // summer
-    "importer": true,
+    importer: true,
     // winter
-    "caravan": true,
-    "innkeeper": true,
+    caravan: true,
+    innkeeper: true,
 } as const;
 
 export const RHINE_UNIMPLEMENTED_CARDS = {
+    // summer
+    accountant: true,
+    administrator: true,
+    brickMason: true,
+    dismantler: true,
+    grapeMerchant: true,
+    oldGeneral: true, // tuscany
+    plantDealer: true,
+    sculptor: true,
+    sonInLaw: true,
+    structureReorganizer: true,
+    subsidizer: true,
+    vineTrader: true,
+    wineEngineer: true,
+    wineTrader: true,
+    writer: true,
     // winter
     brideToBe: true,
     cellarmaster: true,
@@ -24,8 +40,8 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     chemist: true,
     estateAgent: true,
     grapeVendor: true,
-    influencer: true,
-    lobbyist: true,
+    influencer: true, // tuscany
+    lobbyist: true, // tuscany
     middleman: true,
     specialHarvester: true,
     theologian: true,
@@ -290,10 +306,10 @@ export const rhineSummerVisitorCards = {
     //     "Old General",
     //     <>Place 1 STAR_TOKEN. Each opponent who has all 6 STAR_TOKEN on the map must retrieve 3 of their STAR_TOKEN.</>
     // ),
-    // owner: summerVisitorCard(
-    //     "Owner",
-    //     <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have the Windmill, gain <VP>1</VP>.</>
-    // ),
+    owner: summerVisitorCard(
+        "Owner",
+        <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have the Windmill, gain <VP>1</VP>.</>
+    ),
     peasant: summerVisitorCard(
         "Peasant",
         <>Draw <Order />. Then plant 1 <Vine /> even if you don't have the required structure(s) OR gain <Coins>2</Coins>.</>
@@ -338,10 +354,10 @@ export const rhineSummerVisitorCards = {
     //     "Subsidizer",
     //     <>Build 1 structure at a <Coins>2</Coins> discount, plant up to 2 <Vine />, or plant 1 <Vine /> even if you don't have the required structure(s).</>
     // ),
-    // supporter: summerVisitorCard(
-    //     "Supporter",
-    //     <>Choose 2: Draw 1 <Vine />, gain <Coins>2</Coins>, or draw 1 <Order />.</>
-    // ),
+    supporter: summerVisitorCard(
+        "Supporter",
+        <>Choose 2: Draw 1 <Vine />, gain <Coins>2</Coins>, or draw 1 <Order />.</>
+    ),
     traveller: summerVisitorCard(
         "Traveller",
         <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have the Tasting Room, also gain <Coins>3</Coins>.</>

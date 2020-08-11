@@ -1870,6 +1870,57 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    owner: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            {
+                id: "OWNER_BUILD",
+                label: <>Build 1 structure</>,
+                disabledReason: buildStructureDisabledReason(state),
+            },
+            { id: "OWNER_DRAW", label: <>Draw 1 <Order /></>, },
+            {
+                id: "OWNER_PLANT",
+                label: <>Plant 1 <Vine /></>,
+                disabledReason: plantVinesDisabledReason(state),
+            },
+        ]);
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return chooseAction(
+                            state.players[state.currentTurn.playerId].structures.windmill
+                                ? gainVP(1, state)
+                                : state
+                        );
+                    case "vine":
+                        return promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                state = chooseAction(state, action.choice);
+                switch (action.choice) {
+                    case "OWNER_BUILD":
+                        return promptToBuildStructure(state);
+                    case "OWNER_DRAW":
+                        return maybeEndVisitor(drawCards(state, action._key!, { order: 1 }));
+                    case "OWNER_PLANT":
+                        return promptToChooseVineCard(state);
+                    default:
+                        return state;
+                }
+            case "BUILD_STRUCTURE":
+                const { cost } = structures[action.structureId];
+                return maybeEndVisitor(buildStructure(payCoins(cost, state), action.structureId));
+            case "CHOOSE_FIELD":
+                return maybeEndVisitor(plantVineInField(action.fields[0], state));
+            default:
+                return state;
+        }
+    },
     peasant: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -2076,6 +2127,32 @@ export const rhineSummerVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endVisitor(gainVP(1, discardWines(state, action.wines)));
+            default:
+                return state;
+        }
+    },
+    supporter: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            { id: "SUPPORTER_VINE", label: <>Draw 1 <Vine /></>, },
+            { id: "SUPPORTER_GAIN", label: <>Gain <Coins>2</Coins></>, },
+            { id: "SUPPORTER_ORDER", label: <>Draw 1 <Order /></>, },
+        ]);
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return chooseAction(state);
+            case "CHOOSE_ACTION":
+                state = chooseAction(state, action.choice);
+                switch (action.choice) {
+                    case "SUPPORTER_VINE":
+                        return maybeEndVisitor(drawCards(state, action._key!, { vine: 1 }));
+                    case "SUPPORTER_GAIN":
+                        return maybeEndVisitor(gainCoins(2, state));
+                    case "SUPPORTER_ORDER":
+                        return maybeEndVisitor(drawCards(state, action._key!, { order: 1 }));
+                    default:
+                        return state;
+                }
             default:
                 return state;
         }
