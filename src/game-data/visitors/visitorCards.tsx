@@ -322,10 +322,10 @@ export const rhineSummerVisitorCards = {
     //     "Sculptor",
     //     <>Gain <Coins>1</Coins> per field you own, lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass>, or plant up to 2 <Vine />.</>
     // ),
-    // sommelier: summerVisitorCard(
-    //     "Sommelier",
-    //     <>If you have the Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build the Tasting Room.</>
-    // ),
+    sommelier: summerVisitorCard(
+        "Sommelier",
+        <>If you have the Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build the Tasting Room.</>
+    ),
     // sonInLaw: summerVisitorCard(
     //     "Son-in-law",
     //     <>Lay this card on a field. For the remainder of the game you may choose to harvest this field in addition to your first action each winter, but only to a total grape value of 3.</>
@@ -342,10 +342,10 @@ export const rhineSummerVisitorCards = {
     //     "Supporter",
     //     <>Choose 2: Draw 1 <Vine />, gain <Coins>2</Coins>, or draw 1 <Order />.</>
     // ),
-    // traveller: summerVisitorCard(
-    //     "Traveller",
-    //     <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have the Tasting Room, also gain <Coins>3</Coins>.</>
-    // ),
+    traveller: summerVisitorCard(
+        "Traveller",
+        <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have the Tasting Room, also gain <Coins>3</Coins>.</>
+    ),
     // vineTrader: summerVisitorCard(
     //     "Vine Trader",
     //     <>Discard any number of <Vine /> to gain <Coins>3</Coins> for each. Then draw any number of <Vine /> for <Coins>2</Coins> each and/or any number of <WinterVisitor /> for <Coins>4</Coins> each.</>
@@ -354,10 +354,10 @@ export const rhineSummerVisitorCards = {
     //     "Wine Engineer",
     //     <>Pay <Coins>2</Coins> to either gain <WineGlass>4</WineGlass> in your cellar or to age 1 or 2 <Grape /> up to 3 times.</>
     // ),
-    // wineLover: summerVisitorCard(
-    //     "Wine Lover",
-    //     <>If you have a Tasting Room, gain <Residuals>1</Residuals> or <Grape>4</Grape>. Otherwise lose <Residuals>2</Residuals> to build a Tasting Room for free and gain <WineGlass>1</WineGlass>.</>
-    // ),
+    wineLover: summerVisitorCard(
+        "Wine Lover",
+        <>If you have a Tasting Room, gain <Residuals>1</Residuals> or <Grape>4</Grape>. Otherwise lose <Residuals>2</Residuals> to build a Tasting Room for free and gain <WineGlass>1</WineGlass>.</>
+    ),
     // wineTrader: summerVisitorCard(
     //     "Wine Trader",
     //     <>Gain <Grape>1</Grape> OR pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass> or <WineGlass color="white">7</WineGlass> even if you don't have the Large Cellar.</>

@@ -32,6 +32,7 @@ import {
     gainResiduals,
     updatePlayer,
     placeWorker,
+    loseResiduals,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -47,6 +48,7 @@ import {
     switchVines,
     fieldYields,
     cardTypesInPlay,
+    residualPaymentsDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -64,7 +66,7 @@ import {
     makeEndVisitorAction,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine } from "../shared/grapeWineReducers";
+import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements } from "../board/boardPlacements";
@@ -2069,6 +2071,130 @@ export const rhineSummerVisitorReducers: Record<
                         return endVisitor(placeGrapes(state, { red: 2 }));
                     case "REORGANIZER_WHITE":
                         return endVisitor(placeGrapes(state, { white: 2 }));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    sommelier: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const builtTRoom = state.players[state.currentTurn.playerId].structures.tastingRoom;
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "SOMMELIER_DISCARD",
+                            label: <>Discard 1 <WineGlass /> to gain <VP>1</VP></>,
+                            disabledReason: builtTRoom ? undefined : "You haven't built the Tasting Room",
+                        },
+                        {
+                            id: "SOMMELIER_BUILD",
+                            label: <>Pay <Coins>2</Coins> to build the Tasting Room</>,
+                            disabledReason: moneyDisabledReason(state, 2) ||
+                                builtTRoom ? "You already built the Tasting Room." : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SOMMELIER_DISCARD":
+                        return promptToChooseWine(state);
+                    case "SOMMELIER_BUILD":
+                        return endVisitor(buildStructure(payCoins(2, state), "tastingRoom"));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(1, discardWines(state, action.wines)));
+            default:
+                return state;
+        }
+    },
+    traveller: (state, action) => {
+        const bonusGain = state.players[state.currentTurn.playerId].structures.tastingRoom;
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "TRAVELLER_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        {
+                            id: "TRAVELLER_HARVEST",
+                            label: <>Harvest up to 2 fields</>,
+                            disabledReason: harvestFieldDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "TRAVELLER_GAIN":
+                        return endVisitor(gainCoins(bonusGain ? 6 : 3, state));
+                    case "TRAVELLER_HARVEST":
+                        return promptToHarvest(state, 2);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return endVisitor(
+                    gainCoins(bonusGain ? 3 : 0, harvestFields(state, action.fields))
+                );
+            default:
+                return state;
+        }
+    },
+    wineLover: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const tRoomBuilt = state.players[state.currentTurn.playerId].structures.tastingRoom;
+                const needTRoomDisabledReason = tRoomBuilt ? undefined : "You haven't built a Tasting Room.";
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "WLOVER_RESIDUAL",
+                            label: <>Gain <Residuals>1</Residuals></>,
+                            disabledReason: needTRoomDisabledReason,
+                        },
+                        {
+                            id: "WLOVER_RGRAPE",
+                            label: <>Gain <Grape color="red">4</Grape></>,
+                            disabledReason: needTRoomDisabledReason,
+                        },
+                        {
+                            id: "WLOVER_WGRAPE",
+                            label: <>Gain <Grape color="white">4</Grape></>,
+                            disabledReason: needTRoomDisabledReason,
+                        },
+                        {
+                            id: "WLOVER_BUILD",
+                            label: <>Lose <Residuals>2</Residuals> to build a Tasting Room and gain <WineGlass>1</WineGlass></>,
+                            disabledReason: residualPaymentsDisabledReason(state, 2) ||
+                                tRoomBuilt ? undefined : "You already have a a Tasting Room.",
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "WLOVER_RESIDUAL":
+                        return endVisitor(gainResiduals(1, state));
+                    case "WLOVER_RGRAPE":
+                        return endVisitor(placeGrapes(state, { red: 4 }));
+                    case "WLOVER_WGRAPE":
+                        return endVisitor(placeGrapes(state, { white: 4 }));
+                    case "WLOVER_BUILD":
+                        return promptForAction(
+                            buildStructure(loseResiduals(2, state), "tastingRoom"),
+                            {
+                                choices: [
+                                    { id: "WLOVER_RWINE", label: <>Gain <WineGlass color="red">1</WineGlass></>, },
+                                    { id: "WLOVER_WWINE", label: <>Gain <WineGlass color="white">1</WineGlass></>, },
+                                ],
+                            }
+                        );
+                    case "WLOVER_RWINE":
+                        return endVisitor(gainWine({ value: 1, color: "red" }, state));
+                    case "WLOVER_WWINE":
+                        return endVisitor(gainWine({ value: 1, color: "white" }, state));
                     default:
                         return state;
                 }
