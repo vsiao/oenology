@@ -599,22 +599,22 @@ export const rhineWinterVisitorCards = {
         "Premium Buyer",
         <>Fill 1 <Order />. If all of the <WineGlass /> used to fill the wine order were at least 2 higher than the necessary value, gain <VP>2</VP>.</>
     ),
-    // researcher: winterVisitorCard(
-    //     "Researcher",
-    //     <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
-    // ),
-    // rhineSailor: winterVisitorCard(
-    //     "Rhine Sailor",
-    //     <>Discard 3 <Card /> to draw 3 <WinterVisitor /> and gain <Coins>1</Coins>.</>
-    // ),
-    // schoolTeacher: winterVisitorCard(
-    //     "School Teacher",
-    //     <>Pay <Coins>4</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VP>2</VP>.</>
-    // ),
-    // shipper: winterVisitorCard(
-    //     "Shipper",
-    //     <>Make up to 3 <WineGlass />, fill 1 <Order />, or gain <Coins>3</Coins>.</>
-    // ),
+    researcher: winterVisitorCard(
+        "Researcher",
+        <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
+    ),
+    rhineSailor: winterVisitorCard(
+        "Rhine Sailor",
+        <>Discard 3 <Card /> to draw 3 <WinterVisitor /> and gain <Coins>1</Coins>.</>
+    ),
+    schoolTeacher: winterVisitorCard(
+        "School Teacher",
+        <>Pay <Coins>4</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VP>2</VP>.</>
+    ),
+    shipper: winterVisitorCard(
+        "Shipper",
+        <>Make up to 3 <WineGlass />, fill 1 <Order />, or gain <Coins>3</Coins>.</>
+    ),
     // skeptic: winterVisitorCard(
     //     "Skeptic",
     //     <>Upgrade your cellar to the next level at a <Coins>3</Coins> discount OR age 2 <WineGlass /> and fill 1 <Order />.</>

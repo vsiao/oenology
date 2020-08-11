@@ -26,6 +26,7 @@ import {
     promptToChooseCard,
     promptToChooseGrapes,
     promptToChooseVisitor,
+    promptToDiscard,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { visitorCards, winterVisitorCards, rhineWinterVisitorCards } from "./visitorCards";
@@ -1963,6 +1964,125 @@ export const rhineWinterVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endVisitor(fillOrder(action.wines, state, { asPremiumBuyer: true }));
+            default:
+                return state;
+        }
+    },
+    researcher: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "RESEARCHER_DRAW", label: <>Draw 2 <Order /></>, },
+                        {
+                            id: "RESEARCHER_TRAIN",
+                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            disabledReason: trainWorkerDisabledReason(state, 3),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "RESEARCHER_DRAW":
+                        return endVisitor(drawCards(state, action._key!, { order: 2 }));
+                    case "RESEARCHER_TRAIN":
+                        return endVisitor(trainWorker(payCoins(3, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    rhineSailor: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                if (action.cards!.length === 1) {
+                    return promptToDiscard(3, state);
+                } else {
+                    return endVisitor(
+                        gainCoins(1, drawCards(state, action._key!, { winterVisitor: 3 }))
+                    );
+                }
+            default:
+                return state;
+        }
+    },
+    schoolTeacher: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "STEACHER_TRAIN",
+                            label: <>Pay <Coins>4</Coins> to train 1 <Worker /> to use this year</>,
+                            disabledReason: trainWorkerDisabledReason(state, 4),
+                        },
+                        {
+                            id: "STEACHER_DISCARD",
+                            label: <>Discard 1 <WineGlass /> to gain <VP>2</VP></>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "STEACHER_TRAIN":
+                        return endVisitor(
+                            trainWorker(payCoins(4, state), { availableThisYear: true })
+                        );
+                    case "STEACHER_DISCARD":
+                        return promptToChooseWine(state);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(gainVP(2, discardWines(state, action.wines)));
+            default:
+                return state;
+        }
+    },
+    shipper: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "SHIPPER_MAKE",
+                                    label: <>Make up to 3 <WineGlass /></>,
+                                    disabledReason: needGrapesDisabledReason(state),
+                                },
+                                {
+                                    id: "SHIPPER_FILL",
+                                    label: <>Fill 1 <Order /></>,
+                                    disabledReason: fillOrderDisabledReason(state),
+                                },
+                                { id: "SHIPPER_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SHIPPER_MAKE":
+                        return promptToMakeWine(state, /* upToN */ 3);
+                    case "SHIPPER_FILL":
+                        return promptToChooseOrderCard(state);
+                    case "SHIPPER_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    default:
+                        return state;
+                }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "CHOOSE_WINE":
+                return endVisitor(fillOrder(action.wines, state));
             default:
                 return state;
         }
