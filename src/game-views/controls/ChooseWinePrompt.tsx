@@ -65,7 +65,8 @@ const ChooseWinePrompt: React.FunctionComponent<Props> = props => {
 const isDisabled = (prompt: ChooseWinePromptState | FillOrderPromptState, selectedWines: WineSpec[]) => {
     switch (prompt.type) {
         case "chooseWine":
-            return selectedWines.length !== 1 || selectedWines[0].value < prompt.minValue;
+            return selectedWines.length !== (prompt.numWines ?? 1) ||
+                selectedWines.some(w => w.value < prompt.minValue);
 
         case "fillOrder":
             let winesLeft = selectedWines;

@@ -14,7 +14,7 @@ import {
     loseVP,
     updatePlayer,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, TokenMap, WorkerPlacement } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, WorkerPlacement } from "../GameState";
 import {
     promptForAction,
     promptToMakeWine,
@@ -50,7 +50,6 @@ import { endVisitor, setPendingAction, makeEndVisitorAction } from "../shared/tu
 import { discardCards, drawCards, removeCardsFromHand, addCardsToHand } from "../shared/cardReducers";
 import {
     ageCellar,
-    ageSingle,
     discardWines,
     fillOrder,
     harvestField,
@@ -58,6 +57,7 @@ import {
     placeGrapes,
     harvestFields,
     discardGrapes,
+    ageSingleWine,
 } from "../shared/grapeWineReducers";
 import { Choice } from "../prompts/PromptState";
 import { seasonalActions } from "../board/boardPlacements";
@@ -821,7 +821,7 @@ export const winterVisitorReducers: Record<
                             choices: [
                                 {
                                     id: "MVINTNER_UPGRADE",
-                                    label: <>Upgrade cellar at <Coins>2</Coins> discount</>,
+                                    label: <>Upgrade cellar at a <Coins>2</Coins> discount</>,
                                     disabledReason: player.structures.largeCellar
                                         ? "Your cellar is fully upgraded."
                                         : moneyDisabledReason(state, cost),
@@ -829,6 +829,7 @@ export const winterVisitorReducers: Record<
                                 {
                                     id: "MVINTNER_FILL",
                                     label: <>Age 1 <WineGlass /> and fill 1 <Order /></>,
+                                    disabledReason: needCardOfTypeDisabledReason(state, "order"),
                                 },
                             ],
                         });
@@ -850,16 +851,7 @@ export const winterVisitorReducers: Record<
                 if (!vintnerAction.orderId) {
                     // Haven't started filling an order yet: age the chosen wine
                     const wine = action.wines[0];
-                    const idx = wine.value - 1;
-                    return promptToChooseOrderCard(updatePlayer(state, player.id, {
-                        cellar: {
-                            ...player.cellar,
-                            [wine.color]: ageSingle(
-                                player.cellar[wine.color].map((w, i) => w && i !== idx) as TokenMap,
-                                idx
-                            )
-                        },
-                    }));
+                    return promptToChooseOrderCard(ageSingleWine(wine, state));
                 } else {
                     return endVisitor(fillOrder(action.wines, state));
                 }
@@ -2087,7 +2079,75 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    skeptic: (state, action, pendingAction) => {
+        const player = state.players[state.currentTurn.playerId];
+        const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
+        const cost = structures[upgradeCellar].cost - 3;
+        const skepticAction = pendingAction as PlayVisitorPendingAction & { orderId: OrderId; };
+
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "SKEPTIC_UPGRADE",
+                                    label: <>Upgrade cellar at a <Coins>3</Coins> discount</>,
+                                    disabledReason: player.structures.largeCellar
+                                        ? "Your cellar is fully upgraded."
+                                        : moneyDisabledReason(state, cost),
+                                },
+                                {
+                                    id: "SKEPTIC_FILL",
+                                    label: <>Age 2 <WineGlass /> and fill 1 <Order /></>,
+                                    disabledReason: needCardOfTypeDisabledReason(state, "order"),
+                                },
+                            ],
+                        });
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SKEPTIC_UPGRADE":
+                        return endVisitor(buildStructure(payCoins(cost, state), upgradeCellar));
+                    case "SKEPTIC_FILL":
+                        return promptToChooseWine(state, { numWines: 2 });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                if (!skepticAction.orderId) {
+                    // Haven't started filling an order yet: age the chosen wines
+                    action.wines.forEach(wine => {
+                        state = ageSingleWine(wine, state);
+                    });
+                    return promptToChooseOrderCard(state);
+                } else {
+                    return endVisitor(fillOrder(action.wines, state));
+                }
+            default:
+                return state;
+        }
+    },
     supervisor: winterVisitorReducers.supervisor,
     uncertifiedOenologist: winterVisitorReducers.uncertifiedOenologist,
+    winterAgent: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const bonusDraw = Object.values(state.players)
+                    .filter(p => p.id !== state.currentTurn.playerId)
+                    .some(p => p.victoryPoints >= 5);
+                return endVisitor(
+                    drawCards(state, action._key!, { summerVisitor: 2, order: bonusDraw ? 1 : 0 })
+                );
+            default:
+                return state;
+        }
+    },
     zymologist: winterVisitorReducers.zymologist,
 };

@@ -9,17 +9,20 @@ import { addToDiscard } from "./cardReducers";
 // Shared `TokenMap` reducers for aging and auto-devaluation
 // ----------------------------------------------------------------------------
 
+const cellarValueCap = (structures: PlayerState["structures"]): number =>
+    structures.largeCellar ? 9 : structures.mediumCellar ? 6 : 3;
+
 export const ageCellar = (
     cellar: PlayerState["cellar"],
     structures: PlayerState["structures"],
     n = 1
 ): PlayerState["cellar"] => {
-    const valueCap = structures.largeCellar ? 9 : structures.mediumCellar ? 6 : 3;
+    const valueCap = cellarValueCap(structures);
     cellar = {
-        red: ageAll(cellar.red, valueCap),
-        white: ageAll(cellar.white, valueCap),
-        blush: ageAll(cellar.blush, valueCap),
-        sparkling: ageAll(cellar.sparkling, valueCap),
+        red: ageAllTokens(cellar.red, valueCap),
+        white: ageAllTokens(cellar.white, valueCap),
+        blush: ageAllTokens(cellar.blush, valueCap),
+        sparkling: ageAllTokens(cellar.sparkling, valueCap),
     };
     if (n <= 1) {
         return cellar;
@@ -27,18 +30,18 @@ export const ageCellar = (
     return ageCellar(cellar, structures, n - 1);
 };
 
-export const ageAll = (tokens: TokenMap, valueCap: number = tokens.length): TokenMap => {
+export const ageAllTokens = (tokens: TokenMap, valueCap: number = tokens.length): TokenMap => {
     let newTokenMap = new Array(9).fill(false) as TokenMap;
     for (let i = tokens.length - 1; i >= 0; --i) {
         if (!tokens[i]) {
             continue;
         }
-        newTokenMap = ageSingle(newTokenMap, i, valueCap);
+        newTokenMap = ageSingleToken(newTokenMap, i, valueCap);
     }
     return newTokenMap;
 };
 
-export const ageSingle = (tokens: TokenMap, i: number, valueCap: number = tokens.length): TokenMap => {
+const ageSingleToken = (tokens: TokenMap, i: number, valueCap: number): TokenMap => {
     const newTokenMap = tokens.slice() as TokenMap;
     const atCellarBoundary = i + 1 === 3 || i + 1 === 6 || i + 1 === 9;
     if (newTokenMap[i + 1] || (atCellarBoundary && i + 1 >= valueCap)) {
@@ -48,6 +51,22 @@ export const ageSingle = (tokens: TokenMap, i: number, valueCap: number = tokens
         newTokenMap[i + 1] = true;
     }
     return newTokenMap;
+};
+
+export const ageSingleWine = (wine: WineSpec, state: GameState): GameState => {
+    const player = state.players[state.currentTurn.playerId];
+    const idx = wine.value - 1;
+
+    return updatePlayer(state, player.id, {
+        cellar: {
+            ...player.cellar,
+            [wine.color]: ageSingleToken(
+                player.cellar[wine.color].map((w, i) => w && i !== idx) as TokenMap,
+                idx,
+                cellarValueCap(player.structures)
+            )
+        }
+    })
 };
 
 export const devaluedIndex = (value: number, tokens: TokenMap) => {

@@ -2,7 +2,7 @@ import { PromptAction, isPromptAction } from "./prompts/promptActions";
 import { Action } from "redux";
 import { PlayerColor, CardsByType } from "./GameState";
 import { MamaId, PapaId } from "./mamasAndPapas";
-import { UNIMPLEMENTED_CARDS } from "./visitors/visitorCards";
+import { UNIMPLEMENTED_CARDS, RHINE_UNIMPLEMENTED_CARDS } from "./visitors/visitorCards";
 import { GameOptions } from "../store/AppState";
 
 export type GameAction = (
@@ -45,7 +45,14 @@ export interface StartGameAction extends Action<"START_GAME"> {
     excludeCards?: { [Id in string]?: true };
 }
 export const startGame = (players: PlayerInit[], options: GameOptions): GameAction => {
-    return { type: "START_GAME", options, players, excludeCards: UNIMPLEMENTED_CARDS };
+    return {
+        type: "START_GAME",
+        options,
+        players,
+        excludeCards: options.rhineVisitors
+            ? RHINE_UNIMPLEMENTED_CARDS
+            : UNIMPLEMENTED_CARDS,
+    };
 };
 
 interface UndoAction extends Action<"UNDO"> {

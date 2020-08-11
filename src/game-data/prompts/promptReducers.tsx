@@ -285,12 +285,15 @@ export const promptToChooseField = (
 
 export const promptToChooseWine = (
     state: GameState,
-    { minValue = 1 }: { minValue?: number; } = {}
+    { minValue = 1, numWines = 1 }: {
+        minValue?: number;
+        numWines?: number;
+    } = {}
 ): GameState => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, { type: "chooseWine", minValue, });
+    return enqueueActionPrompt(state, { type: "chooseWine", minValue, numWines });
 };
 
 export const promptToChooseGrapes = (state: GameState, limit?: 1): GameState => {

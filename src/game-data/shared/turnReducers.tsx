@@ -9,7 +9,7 @@ import GameState, {
     WorkerPlacementTurn,
     WorkerPlacementTurnPendingAction,
 } from "../GameState";
-import { ageAll, ageCellar } from "./grapeWineReducers";
+import { ageAllTokens, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, displayGameOverPrompt, promptToDiscard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
@@ -610,8 +610,8 @@ const endYear = (state: GameState): GameState => {
                             .map(w => ({ ...w, available: true })),
                         // Age grape and wine tokens
                         crushPad: {
-                            red: ageAll(playerState.crushPad.red),
-                            white: ageAll(playerState.crushPad.white),
+                            red: ageAllTokens(playerState.crushPad.red),
+                            white: ageAllTokens(playerState.crushPad.white),
                         },
                         cellar: ageCellar(playerState.cellar, playerState.structures),
                         // Reset field harvested state

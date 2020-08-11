@@ -16,6 +16,25 @@ export const UNIMPLEMENTED_CARDS = {
     "innkeeper": true,
 } as const;
 
+export const RHINE_UNIMPLEMENTED_CARDS = {
+    // winter
+    brideToBe: true,
+    cellarmaster: true,
+    cheapBuyer: true,
+    chemist: true,
+    estateAgent: true,
+    grapeVendor: true,
+    influencer: true,
+    lobbyist: true,
+    middleman: true,
+    specialHarvester: true,
+    theologian: true,
+    trainer: true,
+    tutor: true,
+    virtuoso: true,
+    wineStoreOwner: true,
+} as const;
+
 export interface VisitorCardData {
     season: "summer" | "winter";
     name: string;
@@ -615,10 +634,10 @@ export const rhineWinterVisitorCards = {
         "Shipper",
         <>Make up to 3 <WineGlass />, fill 1 <Order />, or gain <Coins>3</Coins>.</>
     ),
-    // skeptic: winterVisitorCard(
-    //     "Skeptic",
-    //     <>Upgrade your cellar to the next level at a <Coins>3</Coins> discount OR age 2 <WineGlass /> and fill 1 <Order />.</>
-    // ),
+    skeptic: winterVisitorCard(
+        "Skeptic",
+        <>Upgrade your cellar to the next level at a <Coins>3</Coins> discount OR age 2 <WineGlass /> and fill 1 <Order />.</>
+    ),
     // specialHarvester: winterVisitorCard(
     //     "Special Harvester",
     //     <>Harvest 1 field and make 1 <WineGlass /> OR harvest each <Vine /> on a field as if it were its own field.</>
@@ -645,10 +664,10 @@ export const rhineWinterVisitorCards = {
     //     "Wine Store Owner",
     //     <>Discard <WineGlass>X</WineGlass> to gain X <Order /> OR pay <Coins>X</Coins> to gain <WineGlass>X</WineGlass>.</>
     // ),
-    // winterAgent: winterVisitorCard(
-    //     "Winter Agent",
-    //     <>Draw 2 <SummerVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
-    // ),
+    winterAgent: winterVisitorCard(
+        "Winter Agent",
+        <>Draw 2 <SummerVisitor />. If any opponent already has at least <VP>5</VP>, also draw 1 <Order />.</>
+    ),
     zymologist: winterVisitorCards.zymologist,
 };
 
