@@ -18,6 +18,8 @@ import WineGlass from "./icons/WineGlass";
 import Residuals from "./icons/Residuals";
 import { useTooltip } from "./shared/useTooltip";
 import VisitorCard from "./cards/VisitorCard";
+import { orderCards } from "../game-data/orderCards";
+import OrderCard from "./cards/OrderCard";
 
 interface Props {
     players: PlayerState[];
@@ -60,7 +62,11 @@ const ActivityLogItem: React.FunctionComponent<{
         "left",
         React.useMemo(() => {
             if (event.type === "visitor") {
-                return <VisitorCard className="Sidebar-visitorTip" cardData={visitorCards[event.visitorId]} />;
+                return <VisitorCard className="Sidebar-cardTip" cardData={visitorCards[event.visitorId]} />;
+            } else if (
+                event.type === "fill" && event.orderId // #FillEventOrderId
+            ) {
+                return <OrderCard className="Sidebar-cardTip" cardData={orderCards[event.orderId]} />;
             }
             return null;
         }, [event])
@@ -105,7 +111,8 @@ const renderActivity = (
         case "draw":
             return <>{player} drew {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
         case "fill":
-            return <>{player} filled a {event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)} order</>;
+            const wines = event.wines ?? orderCards[event.orderId].wines; // #FillEventOrderId
+            return <>{player} filled a {wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)} order</>;
         case "gainWine":
             return <>{player} gained a <WineGlass color={event.wine.color}>{event.wine.value}</WineGlass></>;
         case "buySellField":

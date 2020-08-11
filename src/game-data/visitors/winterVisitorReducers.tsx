@@ -800,7 +800,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endVisitor(fillOrder(action.wines, state, /* bonusVP */ true));
+                return endVisitor(fillOrder(action.wines, state, { bonusVP: true }));
             default:
                 return state;
         }
@@ -901,7 +901,7 @@ export const winterVisitorReducers: Record<
                         return state;
                 }
             case "CHOOSE_WINE":
-                return endVisitor(fillOrder(action.wines, state, /* bonusVP */ true));
+                return endVisitor(fillOrder(action.wines, state, { bonusVP: true }));
             default:
                 return state;
         }
@@ -1945,6 +1945,24 @@ export const rhineWinterVisitorReducers: Record<
                 }
             case "MAKE_WINE":
                 return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            default:
+                return state;
+        }
+    },
+    premiumBuyer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptToChooseOrderCard(state);
+                    case "order":
+                        return promptToFillOrder(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(fillOrder(action.wines, state, { asPremiumBuyer: true }));
             default:
                 return state;
         }

@@ -200,7 +200,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     }
                     return promptToFillOrder(state, card.id);
                 case "CHOOSE_WINE":
-                    return endTurn(fillOrder(action.wines, state, /* bonusVP */ pendingAction.hasBonus));
+                    return endTurn(fillOrder(action.wines, state, { bonusVP: pendingAction.hasBonus }));
                 default:
                     return state;
             }

@@ -202,12 +202,18 @@ export const needWineDisabledReason = (
     return undefined;
 };
 
-export const canFillOrderWithWines = (orderId: OrderId, wines: WineSpec[]): false | WineSpec[] => {
+export const canFillOrderWithWines = (
+    orderId: OrderId,
+    wines: WineSpec[],
+    asPremiumBuyer = false
+): false | WineSpec[] => {
     const winesLeft = wines.slice().sort((w1, w2) => w1.value - w2.value);
 
     for (const orderWine of orderCards[orderId].wines) {
         const matchingWineIdx = winesLeft.findIndex(
-            ({ color, value }) => color === orderWine.color && value >= orderWine.value
+            ({ color, value }) =>
+                color === orderWine.color &&
+                value >= (orderWine.value + (asPremiumBuyer ? 2 : 0))
         );
         if (matchingWineIdx < 0) {
             return false;

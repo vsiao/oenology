@@ -1,5 +1,5 @@
 import { VineId, VineYields } from "./vineCards";
-import { WineSpec } from "./orderCards";
+import { WineSpec, OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { VisitorId } from "./visitors/visitorCards";
 import { CardType } from "./GameState";
@@ -53,7 +53,10 @@ interface DrawEvent extends LogEvent<"draw"> {
     cards: CardType[];
 }
 interface FillEvent extends LogEvent<"fill"> {
-    wines: WineSpec[];
+    orderId: OrderId;
+
+    /** @deprecated in favor of `orderId`. TODO: migrate to add ##FillEventOrderId */
+    wines?: WineSpec[];
 }
 interface GainWineEvent extends LogEvent<"gainWine"> {
     wine: WineSpec;

@@ -2,7 +2,7 @@ import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn } from "
 import { WineSpec, OrderId, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
 import { WineIngredients, GrapeSpec } from "../prompts/promptActions";
-import { fieldYields } from "./sharedSelectors";
+import { fieldYields, canFillOrderWithWines } from "./sharedSelectors";
 import { addToDiscard } from "./cardReducers";
 
 //
@@ -169,22 +169,32 @@ export const makeWineFromGrapes = (
 export const fillOrder = (
     winesToUse: WineSpec[],
     state: GameState,
-    bonusVP = false
+    { bonusVP = false, asPremiumBuyer = false }: {
+        bonusVP?: boolean;
+        asPremiumBuyer?: boolean;
+    } = {}
 ): GameState => {
     const orderId = ((state.currentTurn as WorkerPlacementTurn).pendingAction as any).orderId as OrderId;
     if (!orderId) {
         throw new Error("Unexpected state: should've chosen an order before filling");
     }
-    const { residualIncome, wines, victoryPoints } = orderCards[orderId];
-    return gainResiduals(residualIncome, gainVP(victoryPoints + (bonusVP ? 1 : 0),
-        addToDiscard(
-            [{ type: "order", id: orderId }],
-            discardWines(
-                pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, wines }, state),
-                winesToUse
-            )
+    const { residualIncome, victoryPoints } = orderCards[orderId];
+    state = addToDiscard(
+        [{ type: "order", id: orderId }],
+        discardWines(
+            pushActivityLog({ type: "fill", playerId: state.currentTurn.playerId, orderId, }, state),
+            winesToUse
         )
-    ));
+    );
+    return gainResiduals(
+        residualIncome,
+        gainVP(
+            victoryPoints + (bonusVP ? 1 : 0) + (
+                asPremiumBuyer && canFillOrderWithWines(orderId, winesToUse, /* asPremiumBuyer */ true) ? 2 : 0
+            ),
+            state
+        )
+    );
 };
 
 export const discardWines = (state: GameState, wines: WineSpec[]) => {

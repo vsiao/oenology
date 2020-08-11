@@ -595,10 +595,10 @@ export const rhineWinterVisitorCards = {
     //     "Middleman",
     //     <>Draw 3 <Vine />, then discard 1 <Vine /> or pay <Coins>2</Coins> OR fill 1 <Order />, even if the type(s) of wine doesn't match the <Order /> (values matter).</>
     // ),
-    // premiumBuyer: winterVisitorCard(
-    //     "Premium Buyer",
-    //     <>Fill 1 <Order />. If all of the <WineGlass /> used to fill the wine order were at least 2 higher than the necessary value, gain <VP>2</VP>.</>
-    // ),
+    premiumBuyer: winterVisitorCard(
+        "Premium Buyer",
+        <>Fill 1 <Order />. If all of the <WineGlass /> used to fill the wine order were at least 2 higher than the necessary value, gain <VP>2</VP>.</>
+    ),
     // researcher: winterVisitorCard(
     //     "Researcher",
     //     <>Draw 2 <Order /> OR pay <Coins>3</Coins> to train 1 <Worker />.</>
