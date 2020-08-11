@@ -94,7 +94,7 @@ export const promptToChooseCard = (
 
 export const promptToDiscard = (numCards: number, state: GameState): GameState => {
     return promptToChooseCard(state, {
-        title: `Discard ${numCards} cards`,
+        title: `Discard ${numCards} card${numCards === 1 ? "" : "s"}`,
         style: "selector",
         numCards,
         cards: state.players[state.currentTurn.playerId].cardsInHand.map(id => ({ id })),

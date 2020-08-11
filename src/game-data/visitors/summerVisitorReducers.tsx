@@ -1,6 +1,6 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType, WineColor } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType, WineColor, GrapeColor } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -2252,6 +2252,102 @@ export const rhineSummerVisitorReducers: Record<
                     default:
                         return state;
                 }
+            default:
+                return state;
+        }
+    },
+    wineTrader: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "WTRADER_RGRAPE", label: <>Gain <Grape color="red">1</Grape></>, },
+                        { id: "WTRADER_WGRAPE", label: <>Gain <Grape color="white">1</Grape></>, },
+                        {
+                            id: "WTRADER_RWINE",
+                            label: <>Pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass></>,
+                            disabledReason: moneyDisabledReason(state, 6),
+                        },
+                        {
+                            id: "WTRADER_WWINE",
+                            label: <>Pay <Coins>6</Coins> to gain <WineGlass color="white">7</WineGlass></>,
+                            disabledReason: moneyDisabledReason(state, 6),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "WTRADER_RGRAPE":
+                        return endVisitor(placeGrapes(state, { red: 1 }));
+                    case "WTRADER_WGRAPE":
+                        return endVisitor(placeGrapes(state, { white: 1 }));
+                    case "WTRADER_RWINE":
+                        return endVisitor(gainWine({ color: "red", value: 7 }, payCoins(6, state)));
+                    case "WTRADER_WWINE":
+                        return endVisitor(gainWine({ color: "white", value: 7 }, payCoins(6, state)));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    writer: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "WRITER_GAIN",
+                            label: <>Discard 1 <WineGlass /> to gain <Residuals>2</Residuals></>,
+                            disabledReason: needWineDisabledReason(state),
+                        },
+                        {
+                            id: "WRITER_LOSE",
+                            label: <>
+                                Lose <Residuals>2</Residuals> to gain <Grape>4</Grape> or <WineGlass>4</WineGlass>
+                            </>,
+                            disabledReason: residualPaymentsDisabledReason(state, 2),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                const mediumCellarBuilt = state.players[state.currentTurn.playerId].structures.mediumCellar;
+                switch (action.choice) {
+                    case "WRITER_GAIN":
+                        return promptToChooseWine(state);
+                    case "WRITER_LOSE":
+                        const mediumCellarDisabledReason = mediumCellarBuilt ? undefined : "Requires a Medium Cellar.";
+                        return promptForAction(loseResiduals(2, state), {
+                            choices: [
+                                ...(["red", "white"] as GrapeColor[]).map(color => ({
+                                    id: "WRITER_GRAPE",
+                                    data: color,
+                                    label: <>Gain <Grape color={color}>4</Grape></>,
+                                })),
+                                ...(["red", "white", "blush"] as WineColor[]).map(color => ({
+                                    id: "WRITER_WINE",
+                                    data: color,
+                                    label: <>
+                                        Gain <WineGlass color={color}>
+                                            {color === "blush" || mediumCellarBuilt ? 4 : 3}
+                                        </WineGlass>
+                                    </>,
+                                    disabledReason: color === "blush" ? mediumCellarDisabledReason : undefined,
+                                }))
+                            ],
+                        });
+                    case "WRITER_GRAPE":
+                        return endVisitor(placeGrapes(state, { [action.data as GrapeColor]: 4 }));
+                    case "WRITER_WINE":
+                        return endVisitor(
+                            gainWine({ color: action.data as WineColor, value: mediumCellarBuilt ? 4 : 3 }, state)
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_WINE":
+                return endVisitor(gainResiduals(2, discardWines(state, action.wines)));
             default:
                 return state;
         }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import VictoryPoints, { default as VP } from "../../game-views/icons/VictoryPoints";
+import VP from "../../game-views/icons/VictoryPoints";
 import Coins from "../../game-views/icons/Coins";
 import Card, { Vine, SummerVisitor, Order, WinterVisitor } from "../../game-views/icons/Card";
 import Worker from "../../game-views/icons/Worker";
@@ -31,8 +31,6 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     subsidizer: true,
     vineTrader: true,
     wineEngineer: true,
-    wineTrader: true,
-    writer: true,
     // winter
     brideToBe: true,
     cellarmaster: true,
@@ -372,14 +370,14 @@ export const rhineSummerVisitorCards = {
         "Wine Lover",
         <>If you have a Tasting Room, gain <Residuals>1</Residuals> or <Grape>4</Grape>. Otherwise lose <Residuals>2</Residuals> to build a Tasting Room for free and gain <WineGlass>1</WineGlass>.</>
     ),
-    // wineTrader: summerVisitorCard(
-    //     "Wine Trader",
-    //     <>Gain <Grape>1</Grape> OR pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass> or <WineGlass color="white">7</WineGlass> even if you don't have the Large Cellar.</>
-    // ),
-    // writer: summerVisitorCard(
-    //     "Writer",
-    //     <>Discard 1 <WineGlass /> to gain <Residuals>2</Residuals> OR lose <Residuals>2</Residuals> to gain either <Grape>4</Grape> or <WineGlass>4</WineGlass>.</>
-    // ),
+    wineTrader: summerVisitorCard(
+        "Wine Trader",
+        <>Gain <Grape>1</Grape> OR pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass> or <WineGlass color="white">7</WineGlass> even if you don't have the Large Cellar.</>
+    ),
+    writer: summerVisitorCard(
+        "Writer",
+        <>Discard 1 <WineGlass /> to gain <Residuals>2</Residuals> OR lose <Residuals>2</Residuals> to gain either <Grape>4</Grape> or <WineGlass>4</WineGlass>.</>
+    ),
 };
 
 const winterVisitorCard = (name: string, description: React.ReactNode) =>
@@ -424,7 +422,7 @@ export const winterVisitorCards = {
     ),
     governess: winterVisitorCard(
         "Governess",
-        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VictoryPoints>2</VictoryPoints>.</>
+        <>Pay <Coins>3</Coins> to train 1 <Worker /> that you may use this year OR discard 1 <WineGlass /> to gain <VP>2</VP>.</>
     ),
     guestSpeaker: winterVisitorCard(
         "Guest Speaker",
