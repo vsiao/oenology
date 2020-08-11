@@ -84,6 +84,12 @@
     margin-right: .5em;
 }
 
+.GameOverPrompt-playerName {
+    min-width: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .GameOverPrompt-statsButton {
     background: transparent;
     cursor: pointer;

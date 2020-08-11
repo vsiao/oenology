@@ -51,7 +51,10 @@ export const endTurn = (state: GameState): GameState => {
 // Set-up turns
 // ----------------------------------------------------------------------------
 
-export const beginMamaPapaTurn = (playerId: string, state: GameState): GameState => {
+export const beginMamaPapaTurn = (
+    state: GameState,
+    playerId = state.tableOrder[state.grapeIndex]
+): GameState => {
     state = { ...state, currentTurn: { type: "mamaPapa", playerId }, };
     const { mamas, papas } = state.players[state.currentTurn.playerId];
 
@@ -211,7 +214,7 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
     if (nextIndex === 0) {
         return beginNewYear(state);
     }
-    return beginMamaPapaTurn(tableOrder[nextIndex], state);
+    return beginMamaPapaTurn(state, tableOrder[nextIndex]);
 };
 
 //

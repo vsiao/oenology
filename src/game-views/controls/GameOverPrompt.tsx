@@ -81,7 +81,7 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                             <tr key={p.id} className="GameOverPrompt-row">
                                 <th className="GameOverPrompt-rowHeader" scope="row">
                                     <VictoryPoints className="GameOverPrompt-vpIcon">{p.victoryPoints}</VictoryPoints>
-                                    <strong>{p.name}</strong>
+                                    <strong className="GameOverPrompt-playerName">{p.name}</strong>
                                 </th>
                                 <td className="GameOverPrompt-statCell">{p.coinsGained}</td>
                                 <td className="GameOverPrompt-statCell">{p.vinesPlanted}</td>

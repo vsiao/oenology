@@ -146,15 +146,12 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             if (action.type !== "CHOOSE_GRAPE") {
                 return state;
             }
-            const playerId = state.currentTurn.playerId;
             const sellValue = action.grapes.reduce((sum, g) => sum += Math.ceil(g.value / 3), 0);
 
             return endTurn(gainCoins(
                 sellValue,
-                pushActivityLog(
-                    { type: "sellGrapes", grapes: action.grapes, playerId },
-                    discardGrapes(pendingAction.hasBonus ? gainVP(1, state) : state, action.grapes)
-                )));
+                discardGrapes(pendingAction.hasBonus ? gainVP(1, state) : state, action.grapes)
+            ));
 
         case "buySell":
             if (action.type !== "CHOOSE_ACTION") {

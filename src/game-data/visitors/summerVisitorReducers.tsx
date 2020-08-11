@@ -1081,25 +1081,34 @@ export const summerVisitorReducers: Record<
         }
     },
     sponsor: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor((s, numChosen) => {
+            const maybeLoseVp = numChosen > 0 ? <> (lose <VP>1</VP>)</> : null;
+            return [
+                { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine />{maybeLoseVp}</>, },
+                { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins>{maybeLoseVp}</>, },
+                ...(numChosen > 0
+                    ? [{ id: "SPONSOR_PASS", label: <>Pass</>, }]
+                    : [])
+            ];
+        });
+
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForAction(state, {
-                    choices: [
-                        { id: "SPONSOR_DRAW", label: <>Draw 2 <Vine /></>, },
-                        { id: "SPONSOR_GAIN", label: <>Gain <Coins>3</Coins></>, },
-                        { id: "SPONSOR_BOTH", label: <>Do both (lose <VP>1</VP>)</>, },
-                    ],
-                });
+                return chooseAction(state);
+
             case "CHOOSE_ACTION":
+                state = chooseAction(
+                    state,
+                    action.choice,
+                    /* loseVPOnMulti */ action.choice !== "SPONSOR_PASS"
+                );
                 switch (action.choice) {
                     case "SPONSOR_DRAW":
-                        return endVisitor(drawCards(state, action._key!, { vine: 2 }));
+                        return maybeEndVisitor(drawCards(state, action._key!, { vine: 2 }));
                     case "SPONSOR_GAIN":
-                        return endVisitor(gainCoins(3, state));
-                    case "SPONSOR_BOTH":
-                        return endVisitor(
-                            gainCoins(3, drawCards(loseVP(1, state), action._key!, { vine: 2 }))
-                        );
+                        return maybeEndVisitor(gainCoins(3, state));
+                    case "SPONSOR_PASS":
+                        return endVisitor(state);
                     default:
                         return state;
                 }

@@ -137,16 +137,9 @@ const WakeUpPosition: React.FunctionComponent<{
             >
                 <motion.span
                     className="GameBoard-currentPlayerIndicator"
-                    animate={{
-                        scale: [1, 1.2, 1],
-                        borderColor: colors[pos.color],
-                    }}
+                    animate={{ borderColor: colors[pos.color] }}
                     initial={false}
-                    transition={{
-                        ease: "easeInOut",
-                        loop: Infinity,
-                        repeatDelay: .5,
-                    }}
+                    transition={{ ease: "easeInOut" }}
                 />
             </motion.span>
             : null}

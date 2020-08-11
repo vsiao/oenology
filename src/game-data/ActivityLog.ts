@@ -82,6 +82,7 @@ interface SeasonEvent {
     type: "season";
     season: string;
 }
+/** @deprecated in favor of DiscardGrapesEvent */
 interface SellGrapeEvent extends LogEvent<"sellGrapes"> {
     grapes: GrapeSpec[];
 }

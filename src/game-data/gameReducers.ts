@@ -9,7 +9,7 @@ import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
-        return beginMamaPapaTurn(action.players[0].id, initGame(userId, action));
+        return beginMamaPapaTurn(initGame(userId, action));
     }
     if (
         state.currentTurn.playerId !== action.playerId && (
@@ -85,7 +85,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             ])
         ),
         tableOrder: players.map(({ id }) => id),
-        grapeIndex: 0,
+        grapeIndex: Math.floor(random() * players.length),
         wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
             drawVine: [],
