@@ -78,6 +78,9 @@ export interface PlayVisitorPendingAction {
     actionPlayerId?: string;
     lastActionPlayerId?: string;
 
+    // Keeps track of the choices already taken for the current visitor
+    usedChoices?: { [choice: string]: boolean };
+
     // Can play an additional visitor due to placement bonus
     hasBonus: boolean;
 }

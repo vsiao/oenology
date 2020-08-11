@@ -10,7 +10,7 @@ import GameState, {
     WorkerPlacementTurnPendingAction,
 } from "../GameState";
 import { ageAllTokens, ageCellar } from "./grapeWineReducers";
-import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker } from "./sharedReducers";
+import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker, loseVP } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, displayGameOverPrompt, promptToDiscard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
@@ -21,6 +21,7 @@ import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 import { boardActions } from "../board/boardPlacements";
+import { Choice } from "../prompts/PromptState";
 
 export const endTurn = (state: GameState): GameState => {
     state = {
@@ -505,6 +506,48 @@ export const makeEndVisitorAction = (
             nextPlayerId
         );
     };
+};
+
+export const makeChoose2Visitor = (
+    choices: (state: GameState, numChosen: number) => Choice[]
+): [
+    // chooseAction
+    (state: GameState, choice?: string, loseVPOnMulti?: boolean) => GameState,
+    // maybeEndVisitor
+    (state: GameState) => GameState,
+ ] => {
+    const prompt = (state: GameState, usedChoices: { [choice: string]: boolean }) =>
+        promptForAction(state, {
+            choices: choices(state, Object.keys(usedChoices).length)
+                .filter(choice => !usedChoices[choice.id]),
+        });
+
+    return [
+        (state, choice, loseVPOnMulti) => {
+            const pendingAction = (state.currentTurn as WorkerPlacementTurn)
+                .pendingAction! as PlayVisitorPendingAction;
+            const usedChoices = choice === undefined ? {} : {
+                ...pendingAction.usedChoices,
+                [choice]: true,
+            };
+            state = setPendingAction(
+                { ...pendingAction, usedChoices },
+                loseVPOnMulti && Object.keys(usedChoices).length >= 2
+                    ? loseVP(1, state)
+                    : state
+            );
+            return choice === undefined ? prompt(state, usedChoices) : state;
+        },
+        state => {
+            const usedChoices = ((state.currentTurn as WorkerPlacementTurn)
+                .pendingAction! as PlayVisitorPendingAction).usedChoices!;
+            const numUsedChoices = Object.keys(usedChoices).length;
+            if (numUsedChoices >= 2) {
+                return endVisitor(state);
+            }
+            return prompt(state, usedChoices);
+        },
+    ];
 };
 
 /**

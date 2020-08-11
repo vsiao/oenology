@@ -64,6 +64,7 @@ import {
     promptForWakeUpOrder,
     setPendingAction,
     makeEndVisitorAction,
+    makeChoose2Visitor,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
@@ -354,67 +355,34 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
-    contractor: (state, action, pendingAction) => {
-        type ChoiceId = "CONTRACTOR_GAIN" | "CONTRACTOR_BUILD" | "CONTRACTOR_PLANT";
-        interface ContractorAction extends PlayVisitorPendingAction {
-            usedChoices: { [K in ChoiceId]?: true };
-        }
-        const promptContractorAction = (state2: GameState, contractorAction: ContractorAction): GameState => {
-            return promptForAction(
-                state2,
-                {
-                    choices: [
-                        { id: "CONTRACTOR_GAIN", label: <>Gain <VP>1</VP></>, },
-                        {
-                            id: "CONTRACTOR_BUILD",
-                            label: <>Build 1 structure</>,
-                            disabledReason: buildStructureDisabledReason(state2),
-                        },
-                        {
-                            id: "CONTRACTOR_PLANT",
-                            label: <>Plant 1 <Vine /></>,
-                            disabledReason: plantVinesDisabledReason(state2),
-                        },
-                    ].filter(choice => !contractorAction.usedChoices[choice.id as ChoiceId]),
-                }
-            );
-        };
-        const maybeEndVisitor = (state2: GameState): GameState => {
-            const contractorAction =
-                (state2.currentTurn as WorkerPlacementTurn).pendingAction as ContractorAction;
-
-            return Object.keys(contractorAction.usedChoices).length === 2
-                ? endVisitor(state2)
-                : promptContractorAction(state2, contractorAction);
-        };
+    contractor: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            { id: "CONTRACTOR_GAIN", label: <>Gain <VP>1</VP></>, },
+            {
+                id: "CONTRACTOR_BUILD",
+                label: <>Build 1 structure</>,
+                disabledReason: buildStructureDisabledReason(s),
+            },
+            {
+                id: "CONTRACTOR_PLANT",
+                label: <>Plant 1 <Vine /></>,
+                disabledReason: plantVinesDisabledReason(s),
+            },
+        ]);
 
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        const contractorAction: ContractorAction = {
-                            ...pendingAction,
-                            usedChoices: {},
-                        };
-                        return promptContractorAction(
-                            setPendingAction(contractorAction, state),
-                            contractorAction
-                        );
+                        return chooseAction(state);
                     case "vine":
                         return promptToPlant(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_ACTION":
-                const contractorAction = pendingAction as ContractorAction;
-                state = setPendingAction({
-                    ...contractorAction,
-                    usedChoices: {
-                        ...contractorAction.usedChoices,
-                        [action.choice]: true,
-                    },
-                }, state);
+                state = chooseAction(state, action.choice);
                 switch (action.choice) {
                     case "CONTRACTOR_GAIN":
                         return maybeEndVisitor(gainVP(1, state));

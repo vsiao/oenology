@@ -46,7 +46,7 @@ import Residuals from "../../game-views/icons/Residuals";
 import { OrderId } from "../orderCards";
 import { structures } from "../structures";
 import Grape from "../../game-views/icons/Grape";
-import { endVisitor, setPendingAction, makeEndVisitorAction } from "../shared/turnReducers";
+import { endVisitor, setPendingAction, makeEndVisitorAction, makeChoose2Visitor } from "../shared/turnReducers";
 import { discardCards, drawCards, removeCardsFromHand, addCardsToHand } from "../shared/cardReducers";
 import {
     ageCellar,
@@ -59,7 +59,6 @@ import {
     discardGrapes,
     ageSingleWine,
 } from "../shared/grapeWineReducers";
-import { Choice } from "../prompts/PromptState";
 import { seasonalActions } from "../board/boardPlacements";
 import { boardAction } from "../board/boardActionReducer";
 
@@ -149,62 +148,29 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    craftsman: (state, action, pendingAction) => {
+    craftsman: (state, action) => {
         const player = state.players[state.currentTurn.playerId];
         const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
         const cost = structures[upgradeCellar].cost;
 
-        type ChoiceId = "CRAFTSMAN_DRAW" | "CRAFTSMAN_BUILD" | "CRAFTSMAN_GAIN";
-        interface CraftsmanAction extends PlayVisitorPendingAction {
-            usedChoices: { [K in ChoiceId]?: true };
-        }
-        const promptCraftsmanAction = (state2: GameState, craftsmanAction: CraftsmanAction): GameState => {
-            return promptForAction(
-                state2,
-                {
-                    choices: [
-                        { id: "CRAFTSMAN_DRAW", label: <>Draw 1 <Order /></>, },
-                        {
-                            id: "CRAFTSMAN_BUILD",
-                            label: <>Upgrade cellar at regular cost</>,
-                            disabledReason: player.structures.largeCellar
-                                ? "Your cellar is fully upgraded."
-                                : moneyDisabledReason(state, cost),
-                        },
-                        { id: "CRAFTSMAN_GAIN", label: <>Gain <VP>1</VP></>, },
-                    ].filter(choice => !craftsmanAction.usedChoices[choice.id as ChoiceId]),
-                }
-            );
-        };
-        const maybeEndVisitor = (state2: GameState): GameState => {
-            const craftsmanAction =
-                (state2.currentTurn as WorkerPlacementTurn).pendingAction as CraftsmanAction;
-
-            return Object.keys(craftsmanAction.usedChoices).length === 2
-                ? endVisitor(state2)
-                : promptCraftsmanAction(state2, craftsmanAction);
-        };
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            { id: "CRAFTSMAN_DRAW", label: <>Draw 1 <Order /></>, },
+            {
+                id: "CRAFTSMAN_BUILD",
+                label: <>Upgrade cellar at regular cost</>,
+                disabledReason: player.structures.largeCellar
+                    ? "Your cellar is fully upgraded."
+                    : moneyDisabledReason(s, cost),
+            },
+            { id: "CRAFTSMAN_GAIN", label: <>Gain <VP>1</VP></>, },
+        ]);
 
         switch (action.type) {
-            case "CHOOSE_CARDS": {
-                const craftsmanAction: CraftsmanAction = {
-                    ...pendingAction,
-                    usedChoices: {},
-                };
-                return promptCraftsmanAction(
-                    setPendingAction(craftsmanAction, state),
-                    craftsmanAction
-                );
-            }
+            case "CHOOSE_CARDS":
+                return chooseAction(state);
+
             case "CHOOSE_ACTION":
-                const craftsmanAction = pendingAction as CraftsmanAction;
-                state = setPendingAction({
-                    ...craftsmanAction,
-                    usedChoices: {
-                        ...craftsmanAction.usedChoices,
-                        [action.choice]: true,
-                    },
-                }, state);
+                state = chooseAction(state, action.choice);
                 switch (action.choice) {
                     case "CRAFTSMAN_DRAW":
                         return maybeEndVisitor(drawCards(state, action._key!, { order: 1 }));
@@ -566,65 +532,38 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    jackOfAllTrades: (state, action, pendingAction) => {
-        type ChoiceId = "JACK_HARVEST" | "JACK_MAKE" | "JACK_FILL";
-        interface JackAction extends PlayVisitorPendingAction {
-            usedChoices: { [K in ChoiceId]?: true };
-        }
-        const promptJackAction = (state2: GameState, jackAction: JackAction): GameState => {
-            return promptForAction(
-                state2,
-                {
-                    choices: [
-                        {
-                            id: "JACK_HARVEST",
-                            label: <>Harvest 1 field</>,
-                            disabledReason: harvestFieldDisabledReason(state2),
-                        },
-                        {
-                            id: "JACK_MAKE",
-                            label: <>Make up to 2 <WineGlass /></>,
-                            disabledReason: needGrapesDisabledReason(state2),
-                        },
-                        {
-                            id: "JACK_FILL",
-                            label: <>Fill 1 <Order /></>,
-                            disabledReason: fillOrderDisabledReason(state2),
-                        },
-                    ].filter(choice => !jackAction.usedChoices[choice.id as ChoiceId]),
-                }
-            );
-        };
-        const maybeEndVisitor = (state2: GameState): GameState => {
-            const jackAction =
-                (state2.currentTurn as WorkerPlacementTurn).pendingAction as JackAction;
-
-            return Object.keys(jackAction.usedChoices).length === 2
-                ? endVisitor(state2)
-                : promptJackAction(state2, jackAction);
-        };
+    jackOfAllTrades: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            {
+                id: "JACK_HARVEST",
+                label: <>Harvest 1 field</>,
+                disabledReason: harvestFieldDisabledReason(s),
+            },
+            {
+                id: "JACK_MAKE",
+                label: <>Make up to 2 <WineGlass /></>,
+                disabledReason: needGrapesDisabledReason(s),
+            },
+            {
+                id: "JACK_FILL",
+                label: <>Fill 1 <Order /></>,
+                disabledReason: fillOrderDisabledReason(s),
+            },
+        ]);
 
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        const jackAction: JackAction = { ...pendingAction, usedChoices: {}, };
-                        return promptJackAction(setPendingAction(jackAction, state), jackAction);
+                        return chooseAction(state);
                     case "order":
                         return promptToFillOrder(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_ACTION":
-                const jackAction = pendingAction as JackAction;
-                state = setPendingAction({
-                    ...jackAction,
-                    usedChoices: {
-                        ...jackAction.usedChoices,
-                        [action.choice]: true,
-                    },
-                }, state);
+                state = chooseAction(state, action.choice);
                 switch (action.choice) {
                     case "JACK_HARVEST":
                         return promptToHarvest(state);
@@ -673,56 +612,35 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    laborer: (state, action, pendingAction) => {
-        type ChoiceId = "LABORER_HARVEST" | "LABORER_MAKE";
-        interface LaborerAction extends PlayVisitorPendingAction {
-            usedChoices: { [K in ChoiceId]?: true };
-        }
-        const promptLaborerAction = (state2: GameState, { usedChoices }: LaborerAction): GameState => {
-            const alreadyChose = Object.keys(usedChoices).length > 0;
-            const maybeLoseVp = alreadyChose ? <> (lose <VP>1</VP>)</> : null;
-            return promptForAction(state2, {
-                choices: ([
-                    {
-                        id: "LABORER_HARVEST",
-                        label: <>Harvest up to 2 fields{maybeLoseVp}</>,
-                        disabledReason: harvestFieldDisabledReason(state2),
-                    },
-                    {
-                        id: "LABORER_MAKE",
-                        label: <>Make up to 3 <WineGlass />{maybeLoseVp}</>,
-                        disabledReason: needGrapesDisabledReason(state2),
-                    },
-                ] as Choice[])
-                    .filter(choice => !usedChoices[choice.id as ChoiceId])
-                    .concat(alreadyChose ? { id: "LABORER_PASS", label: <>Pass</>, } : []),
-            });
-        };
-        const maybeEndVisitor = (state2: GameState): GameState => {
-            const laborerAction =
-                (state2.currentTurn as WorkerPlacementTurn).pendingAction as LaborerAction;
-
-            return Object.keys(laborerAction.usedChoices).length === 2
-                ? endVisitor(state2)
-                : promptLaborerAction(state2, laborerAction);
-        };
+    laborer: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor((s, numChosen) => {
+            const maybeLoseVp = numChosen > 0 ? <> (lose <VP>1</VP>)</> : null;
+            return [
+                {
+                    id: "LABORER_HARVEST",
+                    label: <>Harvest up to 2 fields{maybeLoseVp}</>,
+                    disabledReason: harvestFieldDisabledReason(s),
+                },
+                {
+                    id: "LABORER_MAKE",
+                    label: <>Make up to 3 <WineGlass />{maybeLoseVp}</>,
+                    disabledReason: needGrapesDisabledReason(s),
+                },
+                ...(numChosen > 0
+                    ? [{ id: "LABORER_PASS", label: <>Pass</>, }]
+                    : [])
+            ];
+        });
 
         switch (action.type) {
-            case "CHOOSE_CARDS": {
-                const laborerAction: LaborerAction = { ...pendingAction, usedChoices: {} };
-                return promptLaborerAction(setPendingAction(laborerAction, state), laborerAction);
-            }
+            case "CHOOSE_CARDS":
+                return chooseAction(state);
             case "CHOOSE_ACTION":
-                const laborerAction = pendingAction as LaborerAction;
-                if (action.choice !== "LABORER_PASS") {
-                    state = setPendingAction({
-                        ...laborerAction,
-                        usedChoices: {
-                            ...laborerAction.usedChoices,
-                            [action.choice]: structures,
-                        },
-                    }, Object.keys(laborerAction.usedChoices).length > 0 ? loseVP(1, state) : state);
-                }
+                state = chooseAction(
+                    state,
+                    action.choice,
+                    /* loseVPOnMulti */ action.choice !== "LABORER_PASS"
+                );
                 switch (action.choice) {
                     case "LABORER_HARVEST":
                         return promptToHarvest(state, 2);
@@ -1788,72 +1706,39 @@ export const rhineWinterVisitorReducers: Record<
         }
     },
     harvestExpert: winterVisitorReducers.harvestExpert,
-    hiredHand: (state, action, pendingAction) => {
-        type ChoiceId = "HHAND_HARVEST" | "HHAND_MAKE" | "HHAND_GAIN" | "HHAND_FILL";
-        interface HiredHandAction extends PlayVisitorPendingAction {
-            usedChoices: { [K in ChoiceId]?: true };
-        }
-        const promptHiredHandAction = (state2: GameState, hiredHandAction: HiredHandAction): GameState => {
-            return promptForAction(
-                state2,
-                {
-                    choices: [
-                        {
-                            id: "HHAND_HARVEST",
-                            label: <>Harvest 1 field</>,
-                            disabledReason: harvestFieldDisabledReason(state),
-                        },
-                        {
-                            id: "HHAND_MAKE",
-                            label: <>Make up to 2 <WineGlass /></>,
-                            disabledReason: needGrapesDisabledReason(state),
-                        },
-                        { id: "HHAND_GAIN", label: <>Gain <Coins>2</Coins></>, },
-                        {
-                            id: "HHAND_FILL",
-                            label: <>Fill 1 <Order /></>,
-                            disabledReason: fillOrderDisabledReason(state),
-                        },
-                    ].filter(choice => !hiredHandAction.usedChoices[choice.id as ChoiceId]),
-                }
-            );
-        };
-        const maybeEndVisitor = (state2: GameState): GameState => {
-            const hiredHandAction =
-                (state2.currentTurn as WorkerPlacementTurn).pendingAction as HiredHandAction;
-
-            return Object.keys(hiredHandAction.usedChoices).length === 2
-                ? endVisitor(state2)
-                : promptHiredHandAction(state2, hiredHandAction);
-        };
+    hiredHand: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
+            {
+                id: "HHAND_HARVEST",
+                label: <>Harvest 1 field</>,
+                disabledReason: harvestFieldDisabledReason(s),
+            },
+            {
+                id: "HHAND_MAKE",
+                label: <>Make up to 2 <WineGlass /></>,
+                disabledReason: needGrapesDisabledReason(s),
+            },
+            { id: "HHAND_GAIN", label: <>Gain <Coins>2</Coins></>, },
+            {
+                id: "HHAND_FILL",
+                label: <>Fill 1 <Order /></>,
+                disabledReason: fillOrderDisabledReason(s),
+            },
+        ]);
 
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
-                        const hiredHandAction: HiredHandAction = {
-                            ...pendingAction,
-                            usedChoices: {},
-                        };
-                        return promptHiredHandAction(
-                            setPendingAction(hiredHandAction, state),
-                            hiredHandAction
-                        );
+                        return chooseAction(state);
                     case "order":
                         return promptToFillOrder(state, card.id);
                     default:
                         return state;
                 }
             case "CHOOSE_ACTION":
-                const hiredHandAction = pendingAction as HiredHandAction;
-                state = setPendingAction({
-                    ...hiredHandAction,
-                    usedChoices: {
-                        ...hiredHandAction.usedChoices,
-                        [action.choice]: true,
-                    },
-                }, state);
+                state = chooseAction(state, action.choice);
                 switch (action.choice) {
                     case "HHAND_HARVEST":
                         return promptToHarvest(state);
