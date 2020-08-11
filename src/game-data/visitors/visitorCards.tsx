@@ -282,10 +282,10 @@ export const rhineSummerVisitorCards = {
         "Greenskeeper",
         <>Gain <Coins>2</Coins> and plant 1 <Vine />. If any player already has at least <VP>10</VP>, plant 1 additional <Vine /> ignoring the fields maximum.</>
     ),
-    // miller: summerVisitorCard(
-    //     "Miller",
-    //     <>If you have a windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a windmill.</>
-    // ),
+    miller: summerVisitorCard(
+        "Miller",
+        <>If you have a windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a windmill.</>
+    ),
     // oldGeneral: summerVisitorCard(
     //     "Old General",
     //     <>Place 1 STAR_TOKEN. Each opponent who has all 6 STAR_TOKEN on the map must retrieve 3 of their STAR_TOKEN.</>
@@ -294,14 +294,14 @@ export const rhineSummerVisitorCards = {
     //     "Owner",
     //     <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have the Windmill, gain <VP>1</VP>.</>
     // ),
-    // peasant: summerVisitorCard(
-    //     "Peasant",
-    //     <>Draw <Order />. The plant 1 <Vine /> even if you don't have the required structure(s) OR gain <Coins>2</Coins>.</>
-    // ),
-    // philanthropist: summerVisitorCard(
-    //     "Philanthropist",
-    //     <>Gain <Coins>3</Coins> OR draw 1 <Order /> and 1 <WinterVisitor />.</>
-    // ),
+    peasant: summerVisitorCard(
+        "Peasant",
+        <>Draw <Order />. Then plant 1 <Vine /> even if you don't have the required structure(s) OR gain <Coins>2</Coins>.</>
+    ),
+    philanthropist: summerVisitorCard(
+        "Philanthropist",
+        <>Gain <Coins>3</Coins> OR draw 1 <Order /> and 1 <WinterVisitor />.</>
+    ),
     // plantDealer: summerVisitorCard(
     //     "Plant Dealer",
     //     <>Draw 4 <Vine /> and discard 2 of them.</>

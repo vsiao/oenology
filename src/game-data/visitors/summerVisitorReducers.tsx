@@ -1854,4 +1854,115 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    miller: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const windmillBuilt = state.players[state.currentTurn.playerId].structures.windmill;
+                const needWindmillDisabledReason = windmillBuilt ? undefined : "You haven't built a Windmill.";
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "MILLER_GAIN_RED",
+                            label: <>Gain <Grape color="red">3</Grape></>,
+                            disabledReason: needWindmillDisabledReason,
+                        },
+                        {
+                            id: "MILLER_GAIN_WHITE",
+                            label: <>Gain <Grape color="white">3</Grape></>,
+                            disabledReason: needWindmillDisabledReason,
+                        },
+                        {
+                            id: "MILLER_GAIN_VP",
+                            label: <>Gain <VP>1</VP></>,
+                            disabledReason: needWindmillDisabledReason,
+                        },
+                        {
+                            id: "MILLER_BUILD",
+                            label: <>Pay <Coins>2</Coins> to build a windmill</>,
+                            disabledReason: windmillBuilt ? "You already built a Windmill." : undefined,
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "MILLER_GAIN_RED":
+                        return endVisitor(placeGrapes(state, { red: 3 }));
+                    case "MILLER_GAIN_WHITE":
+                        return endVisitor(placeGrapes(state, { white: 3 }));
+                    case "MILLER_GAIN_VP":
+                        return endVisitor(gainVP(1, state));
+                    case "MILLER_BUILD":
+                        return endVisitor(buildStructure(payCoins(2, state), "windmill"));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    peasant: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        state = drawCards(state, action._key!, { order: 1 });
+
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "PEASANT_PLANT",
+                                    label: <>Plant 1 <Vine /></>,
+                                    disabledReason: plantVinesDisabledReason(state, {
+                                        bypassStructures: true
+                                    }),
+                                },
+                                { id: "PEASANT_GAIN", label: <>Gain <Coins>2</Coins></>, },
+                            ],
+                        });
+                    case "vine":
+                        return promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "PEASANT_PLANT":
+                        return promptToChooseVineCard(state, { bypassStructures: true });
+                    case "PEASANT_GAIN":
+                        return endVisitor(gainCoins(2, state));
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                return endVisitor(plantVineInField(action.fields[0], state));
+            default:
+                return state;
+        }
+    },
+    philanthropist: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "PHILANTHROPIST_GAIN", label: <>Gain <Coins>3</Coins></>, },
+                        { id: "PHILANTHROPIST_DRAW", label: <>Draw 1 <Order /> and 1 <WinterVisitor /></>, },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "PHILANTHROPIST_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    case "PHILANTHROPIST_DRAW":
+                        return endVisitor(drawCards(state, action._key!, {
+                            order: 1,
+                            winterVisitor: 1,
+                        }));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    }
 };
