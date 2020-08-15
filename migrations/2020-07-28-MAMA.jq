@@ -1,3 +1,4 @@
+# Adds `MAMA` choice actions for every `PAPA_A` or `PAPA_B` choice action
 # jq -f 2020-07-28-MAMA.jq make-wine-gameLogs-export.json
 
 map_values(

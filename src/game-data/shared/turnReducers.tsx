@@ -211,7 +211,7 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
     const { tableOrder } = state;
     const nextIndex = (tableOrder.indexOf(state.currentTurn.playerId) + 1) % tableOrder.length;
 
-    if (nextIndex === 0) {
+    if (nextIndex === state.grapeIndex) {
         return beginNewYear(state);
     }
     return beginMamaPapaTurn(state, tableOrder[nextIndex]);

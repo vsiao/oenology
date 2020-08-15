@@ -34,15 +34,17 @@ export interface PlayerInit {
     id: string;
     name: string;
     color: PlayerColor;
+    mama?: MamaId; // deprecated; see #PreGameShuffle
+    papa?: PapaId; // deprecated; see #PreGameShuffle
 }
 export interface StartGameAction extends Action<"START_GAME"> {
-    players: (PlayerInit & {
-        mama?: MamaId; // deprecated; see #PreGameShuffle
-        papa?: PapaId; // deprecated; see #PreGameShuffle
-    })[];
+    players: PlayerInit[];
     options?: GameOptions;
-    shuffledCards?: CardsByType; // deprecated; see #PreGameShuffle
     excludeCards?: { [Id in string]?: true };
+
+    // Properties for backwards-compatibility
+    shuffledCards?: CardsByType; // #PreGameShuffle
+    startingPlayer?: number;
 }
 export const startGame = (players: PlayerInit[], options: GameOptions): GameAction => {
     return {

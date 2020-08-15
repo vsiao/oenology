@@ -85,7 +85,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             ])
         ),
         tableOrder: players.map(({ id }) => id),
-        grapeIndex: Math.floor(random() * players.length),
+        grapeIndex: action.startingPlayer ?? Math.floor(random() * players.length),
         wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
             drawVine: [],
