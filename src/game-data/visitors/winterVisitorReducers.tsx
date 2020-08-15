@@ -1531,6 +1531,9 @@ export const rhineWinterVisitorReducers: Record<
     // },
     craftsman: winterVisitorReducers.craftsman,
     duchess: (state, action, pendingAction) => {
+        const duchessAction = pendingAction as PlayVisitorPendingAction & {
+            secondFill: boolean;
+        };
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const card = action.cards![0];
@@ -1568,9 +1571,9 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_WINE":
                 state = fillOrder(action.wines, state);
 
-                if (!pendingAction.hasBonus) {
+                if (!duchessAction.secondFill) {
                     return promptToChooseOrderCard(
-                        setPendingAction({ ...pendingAction, hasBonus: true }, state)
+                        setPendingAction({ ...duchessAction, secondFill: true }, state)
                     );
                 }
                 return endVisitor(state);

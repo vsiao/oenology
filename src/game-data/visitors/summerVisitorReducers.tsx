@@ -1800,6 +1800,9 @@ export const rhineSummerVisitorReducers: Record<
         }
     },
     greenskeeper: (state, action, pendingAction) => {
+        const greenskeeperAction = pendingAction as PlayVisitorPendingAction & {
+            secondPlant: boolean;
+        };
         switch (action.type) {
             case "CHOOSE_CARDS":
                 if (!action.cards) {
@@ -1819,12 +1822,13 @@ export const rhineSummerVisitorReducers: Record<
                 }
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fields[0], state);
-
-                const hasBonus = !pendingAction.hasBonus &&
+                const canPlantAgain = !greenskeeperAction.secondPlant &&
+                    plantVinesDisabledReason(state) === undefined &&
                     Object.values(state.players).some(p => p.victoryPoints >= 10);
-                if (hasBonus && plantVinesDisabledReason(state) === undefined) {
+
+                if (canPlantAgain) {
                     return promptToChooseVineCard(
-                        setPendingAction({ ...pendingAction, hasBonus: true }, state),
+                        setPendingAction({ ...greenskeeperAction, secondPlant: true }, state),
                         { optional: true, bypassFieldLimit: true }
                     );
                 }
