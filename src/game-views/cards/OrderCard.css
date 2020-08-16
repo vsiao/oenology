@@ -11,12 +11,14 @@
     padding: 4px;
     width: 160px;
 }
+
 .OrderCard-name {
     color: white;
     font-weight: 600;
     padding: 4px 4px 8px;
     text-transform: uppercase;
 }
+
 .OrderCard-description {
     background: rgba(255, 255, 255, 0.3);
     border-radius: 2px;
@@ -27,9 +29,11 @@
     margin: 0;
     padding: 8px;
 }
+
 .OrderCard-wine {
     margin-bottom: 10px;
 }
+
 .OrderCard-rewards {
     align-self: flex-end;
     text-align: center;

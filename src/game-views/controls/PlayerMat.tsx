@@ -15,8 +15,10 @@ import OrderCard from "../cards/OrderCard";
 import VineCard from "../cards/VineCard";
 import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
+import MamaPapaCard from "../cards/MamaPapaCard";
 
 interface Props {
+    shouldShowMamaPapas: boolean;
     playerState: PlayerState | undefined;
 }
 
@@ -45,11 +47,29 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
             </>}
         </div>
         <ul className="PlayerMat-cards">
-            {playerState && playerState.cardsInHand.map(card => renderCard(card, props))}
+            {playerState && (props.shouldShowMamaPapas
+                ? renderMamaPapas(playerState)
+                : renderCards(playerState))}
         </ul>
     </div>;
 };
-const renderCard = (card: CardId, props: Props) => {
+
+const renderMamaPapas = ({ mamas, papas }: PlayerState) => {
+    return <>
+        {mamas.map(mamaId => <li key={mamaId} className="PlayerMat-card">
+            <MamaPapaCard key={mamaId} id={mamaId} />
+        </li>)}
+        {papas.map(papaId => <li key={papaId} className="PlayerMat-card">
+            <MamaPapaCard key={papaId} id={papaId} />
+        </li>)}
+    </>
+};
+
+const renderCards = (playerState: PlayerState) => {
+    return playerState.cardsInHand.map(card => renderCard(card));
+};
+
+const renderCard = (card: CardId) => {
     switch (card.type) {
         case "vine":
             return <li key={card.id} className="PlayerMat-card">
@@ -71,6 +91,8 @@ const renderCard = (card: CardId, props: Props) => {
 const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     return {
+        shouldShowMamaPapas: game.currentTurn.type === "mamaPapa" &&
+            !!game.playerId && game.players[game.playerId].cardsInHand.length === 0,
         playerState: game.playerId ? game.players[game.playerId] : undefined,
     };
 };

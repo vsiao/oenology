@@ -1,0 +1,49 @@
+.MamaPapaCard {
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    height: 240px;
+    max-height: 240px;
+    padding: 4px;
+    width: 160px;
+}
+.MamaPapaCard--mama {
+    background: sienna;
+}
+.MamaPapaCard--papa {
+    background: steelblue;
+}
+
+.MamaPapaCard-name {
+    font-weight: 600;
+    padding: 4px 4px 8px;
+    text-transform: uppercase;
+}
+
+.MamaPapaCard-description {
+    background: rgba(255, 255, 255, .3);
+    border-radius: 2px;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: space-evenly;
+    line-height: 2em;
+    min-height: 1px;
+    padding: 8px;
+    text-align: center;
+}
+
+.MamaPapaCard-divider {
+    border: none;
+    border-bottom: 1px solid black;
+}
+
+.MamaPapaCard-structure {
+    background: #ccc;
+    border-radius: 0.2em;
+    display: inline-block;
+    line-height: 1.6em;
+    padding: 0 6px;
+}

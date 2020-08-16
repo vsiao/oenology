@@ -2,6 +2,7 @@ import { CardType } from "./GameState";
 import { StructureId } from "./structures";
 
 export interface MamaCard {
+    type: "mama";
     name: string;
     cards: { [K in CardType]?: number };
     coins: number;
@@ -11,7 +12,7 @@ const mama = (
     cards: { [K in CardType]?: number },
     coins = 0
 ): MamaCard => {
-    return { name, cards, coins, };
+    return { type: "mama", name, cards, coins, };
 };
 
 export type MamaId = keyof typeof mamaCards;
@@ -37,6 +38,7 @@ export const mamaCards = {
 };
 
 export interface PapaCard {
+    type: "papa";
     name: string;
     coins: number;
 
@@ -49,7 +51,7 @@ const papa = (
     choiceA: StructureId | "victoryPoint" | "worker",
     choiceB: number
 ): PapaCard => {
-    return { name, coins, choiceA, choiceB };
+    return { type: "papa", name, coins, choiceA, choiceB };
 };
 
 export type PapaId = keyof typeof papaCards;
@@ -72,4 +74,10 @@ export const papaCards = {
     stephan: papa("Stephan", 4, "irrigation", 2),
     steven: papa("Steven", 6, "yoke", 1),
     trevor: papa("Trevor", 1, "tastingRoom", 5),
+};
+
+export type MamaPapaId = MamaId | PapaId;
+export const mamaPapaCards = {
+    ...mamaCards,
+    ...papaCards,
 };
