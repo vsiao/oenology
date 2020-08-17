@@ -1,8 +1,7 @@
 import "./SidebarPlayer.css";
 import cx from "classnames";
 import * as React from "react";
-import { motion } from "framer-motion";
-import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, BoardWorker } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -17,11 +16,14 @@ import { StructureId, structures } from "../game-data/structures";
 import { AnchorSide, useTooltip } from "./shared/useTooltip";
 import { vineCards } from "../game-data/vineCards";
 import Rooster from "./icons/Rooster";
+import { AppState } from "../store/AppState";
+import { connect } from "react-redux";
 
 interface Props {
     player: PlayerState;
     inWakeUpOrder: boolean;
     hasGrape?: boolean;
+    yokeWorker?: BoardWorker | null;
 }
 
 const SidebarPlayer: React.FunctionComponent<Props> = props => {
@@ -49,28 +51,27 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         </div>
         <div className="SidebarPlayer-contents">
             <ul className="SidebarPlayer-workers">
-                {player.workers.map((worker, i) =>
-                    <li key={i} className="SidebarPlayer-worker">
-                        <Worker
-                            workerType={worker.type}
-                            color={player.color}
-                            isTemp={worker.isTemp}
-                            disabled={true}
-                        />
-                        {worker.available &&
-                            <motion.div
-                                className="SidebarPlayer-animatedWorker"
-                                layout
-                                layoutId={`${player.color}_${worker.type}${worker.id}`}
-                            >
+                {player.workers
+                    // Force temp worker to be last in the list
+                    .sort((w1, w2) => (w1.isTemp ? 1 : 0) - (w2.isTemp ? 1 : 0))
+                    .map((worker, i) =>
+                        <li key={worker.id} className="SidebarPlayer-worker">
+                            <Worker
+                                workerType={worker.type}
+                                color={player.color}
+                                isTemp={worker.isTemp}
+                                disabled={true}
+                            />
+                            {worker.available &&
                                 <Worker
+                                    className="SidebarPlayer-animatedWorker"
                                     workerType={worker.type}
                                     color={player.color}
                                     isTemp={worker.isTemp}
-                                />
-                            </motion.div>}
-                    </li>
-                )}
+                                    animateWithId={worker.id}
+                                />}
+                        </li>
+                    )}
             </ul>
             <ul className="SidebarPlayer-fields">
                 {Object.keys(player.fields).sort().map(fieldId => {
@@ -136,13 +137,22 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                                 })}
                             >
                                 {structure.name}&nbsp;
-                                {structureId === "yoke" && isUsed && <Worker color={player.color} />}
+                                {structureId === "yoke" && maybeRenderYokeWorker(props)}
                             </li>}
                     </StructureTooltip>;
                 })}
             </ul>
         </div>
     </div>;
+};
+
+const maybeRenderYokeWorker = ({ player, yokeWorker }: Props) => {
+    return yokeWorker && <Worker
+        color={player.color}
+        workerType={yokeWorker.type}
+        animateWithId={yokeWorker.id}
+        isTemp={yokeWorker.isTemp}
+    />;
 };
 
 const FieldTooltip: React.FunctionComponent<{
@@ -289,5 +299,16 @@ const renderCard = (card: CardId): React.ReactNode => {
     }
 };
 
-export default SidebarPlayer;
+const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) => {
+    const game = state.game!;
+    return {
+        player: game.players[playerId],
+        inWakeUpOrder: game.wakeUpOrder.some(pos => pos && pos.playerId === playerId),
+        hasGrape: game.grapeIndex === game.tableOrder.indexOf(playerId),
+        yokeWorker: game.workerPlacements.yokeHarvest.find(w => w && w.playerId === playerId) ||
+            game.workerPlacements.yokeUproot.find(w => w && w.playerId === playerId),
+    };
+};
+
+export default connect(mapStateToProps)(SidebarPlayer);
 

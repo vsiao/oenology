@@ -1,5 +1,4 @@
 import cx from "classnames";
-import { motion } from "framer-motion";
 import * as React from "react";
 import { connect } from "react-redux";
 import "./BoardPlacement.css";
@@ -28,17 +27,13 @@ const BoardPlacement: React.FunctionComponent<Props> = props => {
                     "BoardPlacement-spot--taken": !!worker,
                 })}>
                     {worker
-                        ? <motion.div layout layoutId={`${worker.color}_${worker.type}${worker.id}`}>
-                            <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} />
-                        </motion.div>
+                        ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} animateWithId={worker.id} />
                         : (icons[i] || <>&nbsp;</>)}
                 </div>
                 {i === 0 && workers.length > numSpots && (
                     <div className="BoardPlacement-overflow">
                         {workers.slice(numSpots).map((w, i) =>
-                            w && <motion.div key={`${w.color}${i}`} layout layoutId={`${w.color}_${w.type}${w.id}`}>
-                                <Worker workerType={w.type} color={w.color} />
-                            </motion.div>
+                            w && <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} animateWithId={w.id} />
                         )}
                     </div>)}
             </td>;

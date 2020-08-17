@@ -162,7 +162,7 @@ const renderWakeUpBonus = (i: number): React.ReactNode => {
         case 5:
             return <VictoryPoints>1</VictoryPoints>;
         case 6:
-            return <Worker isTemp={true} />;
+            return <Worker isTemp={true} animateWithId={999} />;
     }
 };
 
