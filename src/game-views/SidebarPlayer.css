@@ -63,6 +63,7 @@
 }
 
 .SidebarPlayer-contents {
+    overflow: hidden;
     white-space: nowrap;
 }
 

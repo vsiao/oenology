@@ -1,7 +1,7 @@
 import cx from "classnames";
 import * as React from "react";
 import { VisitorCardData } from "../../game-data/visitors/visitorCards";
-import "./VisitorCard.css";
+import "./PlayerCard.css";
 
 interface Props {
     className?: string;
@@ -12,13 +12,13 @@ const VisitorCard: React.FunctionComponent<Props> = props => {
     const { name, description, season } = props.cardData;
     return <div
         className={cx({
-            "VisitorCard": true,
-            [`VisitorCard--${season}`]: true,
+            "PlayerCard": true,
+            [`PlayerCard--${season}Visitor`]: true,
         }, props.className)}
     >
-        <div className="VisitorCard-name">{name}</div>
-        <div className="VisitorCard-description">
-            <p className="VisitorCard-descriptionText">{description}</p>
+        <div className="PlayerCard-name">{name}</div>
+        <div className="PlayerCard-description">
+            <p className="PlayerCard-descriptionText">{description}</p>
         </div>
     </div>;
 };
