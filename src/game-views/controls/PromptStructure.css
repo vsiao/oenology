@@ -10,6 +10,7 @@
     font-size: 1em;
     margin: 1.6em;
     margin-left: 6.6em;
+    max-height: calc(100% - 1em);
     max-width: calc(100% - 8.2em);
     overflow: hidden;
     pointer-events: all;

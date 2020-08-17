@@ -1,0 +1,86 @@
+.PlayerCard {
+    border-radius: 4px;
+    bottom: 0;
+    box-sizing: border-box;
+    color: black;
+    display: inline-flex;
+    flex-direction: column;
+    height: 200px;
+    max-height: 200px;
+    padding: 4px;
+    width: 140px;
+}
+.PlayerCard--order {
+    background: purple;
+}
+.PlayerCard--summerVisitor {
+    background: goldenrod;
+}
+.PlayerCard--winterVisitor {
+    background: #223a90;
+}
+.PlayerCard--vine {
+    background: green;
+}
+
+.PlayerCard-name {
+    font-weight: 600;
+    padding: 4px 4px 8px;
+    text-transform: uppercase;
+}
+.PlayerCard--order .PlayerCard-name,
+.PlayerCard--winterVisitor .PlayerCard-name {
+    color: white;
+}
+
+.PlayerCard-description {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    line-height: 1.6em;
+    margin: 0;
+    padding: 8px;
+    text-align: center;
+}
+.PlayerCard--summerVisitor .PlayerCard-description,
+.PlayerCard--winterVisitor .PlayerCard-description {
+    align-items: center;
+    background: antiquewhite;
+}
+.PlayerCard--vine .PlayerCard-description {
+    display: block;
+}
+
+.PlayerCard-descriptionText {
+    margin: 0;
+}
+
+.PlayerCard-orderRewards {
+    align-self: flex-end;
+    width: 100%;
+}
+
+.PlayerCard-vineStructures {
+    height: 40%;
+    height: calc(50% - 1em);
+    text-align: left;
+}
+.PlayerCard-vineStructure {
+    background: #ccc;
+    border-radius: 0.2em;
+    display: inline-block;
+    font-size: 14px;
+    margin: 0 6px 4px 0;
+    padding: 0 6px;
+}
+
+@media (min-width: 950px) {
+    .PlayerCard {
+        height: 240px;
+        max-height: 240px;
+        padding: 4px;
+        width: 160px;
+    }
+}

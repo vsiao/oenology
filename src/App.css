@@ -1,8 +1,7 @@
 .App {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  font-size: 14px;
 }
 
 .App-header {
@@ -11,8 +10,8 @@
   color: white;
   display: flex;
   flex-shrink: 0;
-  font-size: 24px;
-  height: 48px;
+  font-size: 18px;
+  height: 32px;
   padding: 0 16px;
 }
 
@@ -30,4 +29,18 @@
 
 .App-link {
   color: #61dafb;
+}
+
+
+@media (min-width: 950px) {
+  .App {
+    font-size: 16px;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .App-header {
+    height: 48px;
+    padding: 0 16px;
+  }
 }

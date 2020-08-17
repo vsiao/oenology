@@ -2,6 +2,7 @@
     bottom: 100%;
     height: 200%;
     left: 0;
+    max-height: calc(100vh - 320px);
     overflow: hidden;
     pointer-events: none;
     position: absolute;

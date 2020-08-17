@@ -1,4 +1,4 @@
-import "./VineCard.css";
+import "./PlayerCard.css";
 import cx from "classnames";
 import * as React from "react";
 import { VineCardData } from "../../game-data/vineCards";
@@ -12,17 +12,15 @@ interface Props {
 
 const VineCard: React.FunctionComponent<Props> = props => {
     const { name, structures, yields } = props.cardData;
-    return <div className={cx("VineCard", props.className)}>
-        <div className="VineCard-name">{name}</div>
-        <div className="VineCard-description">
-            <div className="VineCard-structures">
+    return <div className={cx("PlayerCard", "PlayerCard--vine", props.className)}>
+        <div className="PlayerCard-name">{name}</div>
+        <div className="PlayerCard-description">
+            <div className="PlayerCard-vineStructures">
                 {structures.map(s =>
-                    <div key={s} className="VineCard-structure">{capitalize(s)}</div>)}
+                    <div key={s} className="PlayerCard-vineStructure">{capitalize(s)}</div>)}
             </div>
-            <div className="VineCard-yield">
-                {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
-                    <Grape key={grapeColor} color={grapeColor}>{yields[grapeColor]}</Grape>)}
-            </div>
+            {(Object.keys(yields) as GrapeColor[]).map(grapeColor =>
+                <Grape key={grapeColor} color={grapeColor}>{yields[grapeColor]}</Grape>)}
         </div>
     </div>;
 };
