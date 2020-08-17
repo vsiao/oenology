@@ -1867,12 +1867,14 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "LECTURER_MAKE":
-                        return endVisitor(promptToMakeWine(state, /* upToN */ 3));
+                        return promptToMakeWine(state, /* upToN */ 3);
                     case "LECTURER_TRAIN":
                         return endVisitor(trainWorker(payCoins(3, state)));
                     default:
                         return state;
                 }
+            case "MAKE_WINE":
+                return endVisitor(makeWineFromGrapes(state, action.ingredients));
             default:
                 return state;
         }

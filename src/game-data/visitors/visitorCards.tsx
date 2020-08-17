@@ -296,7 +296,7 @@ export const rhineSummerVisitorCards = {
     ),
     miller: summerVisitorCard(
         "Miller",
-        <>If you have a windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a windmill.</>
+        <>If you have a Windmill, gain <Grape>3</Grape> or <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a Windmill.</>
     ),
     // oldGeneral: summerVisitorCard(
     //     "Old General",
@@ -304,7 +304,7 @@ export const rhineSummerVisitorCards = {
     // ),
     owner: summerVisitorCard(
         "Owner",
-        <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have the Windmill, gain <VP>1</VP>.</>
+        <>Choose 2: Build 1 structure at its regular cost, draw 1 <Order />, or plant 1 <Vine />. If you have a Windmill, gain <VP>1</VP>.</>
     ),
     peasant: summerVisitorCard(
         "Peasant",
@@ -336,7 +336,7 @@ export const rhineSummerVisitorCards = {
     // ),
     sommelier: summerVisitorCard(
         "Sommelier",
-        <>If you have the Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build the Tasting Room.</>
+        <>If you have a Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a Tasting Room.</>
     ),
     // sonInLaw: summerVisitorCard(
     //     "Son-in-law",
@@ -356,7 +356,7 @@ export const rhineSummerVisitorCards = {
     ),
     traveller: summerVisitorCard(
         "Traveller",
-        <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have the Tasting Room, also gain <Coins>3</Coins>.</>
+        <>Gain <Coins>3</Coins> or harvest up to 2 fields. If you have a Tasting Room, also gain <Coins>3</Coins>.</>
     ),
     // vineTrader: summerVisitorCard(
     //     "Vine Trader",
@@ -594,7 +594,7 @@ export const rhineWinterVisitorCards = {
     ),
     grapeVendor: winterVisitorCard(
         "Grape Vendor",
-        <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have the Tasting Room.</>
+        <>Discard <Grape>X</Grape> to either gain <Coins>X</Coins> or draw X/2 <WinterVisitor /> (rounded up). Then gain <Coins>4</Coins> if you have a Tasting Room.</>
     ),
     grapeWhisperer: winterVisitorCard(
         "Grape Whisperer",
