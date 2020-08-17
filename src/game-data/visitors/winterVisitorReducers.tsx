@@ -2096,9 +2096,14 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_WINE":
                 if (!skepticAction.orderId) {
                     // Haven't started filling an order yet: age the chosen wines
-                    action.wines.forEach(wine => {
-                        state = ageSingleWine(wine, state);
-                    });
+                    action.wines
+                        // Sort in reverse value order so we can age each wine individually
+                        // eg. if you tried to age both 3 & 4 value wines but starting with
+                        //     the 3 first, it would see the 4 and devalue right back to 3.
+                        .sort((w1, w2) => w2.value - w1.value)
+                        .forEach(wine => {
+                            state = ageSingleWine(wine, state);
+                        });
                     return promptToChooseOrderCard(state);
                 } else {
                     return endVisitor(fillOrder(action.wines, state));
