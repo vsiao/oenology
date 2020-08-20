@@ -1229,7 +1229,7 @@ export const winterVisitorReducers: Record<
                 return promptToChooseWine(state);
             case "CHOOSE_WINE":
                 const wine = action.wines[0];
-                const stateAfterDiscard = discardWines(state, [wine]);
+                const stateAfterDiscard = gainCoins(4, discardWines(state, [wine]));
 
                 const mostValuableWine = Object.values(stateAfterDiscard.players)
                     .map((player) =>
@@ -1965,7 +1965,7 @@ export const rhineWinterVisitorReducers: Record<
                     return promptToDiscard(3, state);
                 } else {
                     return endVisitor(
-                        gainCoins(1, drawCards(state, action._key!, { winterVisitor: 3 }))
+                        gainCoins(1, drawCards(discardCards(action.cards!, state), action._key!, { winterVisitor: 3 }))
                     );
                 }
             default:

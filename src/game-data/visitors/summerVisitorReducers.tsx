@@ -1888,13 +1888,13 @@ export const rhineSummerVisitorReducers: Record<
             {
                 id: "OWNER_BUILD",
                 label: <>Build 1 structure</>,
-                disabledReason: buildStructureDisabledReason(state),
+                disabledReason: buildStructureDisabledReason(s),
             },
             { id: "OWNER_DRAW", label: <>Draw 1 <Order /></>, },
             {
                 id: "OWNER_PLANT",
                 label: <>Plant 1 <Vine /></>,
-                disabledReason: plantVinesDisabledReason(state),
+                disabledReason: plantVinesDisabledReason(s),
             },
         ]);
 
@@ -2090,7 +2090,7 @@ export const rhineSummerVisitorReducers: Record<
                             },
                             {
                                 id: "REORGANIZER_WHITE",
-                                label: <>Gain <Grape color="red">2</Grape></>,
+                                label: <>Gain <Grape color="white">2</Grape></>,
                             },
                         ],
                     });
