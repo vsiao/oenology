@@ -30,8 +30,6 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     vineTrader: true,
     wineEngineer: true,
     // winter
-    brideToBe: true,
-    cellarmaster: true,
     cheapBuyer: true,
     chemist: true,
     influencer: true, // tuscany
@@ -545,10 +543,10 @@ export const rhineWinterVisitorCards = {
         "Bargainer",
         <>Draw 3 <Order />.</>
     ),
-    // brideToBe: winterVisitorCard(
-    //     "Bride-to-be",
-    //     <>Gain <Coins>3</Coins> OR make 1 <WineGlass color="sparkling" /> with any 2 <Grape /> (instead of 2 <Grape color="red" /> and 1 <Grape color="white" />).</>
-    // ),
+    brideToBe: winterVisitorCard(
+        "Bride-to-be",
+        <>Gain <Coins>3</Coins> OR make 1 <WineGlass color="sparkling" /> with any 2 <Grape /> (instead of 2 <Grape color="red" /> and 1 <Grape color="white" />).</>
+    ),
     bureaucrat: winterVisitorCard(
         "Bureaucrat",
         <>If you have the fewest <VP /> (no ties), gain <Coins>5</Coins>. Otherwise pay <Coins>1</Coins> to draw 1 <Vine />, 1 <WinterVisitor />, and 1 <Order />.</>
@@ -557,10 +555,10 @@ export const rhineWinterVisitorCards = {
         "Cellarman",
         <>Pay <Coins>4</Coins> to gain <Grape color="red">1</Grape> and <Grape color="white">1</Grape> OR fill 1 <Order /> and then gain <Coins>3</Coins>.</>
     ),
-    // cellarmaster: winterVisitorCard(
-    //     "Cellarmaster",
-    //     <>Discard 1 <WineGlass /> to gain <Coins>4</Coins>. If it is the most valuable wine in any player's cellar, gain also <VP>2</VP></>
-    // ),
+    cellarmaster: winterVisitorCard(
+        "Cellarmaster",
+        <>Discard 1 <WineGlass /> to gain <Coins>4</Coins>. If it is the most valuable wine in any player's cellar, gain also <VP>2</VP></>
+    ),
     // cheapBuyer: winterVisitorCard(
     //     "Cheap Buyer",
     //     <>Increase the value of 1 or 2 <WineGlass /> by a combined total of 2, then fill 1 <Order />.</>

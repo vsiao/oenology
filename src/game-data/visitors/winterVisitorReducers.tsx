@@ -27,6 +27,7 @@ import {
     promptToChooseGrapes,
     promptToChooseVisitor,
     promptToDiscard,
+    promptToChooseGrape,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { visitorCards, winterVisitorCards, rhineWinterVisitorCards } from "./visitorCards";
@@ -293,7 +294,7 @@ export const winterVisitorReducers: Record<
                     case "EXPORTER_FILL":
                         return promptToChooseOrderCard(state);
                     case "EXPORTER_DISCARD":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     default:
                         return state;
                 }
@@ -1091,7 +1092,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROMOTER_GRAPE":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     case "PROMOTER_WINE":
                         return promptToChooseWine(state);
                     default:
@@ -1398,7 +1399,7 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "ADVERTISER_GRAPE":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     case "ADVERTISER_WINE":
                         return promptToChooseWine(state);
                     case "ADVERTISER_DRAW":
@@ -1420,6 +1421,41 @@ export const rhineWinterVisitorReducers: Record<
         switch (action.type) {
             case "CHOOSE_CARDS":
                 return endVisitor(drawCards(state, action._key!, { order: 3 }));
+            default:
+                return state;
+        }
+    },
+    brideToBe: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        { id: "BRIDETB_GAIN", label: <>Gain <Coins>3</Coins></> },
+                        {
+                            id: "BRIDETB_MAKE",
+                            label: <>Make 1 <WineGlass color="sparkling" /></>,
+                            disabledReason: needGrapesDisabledReason(state) ||
+                                (state.players[state.currentTurn.playerId].structures.largeCellar
+                                    ? undefined
+                                    : "You need a Large Cellar."),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "BRIDETB_GAIN":
+                        return endVisitor(gainCoins(3, state));
+                    case "BRIDETB_MAKE":
+                        return promptToChooseGrapes(state, { asBrideToBe: true });
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                const grapes = action.grapes;
+                const cellarValue = Math.min(9, grapes[0].value + grapes[1].value);
+                return endVisitor(
+                    makeWineFromGrapes(state, [{ type: "sparkling", grapes, cellarValue }])
+                );
             default:
                 return state;
         }
@@ -1501,6 +1537,31 @@ export const rhineWinterVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endVisitor(gainCoins(3, fillOrder(action.wines, state)));
+            default:
+                return state;
+        }
+    },
+    cellarmaster: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptToChooseWine(state);
+            case "CHOOSE_WINE":
+                const wine = action.wines[0];
+                const stateAfterDiscard = gainCoins(4, discardWines(state, [wine]));
+
+                const mostValuableWine = Object.values(stateAfterDiscard.players)
+                    .map((player) =>
+                        Object.values(player.cellar)
+                            .map((wines) => wines.lastIndexOf(true) + 1)
+                            .reduce((v1, v2) => Math.max(v1, v2))
+                    )
+                    .reduce((v1, v2) => Math.max(v1, v2));
+
+                if (wine.value >= mostValuableWine) {
+                    return endVisitor(gainVP(2, stateAfterDiscard));
+                } else {
+                    return endVisitor(stateAfterDiscard);
+                }
             default:
                 return state;
         }
@@ -1649,7 +1710,7 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "ENDORSER_GRAPE":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     case "ENDORSER_WINE":
                         return promptToChooseWine(state);
                     case "ENDORSER_GAIN":
@@ -1746,7 +1807,7 @@ export const rhineWinterVisitorReducers: Record<
     grapeVendor: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptToChooseGrapes(state, 1);
+                return promptToChooseGrape(state);
             case "CHOOSE_GRAPE":
                 const value = action.grapes[0].value;
                 return promptForAction(discardGrapes(state, action.grapes), {

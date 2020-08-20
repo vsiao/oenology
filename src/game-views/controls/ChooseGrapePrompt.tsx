@@ -51,13 +51,23 @@ const ChooseGrapePrompt: React.FunctionComponent<Props> = props => {
             </ul>
             <ChoiceButton
                 className="ChooseGrapePrompt-submit"
-                disabled={selectedGrapes.length === 0 || (props.prompt.limit !== undefined && selectedGrapes.length > props.prompt.limit)}
+                disabled={isDisabled(props.prompt, selectedGrapes)}
                 onClick={() => props.onConfirm(selectedGrapes)}
             >
                 Confirm
             </ChoiceButton>
         </div>
     </PromptStructure>;
+};
+
+const isDisabled = (prompt: ChooseGrapePromptState, selectedGrapes: GrapeSpec[]): boolean => {
+    if (prompt.asBrideToBe) {
+        // Need to make a sparkling wine from any two grapes
+        return selectedGrapes.length !== 2 ||
+            selectedGrapes.reduce((v, { value }) => v + value, 0) < 7;
+    }
+    return selectedGrapes.length === 0 ||
+        (prompt.limit !== undefined && selectedGrapes.length > prompt.limit);
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {

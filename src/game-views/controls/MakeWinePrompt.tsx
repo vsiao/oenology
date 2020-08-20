@@ -172,7 +172,6 @@ const wineFromGrapes = (
     return {
         type: color,
         grapes,
-        grapeValue: totalValue,
         cellarValue,
     };
 };

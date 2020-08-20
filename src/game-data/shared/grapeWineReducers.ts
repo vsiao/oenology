@@ -161,13 +161,14 @@ export const makeWineFromGrapes = (
     let { cellar, crushPad } = player;
     const wines: WineSpec[] = [];
     wine.forEach(({ type, grapes, cellarValue }) => {
-        if (cellarValue <= 0) {
+        const idx = devaluedIndex(cellarValue, cellar[type]);
+        if (idx < 0) {
             return;
         }
-        wines.push({ color: type, value: cellarValue });
+        wines.push({ color: type, value: idx + 1 });
         cellar = {
             ...cellar,
-            [type]: cellar[type].map((w, i) => w || i === cellarValue - 1),
+            [type]: cellar[type].map((w, i) => w || i === idx),
         };
         crushPad = {
             red: crushPad.red.map(

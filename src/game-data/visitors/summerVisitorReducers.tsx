@@ -18,13 +18,13 @@ import {
     promptToPlant,
     promptToChooseCard,
     promptToUproot,
-    promptToChooseGrapes,
     promptToChooseWine,
     promptToSwitchVines,
     promptToPlaceWorker,
     promptToFillOrder,
     promptToChooseOrderCard,
     promptToDiscard,
+    promptToChooseGrape,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
@@ -356,7 +356,7 @@ export const summerVisitorReducers: Record<
                     case "BUYER_PLACE_WHITE":
                         return endVisitor(payCoins(2, placeGrapes(state, { white: 1 })));
                     case "BUYER_DISCARD":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     default:
                         return state;
                 }
@@ -758,7 +758,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "NEGOTIATOR_GRAPE":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     case "NEGOTIATOR_WINE":
                         return promptToChooseWine(state);
                     default:
@@ -1587,7 +1587,7 @@ export const rhineSummerVisitorReducers: Record<
                     case "BOTANIST_GAIN_WHITE":
                         return endVisitor(placeGrapes(state, { white: 2 }));
                     case "BOTANIST_DISCARD":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     default:
                         return state;
                 }
@@ -1624,7 +1624,7 @@ export const rhineSummerVisitorReducers: Record<
                     case "CICERONE_HARVEST":
                         return promptToHarvest(state);
                     case "CICERONE_DRAW":
-                        return promptToChooseGrapes(state, 1);
+                        return promptToChooseGrape(state);
                     default:
                         return state;
                 }
