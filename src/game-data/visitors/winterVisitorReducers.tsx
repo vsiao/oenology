@@ -682,8 +682,7 @@ export const winterVisitorReducers: Record<
                             managerPendingAction: pendingAction,
                         },
                     },
-                    action._key!,
-                    /* hasBonus */ false
+                    action._key!
                 );
             default:
                 return state;

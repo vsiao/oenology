@@ -1,7 +1,6 @@
 import { Coupon } from "../structures";
 import { CardId, FieldId } from "../GameState";
 import { OrderId } from "../orderCards";
-import { VisitorId } from "../visitors/visitorCards";
 import { VineInField } from "./promptActions";
 
 export type PromptState =

@@ -261,23 +261,13 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
             }
             let placementIdx;
             [state, placementIdx] = placeWorker(action.workerType, action.placement, state);
-            return boardAction(
-                action.placement,
-                state,
-                action._key!,
-                state.tableOrder.length > 2 && placementIdx === 0
-            );
+            return boardAction(action.placement, state, action._key!, placementIdx);
         }
         case "CHOOSE_ACTION":
             switch (action.choice) {
                 case "PLANNER_ACT":
                     const { placement, idx } = action.data as any;
-                    return boardAction(
-                        placement,
-                        state,
-                        action._key!,
-                        state.tableOrder.length > 2 && idx === 0,
-                    );
+                    return boardAction(placement, state, action._key!, idx);
                 case "PLANNER_PASS":
                     return endTurn(state);
 

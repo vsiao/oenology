@@ -8,9 +8,10 @@ import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import GameState, { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
 import WorkerIcon from "../icons/Worker";
-import { summerActions, winterActions, yearRoundActions } from "../../game-data/board/boardPlacements";
+import { summerActions, winterActions, yearRoundActions, seasonalActions } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
+import { workerPlacementSeasons, needsGrandeDisabledReason } from "../../game-data/shared/sharedSelectors";
 
 interface ActionChoice {
     type: WorkerPlacement | null;
@@ -120,44 +121,37 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
 };
 
 const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
-    const numPlayers = Object.keys(game.players).length;
-    const numSpots = Math.ceil(numPlayers / 2);
-
     const currentTurn = game.currentTurn as WorkerPlacementTurn;
     if (
         currentTurn.pendingAction &&
         currentTurn.pendingAction.type === "playVisitor" &&
         currentTurn.pendingAction.visitorId === "planner"
     ) {
+        const seasons = workerPlacementSeasons(game);
+        const futureSeasons = seasons.slice(seasons.indexOf("summer") + 1);
         // The Planner visitor allows the player to place a worker in any future season.
-        return winterActions.map(({ type, label }) => {
-            const placements = game.workerPlacements[type];
-            return {
+        return seasonalActions
+            .filter(a => futureSeasons.some(s => s === a.season))
+            .map(({ type, label }) => ({
                 type,
                 label: label(game),
                 disabledReason: undefined,
-                hasSpace: placements.length < numSpots ||
-                    placements.slice(0, numSpots).some(w => !w),
-            };
-        });
+                hasSpace: !needsGrandeDisabledReason(game, type),
+            }));
     }
 
     return [
         ...(currentTurn.season === "summer" ? summerActions : winterActions)
-            .map(({ type, label, disabledReason, }) => {
-                const placements = game.workerPlacements[type];
-                return {
-                    type,
-                    label: label(game),
-                    disabledReason: disabledReason && disabledReason(game),
-                    hasSpace: placements.length < numSpots ||
-                        placements.slice(0, numSpots).some(w => !w),
-                };
-            }),
+            .map(({ type, label, disabledReason, }) => ({
+                type,
+                label: label(game),
+                disabledReason: disabledReason(game),
+                hasSpace: !needsGrandeDisabledReason(game, type),
+            })),
         ...yearRoundActions.map(({ type, label, disabledReason, }) => ({
             type,
             label: label(game),
-            disabledReason: disabledReason && disabledReason(game),
+            disabledReason: disabledReason(game),
             hasSpace: true,
         })),
         {

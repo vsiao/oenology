@@ -1,6 +1,14 @@
 import Coins from "../../game-views/icons/Coins";
 import * as React from "react";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WorkerPlacement, WorkerType, StructureState, CardType, WineColor, GrapeColor } from "../GameState";
+import GameState, {
+    CardType,
+    GrapeColor,
+    PlayVisitorPendingAction,
+    StructureState,
+    WineColor,
+    WorkerPlacement,
+    WorkerPlacementTurn,
+} from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -33,6 +41,7 @@ import {
     updatePlayer,
     placeWorker,
     loseResiduals,
+    retrieveWorker,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -49,6 +58,8 @@ import {
     fieldYields,
     cardTypesInPlay,
     residualPaymentsDisabledReason,
+    workerPlacementSeasons,
+    needsGrandeDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -70,7 +81,7 @@ import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
-import { allPlacements } from "../board/boardPlacements";
+import { allPlacements, seasonalActions } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 
 export const summerVisitorReducers: Record<
@@ -988,38 +999,14 @@ export const summerVisitorReducers: Record<
                         .flat(),
                 });
             case "CHOOSE_ACTION_MULTI":
-                const workers: { type: WorkerType | "temp", id: number }[] = [];
                 action.choices.forEach(id => {
                     const parts = id.split("_");
                     const placement = parts[0] as WorkerPlacement;
                     const index = parseInt(parts[1], 10);
 
-                    state = {
-                        ...state,
-                        workerPlacements: {
-                            ...state.workerPlacements,
-                            [placement]: state.workerPlacements[placement].map((w, i) => {
-                                if (!w || i !== index) {
-                                    return w;
-                                }
-                                workers.push({
-                                    type: w.isTemp ? "temp" : w.type,
-                                    id: w.id,
-                                });
-                                return null;
-                            }),
-                        },
-                    };
+                    state = retrieveWorker(placement, index, state);
                 });
-                const player = state.players[state.currentTurn.playerId];
-                const playerWorkers = player.workers.slice();
-                workers.forEach(({ type, id }) => {
-                    const i = playerWorkers.findIndex(
-                        w => ((type === "temp" && w.isTemp) || w.type === type) && w.id === id
-                    );
-                    playerWorkers[i] = { ...playerWorkers[i], available: true };
-                });
-                return endVisitor(updatePlayer(payCoins(2, state), player.id, { workers: playerWorkers, }));
+                return endVisitor(payCoins(2, state));
             default:
                 return state;
         }
@@ -1336,7 +1323,6 @@ export const summerVisitorReducers: Record<
             default:
                 return state;
         }
-
     },
     volunteerCrew: (state, action) => {
         const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
@@ -1447,6 +1433,68 @@ export const rhineSummerVisitorReducers: Record<
     keyof typeof rhineSummerVisitorCards,
     (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
+    accountant: (state, action) => {
+        const endVisitorAction = makeEndVisitorAction("opponents", (s, playerId) => {
+            return promptForAction(s, {
+                playerId,
+                choices: [
+                    { id: "ACCOUNTANT_DRAW", label: <>Draw 1 <SummerVisitor /></> },
+                    { id: "ACCOUNTANT_PASS", label: <>Pass</> },
+                ],
+            });
+        });
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                state = gainCoins(1, drawCards(state, action._key!, { vine: 1, summerVisitor: 1, winterVisitor: 1, }));
+                return endVisitorAction(state);
+
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "VENDOR_DRAW":
+                        return endVisitorAction(
+                            drawCards(state, action._key!, { summerVisitor: 1 }, action.playerId),
+                            action.playerId
+                        );
+                    case "VENDOR_PASS":
+                        return endVisitorAction(state, action.playerId);
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
+    administrator: (state, action, pendingAction) => {
+        const placedWorker = state.workerPlacements.playSummerVisitor[pendingAction.placementIdx!]!
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const seasons = workerPlacementSeasons(state);
+                const futureSeasons = seasons.slice(seasons.indexOf("summer") + 1);
+                const isGrande = placedWorker.type === "grande";
+                return promptForAction(state, {
+                    choices: seasonalActions
+                        .filter(a => futureSeasons.some(s => s === a.season))
+                        .map(a => ({
+                            id: a.type,
+                            label: a.label(state),
+                            disabledReason: isGrande
+                                ? undefined
+                                : needsGrandeDisabledReason(state, a.type),
+                        })),
+                });
+            case "CHOOSE_ACTION":
+                state = retrieveWorker(
+                    "playSummerVisitor",
+                    pendingAction.placementIdx!,
+                    state
+                );
+                return endVisitor(
+                    placeWorker(placedWorker.type, action.choice as WorkerPlacement, state)[0]
+                );
+            default:
+                return state;
+        }
+    },
     agent: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":

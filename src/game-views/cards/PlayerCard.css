@@ -41,6 +41,7 @@
     flex-wrap: wrap;
     line-height: 1.6em;
     margin: 0;
+    overflow-y: auto;
     padding: 8px;
     text-align: center;
 }

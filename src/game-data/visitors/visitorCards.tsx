@@ -18,8 +18,6 @@ export const UNIMPLEMENTED_CARDS = {
 
 export const RHINE_UNIMPLEMENTED_CARDS = {
     // summer
-    accountant: true,
-    administrator: true,
     brickMason: true,
     dismantler: true,
     grapeMerchant: true,
@@ -224,14 +222,14 @@ export const summerVisitorCards = {
 };
 
 export const rhineSummerVisitorCards = {
-    // accountant: summerVisitorCard(
-    //     "Accountant",
-    //     <>Draw 1 <Vine />, 1 <SummerVisitor />, 1 <WinterVisitor /> and gain <Coins>1</Coins>. Each opponent may draw 1 <SummerVisitor />.</>
-    // ),
-    // administrator: summerVisitorCard(
-    //     "Administrator",
-    //     <>Place the <Worker /> with which you played this card on an action in a future season. Take the action at the beginning of that season.</>
-    // ),
+    accountant: summerVisitorCard(
+        "Accountant",
+        <>Draw 1 <Vine />, 1 <SummerVisitor />, 1 <WinterVisitor /> and gain <Coins>1</Coins>. Each opponent may draw 1 <SummerVisitor />.</>
+    ),
+    administrator: summerVisitorCard(
+        "Administrator",
+        <>Place the <Worker /> with which you played this card on an action in a future season. Take the action at the beginning of that season.</>
+    ),
     agent: summerVisitorCard(
         "Agent",
         <>Discard 2 <Card /> to gain <Coins>5</Coins> OR pay <Coins>2</Coins> to draw 2 <WinterVisitor /> or 2 <Vine />.</>

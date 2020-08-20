@@ -18,8 +18,9 @@ export const boardAction = (
     placement: WorkerPlacement,
     state: GameState,
     seed: string,
-    hasBonus: boolean
+    placementIdx?: number
 ): GameState => {
+    const hasBonus = state.tableOrder.length > 2 && placementIdx === 0;
     const player = state.players[state.currentTurn.playerId];
 
     switch (placement) {
@@ -90,13 +91,21 @@ export const boardAction = (
         case "playSummerVisitor": {
             return promptToChooseVisitor(
                 "summer",
-                setPendingAction({ type: "playVisitor", hasBonus }, state)
+                setPendingAction({
+                    type: "playVisitor",
+                    hasBonus,
+                    placementIdx,
+                }, state)
             );
         }
         case "playWinterVisitor": {
             return promptToChooseVisitor(
                 "winter",
-                setPendingAction({ type: "playVisitor", hasBonus }, state)
+                setPendingAction({
+                    type: "playVisitor",
+                    hasBonus,
+                    placementIdx,
+                }, state)
             );
         }
         case "trainWorker": {

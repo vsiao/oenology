@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { summerActions, winterActions } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
-import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement } from "../game-data/GameState";
+import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement, Season } from "../game-data/GameState";
 import Rooster from "./icons/Rooster";
 import StatusBanner from "./StatusBanner";
 import { Vine, Order, SummerVisitor, WinterVisitor } from "./icons/Card";
@@ -15,7 +15,6 @@ import VictoryPoints from "./icons/VictoryPoints";
 import Worker from "./icons/Worker";
 import { useTooltip } from "./shared/useTooltip";
 
-type Season = "spring" | "summer" | "fall" | "winter";
 interface Props {
     season: Season;
     wakeUpOrder: (WakeUpPosition | null)[];

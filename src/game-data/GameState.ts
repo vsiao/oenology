@@ -6,6 +6,7 @@ import { StructureId } from "./structures";
 import { ActivityLog } from "./ActivityLog";
 import { MamaId, PapaId } from "./mamasAndPapas";
 
+export type Season = "spring" | "summer" | "fall" | "winter";
 export default interface GameState {
     // shared state
     year: number;
@@ -56,6 +57,9 @@ export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
     season: "summer" | "winter";
+
+    // Used to enact actions for workers placed in future seasons
+    // by the Planner and Administrator visitors.
     isPlannerTurn?: boolean;
 
     // Non-null if the player has chosen to play a worker in a position
@@ -87,6 +91,11 @@ export interface PlayVisitorPendingAction {
 
     // Can play an additional visitor due to placement bonus
     hasBonus: boolean;
+
+    // Indicates which worker was used to play this visitor.
+    // `undefined` means the visitor action was taken without a worker,
+    // eg. using the Manager visitor to play a summer visitor.
+    placementIdx?: number;
 }
 export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction

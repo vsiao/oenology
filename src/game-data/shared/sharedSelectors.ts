@@ -1,4 +1,4 @@
-import GameState, { Field, FieldId, CardType, WineColor, StructureState } from "../GameState";
+import GameState, { Field, FieldId, CardType, WineColor, StructureState, Season, WorkerPlacement } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
@@ -234,6 +234,19 @@ export const fillOrderDisabledReason = (state: GameState, playerId = state.curre
 
 export const cardTypesInPlay = (state: GameState): CardType[] => {
     return ["vine", "summerVisitor", "order", "winterVisitor"];
+};
+
+export const workerPlacementSeasons = (state: GameState): Season[] => {
+    return ["summer", "winter"];
+};
+
+export const needsGrandeDisabledReason = (state: GameState, placement: WorkerPlacement) => {
+    const numSpots = Math.ceil(state.tableOrder.length / 2);
+    const placements = state.workerPlacements[placement];
+    return placements.length < numSpots ||
+        placements.slice(0, numSpots).some(w => !w)
+        ? undefined
+        : "You need a grande to play here.";
 };
 
 export const numCardsDisabledReason = (

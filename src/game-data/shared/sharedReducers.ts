@@ -201,6 +201,43 @@ export const placeWorker = (type: WorkerType, placement: WorkerPlacement, state:
     ];
 };
 
+export const retrieveWorker = (
+    placement: WorkerPlacement,
+    index: number,
+    state: GameState
+): GameState => {
+    let retrievedWorker: { type: WorkerType | "temp", id: number } | null = null;
+    state = {
+        ...state,
+        workerPlacements: {
+            ...state.workerPlacements,
+            [placement]: state.workerPlacements[placement].map((w, i) => {
+                if (!w || i !== index) {
+                    return w;
+                }
+                retrievedWorker = {
+                    type: w.isTemp ? "temp" : w.type,
+                    id: w.id,
+                };
+                return null;
+            }),
+        },
+    };
+    if (!retrievedWorker) {
+        throw new Error(`Failed to retrieve worker from ${placement} ${index}`);
+    }
+    const { type, id } = retrievedWorker;
+    const player = state.players[state.currentTurn.playerId];
+    const idx = player.workers.findIndex(
+        w => ((type === "temp" && w.isTemp) || w.type === type) && w.id === id
+    );
+    return updatePlayer(state, player.id, {
+        workers: player.workers.map((w, i) =>
+            i === idx ? { ...w, available: true } : w
+        ),
+    })
+};
+
 export const markStructureUsed = (structureId: StructureId, state: GameState, playerId = state.currentTurn.playerId): GameState => {
     const player = state.players[playerId];
 
