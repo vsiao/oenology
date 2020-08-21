@@ -571,7 +571,11 @@ export const endVisitor = (state: GameState): GameState => {
     if (pendingAction.hasBonus && hasCard) {
         return promptToChooseVisitor(
             currentTurn.season,
-            setPendingAction({ type: "playVisitor", hasBonus: false }, state),
+            setPendingAction({
+                type: "playVisitor",
+                hasBonus: false,
+                placementIdx: pendingAction.placementIdx,
+            }, state),
             { optional: true }
         );
     }

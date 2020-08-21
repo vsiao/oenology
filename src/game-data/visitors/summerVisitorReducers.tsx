@@ -2129,7 +2129,7 @@ export const rhineSummerVisitorReducers: Record<
                 if (action.cards!.length === 1) {
                     return promptToDiscard(2, state);
                 } else {
-                    return promptForAction(state, {
+                    return promptForAction(discardCards(action.cards!, state), {
                         choices: [
                             { id: "REORGANIZER_GAIN", label: <>Gain <Coins>5</Coins></>, },
                             {
