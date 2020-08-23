@@ -17,7 +17,7 @@
         flex-direction: row;
     }
     .Sidebar-players {
-        min-width: 510px;
+        width: 510px;
     }
 }
 

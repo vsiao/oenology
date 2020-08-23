@@ -1451,12 +1451,12 @@ export const rhineSummerVisitorReducers: Record<
 
             case "CHOOSE_ACTION":
                 switch (action.choice) {
-                    case "VENDOR_DRAW":
+                    case "ACCOUNTANT_DRAW":
                         return endVisitorAction(
                             drawCards(state, action._key!, { summerVisitor: 1 }, action.playerId),
                             action.playerId
                         );
-                    case "VENDOR_PASS":
+                    case "ACCOUNTANT_PASS":
                         return endVisitorAction(state, action.playerId);
                     default:
                         return state;
