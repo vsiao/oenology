@@ -3,31 +3,45 @@ import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { Dispatch } from 'redux';
-import { CHEAT_drawCard } from './game-data/gameActions';
+import { CHEAT_drawCard, CHEAT_gainGrape } from './game-data/gameActions';
 import OenologyGame from './game-views/OenologyGame';
 import { AppState } from './store/AppState';
 import { AppAction } from './store/appActions';
 import Home from './game-views/lobby/Home';
+import { GrapeSpec } from './game-data/prompts/promptActions';
+import { GrapeColor } from './game-data/GameState';
 
 interface Props {
-    currentPlayerId: string | null;
-    drawCard: (id: string, playerId: string) => void;
+    playerId: string | null;
+    drawCard: (playerId: string, id: string) => void;
+    gainGrape: (playerId: string, grape: GrapeSpec) => void;
 }
 
 const App: React.FunctionComponent<Props> = props => {
-    const [drawCardInputValue, setDrawCardInputValue] = useState("");
+    const [cheatInputValue, setCheatInputValue] = useState("");
     return <BrowserRouter>
         <div className="App">
             <header className="App-header">
                 <a className="App-homeLink" href="/">oenology</a>
                 <input type="text"
                     className="App-cheatBox"
-                    value={drawCardInputValue}
-                    onChange={e => setDrawCardInputValue(e.target.value)}
+                    value={cheatInputValue}
+                    onChange={e => setCheatInputValue(e.target.value)}
                     onKeyDown={e => {
                         if (e.key === "Enter") {
-                            props.drawCard(drawCardInputValue, props.currentPlayerId!);
-                            setDrawCardInputValue("");
+                            const [cmd, ...parts] = cheatInputValue.split(":");
+                            switch (cmd) {
+                                case "d":
+                                    props.drawCard(props.playerId!, parts[0]);
+                                    break;
+                                case "g":
+                                    props.gainGrape(props.playerId!, {
+                                        color: parts[0] as GrapeColor,
+                                        value: parseInt(parts[1], 10),
+                                    });
+                                    break;
+                            }
+                            setCheatInputValue("");
                         }
                     }}
                 />
@@ -46,13 +60,14 @@ const App: React.FunctionComponent<Props> = props => {
 
 const mapStateToProps = (state: AppState) => {
     return {
-        currentPlayerId: state.game && state.game.playerId,
+        playerId: state.game && state.game.playerId,
     };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch<AppAction>) => {
     return {
-        drawCard: (id: string, playerId: string) => dispatch(CHEAT_drawCard(id, playerId)),
+        drawCard: (playerId: string, id: string) => dispatch(CHEAT_drawCard(id, playerId)),
+        gainGrape: (playerId: string, grape: GrapeSpec) => dispatch(CHEAT_gainGrape(grape, playerId)),
     };
 }
 

@@ -6,6 +6,7 @@ import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
 import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
+import { placeGrapes } from "./shared/grapeWineReducers";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
@@ -35,6 +36,9 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
 
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
+
+        case "CHEAT_GAIN_GRAPE":
+            return placeGrapes(state, { [action.grape.color]: action.grape.value });
     }
 
     state = {

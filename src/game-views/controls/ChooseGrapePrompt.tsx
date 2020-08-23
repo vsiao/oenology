@@ -65,9 +65,12 @@ const isDisabled = (prompt: ChooseGrapePromptState, selectedGrapes: GrapeSpec[])
         // Need to make a sparkling wine from any two grapes
         return selectedGrapes.length !== 2 ||
             selectedGrapes.reduce((v, { value }) => v + value, 0) < 7;
+    } else if (prompt.numGrapes !== undefined) {
+        return selectedGrapes.length !== prompt.numGrapes;
+    } else {
+        return selectedGrapes.length === 0 ||
+            (prompt.upToN !== undefined && selectedGrapes.length > prompt.upToN);
     }
-    return selectedGrapes.length === 0 ||
-        (prompt.limit !== undefined && selectedGrapes.length > prompt.limit);
 };
 
 const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {

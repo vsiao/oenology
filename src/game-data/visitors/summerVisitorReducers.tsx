@@ -25,6 +25,7 @@ import {
     promptToChooseOrderCard,
     promptToDiscard,
     promptToChooseGrape,
+    promptToChooseGrapes,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
@@ -1842,6 +1843,56 @@ export const rhineSummerVisitorReducers: Record<
                         return endVisitor(placeGrapes(payCoins(5, state), { red: 4, white: 4 }));
                     default:
                         return state;
+                }
+            default:
+                return state;
+        }
+    },
+    grapeMerchant: (state, action, pendingAction) => {
+        const gMerchantAction = pendingAction as PlayVisitorPendingAction & {
+            choice: "sell" | "gain";
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                return promptForAction(state, {
+                    choices: [
+                        {
+                            id: "GMERCHANT_SELL",
+                            label: <>Sell up to 3 <Grape /></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                        {
+                            id: "GMERCHANT_GAIN",
+                            label: <>Discard 2 <Grape /> to gain <WineGlass color="blush">6</WineGlass></>,
+                            disabledReason: needGrapesDisabledReason(state),
+                        },
+                    ],
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "GMERCHANT_SELL":
+                        return promptToChooseGrapes(
+                            setPendingAction({ ...gMerchantAction, choice: "sell" }, state),
+                            { upToN: 3 }
+                        );
+                    case "GMERCHANT_GAIN":
+                        return promptToChooseGrapes(
+                            setPendingAction({ ...gMerchantAction, choice: "gain" }, state),
+                            { numGrapes: 2 }
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_GRAPE":
+                if (gMerchantAction.choice === "sell") {
+                    const sellValue = 3 * action.grapes.reduce((sum, g) => sum += Math.ceil(g.value / 3), 0);
+                    return endVisitor(
+                        gainCoins(sellValue, discardGrapes(state, action.grapes))
+                    );
+                } else {
+                    return endVisitor(
+                        discardGrapes(gainWine({ color: "blush", value: 6 }, state), action.grapes)
+                    );
                 }
             default:
                 return state;

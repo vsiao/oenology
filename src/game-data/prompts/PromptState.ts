@@ -50,7 +50,8 @@ export interface ChooseWinePromptState {
 
 export interface ChooseGrapePromptState {
     type: "chooseGrape";
-    limit?: number;
+    upToN?: number;
+    numGrapes?: number;
     asBrideToBe: boolean;
 }
 

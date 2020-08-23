@@ -1,4 +1,4 @@
-import { PromptAction, isPromptAction } from "./prompts/promptActions";
+import { PromptAction, isPromptAction, GrapeSpec } from "./prompts/promptActions";
 import { Action } from "redux";
 import { PlayerColor, CardsByType } from "./GameState";
 import { MamaId, PapaId } from "./mamasAndPapas";
@@ -11,6 +11,7 @@ export type GameAction = (
     | UndoAction
     | EndGameAction
     | CHEAT_DrawCardAction
+    | CHEAT_GainGrapeAction
 ) & {
     // Every action should first be pushed to firebase to be
     // applied on other clients. Then, only on success do we
@@ -22,6 +23,7 @@ export const isGameAction = (action: Action): action is GameAction => {
     switch (action.type) {
         case "START_GAME":
         case "CHEAT_DRAW_CARD":
+        case "CHEAT_GAIN_GRAPE":
         case "END_GAME":
         case "UNDO":
             return true;
@@ -77,4 +79,12 @@ interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {
 }
 export const CHEAT_drawCard = (id: string, playerId: string): GameAction => {
     return { type: "CHEAT_DRAW_CARD", id, playerId, };
+};
+
+interface CHEAT_GainGrapeAction extends Action<"CHEAT_GAIN_GRAPE"> {
+    grape: GrapeSpec;
+    playerId: string;
+}
+export const CHEAT_gainGrape = (grape: GrapeSpec, playerId: string): GameAction => {
+    return { type: "CHEAT_GAIN_GRAPE", grape, playerId };
 };
