@@ -22,7 +22,6 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     dismantler: true,
     oldGeneral: true, // tuscany
     plantDealer: true,
-    sculptor: true,
     sonInLaw: true,
     structureReorganizer: true, // tuscany
     subsidizer: true,
@@ -325,10 +324,10 @@ export const rhineSummerVisitorCards = {
         "Reorganizer",
         <>Discard 2 <Card /> to gain either <Coins>5</Coins> or <Grape>2</Grape>.</>
     ),
-    // sculptor: summerVisitorCard(
-    //     "Sculptor",
-    //     <>Gain <Coins>1</Coins> per field you own, lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass>, or plant up to 2 <Vine />.</>
-    // ),
+    sculptor: summerVisitorCard(
+        "Sculptor",
+        <>Gain <Coins>1</Coins> per field you own, lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass>, or plant up to 2 <Vine />.</>
+    ),
     sommelier: summerVisitorCard(
         "Sommelier",
         <>If you have a Tasting Room, discard 1 <WineGlass /> to gain <VP>1</VP>. Otherwise pay <Coins>2</Coins> to build a Tasting Room.</>

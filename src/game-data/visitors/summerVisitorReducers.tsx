@@ -2209,6 +2209,72 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    sculptor: (state, action, pendingAction) => {
+        const player = state.players[state.currentTurn.playerId];
+        const sculptorAction = pendingAction as PlayVisitorPendingAction & {
+            secondPlant?: boolean
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                { id: "SCULPTOR_GAIN", label: <>Gain <Coins>1</Coins> per field you own</> },
+                                {
+                                    id: "SCULPTOR_LOSE",
+                                    label: <>Lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass></>,
+                                    disabledReason: residualPaymentsDisabledReason(state, 1) || (
+                                        player.structures.mediumCellar
+                                            ? undefined
+                                            : "You don't have a Medium Cellar."
+                                    ),
+                                },
+                                {
+                                    id: "SCULPTOR_PLANT",
+                                    label: <>Plant up to 2 <Vine /></>,
+                                    disabledReason: plantVinesDisabledReason(state),
+                                },
+                            ],
+                        });
+                    case "vine":
+                        return promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "SCULPTOR_GAIN":
+                        const numFieldsOwned = Object.values(player.fields)
+                            .filter(f => !f.sold).length;
+                        return endVisitor(gainCoins(numFieldsOwned, state));
+
+                    case "SCULPTOR_LOSE":
+                        return endVisitor(gainWine({ color: "blush", value: 4 }, loseResiduals(1, state)));
+
+                    case "SCULPTOR_PLANT":
+                        return promptToChooseVineCard(state);
+
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                state = plantVineInField(action.fields[0], state);
+                const canPlantAgain = !sculptorAction.secondPlant &&
+                    plantVinesDisabledReason(state) === undefined;
+
+                return canPlantAgain
+                    ? promptToChooseVineCard(
+                        setPendingAction({ ...sculptorAction, secondPlant: true }, state),
+                        { optional: true }
+                    )
+                    : endVisitor(state);
+
+            default:
+                return state;
+        }
+    },
     sommelier: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
