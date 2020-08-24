@@ -57,7 +57,7 @@
     margin: 0;
 }
 
-.PlayerCard-orderRewards {
+.PlayerCard-rewards {
     align-self: flex-end;
     width: 100%;
 }
@@ -76,7 +76,7 @@
     padding: 0 6px;
 }
 
-@media (min-width: 950px) {
+@media (min-width: 800px) {
     .PlayerCard {
         height: 240px;
         max-height: 240px;
