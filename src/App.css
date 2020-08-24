@@ -32,15 +32,18 @@
 }
 
 
-@media (min-width: 950px) {
+@media (min-width: 800px) {
   .App {
-    font-size: 16px;
     height: 100vh;
-    overflow: hidden;
   }
 
   .App-header {
     height: 48px;
-    padding: 0 16px;
+  }
+}
+
+@media (min-width: 900px) {
+  .App {
+    font-size: 16px;
   }
 }

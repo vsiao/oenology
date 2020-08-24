@@ -76,7 +76,7 @@
     padding: 0 6px;
 }
 
-@media (min-width: 950px) {
+@media (min-width: 800px) {
     .PlayerCard {
         height: 240px;
         max-height: 240px;

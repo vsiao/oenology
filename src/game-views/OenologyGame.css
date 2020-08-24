@@ -2,6 +2,7 @@
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 70vh 280px 1fr;
+    /* 36px = App-header height; 280px = PlayerMat height */
     grid-template-rows: calc(100vh - 36px - 280px) 280px 1fr;
     grid-template-areas:
         "main"
@@ -11,9 +12,9 @@
     min-height: 1px;
 }
 
-@media (min-width: 950px) {
+@media (min-width: 800px) {
     .OenologyGame {
-        grid-template-columns: 1fr 510px;
+        grid-template-columns: 1fr 520px;
         grid-template-rows: 1fr 320px;
         grid-template-areas:
             "main sidebar"
@@ -23,7 +24,7 @@
 
 @media (min-width: 1750px) {
     .OenologyGame {
-        grid-template-columns: 1fr 860px;
+        grid-template-columns: 1fr 880px;
     }
 }
 
