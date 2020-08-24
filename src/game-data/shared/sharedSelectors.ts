@@ -5,6 +5,17 @@ import { WineSpec, orderCards, OrderId } from "../orderCards";
 import { Coupon, structures, StructureId } from "../structures";
 import { GrapeSpec, VineInField } from "../prompts/promptActions";
 
+export const isControllingPlayer = (state: GameState, playerId = state.playerId) => {
+    if (
+        state.currentTurn.type === "workerPlacement" &&
+        state.currentTurn.pendingAction?.type === "playVisitor" &&
+        state.currentTurn.pendingAction.actionPlayerId !== undefined
+    ) {
+        return playerId === state.currentTurn.pendingAction.actionPlayerId;
+    }
+    return playerId === state.currentTurn.playerId;
+};
+
 export const buildStructureDisabledReason = (
     state: GameState,
     coupon: Coupon = { kind: "discount", amount: 0 },

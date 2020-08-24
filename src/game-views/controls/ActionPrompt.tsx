@@ -62,10 +62,12 @@ const renderPrompt = (
 };
 
 const mapStateToProps = (state: AppState) => {
+    const game = state.game!
     return {
-        actionPrompt: state.game!.actionPrompts[0],
-        playerId: state.game!.playerId!,
-        undoable: state.game!.undoable,
+        actionPrompt: game.actionPrompts[0],
+        playerId: game.playerId!,
+        undoable: !!game.undoState && game.undoState.type === "undoable" &&
+            game.undoState.isLastActionByCurrentTurnPlayer,
     };
 };
 

@@ -7,32 +7,24 @@ import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers"
 import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { placeGrapes } from "./shared/grapeWineReducers";
+import { isControllingPlayer } from "./shared/sharedSelectors";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
         return beginMamaPapaTurn(initGame(userId, action));
     }
-    if (
-        state.currentTurn.playerId !== action.playerId && (
-            state.currentTurn.type !== "workerPlacement" ||
-            state.currentTurn.pendingAction?.type !== "playVisitor" ||
-            state.currentTurn.pendingAction.actionPlayerId !== action.playerId
-        )
-    ) {
+    if (!isControllingPlayer(state, action.playerId)) {
         // It's not this player's turn. Reject the action.
         return state;
     }
     switch (action.type) {
         case "UNDO":
-            if (!state.prevState) {
+            if (state.undoState?.type !== "undoable") {
                 // Somehow tried to undo more times than allowed. This might happen
                 // when double-clicking; we can just ignore it.
                 return state;
             }
-            // If the undo requester wasn't the last player to commit an action, don't do anything.
-            return action.playerId === state.lastActionPlayerId
-                ? state.prevState
-                : state;
+            return state.undoState.prevState;
 
         case "CHEAT_DRAW_CARD":
             return CHEAT_drawCard(action.id, action.playerId, state);
@@ -45,9 +37,11 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         ...state,
         // Actions are undoable by default when performed by the current player.
         // In certain cases (ending a turn, drawing a card), this state will be cleared.
-        undoable: state.playerId === action.playerId,
-        lastActionPlayerId: action.playerId,
-        prevState: state,
+        undoState: {
+            type: "undoable",
+            prevState: state,
+            isLastActionByCurrentTurnPlayer: state.playerId === action.playerId,
+        },
     };
     return board(prompt(state, action), action);
 };
@@ -109,8 +103,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             yokeUproot: []
         },
         activityLog: [],
-        undoable: false,
-        prevState: null,
+        undoState: null,
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };

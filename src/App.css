@@ -20,18 +20,6 @@
   text-decoration: none;
 }
 
-.App-cheatBox {
-  background: transparent;
-  border: 0;
-  color: white;
-  margin-left: auto;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-
 @media (min-width: 950px) {
   .App {
     font-size: 16px;

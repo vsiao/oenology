@@ -1,4 +1,3 @@
-import "./SidebarPlayer.css";
 import cx from "classnames";
 import * as React from "react";
 import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, BoardWorker } from "../game-data/GameState";
@@ -18,6 +17,7 @@ import { vineCards } from "../game-data/vineCards";
 import Rooster from "./icons/Rooster";
 import { AppState } from "../store/AppState";
 import { connect } from "react-redux";
+import "./SidebarPlayer.css";
 
 interface Props {
     player: PlayerState;

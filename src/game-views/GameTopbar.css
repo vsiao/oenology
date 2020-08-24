@@ -1,0 +1,33 @@
+.GameTopbar-undoButton {
+  background: none;
+  border: 1px solid white;
+  border-radius: 50%;
+  fill: white;
+  margin-left: 1em;
+  padding: .1em;
+}
+.GameTopbar-undoButton--enabled {
+    border-color: white;
+  cursor: pointer;
+  fill: white;
+  transition: .2s background-color;
+}
+.GameTopbar-undoButton--enabled:hover {
+  background: white;
+  fill: black;
+}
+.GameTopbar-undoButton--disabled {
+  border-color: #666;
+  fill: #666;
+}
+
+.GameTopbar-undoIcon {
+  display: block;
+}
+
+.GameTopbar-cheatBox {
+  background: transparent;
+  border: 0;
+  color: white;
+  margin-left: auto;
+}

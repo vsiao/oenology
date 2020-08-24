@@ -24,11 +24,17 @@ import { boardActions } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 
 export const endTurn = (state: GameState): GameState => {
-    state = {
-        ...state,
-        undoable: false,
-        prevState: null,
-    };
+    if (state.undoState?.type === "undoable") {
+        state = {
+            ...state,
+            undoState: {
+                ...state.undoState,
+                // Mark the current turn as ended. The action is still undoable,
+                // but only by the next turn's player.
+                isLastActionByCurrentTurnPlayer: false,
+            },
+        };
+    }
     switch (state.currentTurn.type) {
         case "mamaPapa":
             return endMamaPapaTurn(state);
@@ -633,7 +639,10 @@ const endYear = (state: GameState): GameState => {
     if (Object.values(state.players).some(p => p.victoryPoints >= GAME_OVER_VP)) {
         // End of game
         return displayGameOverPrompt(
-            pushActivityLog({ type: "season", season: "Game Over!" }, state)
+            pushActivityLog(
+                { type: "season", season: "Game Over!" },
+                { ...state, undoState: null }
+            )
         );
     }
     state = pushActivityLog({ type: "season", season: `End of Year ${state.year}` }, state);

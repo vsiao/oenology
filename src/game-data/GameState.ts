@@ -28,12 +28,25 @@ export default interface GameState {
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 
-    // Undo state
-    undoable: boolean;
-    lastActionPlayerId?: string;
-    prevState: GameState | null;
+    undoState:
+        | {
+            type: "undoable",
+            // Contains a copy of the game state prior to the most recent action.
+            prevState: GameState
 
-    // Published key of the most-recently applied PlaceWorkerAction
+            // `true` if the last action was by the current controlling player
+            // within the context of the current turn. Ending a turn causes this
+            // to flip to `false` (though `prevState` will still exist to allow
+            // the next turn's player to undo, if necessary)
+            isLastActionByCurrentTurnPlayer: boolean;
+        }
+        // If a card was drawn, don't allow undoing since information was revealed
+        | { type: "drawnCard" }
+        // Nothing to undo, usually indicating game beginning or game end
+        | null;
+
+    // Published key of the most-recently applied PlaceWorkerAction,
+    // mostly for debugging purposes.
     lastPlaceWorkerActionKey?: string;
 
     // local state
