@@ -1,5 +1,4 @@
 import "./PlayerCard.css";
-import cx from "classnames";
 import * as React from "react";
 import { VineCardData } from "../../game-data/vineCards";
 import PlayerCard from "./PlayerCard";
