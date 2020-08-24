@@ -3,10 +3,10 @@
     display: flex;
     flex-direction: column;
     grid-area: sidebar;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
-@media (min-width: 950px) {
+@media (min-width: 800px) {
     .Sidebar {
         border-left: 3px solid #282c34;
     }
@@ -18,12 +18,6 @@
     }
     .Sidebar-players {
         width: 510px;
-    }
-}
-
-@media (max-width: 444px) {
-    .Sidebar-players {
-        font-size: 12px;
     }
 }
 
