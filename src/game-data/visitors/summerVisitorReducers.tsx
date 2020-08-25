@@ -59,7 +59,6 @@ import {
     fieldYields,
     cardTypesInPlay,
     residualPaymentsDisabledReason,
-    workerPlacementSeasons,
     needsGrandeDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
@@ -82,7 +81,7 @@ import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
-import { allPlacements, seasonalActions } from "../board/boardPlacements";
+import { allPlacements, boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 
 export const summerVisitorReducers: Record<
@@ -1469,12 +1468,10 @@ export const rhineSummerVisitorReducers: Record<
         const placedWorker = state.workerPlacements.playSummerVisitor[pendingAction.placementIdx!]!
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const seasons = workerPlacementSeasons(state);
-                const futureSeasons = seasons.slice(seasons.indexOf("summer") + 1);
+                const { fall, winter } = boardActionsBySeason(state);
                 const isGrande = placedWorker.type === "grande";
                 return promptForAction(state, {
-                    choices: seasonalActions
-                        .filter(a => futureSeasons.some(s => s === a.season))
+                    choices: [...fall, ...winter]
                         .map(a => ({
                             id: a.type,
                             label: a.label(state),

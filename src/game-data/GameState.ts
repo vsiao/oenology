@@ -25,6 +25,7 @@ export default interface GameState {
     ];
     drawPiles: CardsByType;
     discardPiles: CardsByType;
+    boardType?: "base" | "tuscanyA" | "tuscanyB";
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 

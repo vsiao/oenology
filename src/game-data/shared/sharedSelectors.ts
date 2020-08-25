@@ -1,4 +1,4 @@
-import GameState, { Field, FieldId, CardType, WineColor, StructureState, Season, WorkerPlacement } from "../GameState";
+import GameState, { Field, FieldId, CardType, WineColor, StructureState, WorkerPlacement } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
@@ -245,10 +245,6 @@ export const fillOrderDisabledReason = (state: GameState, playerId = state.curre
 
 export const cardTypesInPlay = (state: GameState): CardType[] => {
     return ["vine", "summerVisitor", "order", "winterVisitor"];
-};
-
-export const workerPlacementSeasons = (state: GameState): Season[] => {
-    return ["summer", "winter"];
 };
 
 export const needsGrandeDisabledReason = (state: GameState, placement: WorkerPlacement) => {

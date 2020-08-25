@@ -2,7 +2,7 @@ import * as React from "react";
 import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import GameState, { WorkerPlacement } from "../GameState";
+import GameState, { WorkerPlacement, Season } from "../GameState";
 import {
     buildStructureDisabledReason,
     fillOrderDisabledReason,
@@ -180,37 +180,65 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
     ),
 };
 
-export const summerActions: BoardAction[] = [
-    boardActions.drawVine,
-    boardActions.playSummerVisitor,
-    boardActions.giveTour,
-    boardActions.buySell,
-    boardActions.buildStructure,
-    boardActions.plantVine,
-];
-
-export const winterActions: BoardAction[] = [
-    boardActions.drawOrder,
-    boardActions.playWinterVisitor,
-    boardActions.harvestField,
-    boardActions.trainWorker,
-    boardActions.makeWine,
-    boardActions.fillOrder,
-];
-
-export const seasonalActions = [
-    ...summerActions,
-    ...winterActions,
-];
-
 export const yearRoundActions: BoardAction[] = [
     boardActions.yokeHarvest,
     boardActions.yokeUproot,
     boardActions.gainCoin,
 ];
 
-export const allPlacements = [
-    ...summerActions,
-    ...winterActions,
-    ...yearRoundActions,
-];
+export const allPlacements = Object.values(boardActions);
+
+export const boardActionsBySeason = (state: GameState): { [K in Season]: BoardAction[] } => {
+    switch (state.boardType) {
+        case undefined:
+        case "base":
+            return {
+                spring: [],
+                summer: [
+                    boardActions.drawVine,
+                    boardActions.playSummerVisitor,
+                    boardActions.giveTour,
+                    boardActions.buySell,
+                    boardActions.buildStructure,
+                    boardActions.plantVine,
+                ],
+                fall: [],
+                winter: [
+                    boardActions.drawOrder,
+                    boardActions.playWinterVisitor,
+                    boardActions.harvestField,
+                    boardActions.trainWorker,
+                    boardActions.makeWine,
+                    boardActions.fillOrder,
+                ]
+            };
+        case "tuscanyA":
+        case "tuscanyB":
+            return {
+                spring: [
+                    boardActions.drawVine,
+                    boardActions.giveTour,
+                    boardActions.buildStructure,
+                    // place or move star token
+                ],
+                summer: [
+                    boardActions.playSummerVisitor,
+                    boardActions.plantVine,
+                    // trade
+                    boardActions.buySell,
+                ],
+                fall: [
+                    boardActions.drawOrder,
+                    boardActions.harvestField,
+                    boardActions.makeWine,
+                    // build 2
+                ],
+                winter: [
+                    boardActions.playWinterVisitor,
+                    boardActions.trainWorker,
+                    // sell wine
+                    boardActions.fillOrder,
+                ],
+            };
+    }
+};

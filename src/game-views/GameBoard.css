@@ -85,7 +85,7 @@
     }
 }
 
-.GameBoard-season {
+.GameBoard-currentSeason {
     align-items: center;
     border-right: 1px solid rgba(0, 0, 0, .3);
     box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
@@ -95,42 +95,40 @@
     justify-content: center;
     text-transform: capitalize;
 }
-.GameBoard--spring .GameBoard-season {
+.GameBoard--spring .GameBoard-currentSeason {
     background: #40a746;
 }
-.GameBoard--summer .GameBoard-season {
+.GameBoard--summer .GameBoard-currentSeason {
     background: gold;
 }
-.GameBoard--fall .GameBoard-season {
+.GameBoard--fall .GameBoard-currentSeason {
     background: peru;
 }
-.GameBoard--winter .GameBoard-season {
+.GameBoard--winter .GameBoard-currentSeason {
     background: royalblue;
     color: white;
 }
 
-.GameBoard-summerHeader,
-.GameBoard-winterHeader {
+.GameBoard-seasonHeader {
     font-weight: bold;
     height: 2em;
     padding: 0 1em;
+    text-transform: capitalize;
 }
-.GameBoard-summerHeader {
+.GameBoard-season--summer .GameBoard-seasonHeader {
     background: gold;
 }
-.GameBoard-winterHeader {
+.GameBoard-season--winter .GameBoard-seasonHeader {
     background: royalblue;
     color: white;
 }
 
-.GameBoard-summerActions,
-.GameBoard-winterActions {
+.GameBoard-season {
     padding: 24px;
     position: relative;
     width: 50%;
 }
-.GameBoard-summerActions::after,
-.GameBoard-winterActions::after {
+.GameBoard-season::after {
     background: black;
     content: "";
     display: block;
@@ -144,8 +142,10 @@
     width: 100%;
     z-index: 1;
 }
-.GameBoard--summer .GameBoard-summerActions::after,
-.GameBoard--winter .GameBoard-winterActions::after {
+.GameBoard--spring .GameBoard-season--spring::after,
+.GameBoard--summer .GameBoard-season--summer::after,
+.GameBoard--fall .GameBoard-season--fall::after,
+.GameBoard--winter .GameBoard-season--winter::after {
     opacity: 0;
 }
 

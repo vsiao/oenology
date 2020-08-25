@@ -3,7 +3,7 @@ import cx from "classnames";
 import { motion } from "framer-motion";
 import * as React from "react";
 import { connect } from "react-redux";
-import { summerActions, winterActions } from "../game-data/board/boardPlacements";
+import { BoardAction, boardActionsBySeason } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
 import { BoardWorker, PlayerColor, CurrentTurn, WorkerPlacement, Season } from "../game-data/GameState";
@@ -16,74 +16,62 @@ import Worker from "./icons/Worker";
 import { useTooltip } from "./shared/useTooltip";
 
 interface Props {
-    season: Season;
     wakeUpOrder: (WakeUpPosition | null)[];
+    currentSeason: Season;
+    seasonOrder: Season[];
+    actionsBySeason: Record<Season, BoardAction[]>;
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
 }
 
 const GameBoard: React.FunctionComponent<Props> = props => {
-    const { season, workerPlacements } = props;
+    const { currentSeason, seasonOrder, workerPlacements } = props;
 
     const scrollableRef = React.useRef<HTMLDivElement>(null);
-    const summerRef = React.useRef<HTMLDivElement>(null);
-    const winterRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
-        const seasonNode = season === "spring" || season === "summer"
-            ? summerRef.current
-            : winterRef.current;
-        const seasonRect = seasonNode && seasonNode.getBoundingClientRect();
-        const scrollRect = scrollableRef.current && scrollableRef.current.getBoundingClientRect();
-        const isScrolledIntoView = seasonRect && scrollRect &&
-            seasonRect.left < (scrollRect.left + scrollRect.width / 3) &&
-            seasonRect.right >= (scrollRect.left + 2 * scrollRect.width / 3);
-        if (seasonNode && !isScrolledIntoView) {
-            seasonNode.scrollIntoView({ behavior: "smooth", block: "start" });
+        const scrollNode = scrollableRef.current;
+        if (scrollNode) {
+            const targetPct = seasonOrder.indexOf(currentSeason) / (seasonOrder.length - 1);
+            scrollNode.scroll({
+                left: targetPct * scrollNode.scrollWidth,
+                behavior: "smooth",
+            });
         }
-    }, [season, summerRef, winterRef]);
+    }, [currentSeason, scrollableRef, seasonOrder]);
 
-    return <div className={cx("GameBoard", `GameBoard--${season}`)}>
+    return <div className={cx("GameBoard", `GameBoard--${currentSeason}`)}>
         <StatusBanner />
         <ol className="GameBoard-wakeUpOrder">
             {props.wakeUpOrder.map((pos, i) =>
-                <WakeUpPosition key={i} pos={pos} season={season} i={i} />
+                <WakeUpPosition key={i} pos={pos} season={currentSeason} i={i} />
             )}
         </ol>
-        <span className="GameBoard-season">{season}</span>
+        <span className="GameBoard-currentSeason">{currentSeason}</span>
         <div className="GameBoard-actionsScroller" ref={scrollableRef}>
             <div className="GameBoard-seasons">
-                <div className="GameBoard-summerActions" ref={summerRef}>
-                    <table className="GameBoard-actionsTable">
-                        <thead>
-                            <tr><td className="GameBoard-summerHeader" colSpan={42}>Summer</td></tr>
-                        </thead>
-                        <tbody>
-                        {summerActions.map(action =>
-                            <BoardPlacement
-                                key={action.type}
-                                placement={action}
-                                season="summer"
-                                workers={workerPlacements[action.type]}
-                            />)}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="GameBoard-winterActions" ref={winterRef}>
-                    <table className="GameBoard-actionsTable">
-                        <thead>
-                            <tr><td className="GameBoard-winterHeader" colSpan={42}>Winter</td></tr>
-                        </thead>
-                        <tbody>
-                        {winterActions.map(action =>
-                            <BoardPlacement
-                                key={action.type}
-                                placement={action}
-                                season="winter"
-                                workers={workerPlacements[action.type]}
-                            />)}
-                        </tbody>
-                    </table>
-                </div>
+                {seasonOrder.map(season =>
+                    <div key={season} className={cx(
+                        "GameBoard-season",
+                        `GameBoard-season--${season}`
+                    )}>
+                        <table className="GameBoard-actionsTable">
+                            <thead>
+                                <tr>
+                                    <td className="GameBoard-seasonHeader" colSpan={42}>{season}</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {props.actionsBySeason[season].map(action =>
+                                <BoardPlacement
+                                    key={action.type}
+                                    placement={action}
+                                    season={season}
+                                    workers={workerPlacements[action.type]}
+                                />)}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     </div>;
@@ -167,8 +155,8 @@ const renderWakeUpBonus = (i: number): React.ReactNode => {
 
 const mapStateToProps = (state: AppState) => {
     const { currentTurn, wakeUpOrder, workerPlacements, players } = state.game!;
+    const actionsBySeason = boardActionsBySeason(state.game!);
     return {
-        season: seasonFromCurrentTurn(currentTurn),
         wakeUpOrder: wakeUpOrder.map(pos => {
             return !pos ? null : {
                 current: pos.playerId === currentTurn.playerId,
@@ -176,6 +164,10 @@ const mapStateToProps = (state: AppState) => {
                 color: players[pos.playerId].color,
             };
         }),
+        currentSeason: seasonFromCurrentTurn(currentTurn),
+        seasonOrder: (["spring", "summer", "fall", "winter"] as const)
+            .filter(s => actionsBySeason[s].length > 0),
+        actionsBySeason,
         workerPlacements,
     };
 };

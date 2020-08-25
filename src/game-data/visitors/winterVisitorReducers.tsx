@@ -61,8 +61,8 @@ import {
     discardGrapes,
     ageSingleWine,
 } from "../shared/grapeWineReducers";
-import { seasonalActions } from "../board/boardPlacements";
 import { boardAction } from "../board/boardActionReducer";
+import { boardActionsBySeason } from "../board/boardPlacements";
 
 export const winterVisitorReducers: Record<
     keyof typeof winterVisitorCards,
@@ -664,9 +664,9 @@ export const winterVisitorReducers: Record<
     manager: (state, action, pendingAction) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
+                const { spring, summer, fall } = boardActionsBySeason(state);
                 return promptForAction(state, {
-                    choices: seasonalActions
-                        .filter(a => a.season !== "winter")
+                    choices: [...spring, ...summer, ...fall]
                         .map(a => ({
                             id: a.type,
                             label: a.label(state, -1),

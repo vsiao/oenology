@@ -8,10 +8,10 @@ import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import GameState, { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, Worker } from "../../game-data/GameState";
 import WorkerIcon from "../icons/Worker";
-import { summerActions, winterActions, yearRoundActions, seasonalActions } from "../../game-data/board/boardPlacements";
+import { yearRoundActions, boardActionsBySeason } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
-import { workerPlacementSeasons, needsGrandeDisabledReason } from "../../game-data/shared/sharedSelectors";
+import { needsGrandeDisabledReason } from "../../game-data/shared/sharedSelectors";
 
 interface ActionChoice {
     type: WorkerPlacement | null;
@@ -122,16 +122,14 @@ const mapStateToProps = (state: AppState, ownProps: { playerId: string; }) => {
 
 const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
     const currentTurn = game.currentTurn as WorkerPlacementTurn;
+    const boardActions = boardActionsBySeason(game);
     if (
         currentTurn.pendingAction &&
         currentTurn.pendingAction.type === "playVisitor" &&
         currentTurn.pendingAction.visitorId === "planner"
     ) {
-        const seasons = workerPlacementSeasons(game);
-        const futureSeasons = seasons.slice(seasons.indexOf("summer") + 1);
         // The Planner visitor allows the player to place a worker in any future season.
-        return seasonalActions
-            .filter(a => futureSeasons.some(s => s === a.season))
+        return [...boardActions.fall, ...boardActions.winter]
             .map(({ type, label }) => ({
                 type,
                 label: label(game),
@@ -141,7 +139,7 @@ const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
     }
 
     return [
-        ...(currentTurn.season === "summer" ? summerActions : winterActions)
+        ...(boardActions[currentTurn.season] || [])
             .map(({ type, label, disabledReason, }) => ({
                 type,
                 label: label(game),
