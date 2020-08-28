@@ -1911,7 +1911,7 @@ export const rhineSummerVisitorReducers: Record<
                         return promptToChooseVineCard(gainCoins(2, state));
                     case "vine":
                         return promptToPlant(state, card.id, {
-                            bypassFieldLimit: pendingAction.hasBonus,
+                            bypassFieldLimit: greenskeeperAction.secondPlant,
                         });
                     default:
                         return state;
@@ -1919,7 +1919,7 @@ export const rhineSummerVisitorReducers: Record<
             case "CHOOSE_FIELD":
                 state = plantVineInField(action.fields[0], state);
                 const canPlantAgain = !greenskeeperAction.secondPlant &&
-                    plantVinesDisabledReason(state) === undefined &&
+                    plantVinesDisabledReason(state, { bypassFieldLimit: true }) === undefined &&
                     Object.values(state.players).some(p => p.victoryPoints >= 10);
 
                 if (canPlantAgain) {
@@ -2389,7 +2389,7 @@ export const rhineSummerVisitorReducers: Record<
                             id: "WLOVER_BUILD",
                             label: <>Lose <Residuals>2</Residuals> to build a Tasting Room and gain <WineGlass>1</WineGlass></>,
                             disabledReason: residualPaymentsDisabledReason(state, 2) ||
-                                (tRoomBuilt ? undefined : "You already have a a Tasting Room."),
+                                (tRoomBuilt ? "You already have a Tasting Room." : undefined),
                         },
                     ],
                 });
