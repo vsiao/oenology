@@ -160,7 +160,12 @@ export const trainWorker = (
     );
 };
 
-export const placeWorker = (type: WorkerType, placement: WorkerPlacement, state: GameState): [GameState, number] => {
+export const placeWorker = (
+    type: WorkerType,
+    placement: WorkerPlacement,
+    state: GameState,
+    source?: "Planner" | "Administrator"
+): [GameState, number] => {
     const player = state.players[state.currentTurn.playerId];
     const workerIndex = player.workers.reduce(
         (previousValue, worker, currentIndex) =>
@@ -184,6 +189,7 @@ export const placeWorker = (type: WorkerType, placement: WorkerPlacement, state:
         playerId: state.currentTurn.playerId,
         color: player.color,
         isTemp: !!player.workers[workerIndex].isTemp,
+        source,
     };
     return [
         {

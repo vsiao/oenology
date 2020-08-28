@@ -5,7 +5,6 @@ import GameState, {
     PlayerState,
     StructureState,
     WakeUpPosition,
-    WorkerPlacement,
     WorkerPlacementTurn,
     WorkerPlacementTurnPendingAction,
 } from "../GameState";
@@ -20,7 +19,7 @@ import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
-import { boardActions } from "../board/boardPlacements";
+import { boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 
 export const endTurn = (state: GameState): GameState => {
@@ -349,26 +348,29 @@ const startPlannerTurn = (
         ...state,
         currentTurn: { type: "workerPlacement", playerId, isPlannerTurn: true, season },
     };
-    const plannerPlacement = Object.entries(state.workerPlacements)
-        .find(([placement, workers]) =>
-            boardActions[placement as WorkerPlacement].season === season &&
-            workers.some(w => w && w.playerId === playerId)
-        );
+    const plannerAction = boardActionsBySeason(state)[season].find(action =>
+        state.workerPlacements[action.type].some(w => w && w.playerId === playerId)
+    );
 
-    if (!plannerPlacement) {
+    if (!plannerAction) {
         return endPlannerTurn(state);
     }
-    const placement = boardActions[plannerPlacement[0] as WorkerPlacement];
-    const workerIdx = state.workerPlacements[placement.type].findIndex(w => w?.playerId === playerId);
-    const disabledReason = placement.disabledReason && placement.disabledReason(state, workerIdx);
+    const workerIdx = state.workerPlacements[plannerAction.type]
+        .findIndex(w => w?.playerId === playerId);
+    const disabledReason = plannerAction.disabledReason &&
+        plannerAction.disabledReason(state, workerIdx);
 
     return promptForAction(state, {
-        description: <p>You placed a worker with the <strong>Planner</strong>.</p>,
+        description: <p>
+            You placed a worker with the <strong>
+                {state.workerPlacements[plannerAction.type][workerIdx]!.source}
+            </strong>.
+        </p>,
         choices: [
             {
                 id: "PLANNER_ACT",
-                data: { placement: placement.type, idx: workerIdx },
-                label: placement.label(state, workerIdx),
+                data: { placement: plannerAction.type, idx: workerIdx },
+                label: plannerAction.label(state, workerIdx),
                 disabledReason,
             },
             { id: "PLANNER_PASS", label: "Pass" },

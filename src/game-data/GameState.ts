@@ -183,6 +183,7 @@ export interface BoardWorker {
     playerId: string,
     color: PlayerColor;
     isTemp?: boolean;
+    source?: "Planner" | "Administrator";
 }
 
 export type CardId =

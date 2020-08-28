@@ -896,7 +896,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptToPlaceWorker(state);
             case "PLACE_WORKER":
-                return endVisitor(placeWorker(action.workerType, action.placement!, state)[0]);
+                return endVisitor(placeWorker(action.workerType, action.placement!, state, "Planner")[0]);
             default:
                 return state;
         }
@@ -1487,7 +1487,12 @@ export const rhineSummerVisitorReducers: Record<
                     state
                 );
                 return endVisitor(
-                    placeWorker(placedWorker.type, action.choice as WorkerPlacement, state)[0]
+                    placeWorker(
+                        placedWorker.type,
+                        action.choice as WorkerPlacement,
+                        state,
+                        "Administrator"
+                    )[0]
                 );
             default:
                 return state;
