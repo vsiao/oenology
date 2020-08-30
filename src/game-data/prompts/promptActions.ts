@@ -132,6 +132,7 @@ export const buildStructure = (structureId: StructureId, playerId: string): Prom
 
 interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
     placement: WorkerPlacement | null; // null means pass
+    idx?: number; // undefined means first available
     workerType: WorkerType;
     playerId: string;
 }

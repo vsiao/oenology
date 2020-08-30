@@ -163,9 +163,10 @@ export const trainWorker = (
 export const placeWorker = (
     type: WorkerType,
     placement: WorkerPlacement,
+    placementIdx: number | undefined,
     state: GameState,
     source?: "Planner" | "Administrator"
-): [GameState, number] => {
+): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const workerIndex = player.workers.reduce(
         (previousValue, worker, currentIndex) =>
@@ -179,7 +180,7 @@ export const placeWorker = (
     }
     state = pushActivityLog({ type: "placeWorker", playerId: player.id, }, state);
     const placements = state.workerPlacements[placement].slice();
-    let placementIdx = placements.findIndex(w => w === null);
+    placementIdx = placementIdx ?? placements.findIndex(w => w === null);
     if (placementIdx < 0) {
         placementIdx = placements.length;
     }
@@ -191,20 +192,17 @@ export const placeWorker = (
         isTemp: !!player.workers[workerIndex].isTemp,
         source,
     };
-    return [
-        {
-            ...updatePlayer(state, player.id, {
-                workers: player.workers.map(
-                    (w, i) => i === workerIndex ? { ...w, available: false } : w
-                ),
-            }),
-            workerPlacements: {
-                ...state.workerPlacements,
-                [placement]: placements,
-            },
+    return {
+        ...updatePlayer(state, player.id, {
+            workers: player.workers.map(
+                (w, i) => i === workerIndex ? { ...w, available: false } : w
+            ),
+        }),
+        workerPlacements: {
+            ...state.workerPlacements,
+            [placement]: placements,
         },
-        placementIdx,
-    ];
+    };
 };
 
 export const retrieveWorker = (

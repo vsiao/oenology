@@ -2,7 +2,7 @@ import * as React from "react";
 import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import GameState, { WorkerPlacement, Season } from "../GameState";
+import GameState, { WorkerPlacement, Season, BoardType } from "../GameState";
 import {
     buildStructureDisabledReason,
     fillOrderDisabledReason,
@@ -20,145 +20,284 @@ import WineGlass from "../../game-views/icons/WineGlass";
 
 export interface BoardAction {
     type: WorkerPlacement,
-    label: (state: GameState, placementIndex?: number) => React.ReactNode;
-    boardIcon: (state: GameState, placementIndex?: number) => React.ReactNode;
-    disabledReason: (state: GameState, placementIndex?: number) => string | undefined;
+    label: (state: GameState) => React.ReactNode;
+    choices: (state: GameState) => PlacementChoice[];
+    choiceAt: (i: number, state: GameState) => PlacementChoice;
+}
+interface PlacementChoice {
+    label: React.ReactNode;
+    bonusIcon?: React.ReactNode;
+    disabledReason?: string | undefined;
+    idx: number | undefined; // undefined indicates grande is required
 }
 
 const action = (
     type: WorkerPlacement,
-    label: (bonusIdx?: number) => React.ReactNode,
-    boardIcon?: (bonusIdx?: number) => React.ReactNode,
-    disabledReason?: (state: GameState, bonusIdx: number) => string | undefined
+    choice: (placementIdx: number | undefined, data: {
+        state: GameState;
+        boardType: BoardType;
+        numSpots: number;
+    }) => {
+        label: React.ReactNode;
+        bonusIcon?: React.ReactNode;
+        disabledReason?: string | undefined;
+    }
 ): BoardAction => {
-    const defaultPlacementIndex = (state: GameState) => {
+    const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
+    const firstEmptyIndex = (state: GameState) => {
         const placements = state.workerPlacements[type];
-        const i = placements.indexOf(null); // find first empty
-        return i < 0 ? placements.length : i;
+        const firstEmpty = placements.indexOf(null); // find first empty
+        const i = firstEmpty < 0 ? placements.length : firstEmpty;
+        return i >= numSpots(state)
+            ? undefined // must use grande to place
+            : i;
     };
-    const bonusIdx = (state: GameState, placementIdx: number) => {
-        return state.tableOrder.length > 2 ? placementIdx : -1;
+    const data = (state: GameState) => ({
+        boardType: state.boardType ?? "base",
+        numSpots: numSpots(state),
+        state,
+    });
+    const choiceAt = (idx: number | undefined, state: GameState) => {
+        return { ...choice(idx, data(state)), idx };
     };
+
     return {
         type,
-        label: ((state, i = defaultPlacementIndex(state)) => label(bonusIdx(state, i))),
-        boardIcon: ((state, i = defaultPlacementIndex(state)) =>
-            boardIcon && boardIcon(bonusIdx(state, i))),
-        disabledReason: ((state, i = defaultPlacementIndex(state)) =>
-            disabledReason && disabledReason(state, bonusIdx(state, i)))
+        label: state => choice(-1, data(state)).label,
+        choiceAt,
+        choices: state => {
+            const d = data(state);
+            const firstChoice = choiceAt(firstEmptyIndex(state), state);
+            if (firstChoice?.bonusIcon) {
+                // return all possible bonus placements
+                return new Array(numSpots(state)).fill(null)
+                    .map((_, idx) => ({ ...choice(idx, d), idx }))
+                    .filter(({ bonusIcon }) => !!bonusIcon);
+            } else {
+                return [firstChoice];
+            }
+        },
     };
 }
 
 const boardActions: Record<WorkerPlacement, BoardAction> = {
     buildStructure: action(
         "buildStructure",
-        i => i === 0
-            ? <>Build one structure at a <Coins>1</Coins> discount</>
-            : <>Build one structure</>,
-        i => i === 0 ? <Coins>1</Coins> : null,
-        (state, i) => {
-            return buildStructureDisabledReason(
-                state,
-                i === 0 ? { kind: "discount", amount: 1 } : undefined
-            );
-        },
+        (i, { numSpots, state }) => {
+            const isBonusSpot = i === 0 && numSpots > 1;
+            return {
+                label: <>Build one structure{
+                    isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
+                }</>,
+                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                disabledReason: buildStructureDisabledReason(
+                    state,
+                    isBonusSpot ? { kind: "discount", amount: 1 } : undefined
+                ),
+            }
+        }
     ),
     buySell: action(
         "buySell",
-        i => i === 0
-            ? <>Sell grape(s) or buy/sell one field and gain <VP>1</VP></>
-            : <>Sell grape(s) or buy/sell one field</>,
-        i => i === 0 ? <VP>1</VP> : null,
-        state => {
+        (i, { boardType, numSpots, state }) => {
             const player = state.players[state.currentTurn.playerId];
-            return hasGrapes(state) ||
-                Object.values(player.fields)
-                    .some(f =>
-                        (f.sold && player.coins >= f.value) ||
-                        (!f.sold && f.vines.length === 0)
-                    )
-                ? undefined
-                : "You don't have anything to buy or sell.";
-        },
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: boardType === "base"
+                    ? <>Sell grape(s) or buy/sell one field{
+                        isBonusSpot ? <> and gain <VP>1</VP></> : null
+                    }</>
+                    : <>Buy/sell one field{
+                        isBonusSpot ? <> and gain <VP>1</VP></> : null
+                    }</>,
+                bonusIcon: isBonusSpot ? <VP>1</VP> : null,
+                disabledReason: (boardType === "base" && hasGrapes(state)) ||
+                    Object.values(player.fields)
+                        .some(f =>
+                            (f.sold && player.coins >= f.value) ||
+                            (!f.sold && f.vines.length === 0)
+                        )
+                    ? undefined
+                    : "You don't have anything to buy or sell.",
+            };
+        }
     ),
     drawOrder: action(
         "drawOrder",
-        i => i === 0 ? <>Draw 2 <Order /></> : <>Draw <Order /></>,
-        i => i === 0 ? <Order /> : null,
+        (i, { boardType, numSpots }) => {
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Draw {isBonusSpot ? "2 " : ""}<Order /></>,
+                bonusIcon: isBonusSpot ? <Order /> : null,
+            };
+        }
     ),
     drawVine: action(
         "drawVine",
-        i => i === 0 ? <>Draw 2 <Vine /></> : <>Draw <Vine /></>,
-        i => i === 0 ? <Vine /> : null,
+        (i, { boardType, numSpots }) => {
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Draw {isBonusSpot ? "2 " : ""}<Vine /></>,
+                bonusIcon: isBonusSpot ? <Vine /> : null,
+            };
+        }
     ),
     fillOrder: action(
         "fillOrder",
-        i => i === 0
-            ? <>Fill <Order /> and gain <VP>1</VP> extra</>
-            : <>Fill <Order /></>,
-        i => i === 0 ? <VP>1</VP> : null,
-        state => fillOrderDisabledReason(state),
+        (i, { numSpots, state }) => {
+            const isBonusSpot = i === 0 && numSpots > 1;
+            return {
+                label: <>Fill <Order />{
+                    isBonusSpot ? <> and gain <VP>1</VP> extra</> : null
+                }</>,
+                bonusIcon: isBonusSpot ? <VP>1</VP> : null,
+                disabledReason: fillOrderDisabledReason(state),
+            };
+        }
     ),
     gainCoin: action(
         "gainCoin",
-        () => <>Gain <Coins>1</Coins></>
+        () => ({ label: <>Gain <Coins>1</Coins></> })
     ),
     giveTour: action(
         "giveTour",
-        i => i === 0
-            ? <>Give tour to gain <Coins>3</Coins></>
-            : <>Give tour to gain <Coins>2</Coins></>,
-        i => i === 0 ? <Coins>1</Coins> : null,
+        (i, { numSpots }) => {
+            const isBonusSpot = i === 0 && numSpots > 1;
+            return {
+                label: <>Give tour to gain <Coins>{
+                    isBonusSpot ? "3" : "2"
+                }</Coins></>,
+                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+            };
+        }
     ),
     harvestField: action(
         "harvestField",
-        i => i === 0 ? <>Harvest up to 2 fields</> : <>Harvest one field</>,
-        i => i === 0 ? <>+1</> : null,
-        harvestFieldDisabledReason,
+        (i, { boardType, numSpots, state }) => {
+            if (boardType !== "base" && i === 1) {
+                return {
+                    label: <>Harvest one field and gain <Coins>1</Coins></>,
+                    bonusIcon: <Coins>1</Coins>,
+                    disabledReason: harvestFieldDisabledReason(state),
+                };
+            }
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Harvest {
+                    isBonusSpot ? "up to 2" : "one"
+                } field</>,
+                bonusIcon: isBonusSpot ? "+1" : null,
+                disabledReason: harvestFieldDisabledReason(state),
+            };
+        }
     ),
     makeWine: action(
         "makeWine",
-        i => i === 0 ? <>Make up to 3 <WineGlass /></> : <>Make up to 2 <WineGlass /></>,
-        i => i === 0 ? <>+1</> : null,
-        state => needGrapesDisabledReason(state),
+        (i, { boardType, numSpots, state }) => {
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Make up to {
+                    isBonusSpot ? "3" : "2"
+                } <WineGlass /></>,
+                bonusIcon: isBonusSpot ? "+1" : null,
+                disabledReason: needGrapesDisabledReason(state),
+            };
+        }
     ),
     plantVine: action(
         "plantVine",
-        i => i === 0 ? <>Plant up to 2 <Vine /></> : <>Plant <Vine /></>,
-        i => i === 0 ? <Vine /> : null,
-        state => plantVinesDisabledReason(state),
+        (i, { boardType, numSpots, state }) => {
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Plant {
+                    isBonusSpot ? "up to 2 " : ""
+                }<Vine /></>,
+                bonusIcon: isBonusSpot ? <Vine /> : null,
+                disabledReason: plantVinesDisabledReason(state),
+            };
+        }
     ),
     playSummerVisitor: action(
         "playSummerVisitor",
-        i => i === 0 ? <>Play up to 2 <SummerVisitor /></> : <>Play <SummerVisitor /></>,
-        i => i === 0 ? <SummerVisitor /> : null,
-        state => needCardOfTypeDisabledReason(state, "summerVisitor"),
+        (i, { boardType, numSpots, state }) => {
+            if (boardType !== "base" && i === 0) {
+                return {
+                    label: <>Play <SummerVisitor /> and gain <Coins>1</Coins></>,
+                    bonusIcon: <Coins>1</Coins>,
+                    disabledReason: needCardOfTypeDisabledReason(state, "summerVisitor"),
+                };
+            }
+            const isBonusSpot = numSpots > 1 && (
+                (boardType === "base" && i === 0) ||
+                (boardType !== "base" && i === 1)
+            );
+            return {
+                label: <>Play {
+                    isBonusSpot ? "up to 2 " : ""
+                }<SummerVisitor /></>,
+                bonusIcon: isBonusSpot ? <SummerVisitor /> : null,
+                disabledReason: needCardOfTypeDisabledReason(state, "summerVisitor"),
+            };
+        }
     ),
     playWinterVisitor: action(
         "playWinterVisitor",
-        i => i === 0 ? <>Play up to 2 <WinterVisitor /></> : <>Play <WinterVisitor /></>,
-        i => i === 0 ? <WinterVisitor /> : null,
-        state => needCardOfTypeDisabledReason(state, "winterVisitor"),
+        (i, { boardType, numSpots, state }) => {
+            if (boardType !== "base" && i === 0) {
+                return {
+                    label: <>Play <WinterVisitor /> and gain <Coins>1</Coins></>,
+                    bonusIcon: <Coins>1</Coins>,
+                    disabledReason: needCardOfTypeDisabledReason(state, "winterVisitor"),
+                };
+            }
+            const isBonusSpot = numSpots > 1 && (
+                (boardType === "base" && i === 0) ||
+                (boardType !== "base" && i === 1)
+            );
+            return {
+                label: <>Play {
+                    isBonusSpot ? "up to 2 " : ""
+                }<WinterVisitor /></>,
+                bonusIcon: isBonusSpot ? <WinterVisitor /> : null,
+                disabledReason: needCardOfTypeDisabledReason(state, "winterVisitor"),
+            };
+        }
     ),
     trainWorker: action(
         "trainWorker",
-        i => i === 0
-            ? <>Pay <Coins>3</Coins> to train <Worker /></>
-            : <>Pay <Coins>4</Coins> to train <Worker /></>,
-        i => i === 0 ? <Coins>1</Coins> : null,
-        (state, i) => trainWorkerDisabledReason(state, i === 0 ? 3 : 4),
+        (i, { boardType, numSpots, state }) => {
+            const isBonusSpot = i === 0 &&
+                (boardType !== "base" || numSpots > 1);
+            return {
+                label: <>Pay <Coins>{
+                    isBonusSpot ? "3" : "4"
+                }</Coins> to train <Worker /></>,
+                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                disabledReason: trainWorkerDisabledReason(state, isBonusSpot ? 3 : 4),
+            };
+        }
     ),
     yokeHarvest: action(
         "yokeHarvest",
-        () => "Yoke: Harvest one field",
-        () => null,
-        state => structureUsedDisabledReason(state, "yoke") || harvestFieldDisabledReason(state),
+        (i, { state }) => ({
+            label: "Yoke: Harvest one field",
+            disabledReason: structureUsedDisabledReason(state, "yoke") ||
+                harvestFieldDisabledReason(state),
+        })
     ),
     yokeUproot: action(
         "yokeUproot",
-        () => "Yoke: Uproot",
-        () => null,
-        state => structureUsedDisabledReason(state, "yoke") || uprootDisabledReason(state)
+        (i, { state }) => ({
+            label: "Yoke: Uproot",
+            disabledReason: structureUsedDisabledReason(state, "yoke") ||
+                uprootDisabledReason(state),
+        })
     ),
 };
 

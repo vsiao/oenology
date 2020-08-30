@@ -48,9 +48,11 @@ const mapStateToProps = (state: AppState, { placement }: { placement: BoardActio
     const game = state.game!;
     const numSpots = Math.ceil(Object.keys(game.players).length / 2);
     return {
-        title: placement.label(game, -1),
+        title: placement.label(game),
         numSpots,
-        icons: new Array(numSpots).fill(null).map((_, i) => placement.boardIcon(game, i)),
+        icons: new Array(numSpots).fill(null).map(
+            (_, i) => placement.choiceAt(i, game).bonusIcon
+        ),
     };
 };
 

@@ -896,7 +896,9 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptToPlaceWorker(state);
             case "PLACE_WORKER":
-                return endVisitor(placeWorker(action.workerType, action.placement!, state, "Planner")[0]);
+                return endVisitor(
+                    placeWorker(action.workerType, action.placement!, action.idx, state, "Planner")
+                );
             default:
                 return state;
         }
@@ -978,7 +980,7 @@ export const summerVisitorReducers: Record<
                     upToN: 2,
                     title: "Retrieve up to 2 workers",
                     choices: allPlacements
-                        .map(({ type, label }) => {
+                        .map(({ type, choiceAt }) => {
                             if (type === "playSummerVisitor") {
                                 // Must retrieve from *other* actions
                                 return [];
@@ -989,7 +991,7 @@ export const summerVisitorReducers: Record<
                                         id: `${type}_${i}`,
                                         label: <>
                                             <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
-                                            &nbsp;{label(state, i)}
+                                            &nbsp;{choiceAt(i, state).label}
                                         </>,
                                     } as Choice
                                     : null
@@ -1466,19 +1468,24 @@ export const rhineSummerVisitorReducers: Record<
     },
     administrator: (state, action, pendingAction) => {
         const placedWorker = state.workerPlacements.playSummerVisitor[pendingAction.placementIdx!]!
+        type ChoiceData = number;
+
         switch (action.type) {
             case "CHOOSE_CARDS":
                 const { fall, winter } = boardActionsBySeason(state);
                 const isGrande = placedWorker.type === "grande";
-                return promptForAction(state, {
+                return promptForAction<ChoiceData>(state, {
                     choices: [...fall, ...winter]
-                        .map(a => ({
-                            id: a.type,
-                            label: a.label(state),
-                            disabledReason: isGrande
-                                ? undefined
-                                : needsGrandeDisabledReason(state, a.type),
-                        })),
+                        .map(({ type, choices }) =>
+                            choices(state).map(({ label, idx }) => ({
+                                id: type,
+                                data: idx,
+                                label,
+                                disabledReason: isGrande
+                                    ? undefined
+                                    : needsGrandeDisabledReason(state, type),
+                            }))
+                        ).flat(),
                 });
             case "CHOOSE_ACTION":
                 state = retrieveWorker(
@@ -1490,9 +1497,10 @@ export const rhineSummerVisitorReducers: Record<
                     placeWorker(
                         placedWorker.type,
                         action.choice as WorkerPlacement,
+                        action.data as ChoiceData,
                         state,
                         "Administrator"
-                    )[0]
+                    )
                 );
             default:
                 return state;

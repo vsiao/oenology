@@ -259,9 +259,8 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
             if (!action.placement) {
                 return passToNextSeason(state);
             }
-            let placementIdx;
-            [state, placementIdx] = placeWorker(action.workerType, action.placement, state);
-            return boardAction(action.placement, state, action._key!, placementIdx);
+            state = placeWorker(action.workerType, action.placement, action.idx, state);
+            return boardAction(action.placement, state, action._key!, action.idx);
         }
         case "CHOOSE_ACTION":
             switch (action.choice) {

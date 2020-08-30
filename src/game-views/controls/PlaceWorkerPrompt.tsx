@@ -11,12 +11,12 @@ import WorkerIcon from "../icons/Worker";
 import { yearRoundActions, boardActionsBySeason } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
-import { needsGrandeDisabledReason } from "../../game-data/shared/sharedSelectors";
 
 interface ActionChoice {
     type: WorkerPlacement | null;
     label: React.ReactNode;
-    disabledReason: string | undefined;
+    idx?: number | undefined;
+    disabledReason?: string | undefined;
     hasSpace: boolean;
 }
 
@@ -25,7 +25,11 @@ interface Props {
     workers: Worker[];
     placements: ActionChoice[];
     defaultWorkerType: WorkerType;
-    onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) => void;
+    onPlaceWorker: (
+        placement: WorkerPlacement | null,
+        workerType: WorkerType,
+        idx: number | undefined
+    ) => void;
     undo?: () => void;
 }
 
@@ -80,20 +84,20 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
                 )}
             </div>
             <ul className="PlaceWorkerPrompt-choices">
-                {placements.map((placement, i) => {
-                    const requiresGrande = !placement.hasSpace && selectedWorkerType !== "grande";
+                {placements.map(({ type, label, idx, disabledReason, hasSpace }, i) => {
+                    const requiresGrande = !hasSpace && selectedWorkerType !== "grande";
                     return <li className="PlaceWorkerPrompt-choice" key={i}>
                         <ChoiceButton
                             className="PlaceWorkerPrompt-choiceButton"
-                            disabledReason={placement.disabledReason ||
+                            disabledReason={disabledReason ||
                                 (requiresGrande ? "No space. Use a grande worker?" : undefined) ||
                                 (noAvailableWorkers ? "No available workers." : undefined)
                             }
-                            onClick={() => onPlaceWorker(placement.type, selectedWorkerType)}
+                            onClick={() => onPlaceWorker(type, selectedWorkerType, idx)}
                         >
-                            {placement.label}
+                            {label}
                         </ChoiceButton>
-                        {!placement.disabledReason && requiresGrande
+                        {!disabledReason && requiresGrande
                             ? <WorkerIcon
                                 className="PlaceWorkerPrompt-choiceNeedsGrande"
                                 workerType="grande"
@@ -130,28 +134,35 @@ const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
     ) {
         // The Planner visitor allows the player to place a worker in any future season.
         return [...boardActions.fall, ...boardActions.winter]
-            .map(({ type, label }) => ({
-                type,
-                label: label(game),
-                disabledReason: undefined,
-                hasSpace: !needsGrandeDisabledReason(game, type),
-            }));
+            .map(({ type, choices }) =>
+                choices(game).map(choice => ({
+                    ...choice,
+                    type,
+                    // Allow placing even if they can't resolve the action now.
+                    // We'll check this condition again once the season rolls around.
+                    disabledReason: undefined,
+                    hasSpace: choice.idx === undefined,
+                }))
+            ).flat();
     }
 
     return [
         ...(boardActions[currentTurn.season] || [])
-            .map(({ type, label, disabledReason, }) => ({
-                type,
-                label: label(game),
-                disabledReason: disabledReason(game),
-                hasSpace: !needsGrandeDisabledReason(game, type),
-            })),
-        ...yearRoundActions.map(({ type, label, disabledReason, }) => ({
-            type,
-            label: label(game),
-            disabledReason: disabledReason(game),
-            hasSpace: true,
-        })),
+            .map(({ type, choices }) =>
+                choices(game).map(choice => ({
+                    ...choice,
+                    type,
+                    hasSpace: choice.idx === undefined,
+                }))
+            ).flat(),
+        ...yearRoundActions
+            .map(({ type, choices }) =>
+                choices(game).map(choice => ({
+                    ...choice,
+                    type,
+                    hasSpace: true,
+                }))
+            ).flat(),
         {
             type: null,
             label: "Pass",

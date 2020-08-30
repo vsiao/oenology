@@ -357,8 +357,7 @@ const startPlannerTurn = (
     }
     const workerIdx = state.workerPlacements[plannerAction.type]
         .findIndex(w => w?.playerId === playerId);
-    const disabledReason = plannerAction.disabledReason &&
-        plannerAction.disabledReason(state, workerIdx);
+    const placement = plannerAction.choiceAt(workerIdx, state);
 
     return promptForAction(state, {
         description: <p>
@@ -370,8 +369,8 @@ const startPlannerTurn = (
             {
                 id: "PLANNER_ACT",
                 data: { placement: plannerAction.type, idx: workerIdx },
-                label: plannerAction.label(state, workerIdx),
-                disabledReason,
+                label: placement.label,
+                disabledReason: placement.disabledReason,
             },
             { id: "PLANNER_PASS", label: "Pass" },
         ],

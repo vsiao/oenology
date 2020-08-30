@@ -6,6 +6,7 @@ import { StructureId } from "./structures";
 import { ActivityLog } from "./ActivityLog";
 import { MamaId, PapaId } from "./mamasAndPapas";
 
+export type BoardType = "base" | "tuscanyA" | "tuscanyB";
 export type Season = "spring" | "summer" | "fall" | "winter";
 export default interface GameState {
     // shared state
@@ -25,7 +26,7 @@ export default interface GameState {
     ];
     drawPiles: CardsByType;
     discardPiles: CardsByType;
-    boardType?: "base" | "tuscanyA" | "tuscanyB";
+    boardType?: BoardType;
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 

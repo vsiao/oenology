@@ -668,9 +668,8 @@ export const winterVisitorReducers: Record<
                 return promptForAction(state, {
                     choices: [...spring, ...summer, ...fall]
                         .map(a => ({
+                            ...a.choiceAt(-1, state),
                             id: a.type,
-                            label: a.label(state, -1),
-                            disabledReason: a.disabledReason(state, -1),
                         }))
                 });
             case "CHOOSE_ACTION":
