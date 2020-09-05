@@ -148,7 +148,19 @@ const Lobby: React.FunctionComponent<Props> = ({
                                 Visit from the Rhine Valley (BETA)
                             </label>
                         </li>
-                        {renderComingSoonOption("Tuscany board")}
+                        {/* <li className="Lobby-gameOption">
+                            <label className="Lobby-optionLabel">
+                                <input
+                                    className="Lobby-optionCheckbox"
+                                    type="checkbox"
+                                    disabled={!isHost}
+                                    checked={gameOptions.tuscanyBoard ?? false}
+                                    onChange={() => setOption("tuscanyBoard", !gameOptions.tuscanyBoard)}
+                                />
+                                Tuscany Board (ALPHA)
+                            </label>
+                        </li> */}
+                        {renderComingSoonOption("Tuscany workers")}
                     </ul>
                     {isHost
                         ? <ChoiceButton

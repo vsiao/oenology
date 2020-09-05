@@ -17,6 +17,10 @@
     position: absolute;
     transition: 150ms transform ease-in-out;
 }
+.GameBoard--tuscanyA + * .PromptStructure,
+.GameBoard--tuscanyB + * .PromptStructure {
+    margin-left: 21.6em;
+}
 .PromptStructure--collapsed {
     transform: translateY(calc(100% - 1em));
 }

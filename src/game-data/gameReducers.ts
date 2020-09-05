@@ -65,6 +65,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
 
     return {
         year: 0,
+        boardType: action.options && action.options.tuscanyBoard ? "tuscanyA" : "base",
         currentTurn: {
             type: "mamaPapa",
             playerId: players[0].id,

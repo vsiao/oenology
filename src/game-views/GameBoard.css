@@ -1,18 +1,150 @@
 .GameBoard {
     display: grid;
     grid-template-areas:
-        "season banner"
-        "order actions";
+        "sidebar banner"
+        "sidebar actions";
     grid-template-columns: 5em 1fr;
     grid-template-rows: 2em 1fr;
 }
+.GameBoard--tuscanyA,
+.GameBoard--tuscanyB {
+    grid-template-columns: 20em 1fr;
+}
 
-.GameBoard-wakeUpOrder {
-    border-right: 1px solid #aaa;
+.GameBoard-sidebar {
+    border-right: 1px solid rgba(0, 0, 0, .3);
     box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
     display: flex;
     flex-direction: column;
-    grid-area: order;
+    grid-area: sidebar;
+}
+
+.GameBoard-wakeUpSeason {
+    background: #ccc;
+    height: 2em;
+    padding: 0;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.GameBoard-wakeUpChart {
+    flex: 1 1 auto;
+    min-height: 1px;
+}
+
+.GameBoard-wakeUpTable {
+    border-collapse: collapse;
+    height: 100%;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.GameBoard-wakeUpRow {
+    height: calc(100% / 7);
+}
+
+.GameBoard-wakeUpCell {
+    background: #eee;
+    border-bottom: 1px solid #ccc;
+    text-align: center;
+    width: 25%;
+}
+.GameBoard--spring .GameBoard-wakeUpCell--spring,
+.GameBoard--summer .GameBoard-wakeUpCell--summer,
+.GameBoard--fall .GameBoard-wakeUpCell--fall,
+.GameBoard--winter .GameBoard-wakeUpCell--winter {
+    background: white;
+}
+
+.GameBoard-wakeUpCell + .GameBoard-wakeUpCell {
+    border-left: 4px solid white;
+}
+
+.GameBoard-influence {
+    flex-shrink: 0;
+    height: 20em;
+    position: relative;
+}
+
+.GameBoard-influenceMap {
+    margin: .5em;
+    opacity: .5;
+    width: calc(100% - 1em);
+}
+
+.GameBoard-influenceRegion {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    padding: .2em .4em;
+    position: absolute;
+    text-transform: capitalize;
+    top: 0;
+    width: 4em;
+}
+.GameBoard-influenceRegion--arezzo {
+    right: 3%;
+    top: 25%;
+}
+.GameBoard-influenceRegion--firenze {
+    top: 18%;
+    right: 30%;
+}
+.GameBoard-influenceRegion--grosseto {
+    top: 70%;
+    right: 34%;
+}
+.GameBoard-influenceRegion--livorno {
+    top: 57%;
+    left: 7%;
+}
+.GameBoard-influenceRegion--lucca {
+    left: 10%;
+    top: 10%;
+}
+.GameBoard-influenceRegion--pisa {
+    top: 32%;
+    left: 23%;
+}
+.GameBoard-influenceRegion--siena {
+    top: 47%;
+    right: 19%;
+}
+
+.GameBoard-regionName {
+    background: white;
+    border-radius: .2em;
+    margin: .2em 0;
+    padding: 0 .2em;
+}
+
+.GameBoard-currentSeason {
+    align-items: center;
+    display: flex;
+    font-weight: 600;
+    height: 2em;
+    justify-content: center;
+    text-transform: capitalize;
+}
+.GameBoard--spring .GameBoard-currentSeason {
+    background: #40a746;
+}
+.GameBoard--summer .GameBoard-currentSeason {
+    background: gold;
+}
+.GameBoard--fall .GameBoard-currentSeason {
+    background: peru;
+}
+.GameBoard--winter .GameBoard-currentSeason {
+    background: royalblue;
+    color: white;
+}
+
+.GameBoard-wakeUpOrder {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
     list-style-type: none;
     margin: 0;
     padding-left: 0;
@@ -85,38 +217,20 @@
     }
 }
 
-.GameBoard-currentSeason {
-    align-items: center;
-    border-right: 1px solid rgba(0, 0, 0, .3);
-    box-shadow: 0 0 6px 0 rgba(0,0,0,.3);
-    display: flex;
-    font-weight: 600;;
-    grid-area: season;
-    justify-content: center;
-    text-transform: capitalize;
-}
-.GameBoard--spring .GameBoard-currentSeason {
-    background: #40a746;
-}
-.GameBoard--summer .GameBoard-currentSeason {
-    background: gold;
-}
-.GameBoard--fall .GameBoard-currentSeason {
-    background: peru;
-}
-.GameBoard--winter .GameBoard-currentSeason {
-    background: royalblue;
-    color: white;
-}
-
 .GameBoard-seasonHeader {
     font-weight: bold;
     height: 2em;
     padding: 0 1em;
     text-transform: capitalize;
 }
+.GameBoard-season--spring .GameBoard-seasonHeader {
+    background: #40a746;
+}
 .GameBoard-season--summer .GameBoard-seasonHeader {
     background: gold;
+}
+.GameBoard-season--fall .GameBoard-seasonHeader {
+    background: peru;
 }
 .GameBoard-season--winter .GameBoard-seasonHeader {
     background: royalblue;

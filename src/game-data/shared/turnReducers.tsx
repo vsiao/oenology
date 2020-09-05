@@ -305,24 +305,29 @@ export interface WakeUpChoiceData {
 export const promptForWakeUpOrder = (state: GameState) => {
     return promptForAction<WakeUpChoiceData>(state, {
         title: "Choose wake-up order",
-        choices: [
-            { id: "WAKE_UP", data: { idx: 0 }, label: <>1: No bonus</> },
-            { id: "WAKE_UP", data: { idx: 1 }, label: <>2: Draw <Vine /></>, },
-            { id: "WAKE_UP", data: { idx: 2 }, label: <>3: Draw <Order /></>, },
-            { id: "WAKE_UP", data: { idx: 3 }, label: <>4: Gain <Coins>1</Coins></>, },
-            {
-                id: "WAKE_UP",
-                data: { idx: 4, visitor: "summer" as const },
-                label: <>5: Draw <SummerVisitor /></>,
-            },
-            {
-                id: "WAKE_UP",
-                data: { idx: 4, visitor: "winter" as const },
-                label: <>5: Draw <WinterVisitor /></>,
-            },
-            { id: "WAKE_UP", data: { idx: 5 }, label: <>6: Gain <VictoryPoints>1</VictoryPoints></>, },
-            { id: "WAKE_UP", data: { idx: 6 }, label: <>7: <Worker isTemp /> for this year</>, },
-        ].map(choice =>
+        choices: (state.boardType !== "base"
+            ? new Array(7).fill(null).map((_, idx) =>
+                ({ id: "WAKE_UP", data: { idx }, label: <>{idx + 1}</> })
+            ).filter(({ data }) => data.idx !== 0)
+            : [
+                { id: "WAKE_UP", data: { idx: 0 }, label: <>1: No bonus</> },
+                { id: "WAKE_UP", data: { idx: 1 }, label: <>2: Draw <Vine /></>, },
+                { id: "WAKE_UP", data: { idx: 2 }, label: <>3: Draw <Order /></>, },
+                { id: "WAKE_UP", data: { idx: 3 }, label: <>4: Gain <Coins>1</Coins></>, },
+                {
+                    id: "WAKE_UP",
+                    data: { idx: 4, visitor: "summer" as const },
+                    label: <>5: Draw <SummerVisitor /></>,
+                },
+                {
+                    id: "WAKE_UP",
+                    data: { idx: 4, visitor: "winter" as const },
+                    label: <>5: Draw <WinterVisitor /></>,
+                },
+                { id: "WAKE_UP", data: { idx: 5 }, label: <>6: Gain <VictoryPoints>1</VictoryPoints></>, },
+                { id: "WAKE_UP", data: { idx: 6 }, label: <>7: <Worker isTemp /> for this year</>, },
+            ]
+        ).map(choice =>
             state.wakeUpOrder[choice.data.idx]
                 ? {
                     ...choice,
