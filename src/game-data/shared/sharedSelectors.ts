@@ -367,8 +367,7 @@ export const moneyDisabledReason = (
 
 export const gameIsOver = (state: GameState) => {
     const threshold = state.boardType === "base" ? 20 : 25;
-    return state.currentTurn.type === "workerPlacement"
-        && state.season === "winter"
+    return state.season === "winter"
         && state.wakeUpOrder.every(pos => !pos || pos.season !== "winter")
         && Object.values(state.players).some(p => p.victoryPoints >= threshold);
 };

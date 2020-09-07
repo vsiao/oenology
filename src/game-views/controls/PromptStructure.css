@@ -20,6 +20,7 @@
 .GameBoard--tuscanyA + * .PromptStructure,
 .GameBoard--tuscanyB + * .PromptStructure {
     margin-left: 21.6em;
+    max-width: calc(100% - 23.2em);
 }
 .PromptStructure--collapsed {
     transform: translateY(calc(100% - 1em));

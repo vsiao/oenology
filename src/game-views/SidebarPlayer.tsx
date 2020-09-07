@@ -304,7 +304,12 @@ const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) =>
     return {
         player: game.players[playerId],
         inWakeUpOrder: game.wakeUpOrder.some(pos => pos && pos.playerId === playerId),
-        hasGrape: game.grapeIndex === game.tableOrder.indexOf(playerId),
+
+        // In Tuscany, only display the grape token after the game has started.
+        // During game set-up, `grapeIndex` indicates the starting player.
+        hasGrape: (game.boardType === "base" || game.year >= 1) &&
+            game.grapeIndex === game.tableOrder.indexOf(playerId),
+
         yokeWorker: game.workerPlacements.yokeHarvest.find(w => w && w.playerId === playerId) ||
             game.workerPlacements.yokeUproot.find(w => w && w.playerId === playerId),
     };

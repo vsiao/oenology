@@ -64,7 +64,7 @@ export const endTurn = (state: GameState): GameState => {
 
 export const beginMamaPapaTurn = (
     state: GameState,
-    playerId = state.tableOrder[state.grapeIndex]
+    playerId = state.tableOrder[state.grapeIndex!]
 ): GameState => {
     state = { ...state, currentTurn: { type: "mamaPapa", playerId }, };
     const { mamas, papas } = state.players[state.currentTurn.playerId];
@@ -241,7 +241,7 @@ const beginNewYear = (state: GameState): GameState => {
         { ...state, year, }
     );
     if (state.boardType === "base") {
-        return beginWakeUpTurn(state.tableOrder[state.grapeIndex], {
+        return beginWakeUpTurn(state.tableOrder[state.grapeIndex!], {
             ...state,
             season: "spring",
             year,
@@ -277,13 +277,18 @@ export const chooseWakeUp = (
     const isChoosingForNextYear = state.boardType !== "base" && season === "spring" && state.year > 0;
     state = {
         ...state,
+        grapeIndex: state.boardType !== "base" && wakeUpData.idx === 0
+            ? null
+            : state.grapeIndex,
         wakeUpOrder: state.wakeUpOrder.map((pos, i) => {
-            if (i !== wakeUpData.idx) {
-                return pos;
+            if (isChoosingForNextYear) {
+                return {
+                    ...pos,
+                    ...pos?.playerId === playerId ? { season: null } : null,
+                    ...i === wakeUpData.idx ? { nextYearPlayerId: playerId } : null,
+                };
             }
-            return isChoosingForNextYear
-                ? { ...pos, nextYearPlayerId: playerId }
-                : { playerId, season };
+            return i === wakeUpData.idx ? { playerId, season } : pos;
         }) as GameState["wakeUpOrder"],
     };
     return isChoosingForNextYear
@@ -368,7 +373,7 @@ export const endWakeUpTurn = (state: GameState): GameState => {
                 })
             )
             // In Tuscany, the first year starts after wake-up
-            : beginNewYear(state);
+            : beginNewYear({ ...state, grapeIndex: null });
     }
     return beginWakeUpTurn(tableOrder[nextWakeUpIndex], state);
 };
@@ -440,6 +445,8 @@ export const promptForWakeUpOrder = (forSeason: Season, state: GameState) => {
             })
             .flat()
             .map(choice => {
+                const hasGrapeToken = state.year >= 1 &&
+                    state.grapeIndex === state.tableOrder.findIndex(id => id === state.currentTurn.playerId);
                 const takenByPlayerId = forSeason === "spring" && state.year > 0
                     ? state.wakeUpOrder[choice.data.idx]?.nextYearPlayerId
                     : state.wakeUpOrder[choice.data.idx]?.playerId;
@@ -447,8 +454,12 @@ export const promptForWakeUpOrder = (forSeason: Season, state: GameState) => {
                     ...choice,
                     disabledReason: takenByPlayerId
                         ? `Taken by ${state.players[takenByPlayerId].name}`
-                        : forSeason === "spring" && choice.data.idx === 0
-                            ? "Grape token required choose first wake-up position"
+                        : forSeason === "spring"
+                            ? (choice.data.idx === 0 && !hasGrapeToken
+                                ? "Grape token required to choose first wake-up position"
+                                : choice.data.idx !== 0 && hasGrapeToken
+                                    ? "Must choose first wake-up position"
+                                    : undefined)
                             : undefined,
                 };
             }),
@@ -715,8 +726,6 @@ export const passToNextSeason = (state: GameState): GameState => {
 
     state = pushActivityLog({ type: "pass", playerId }, state);
     if (nextSeason === "spring") {
-        // Set season to null to indicate that we've passed out of the current year
-        wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: null };
         return beginEOYDiscardTurn(
             playerId,
             doEOYForPlayer(playerId, { ...state, wakeUpOrder })
@@ -892,7 +901,7 @@ const endEOYDiscardTurn = (state: GameState): GameState => {
     if (i === compactWakeUpOrder.length - 1) {
         // Begin a new year
         const tableOrder = state.tableOrder;
-        const grapeIndex = (tableOrder.length + state.grapeIndex - 1) % tableOrder.length;
+        const grapeIndex = (tableOrder.length + state.grapeIndex! - 1) % tableOrder.length;
         return beginNewYear({
             ...state,
             grapeIndex,

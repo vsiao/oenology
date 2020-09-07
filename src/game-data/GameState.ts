@@ -15,7 +15,7 @@ export default interface GameState {
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
     tableOrder: string[];
-    grapeIndex: number; // index into tableOrder. picks wakeUpOrder first this year.
+    grapeIndex: number | null; // index into tableOrder. picks wakeUpOrder first this year.
     wakeUpOrder: [
         WakeUpPosition | null, // -
         WakeUpPosition | null, // vine
