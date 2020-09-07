@@ -7,20 +7,23 @@ import GameState, {
     WakeUpPosition,
     WorkerPlacementTurn,
     WorkerPlacementTurnPendingAction,
+    Season,
 } from "../GameState";
 import { ageAllTokens, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker, loseVP } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, displayGameOverPrompt, promptToDiscard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
-import Card, { SummerVisitor, WinterVisitor, Vine, Order } from "../../game-views/icons/Card";
+import Card, { SummerVisitor, WinterVisitor, Order, Vine } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
-import { needCardOfTypeDisabledReason, GAME_OVER_VP } from "./sharedSelectors";
+import { needCardOfTypeDisabledReason, GAME_OVER_VP, cardTypesInPlay } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 import { boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
+import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
+import GrapeToken from "../../game-views/icons/GrapeToken";
 
 export const endTurn = (state: GameState): GameState => {
     if (state.undoState?.type === "undoable") {
@@ -42,6 +45,9 @@ export const endTurn = (state: GameState): GameState => {
             return endWakeUpTurn(state);
 
         case "workerPlacement":
+            return endWorkerPlacementTurn(state);
+
+        case "passToNextSeason":
             return endWorkerPlacementTurn(state);
 
         case "fallVisitor":
@@ -217,7 +223,9 @@ export const endMamaPapaTurn = (state: GameState): GameState => {
     const nextIndex = (tableOrder.indexOf(state.currentTurn.playerId) + 1) % tableOrder.length;
 
     if (nextIndex === state.grapeIndex) {
-        return beginNewYear(state);
+        return state.boardType === "base"
+            ? beginNewYear(state)
+            : beginWakeUpTurn(state.tableOrder[state.grapeIndex], state);
     }
     return beginMamaPapaTurn(state, tableOrder[nextIndex]);
 };
@@ -230,56 +238,96 @@ const beginNewYear = (state: GameState): GameState => {
     const year = state.year + 1;
     return pushActivityLog(
         { type: "season", season: `Spring (Year ${year})` },
-        beginWakeUpTurn(state.tableOrder[state.grapeIndex], { ...state, year, })
+        state.boardType === "base"
+            ? beginWakeUpTurn(state.tableOrder[state.grapeIndex], {
+                ...state,
+                season: "spring",
+                year,
+            })
+            : startPlannerTurn(
+                "spring",
+                state.wakeUpOrder.find(pos => pos !== null)!.playerId,
+                state
+            )
     );
 };
 
 const beginWakeUpTurn = (playerId: string, state: GameState): GameState => {
-    return promptForWakeUpOrder({
+    return promptForWakeUpOrder(state.boardType === "base" ? "summer" : "spring", {
         ...state,
         currentTurn: { type: "wakeUpOrder", playerId, },
     });
 };
 
 export const chooseWakeUp = (
-    { idx, visitor }: WakeUpChoiceData,
-    seed: string,
+    season: Season,
+    wakeUpData: WakeUpChoiceData,
     state: GameState
 ): GameState => {
     const playerId = state.currentTurn.playerId;
     state = {
         ...state,
         wakeUpOrder: state.wakeUpOrder.map((pos, i) =>
-            i === idx ? { playerId } : pos
+            i === wakeUpData.idx
+                ? { playerId, season }
+                : pos
         ) as GameState["wakeUpOrder"],
     };
-    switch (idx) {
-        case 0:
-            return state;
-        case 1:
-            return drawCards(state, seed, { vine: 1 });
-        case 2:
+    return gainWakeUpBonus(wakeUpData, state);
+};
+
+export const gainWakeUpBonus = (
+    wakeUpData: WakeUpChoiceData,
+    state: GameState,
+): GameState => {
+    const playerId = state.currentTurn.playerId;
+    const idx = state.wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
+    const season = state.wakeUpOrder[idx]!.season;
+    const playerState = state.players[playerId];
+    const bonus = wakeUpBonuses(state.boardType!)[season][idx];
+    const seed = state.lastActionKey!;
+
+    switch (bonus) {
+        case "ageGrapes":
+            return updatePlayer(state, playerId, {
+                crushPad: {
+                    red: ageAllTokens(playerState.crushPad.red),
+                    white: ageAllTokens(playerState.crushPad.white),
+                },
+            });
+        case "drawCard":
+            return drawCards(state, seed, { [wakeUpData.cardType!]: 1 });
+        case "drawOrder":
             return drawCards(state, seed, { order: 1 });
-        case 3:
-            return gainCoins(1, state);
-        case 4:
-            return drawCards(
-                state,
-                seed,
-                visitor === "summer" ? { summerVisitor: 1 } : { winterVisitor: 1 }
-            );
-        case 5:
-            return gainVP(1, state);
-        case 6:
-            const player = state.players[playerId];
-            return updatePlayer(state, player.id, {
+        case "drawStructure":
+            return state; // drawCards(state, seed, { structure: 1 });
+        case "drawSummerVisitor":
+            return drawCards(state, seed, { summerVisitor: 1 });
+        case "drawVine":
+            return drawCards(state, seed, { vine: 1 });
+        case "drawVisitor":
+            const cardType = wakeUpData.cardType ??
+                (wakeUpData.visitor === "summer" ? "summerVisitor" : "winterVisitor");
+            return drawCards(state, seed, { [cardType]: 1 });
+        case "drawWinterVisitor":
+            return drawCards(state, seed, { winterVisitor: 1 });
+        case "firstPlayer":
+            return { ...state, grapeIndex: state.tableOrder.findIndex(id => id === playerId) };
+        case "gainCoin":
+            return gainCoins(1, state, playerId);
+        case "gainVP":
+            return gainVP(1, state, playerId);
+        case "influence":
+            return state; // TODO
+        case "nothing":
+            return state;
+        case "tempWorker":
+            return updatePlayer(state, playerId, {
                 workers: [
-                    ...player.workers,
+                    ...playerState.workers,
                     { type: "normal", id: 999, available: true, isTemp: true }
                 ],
             });
-        default:
-            throw new Error(`Unexpected wake-up index ${idx}`);
     }
 };
 
@@ -289,54 +337,96 @@ export const endWakeUpTurn = (state: GameState): GameState => {
 
     if (nextWakeUpIndex === grapeIndex) {
         const firstPlayerId = wakeUpOrder.filter((pos) => pos)[0]!.playerId;
-        return startWorkerPlacementTurn(
-            "summer",
-            firstPlayerId,
-            pushActivityLog({ type: "season", season: `Summer (Year ${state.year})` }, state)
-        );
+        return state.boardType === "base"
+            // In the base game, "wake-up" turns occur in the spring.
+            // When spring concludes, we begin summer worker placement turns.
+            ? startWorkerPlacementTurn(
+                firstPlayerId,
+                pushActivityLog({ type: "season", season: `Summer (Year ${state.year})` }, {
+                    ...state,
+                    season: "summer"
+                })
+            )
+            // In Tuscany, the first year starts after wake-up
+            : beginNewYear(state);
     }
     return beginWakeUpTurn(tableOrder[nextWakeUpIndex], state);
 };
 
 export interface WakeUpChoiceData {
     idx: number;
+    cardType?: CardType;
     visitor?: "summer" | "winter";
 }
-export const promptForWakeUpOrder = (state: GameState) => {
+export const promptForWakeUpOrder = (forSeason: Season, state: GameState) => {
+    const renderBonusLabel = (bonus: WakeUpBonus): React.ReactNode => {
+        switch (bonus) {
+            case "ageGrapes":
+                return <>Age grapes</>;
+            case "drawCard":
+                throw new Error("Unexpected state"); // handled below
+            case "drawOrder":
+                return <>Draw <Order /></>;
+            case "drawStructure":
+                return <>Draw XCXC</>;
+            case "drawSummerVisitor":
+                return <>Draw <SummerVisitor /></>;
+            case "drawVine":
+                return <>Draw <Vine /></>;
+            case "drawVisitor":
+                throw new Error("Unexpected state"); // handled below
+            case "drawWinterVisitor":
+                return <>Draw <WinterVisitor /></>;
+            case "firstPlayer":
+                return <>Gain <GrapeToken /></>;
+            case "gainCoin":
+                return <>Gain <Coins>1</Coins></>;
+            case "gainVP":
+                return <>Gain <VictoryPoints>1</VictoryPoints></>;
+            case "influence":
+                return "STAR_TOKEN";
+            case "nothing":
+                return <>No bonus</>;
+            case "tempWorker":
+                return <>Gain <Worker isTemp={true} /> for this year</>;
+        }
+    };
+
+    const bonuses = wakeUpBonuses(state.boardType ?? "base")[forSeason];
     return promptForAction<WakeUpChoiceData>(state, {
         title: "Choose wake-up order",
-        choices: (state.boardType !== "base"
-            ? new Array(7).fill(null).map((_, idx) =>
-                ({ id: "WAKE_UP", data: { idx }, label: <>{idx + 1}</> })
-            ).filter(({ data }) => data.idx !== 0)
-            : [
-                { id: "WAKE_UP", data: { idx: 0 }, label: <>1: No bonus</> },
-                { id: "WAKE_UP", data: { idx: 1 }, label: <>2: Draw <Vine /></>, },
-                { id: "WAKE_UP", data: { idx: 2 }, label: <>3: Draw <Order /></>, },
-                { id: "WAKE_UP", data: { idx: 3 }, label: <>4: Gain <Coins>1</Coins></>, },
-                {
-                    id: "WAKE_UP",
-                    data: { idx: 4, visitor: "summer" as const },
-                    label: <>5: Draw <SummerVisitor /></>,
-                },
-                {
-                    id: "WAKE_UP",
-                    data: { idx: 4, visitor: "winter" as const },
-                    label: <>5: Draw <WinterVisitor /></>,
-                },
-                { id: "WAKE_UP", data: { idx: 5 }, label: <>6: Gain <VictoryPoints>1</VictoryPoints></>, },
-                { id: "WAKE_UP", data: { idx: 6 }, label: <>7: <Worker isTemp /> for this year</>, },
-            ]
-        ).map(choice =>
-            state.wakeUpOrder[choice.data.idx]
-                ? {
-                    ...choice,
-                    disabledReason: `Taken by ${
-                        state.players[state.wakeUpOrder[choice.data.idx]!.playerId].name
-                    }`,
+        choices: bonuses
+            .map((bonus, idx) => {
+                if (bonus === "drawVisitor") {
+                    return (["summerVisitor", "winterVisitor"] as const).map(cardType => ({
+                        id: "WAKE_UP",
+                        data: { idx, cardType },
+                        label: <>{idx + 1}: Draw <Card type={cardType} /></>,
+                    }));
+                } else if (bonus === "drawCard") {
+                    return cardTypesInPlay(state).map(cardType => ({
+                        id: "WAKE_UP",
+                        data: { idx, cardType },
+                        label: <>{idx + 1}: Draw <Card type={cardType} /></>,
+                    }));
                 }
-                : choice
-        ),
+                return [{
+                    id: "WAKE_UP",
+                    data: { idx },
+                    label: forSeason === "spring"
+                        ? <>{idx === 0 ? <><GrapeToken /></> : idx + 1}</>
+                        : <>{idx + 1}: {renderBonusLabel(bonus)}</>,
+                }];
+            })
+            .flat()
+            .map(choice => ({
+                ...choice,
+                disabledReason: state.wakeUpOrder[choice.data.idx]
+                    ? `Taken by ${state.players[state.wakeUpOrder[choice.data.idx]!.playerId].name}`
+                    : forSeason === "spring" && choice.data.idx === 0
+                        ? "Grape token required choose first wake-up position"
+                        : undefined,
+            })),
     });
 };
 
@@ -345,13 +435,14 @@ export const promptForWakeUpOrder = (state: GameState) => {
 // ----------------------------------------------------------------------------
 
 const startPlannerTurn = (
-    season: "summer" | "winter",
+    season: Season,
     playerId: string,
     state: GameState
 ): GameState => {
     state = {
         ...state,
-        currentTurn: { type: "workerPlacement", playerId, isPlannerTurn: true, season },
+        season,
+        currentTurn: { type: "workerPlacement", playerId, isPlannerTurn: true },
     };
     const plannerAction = boardActionsBySeason(state)[season].find(action =>
         state.workerPlacements[action.type].some(w => w && w.playerId === playerId)
@@ -386,11 +477,11 @@ const endPlannerTurn = (state: GameState): GameState => {
     const { currentTurn, wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
     const i = compactWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
-    const season = (currentTurn as WorkerPlacementTurn).season;
+    const season = state.season;
 
     if (i === compactWakeUpOrder.length - 1) {
         // Begin season
-        return startWorkerPlacementTurn(season, compactWakeUpOrder[0].playerId, state);
+        return startWorkerPlacementTurn(compactWakeUpOrder[0].playerId, state);
     } else {
         const nextPlayerId =
             compactWakeUpOrder[(i + 1) % compactWakeUpOrder.length].playerId;
@@ -399,34 +490,19 @@ const endPlannerTurn = (state: GameState): GameState => {
 };
 
 const startWorkerPlacementTurn = (
-    season: "summer" | "winter",
     playerId: string,
     state: GameState
 ) => {
     state = {
         ...state,
-        currentTurn: { type: "workerPlacement", playerId, season },
+        currentTurn: { type: "workerPlacement", playerId },
     };
     const player = state.players[playerId];
     if (player.workers.every(w => !w.available)) {
         // player is out of workers, auto-pass them
-        return passToNextSeason(state, player.id);
+        return passToNextSeason(state);
     }
     return promptToPlaceWorker(state);
-};
-
-export const passToNextSeason = (
-    state: GameState,
-    playerId = state.currentTurn.playerId
-): GameState => {
-    const wakeUpOrder = state.wakeUpOrder.map((pos) => {
-        if (!pos || pos.playerId !== playerId) {
-            return pos;
-        }
-        return { ...pos, passed: true };
-    }) as GameState["wakeUpOrder"];
-
-    return endTurn(pushActivityLog({ type: "pass", playerId }, { ...state, wakeUpOrder }));
 };
 
 export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
@@ -455,33 +531,32 @@ const endWorkerPlacementTurn = (state: GameState): GameState => {
             })
         );
     }
-    const { wakeUpOrder } = state;
-    const season = currentTurn.season;
+    const { boardType, season, wakeUpOrder } = state;
     const compactWakeUpOrder = wakeUpOrder.filter((pos) => pos !== null) as WakeUpPosition[];
 
-    if (compactWakeUpOrder.every((p) => p.passed)) {
-        // If everyone passed, it's the end of the season
-        if (season === "summer") {
-            return pushActivityLog(
-                { type: "season", season: `Fall (Year ${state.year})` },
-                startFallVisitorTurn(compactWakeUpOrder[0].playerId, {
-                    ...state,
-                    // preserve wake-up order; just reset "passed" state
-                    wakeUpOrder: wakeUpOrder.map((pos) => {
-                        return pos === null ? null : { ...pos, passed: false };
-                    }) as GameState["wakeUpOrder"],
-                })
-            );
-        } else {
-            return endYear(state);
+    if (compactWakeUpOrder.every(p => p.season !== season)) {
+        switch (season) {
+            case "spring":
+                return startPlannerTurn("summer", compactWakeUpOrder[0].playerId, state);
+            case "summer":
+                return boardType === "base"
+                    ? pushActivityLog(
+                        { type: "season", season: `Fall (Year ${state.year})` },
+                        startFallVisitorTurn(compactWakeUpOrder[0].playerId, state)
+                    )
+                    : startPlannerTurn("fall", compactWakeUpOrder[0].playerId, state);
+            case "fall":
+                return startPlannerTurn("winter", compactWakeUpOrder[0].playerId, state);
+            case "winter":
+                return endYear(state);
         }
     }
     const activeWakeUpOrder = compactWakeUpOrder
-        .filter((pos) => pos.playerId === currentTurn.playerId || !pos.passed);
+        .filter((pos) => pos.playerId === currentTurn.playerId || pos.season === season);
     const i = activeWakeUpOrder.findIndex((pos) => pos.playerId === currentTurn.playerId);
     const nextPlayerId = activeWakeUpOrder[(i + 1) % activeWakeUpOrder.length].playerId;
 
-    return startWorkerPlacementTurn(season, nextPlayerId, state);
+    return startWorkerPlacementTurn(nextPlayerId, state);
 };
 
 export const makeEndVisitorAction = (
@@ -497,7 +572,7 @@ export const makeEndVisitorAction = (
                 case "opponents":
                     return pos.playerId !== state.currentTurn.playerId;
                 case "activePlayers":
-                    return !pos.passed;
+                    return pos.season === state.season;
                 default:
                     return true;
             }
@@ -578,11 +653,11 @@ export const endVisitor = (state: GameState): GameState => {
 
     const hasCard = needCardOfTypeDisabledReason(
         state,
-        currentTurn.season === "summer" ? "summerVisitor" : "winterVisitor"
+        state.season === "summer" ? "summerVisitor" : "winterVisitor"
     ) === undefined;
     if (pendingAction.hasBonus && hasCard) {
         return promptToChooseVisitor(
-            currentTurn.season,
+            state.season as "summer" | "winter",
             setPendingAction({
                 type: "playVisitor",
                 hasBonus: false,
@@ -595,6 +670,52 @@ export const endVisitor = (state: GameState): GameState => {
 };
 
 //
+// Pass-to-next-season turns
+// ----------------------------------------------------------------------------
+
+export const passToNextSeason = (state: GameState): GameState => {
+    const playerId = state.currentTurn.playerId;
+    const seasons: Season[] = state.boardType === "base"
+        ? ["summer", "winter"]
+        : ["spring", "summer", "fall", "winter"];
+    const nextSeason = seasons[
+        (seasons.findIndex(s => s === state.season) + 1) % seasons.length
+    ];
+    const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
+    const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
+    wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
+
+    state = pushActivityLog({ type: "pass", playerId }, { ...state, wakeUpOrder });
+
+    if (state.boardType === "base") {
+        return endTurn(state);
+    }
+
+    const bonus = wakeUpBonuses(state.boardType!)[nextSeason][idx];
+    switch (bonus) {
+        case "drawCard":
+            return promptForAction<WakeUpChoiceData>(state, {
+                choices: cardTypesInPlay(state).map(cardType => ({
+                    id: "DRAW_CARD",
+                    data: { idx, cardType },
+                    label: <>Draw <Card type={cardType} /></>,
+                })),
+            });
+        case "drawVisitor":
+            return promptForAction<WakeUpChoiceData>(state, {
+                choices: (["summerVisitor", "winterVisitor"] as const).map(cardType => ({
+                    id: "DRAW_CARD",
+                    data: { idx, cardType },
+                    label: <>Draw <Card type={cardType} /></>,
+                })),
+            });
+        case "influence": // TODO
+        default:
+            return endTurn(gainWakeUpBonus({ idx }, state));
+    }
+};
+
+//
 // Fall visitor turns
 // ----------------------------------------------------------------------------
 
@@ -602,6 +723,7 @@ const startFallVisitorTurn = (playerId: string, state: GameState): GameState => 
     const canDrawTwo = state.players[playerId].structures.cottage;
     return promptForAction({
         ...state,
+        season: "fall",
         currentTurn: { type: "fallVisitor", playerId, },
     }, {
         description: <p><em>Fall season: Draw 1 Visitor card (2 with Cottage).</em></p>,

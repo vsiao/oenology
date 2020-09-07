@@ -141,18 +141,18 @@ const actionsForCurrentTurn = (game: GameState): ActionChoice[] => {
                     // Allow placing even if they can't resolve the action now.
                     // We'll check this condition again once the season rolls around.
                     disabledReason: undefined,
-                    hasSpace: choice.idx === undefined,
+                    hasSpace: choice.idx !== undefined,
                 }))
             ).flat();
     }
 
     return [
-        ...(boardActions[currentTurn.season] || [])
+        ...(boardActions[game.season] || [])
             .map(({ type, choices }) =>
                 choices(game).map(choice => ({
                     ...choice,
                     type,
-                    hasSpace: choice.idx === undefined,
+                    hasSpace: choice.idx !== undefined,
                 }))
             ).flat(),
         ...yearRoundActions

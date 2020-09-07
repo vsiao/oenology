@@ -42,6 +42,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             prevState: state,
             isLastActionByCurrentTurnPlayer: state.playerId === action.playerId,
         },
+        lastActionKey: action._key,
     };
     return board(prompt(state, action), action);
 };
@@ -65,6 +66,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
 
     return {
         year: 0,
+        season: "spring",
         boardType: action.options && action.options.tuscanyBoard ? "tuscanyA" : "base",
         currentTurn: {
             type: "mamaPapa",

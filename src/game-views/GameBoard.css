@@ -53,11 +53,11 @@
 .GameBoard--summer .GameBoard-wakeUpCell--summer,
 .GameBoard--fall .GameBoard-wakeUpCell--fall,
 .GameBoard--winter .GameBoard-wakeUpCell--winter {
-    background: white;
+    background: transparent;
 }
 
 .GameBoard-wakeUpCell + .GameBoard-wakeUpCell {
-    border-left: 4px solid white;
+    border-left: 2px solid white;
 }
 
 .GameBoard-influence {
@@ -155,8 +155,9 @@
     flex: 1 1 auto;
     height: 40px;
     justify-content: center;
+    padding: 0 .2em;
     position: relative;
-    white-space: nowrap;
+    text-align: center;
 }
 .GameBoard-wakeUpPosition + .GameBoard-wakeUpPosition {
     border-top: 1px solid #ccc;

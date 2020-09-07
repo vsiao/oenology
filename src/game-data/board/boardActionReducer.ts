@@ -13,6 +13,7 @@ import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason } from "../shared/sharedSelectors";
 import { drawCards } from "../shared/cardReducers";
 import { gainCoins, markStructureUsed, trainWorker, payCoins, gainVP } from "../shared/sharedReducers";
+import { boardActions } from "./boardPlacements";
 
 export const boardAction = (
     placement: WorkerPlacement,
@@ -20,7 +21,7 @@ export const boardAction = (
     seed: string,
     placementIdx?: number
 ): GameState => {
-    const hasBonus = state.tableOrder.length > 2 && placementIdx === 0;
+    const hasBonus = !!boardActions[placement].choiceAt(placementIdx, state).bonusIcon;
     const player = state.players[state.currentTurn.playerId];
 
     switch (placement) {

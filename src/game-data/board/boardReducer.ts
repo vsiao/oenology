@@ -26,6 +26,7 @@ import {
     chooseMamaPapa,
     chooseWakeUp,
     endTurn,
+    gainWakeUpBonus,
     passToNextSeason,
     setPendingAction,
 } from "../shared/turnReducers";
@@ -49,12 +50,41 @@ export const board = (state: GameState, action: GameAction): GameState => {
 
         case "wakeUpOrder": {
             if (action.type === "CHOOSE_ACTION" && action.choice === "WAKE_UP") {
-                return endTurn(chooseWakeUp(action.data as WakeUpChoiceData, action._key!, state));
+                return endTurn(
+                    chooseWakeUp(
+                        // Base game always chooses wake-up position for the summer
+                        state.boardType === "base" ? "summer" : "spring",
+                        action.data as WakeUpChoiceData,
+                        state
+                    )
+                );
             }
             return state;
         }
         case "workerPlacement":
             return workerPlacement(state, action);
+
+        case "passToNextSeason":
+            // retrieve workers
+            // age grapes and wine
+            // discard to 7 cards
+            // collect residual payments
+            // choose wake-up position
+
+            // might need to prompt card type draw
+            // or place/move influence
+            switch (action.type) {
+                case "CHOOSE_ACTION":
+                    switch (action.choice) {
+                        case "WAKE_UP":
+                        case "DRAW_CARD":
+                            return gainWakeUpBonus(action.data as WakeUpChoiceData, state);
+                        default:
+                            return state;
+                    }
+                default:
+                    return state;
+            }
 
         case "fallVisitor":
             switch (action.type) {
@@ -259,8 +289,9 @@ const workerPlacementInit = (state: GameState, action: GameAction): GameState =>
             if (!action.placement) {
                 return passToNextSeason(state);
             }
-            state = placeWorker(action.workerType, action.placement, action.idx, state);
-            return boardAction(action.placement, state, action._key!, action.idx);
+            let placementIdx: number;
+            [state, placementIdx] = placeWorker(action.workerType, action.placement, action.idx, state);
+            return boardAction(action.placement, state, action._key!, placementIdx);
         }
         case "CHOOSE_ACTION":
             switch (action.choice) {

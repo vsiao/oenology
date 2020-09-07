@@ -368,8 +368,8 @@ export const moneyDisabledReason = (
 export const GAME_OVER_VP = 20;
 export const gameIsOver = (state: GameState) => {
     return state.currentTurn.type === "workerPlacement"
-        && state.currentTurn.season === "winter"
-        && state.wakeUpOrder.every(pos => !pos || pos.passed)
+        && state.season === "winter"
+        && state.wakeUpOrder.every(pos => !pos || pos.season !== "winter")
         && Object.values(state.players).some(p => p.victoryPoints >= GAME_OVER_VP);
 };
 

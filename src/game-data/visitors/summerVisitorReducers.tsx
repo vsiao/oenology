@@ -803,13 +803,13 @@ export const summerVisitorReducers: Record<
     organizer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForWakeUpOrder(state);
+                return promptForWakeUpOrder(state.season, state);
 
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "WAKE_UP":
                         return passToNextSeason(
-                            chooseWakeUp(action.data as WakeUpChoiceData, action._key!, {
+                            chooseWakeUp(state.season, action.data as WakeUpChoiceData, {
                                 ...state,
                                 // Clear the previous wake-up position
                                 wakeUpOrder: state.wakeUpOrder.map(
@@ -817,6 +817,9 @@ export const summerVisitorReducers: Record<
                                 ) as GameState["wakeUpOrder"],
                             })
                         );
+
+                    // TODO influence
+
                     default:
                         return state;
                 }
@@ -897,7 +900,7 @@ export const summerVisitorReducers: Record<
                 return promptToPlaceWorker(state);
             case "PLACE_WORKER":
                 return endVisitor(
-                    placeWorker(action.workerType, action.placement!, action.idx, state, "Planner")
+                    placeWorker(action.workerType, action.placement!, action.idx, state, "Planner")[0]
                 );
             default:
                 return state;
@@ -1500,7 +1503,7 @@ export const rhineSummerVisitorReducers: Record<
                         action.data as ChoiceData,
                         state,
                         "Administrator"
-                    )
+                    )[0]
                 );
             default:
                 return state;

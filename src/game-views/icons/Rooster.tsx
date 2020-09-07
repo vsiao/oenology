@@ -11,8 +11,12 @@ interface Props {
 
 const Rooster: React.FunctionComponent<Props> = props => {
     return <motion.svg
-        layout={props.color !== undefined}
-        layoutId={`rooster${props.color}`}
+        {...props.color !== undefined
+            ? {
+                layout: true,
+                layoutId: `rooster${props.color}`,
+            }
+            : null}
         className={cx({
             "Rooster": true,
             [`Rooster--${props.color}`]: props.color !== undefined,

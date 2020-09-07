@@ -20,8 +20,8 @@ export const wakeUpBonuses = (boardType: BoardType): Record<Season, WakeUpBonus[
     switch (boardType) {
         case "base":
             return {
-                spring: ["nothing", "drawVine", "drawOrder", "gainCoin", "drawVisitor", "gainVP", "tempWorker"],
-                summer: [],
+                spring: [],
+                summer: ["nothing", "drawVine", "drawOrder", "gainCoin", "drawVisitor", "gainVP", "tempWorker"],
                 fall: [],
                 winter: [],
             };

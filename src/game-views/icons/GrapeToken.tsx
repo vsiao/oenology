@@ -5,12 +5,14 @@ import "./GrapeToken.css";
 
 interface Props {
 	className?: string;
+	animated?: boolean;
 }
 
-const GrapeToken: React.FunctionComponent<Props> = ({ className }) => {
+const GrapeToken: React.FunctionComponent<Props> = ({ className, animated }) => {
     return <motion.svg
-		layout
-		layoutId="grapeToken"
+		{...animated
+			? { layout: true, layoutId: "grapeToken" }
+			: null}
         className={cx("GrapeToken", className)}
         xmlns="http://www.w3.org/2000/svg"
         version="1.1"

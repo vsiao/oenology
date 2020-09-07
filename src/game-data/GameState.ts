@@ -11,6 +11,7 @@ export type Season = "spring" | "summer" | "fall" | "winter";
 export default interface GameState {
     // shared state
     year: number;
+    season: Season;
     currentTurn: CurrentTurn;
     players: Record<string, PlayerState>;
     tableOrder: string[];
@@ -47,6 +48,10 @@ export default interface GameState {
         // Nothing to undo, usually indicating game beginning or game end
         | null;
 
+    // Published key of the most-recently received action.
+    // Used as a PRNG seed for on-demand shuffling.
+    lastActionKey?: string;
+
     // Published key of the most-recently applied PlaceWorkerAction,
     // mostly for debugging purposes.
     lastPlaceWorkerActionKey?: string;
@@ -58,20 +63,20 @@ export default interface GameState {
 
 export interface WakeUpPosition {
     playerId: string;
-    passed?: true;
+    season: Season;
 }
 
 export type CurrentTurn =
     | { type: "mamaPapa"; playerId: string; }
     | { type: "wakeUpOrder"; playerId: string; }
     | WorkerPlacementTurn
+    | { type: "passToNextSeason", playerId: string; }
     | { type: "fallVisitor"; playerId: string; }
     | { type: "endOfYearDiscard"; playerId: string; };
 
 export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
-    season: "summer" | "winter";
 
     // Used to enact actions for workers placed in future seasons
     // by the Planner and Administrator visitors.

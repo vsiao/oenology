@@ -2,7 +2,7 @@ import "./StatusBanner.css";
 import * as React from "react";
 import { connect } from "react-redux";
 import { AppState } from "../store/AppState";
-import { CurrentTurn, WorkerPlacementTurnPendingAction, WorkerPlacementTurn } from "../game-data/GameState";
+import { CurrentTurn, WorkerPlacementTurnPendingAction, WorkerPlacementTurn, Season } from "../game-data/GameState";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { gameIsOver } from "../game-data/shared/sharedSelectors";
@@ -16,6 +16,7 @@ import XIcon from "./icons/XIcon";
 
 interface Props {
     gameOver: boolean;
+    season: Season;
     currentTurn: CurrentTurn;
     playerNames: Record<string, string>;
     playerId: string | null;
@@ -67,7 +68,7 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
     </>;
 };
 
-const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
+const renderStatus = ({ currentTurn, season, playerNames, playerId }: Props) => {
     const playerName = <strong>{playerNames[currentTurn.playerId]}</strong>;
     switch (currentTurn.type) {
         case "mamaPapa":
@@ -79,6 +80,7 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
         case "workerPlacement":
             if (currentTurn.pendingAction) {
                 return renderPendingActionStatus(
+                    season,
                     currentTurn,
                     playerNames
                 );
@@ -93,10 +95,11 @@ const renderStatus = ({ currentTurn, playerNames, playerId }: Props) => {
 };
 
 const renderPendingActionStatus = (
+    season: Season,
     currentTurn: WorkerPlacementTurn,
     playerNames: Record<string, string>
 ): React.ReactElement => {
-    const { season, playerId } = currentTurn;
+    const { playerId } = currentTurn;
     const pendingAction = currentTurn.pendingAction as WorkerPlacementTurnPendingAction;
     const playerName = <strong>{playerNames[playerId]}</strong>;
 
@@ -151,6 +154,7 @@ const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     return {
         gameOver: gameIsOver(game),
+        season: game.season,
         currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(
             Object.keys(game.players)

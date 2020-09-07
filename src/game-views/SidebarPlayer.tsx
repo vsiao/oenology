@@ -41,7 +41,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     </li>
                 )}
             </ul>
-            {props.hasGrape && <GrapeToken className="SidebarPlayer-grapeToken" />}
+            {props.hasGrape && <GrapeToken className="SidebarPlayer-grapeToken" animated={true} />}
             {props.inWakeUpOrder
                 ? null
                 : <Rooster className="SidebarPlayer-rooster" color={player.color} />}

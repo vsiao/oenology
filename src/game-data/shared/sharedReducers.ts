@@ -166,7 +166,7 @@ export const placeWorker = (
     placementIdx: number | undefined,
     state: GameState,
     source?: "Planner" | "Administrator"
-): GameState => {
+): [GameState, number] => {
     const player = state.players[state.currentTurn.playerId];
     const workerIndex = player.workers.reduce(
         (previousValue, worker, currentIndex) =>
@@ -192,17 +192,20 @@ export const placeWorker = (
         isTemp: !!player.workers[workerIndex].isTemp,
         source,
     };
-    return {
-        ...updatePlayer(state, player.id, {
-            workers: player.workers.map(
-                (w, i) => i === workerIndex ? { ...w, available: false } : w
-            ),
-        }),
-        workerPlacements: {
-            ...state.workerPlacements,
-            [placement]: placements,
+    return [
+        {
+            ...updatePlayer(state, player.id, {
+                workers: player.workers.map(
+                    (w, i) => i === workerIndex ? { ...w, available: false } : w
+                ),
+            }),
+            workerPlacements: {
+                ...state.workerPlacements,
+                [placement]: placements,
+            },
         },
-    };
+        placementIdx
+    ];
 };
 
 export const retrieveWorker = (

@@ -22,7 +22,7 @@ export interface BoardAction {
     type: WorkerPlacement,
     label: (state: GameState) => React.ReactNode;
     choices: (state: GameState) => PlacementChoice[];
-    choiceAt: (i: number, state: GameState) => PlacementChoice;
+    choiceAt: (i: number | undefined, state: GameState) => PlacementChoice;
 }
 interface PlacementChoice {
     label: React.ReactNode;
@@ -80,7 +80,7 @@ const action = (
     };
 }
 
-const boardActions: Record<WorkerPlacement, BoardAction> = {
+export const boardActions: Record<WorkerPlacement, BoardAction> = {
     buildStructure: action(
         "buildStructure",
         (i, { numSpots, state }) => {
@@ -309,7 +309,7 @@ export const yearRoundActions: BoardAction[] = [
 
 export const allPlacements = Object.values(boardActions);
 
-export const boardActionsBySeason = (state: GameState): { [K in Season]: BoardAction[] } => {
+export const boardActionsBySeason = (state: GameState): Record<Season, BoardAction[]> => {
     switch (state.boardType) {
         case undefined:
         case "base":
