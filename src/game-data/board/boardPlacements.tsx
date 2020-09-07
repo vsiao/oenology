@@ -17,6 +17,7 @@ import {
 } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
+import StarToken from "../../game-views/icons/StarToken";
 
 export interface BoardAction {
     type: WorkerPlacement,
@@ -228,7 +229,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
         (i, { numSpots }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
-                label: <>Place or move STAR_TOKEN</>,
+                label: <>Place or move <StarToken /></>,
                 bonus: isBonusSpot ? "influence" : undefined,
                 disabledReason: "Unimplemented",
             };

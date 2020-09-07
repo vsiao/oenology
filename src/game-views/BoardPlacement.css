@@ -6,6 +6,17 @@
     box-shadow: 0 -1px #ccc;
 }
 
+.BoardPlacement-cell--vertical {
+    text-align: center;
+    position: relative;
+}
+
+.BoardPlacement-spots {
+    display: flex;
+    justify-content: center;
+    margin-top: .8em;
+}
+
 .BoardPlacement-spotCell {
     position: relative;
     text-align: center;
@@ -43,8 +54,15 @@
     white-space: nowrap;
     z-index: 1;
 }
-.BoardPlacement-overflow .Worker {
-    margin-right: .8em;
+.BoardPlacement-overflow .Worker + .Worker {
+    margin-left: .8em;
+}
+
+.BoardPlacement-cell--vertical .BoardPlacement-overflow {
+    bottom: .4em;
+    left: 50%;
+    transform: translateX(-50%);
+    top: auto;
 }
 
 .BoardPlacement-title {

@@ -148,7 +148,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                                 Visit from the Rhine Valley (BETA)
                             </label>
                         </li>
-                        {/* <li className="Lobby-gameOption">
+                        <li className="Lobby-gameOption">
                             <label className="Lobby-optionLabel">
                                 <input
                                     className="Lobby-optionCheckbox"
@@ -159,7 +159,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                                 />
                                 Tuscany Board (ALPHA)
                             </label>
-                        </li> */}
+                        </li>
                         {renderComingSoonOption("Tuscany workers")}
                     </ul>
                     {isHost

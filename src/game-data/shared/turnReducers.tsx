@@ -24,6 +24,7 @@ import { boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
 import GrapeToken from "../../game-views/icons/GrapeToken";
+import StarToken from "../../game-views/icons/StarToken";
 
 export const endTurn = (state: GameState): GameState => {
     if (state.undoState?.type === "undoable") {
@@ -409,7 +410,7 @@ export const promptForWakeUpOrder = (forSeason: Season, state: GameState) => {
             case "gainVP":
                 return <>Gain <VictoryPoints>1</VictoryPoints></>;
             case "influence":
-                return "STAR_TOKEN";
+                return <StarToken />;
             case "nothing":
                 return <>No bonus</>;
             case "tempWorker":

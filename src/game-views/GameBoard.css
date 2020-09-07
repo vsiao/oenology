@@ -226,19 +226,19 @@
 .GameBoard--tuscanyB .GameBoard-seasons {
     width: 100%;
 }
-@media (max-width: 2700px) {
+@media (max-width: 2220px) {
     .GameBoard--tuscanyA .GameBoard-seasons,
     .GameBoard--tuscanyB .GameBoard-seasons {
         width: calc(400% / 3);
     }
 }
-@media (max-width: 2500px) {
+@media (max-width: 1960px) and (min-width: 1750px), (max-width: 1600px) {
     .GameBoard--tuscanyA .GameBoard-seasons,
     .GameBoard--tuscanyB .GameBoard-seasons {
         width: 200%;
     }
 }
-@media (max-width: 2000px) {
+@media (max-width: 1350px) {
     .GameBoard--tuscanyA .GameBoard-seasons,
     .GameBoard--tuscanyB .GameBoard-seasons {
         width: 400%;

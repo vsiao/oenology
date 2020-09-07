@@ -17,6 +17,7 @@ import { useTooltip } from "./shared/useTooltip";
 import { wakeUpBonuses, WakeUpBonus } from "../game-data/board/wakeUpOrder";
 import GrapeToken from "./icons/GrapeToken";
 import { influenceRegions, InfluenceData } from "../game-data/board/influence";
+import StarToken from "./icons/StarToken";
 
 interface WakeUpSpot extends WakeUpPosition {
     current: boolean;
@@ -150,6 +151,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                             <tbody>
                             {props.actionsBySeason[season].map(action =>
                                 <BoardPlacement
+                                    boardType={boardType}
                                     key={action.type}
                                     placement={action}
                                     season={season}
@@ -246,7 +248,7 @@ const renderBonus = (
         case "gainVP":
             return <VictoryPoints>1</VictoryPoints>;
         case "influence":
-            return "STAR_TOKEN";
+            return <StarToken />;
         case "nothing":
             return renderNothing();
         case "tempWorker":

@@ -1,0 +1,18 @@
+.StarToken {
+    align-items: center;
+    display: inline-flex;
+    height: 1.4em;
+    position: relative;
+    width: 1.4em;
+}
+
+.StarToken-icon {
+    height: 100%;
+    left: 50%;
+    position: absolute;
+    stroke: black;
+    stroke-width: .1em;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    width: 100%;
+}

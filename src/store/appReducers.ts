@@ -94,7 +94,7 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
                     ) as GameState["wakeUpOrder"],
                     workerPlacements: Object.fromEntries(
                         allPlacements.map(({ type }) =>
-                            [type, gameState.workerPlacements[type] || []]
+                            [type, gameState.workerPlacements?.[type] ?? []]
                         )
                     ) as GameState["workerPlacements"],
                     players: Object.fromEntries(

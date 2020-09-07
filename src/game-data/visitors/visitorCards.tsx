@@ -294,7 +294,7 @@ export const rhineSummerVisitorCards = {
     ),
     // oldGeneral: summerVisitorCard(
     //     "Old General",
-    //     <>Place 1 STAR_TOKEN. Each opponent who has all 6 STAR_TOKEN on the map must retrieve 3 of their STAR_TOKEN.</>
+    //     <>Place 1 <StarToken />. Each opponent who has all 6 <StarToken /> on the map must retrieve 3 of their <StarToken />.</>
     // ),
     owner: summerVisitorCard(
         "Owner",
@@ -601,7 +601,7 @@ export const rhineWinterVisitorCards = {
     ),
     // influencer: winterVisitorCard(
     //     "Influencer",
-    //     <>Place 1 STAR_TOKEN, then move up to 3 STAR_TOKEN owned by any player.</>
+    //     <>Place 1 <StarToken />, then move up to 3 <StarToken /> owned by any player.</>
     // ),
     laborer: winterVisitorCards.laborer,
     lecturer: winterVisitorCard(
@@ -610,7 +610,7 @@ export const rhineWinterVisitorCards = {
     ),
     // lobbyist: winterVisitorCard(
     //     "Lobbyist",
-    //     <>Pay <Coins>X</Coins> to return X STAR_TOKEN from the map to their owners. If any player has at least <VP>20</VP>, you lose <VP>3</VP>.</>
+    //     <>Pay <Coins>X</Coins> to return X <StarToken /> from the map to their owners. If any player has at least <VP>20</VP>, you lose <VP>3</VP>.</>
     // ),
     lovebirds: winterVisitorCard(
         "Lovebirds",
