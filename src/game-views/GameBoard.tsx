@@ -20,11 +20,11 @@ import { influenceRegions, InfluenceData } from "../game-data/board/influence";
 
 interface WakeUpSpot extends WakeUpPosition {
     current: boolean;
-    color: PlayerColor;
 }
 
 interface Props {
     wakeUpOrder: (WakeUpSpot | null)[];
+    playerColors: Record<string, PlayerColor>;
     boardType: BoardType;
     currentSeason: Season;
     seasonOrder: Season[];
@@ -33,7 +33,7 @@ interface Props {
 }
 
 const GameBoard: React.FunctionComponent<Props> = props => {
-    const { boardType, currentSeason, seasonOrder, workerPlacements } = props;
+    const { boardType, currentSeason, seasonOrder, playerColors, workerPlacements } = props;
     const bonusesBySeason = wakeUpBonuses(boardType);
 
     const scrollableRef = React.useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                     <span className="GameBoard-currentSeason">{currentSeason}</span>
                     <ol className="GameBoard-wakeUpOrder">
                         {props.wakeUpOrder.map((pos, i) =>
-                            <WakeUpSpot key={i} pos={pos} season={currentSeason} i={i} />
+                            <WakeUpSpot key={i} pos={pos} playerColors={playerColors} season={currentSeason} i={i} />
                         )}
                     </ol>
                 </>
@@ -90,8 +90,12 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                             bonusesBySeason[season].length
                                                 ? <td key={season} className={cx("GameBoard-wakeUpCell", `GameBoard-wakeUpCell--${season}`)}>
                                                     <div className="GameBoard-wakeUpPosition">
-                                                        {pos && pos.season === season
-                                                            ? <Rooster color={pos.color} />
+                                                        {pos && (pos.season === season || (pos.nextYearPlayerId && season === "spring"))
+                                                            ? <Rooster color={
+                                                                pos.nextYearPlayerId && season === "spring"
+                                                                    ? playerColors[pos.nextYearPlayerId]
+                                                                    : playerColors[pos.playerId]
+                                                            } />
                                                             : renderBonus(
                                                                 bonusesBySeason[season][i],
                                                                 () => season === "spring"
@@ -109,7 +113,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                                             >
                                                                 <motion.span
                                                                     className="GameBoard-currentPlayerIndicator"
-                                                                    animate={{ borderColor: colors[pos.color] }}
+                                                                    animate={{ borderColor: colors[playerColors[pos.playerId]] }}
                                                                     initial={false}
                                                                     transition={{ ease: "easeInOut" }}
                                                                 />
@@ -171,9 +175,10 @@ const colors: Record<PlayerColor, string> = {
 
 const WakeUpSpot: React.FunctionComponent<{
     pos: WakeUpSpot | null;
+    playerColors: Record<string, PlayerColor>;
     season: Season;
     i: number;
-}> = ({ pos, season, i }) => {
+}> = ({ pos, playerColors, season, i }) => {
     const bonus = wakeUpBonuses("base").summer[i];
     const [anchorRef, maybeLayer] = useTooltip(
         "right",
@@ -190,7 +195,7 @@ const WakeUpSpot: React.FunctionComponent<{
         })}
     >
         {pos
-            ? <Rooster color={pos.color} />
+            ? <Rooster color={playerColors[pos.playerId]} />
             : season === "spring"
                 ? renderBonus(bonus, () => null, /* withAnimatedTokens */ true)
                 : i + 1}
@@ -202,7 +207,7 @@ const WakeUpSpot: React.FunctionComponent<{
             >
                 <motion.span
                     className="GameBoard-currentPlayerIndicator"
-                    animate={{ borderColor: colors[pos.color] }}
+                    animate={{ borderColor: playerColors[pos.playerId] }}
                     initial={false}
                     transition={{ ease: "easeInOut" }}
                 />
@@ -287,9 +292,9 @@ const mapStateToProps = (state: AppState) => {
             return !pos ? null : {
                 ...pos,
                 current: pos.playerId === currentTurn.playerId,
-                color: players[pos.playerId].color,
             };
         }),
+        playerColors: Object.fromEntries(Object.entries(players).map(([id, p]) => [id, p.color])),
         boardType: boardType ?? "base",
         currentSeason: season,
         seasonOrder: (["spring", "summer", "fall", "winter"] as const)

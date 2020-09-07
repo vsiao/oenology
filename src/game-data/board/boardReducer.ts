@@ -78,7 +78,7 @@ export const board = (state: GameState, action: GameAction): GameState => {
                     switch (action.choice) {
                         case "WAKE_UP":
                         case "DRAW_CARD":
-                            return gainWakeUpBonus(action.data as WakeUpChoiceData, state);
+                            return endTurn(gainWakeUpBonus(action.data as WakeUpChoiceData, state));
                         default:
                             return state;
                     }

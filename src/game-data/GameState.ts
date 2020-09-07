@@ -63,7 +63,11 @@ export default interface GameState {
 
 export interface WakeUpPosition {
     playerId: string;
-    season: Season;
+    season: Season | null;
+
+    // If set, a player has chosen this wake-up position
+    // for the next year (applicable to Tuscany board)
+    nextYearPlayerId?: string;
 }
 
 export type CurrentTurn =
