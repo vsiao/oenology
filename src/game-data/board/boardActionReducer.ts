@@ -21,7 +21,8 @@ export const boardAction = (
     seed: string,
     placementIdx?: number
 ): GameState => {
-    const hasBonus = !!boardActions[placement].choiceAt(placementIdx, state).bonusIcon;
+    const bonus = boardActions[placement].choiceAt(placementIdx, state).bonus;
+    const hasBonus = !!bonus;
     const player = state.players[state.currentTurn.playerId];
 
     switch (placement) {
@@ -34,11 +35,13 @@ export const boardAction = (
         case "buySell":
             return promptForAction(setPendingAction({ type: "buySell", hasBonus }, state), {
                 choices: [
-                    {
-                        id: "BOARD_SELL_GRAPES",
-                        label: "Sell grape(s)",
-                        disabledReason: needGrapesDisabledReason(state),
-                    },
+                    ...state.boardType === "base"
+                        ? [{
+                            id: "BOARD_SELL_GRAPES",
+                            label: "Sell grape(s)",
+                            disabledReason: needGrapesDisabledReason(state),
+                        }]
+                        : [],
                     {
                         id: "BOARD_BUY_FIELD",
                         label: "Buy a field",
@@ -76,7 +79,10 @@ export const boardAction = (
         }
         case "harvestField": {
             return promptToHarvest(
-                setPendingAction({ type: "harvestField", hasBonus }, state),
+                setPendingAction({
+                    type: "harvestField",
+                    hasBonus: bonus === "plusOne",
+                }, bonus === "gainCoin" ? gainCoins(1, state) : state),
                 hasBonus ? 2 : 1
             );
         }
@@ -98,9 +104,9 @@ export const boardAction = (
                 "summer",
                 setPendingAction({
                     type: "playVisitor",
-                    hasBonus,
+                    hasBonus: bonus === "playSummerVisitor",
                     placementIdx,
-                }, state)
+                }, bonus === "gainCoin" ? gainCoins(1, state) : state)
             );
         }
         case "playWinterVisitor": {
@@ -108,9 +114,9 @@ export const boardAction = (
                 "winter",
                 setPendingAction({
                     type: "playVisitor",
-                    hasBonus,
+                    hasBonus: bonus === "playWinterVisitor",
                     placementIdx,
-                }, state)
+                }, bonus === "gainCoin" ? gainCoins(1, state) : state)
             );
         }
         case "sellWine":

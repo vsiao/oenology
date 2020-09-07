@@ -24,9 +24,21 @@ export interface BoardAction {
     choices: (state: GameState) => PlacementChoice[];
     choiceAt: (i: number | undefined, state: GameState) => PlacementChoice;
 }
+
+export type PlacementBonus =
+    | "gainCoin"
+    | "gainVP"
+    | "drawOrder"
+    | "drawVine"
+    | "plantVine"
+    | "influence"
+    | "playSummerVisitor"
+    | "playWinterVisitor"
+    | "plusOne";
+
 interface PlacementChoice {
     label: React.ReactNode;
-    bonusIcon?: React.ReactNode;
+    bonus?: PlacementBonus;
     disabledReason?: string | undefined;
     idx: number | undefined; // undefined indicates grande is required
 }
@@ -39,7 +51,7 @@ const action = (
         numSpots: number;
     }) => {
         label: React.ReactNode;
-        bonusIcon?: React.ReactNode;
+        bonus?: PlacementBonus;
         disabledReason?: string | undefined;
     }
 ): BoardAction => {
@@ -68,11 +80,11 @@ const action = (
         choices: state => {
             const d = data(state);
             const firstChoice = choiceAt(firstEmptyIndex(state), state);
-            if (firstChoice?.bonusIcon) {
+            if (firstChoice?.bonus) {
                 // return all possible bonus placements
                 return new Array(numSpots(state)).fill(null)
                     .map((_, idx) => ({ ...choice(idx, d), idx }))
-                    .filter(({ bonusIcon }) => !!bonusIcon);
+                    .filter(({ bonus }) => !!bonus);
             } else {
                 return [firstChoice];
             }
@@ -89,7 +101,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Build one structure{
                     isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
                 }</>,
-                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                bonus: isBonusSpot ? "gainCoin" : undefined,
                 disabledReason: buildStructureDisabledReason(
                     state,
                     isBonusSpot ? { kind: "discount", amount: 1 } : undefined
@@ -105,7 +117,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Build one structure{
                     isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
                 }</>,
-                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                bonus: isBonusSpot ? "gainCoin" : undefined,
                 disabledReason: buildStructureDisabledReason(
                     state,
                     isBonusSpot ? { kind: "discount", amount: 1 } : undefined
@@ -127,7 +139,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                     : <>Buy/sell one field{
                         isBonusSpot ? <> and gain <VP>1</VP></> : null
                     }</>,
-                bonusIcon: isBonusSpot ? <VP>1</VP> : null,
+                bonus: isBonusSpot ? "gainVP" : undefined,
                 disabledReason: (boardType === "base" && hasGrapes(state)) ||
                     Object.values(player.fields)
                         .some(f =>
@@ -146,7 +158,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 (boardType !== "base" || numSpots > 1);
             return {
                 label: <>Draw {isBonusSpot ? "2 " : ""}<Order /></>,
-                bonusIcon: isBonusSpot ? <Order /> : null,
+                bonus: isBonusSpot ? "drawOrder" : undefined,
             };
         }
     ),
@@ -157,7 +169,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 (boardType !== "base" || numSpots > 1);
             return {
                 label: <>Draw {isBonusSpot ? "2 " : ""}<Vine /></>,
-                bonusIcon: isBonusSpot ? <Vine /> : null,
+                bonus: isBonusSpot ? "drawVine" : undefined,
             };
         }
     ),
@@ -169,7 +181,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Fill <Order />{
                     isBonusSpot ? <> and gain <VP>1</VP> extra</> : null
                 }</>,
-                bonusIcon: isBonusSpot ? <VP>1</VP> : null,
+                bonus: isBonusSpot ? "gainVP" : undefined,
                 disabledReason: fillOrderDisabledReason(state),
             };
         }
@@ -186,7 +198,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Give tour to gain <Coins>{
                     isBonusSpot ? "3" : "2"
                 }</Coins></>,
-                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                bonus: isBonusSpot ? "gainCoin" : undefined,
             };
         }
     ),
@@ -196,7 +208,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             if (boardType !== "base" && i === 1) {
                 return {
                     label: <>Harvest one field and gain <Coins>1</Coins></>,
-                    bonusIcon: <Coins>1</Coins>,
+                    bonus: "gainCoin",
                     disabledReason: harvestFieldDisabledReason(state),
                 };
             }
@@ -206,7 +218,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Harvest {
                     isBonusSpot ? "up to 2 fields" : "one field"
                 }</>,
-                bonusIcon: isBonusSpot ? "+1" : null,
+                bonus: isBonusSpot ? "plusOne" : undefined,
                 disabledReason: harvestFieldDisabledReason(state),
             };
         }
@@ -217,7 +229,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
                 label: <>Place or move STAR_TOKEN</>,
-                bonusIcon: isBonusSpot ? "STAR_TOKEN" : null,
+                bonus: isBonusSpot ? "influence" : undefined,
                 disabledReason: "Unimplemented",
             };
         }
@@ -231,7 +243,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Make up to {
                     isBonusSpot ? "3" : "2"
                 } wine tokens</>,
-                bonusIcon: isBonusSpot ? "+1" : null,
+                bonus: isBonusSpot ? "plusOne" : undefined,
                 disabledReason: needGrapesDisabledReason(state),
             };
         }
@@ -245,7 +257,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Plant {
                     isBonusSpot ? "up to 2 " : ""
                 }<Vine /></>,
-                bonusIcon: isBonusSpot ? <Vine /> : null,
+                bonus: isBonusSpot ? "plantVine" : undefined,
                 disabledReason: plantVinesDisabledReason(state),
             };
         }
@@ -256,7 +268,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             if (boardType !== "base" && i === 0) {
                 return {
                     label: <>Play <SummerVisitor /> and gain <Coins>1</Coins></>,
-                    bonusIcon: <Coins>1</Coins>,
+                    bonus: "gainCoin",
                     disabledReason: needCardOfTypeDisabledReason(state, "summerVisitor"),
                 };
             }
@@ -268,7 +280,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Play {
                     isBonusSpot ? "up to 2 " : ""
                 }<SummerVisitor /></>,
-                bonusIcon: isBonusSpot ? <SummerVisitor /> : null,
+                bonus: isBonusSpot ? "playSummerVisitor" : undefined,
                 disabledReason: needCardOfTypeDisabledReason(state, "summerVisitor"),
             };
         }
@@ -279,7 +291,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             if (boardType !== "base" && i === 0) {
                 return {
                     label: <>Play <WinterVisitor /> and gain <Coins>1</Coins></>,
-                    bonusIcon: <Coins>1</Coins>,
+                    bonus: "gainCoin",
                     disabledReason: needCardOfTypeDisabledReason(state, "winterVisitor"),
                 };
             }
@@ -291,7 +303,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Play {
                     isBonusSpot ? "up to 2 " : ""
                 }<WinterVisitor /></>,
-                bonusIcon: isBonusSpot ? <WinterVisitor /> : null,
+                bonus: isBonusSpot ? "playWinterVisitor" : undefined,
                 disabledReason: needCardOfTypeDisabledReason(state, "winterVisitor"),
             };
         }
@@ -302,7 +314,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
                 label: <>Sell one wine token</>,
-                bonusIcon: isBonusSpot ? "STAR_TOKEN" : null,
+                bonus: isBonusSpot ? "influence" : undefined,
                 disabledReason: "Unimplemented",
             };
         }
@@ -313,13 +325,13 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
                 label: <>
-                    Trade one for one
+                    Trade {isBonusSpot ? "up to 2" : "one"}
                     {" "}<Card /><Card style={{ marginLeft: "-.8em" }} /> /
                     {" "}<Coins>3</Coins> /
                     {" "}<VP>1</VP> /
                     {" "}<Grape>1</Grape>
                 </>,
-                bonusIcon: isBonusSpot ? "+1" : null,
+                bonus: isBonusSpot ? "plusOne" : undefined,
                 disabledReason: "Unimplemented",
             }
         }
@@ -333,7 +345,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 label: <>Pay <Coins>{
                     isBonusSpot ? "3" : "4"
                 }</Coins> to train <Worker /></>,
-                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                bonus: isBonusSpot ? "gainCoin" : undefined,
                 disabledReason: trainWorkerDisabledReason(state, isBonusSpot ? 3 : 4),
             };
         }
