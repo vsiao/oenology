@@ -218,6 +218,33 @@
     }
 }
 
+.GameBoard--tuscanyA .GameBoard-actionsScroller,
+.GameBoard--tuscanyB .GameBoard-actionsScroller {
+    overflow-x: auto;
+}
+.GameBoard--tuscanyA .GameBoard-seasons,
+.GameBoard--tuscanyB .GameBoard-seasons {
+    width: 100%;
+}
+@media (max-width: 2700px) {
+    .GameBoard--tuscanyA .GameBoard-seasons,
+    .GameBoard--tuscanyB .GameBoard-seasons {
+        width: calc(400% / 3);
+    }
+}
+@media (max-width: 2500px) {
+    .GameBoard--tuscanyA .GameBoard-seasons,
+    .GameBoard--tuscanyB .GameBoard-seasons {
+        width: 200%;
+    }
+}
+@media (max-width: 2000px) {
+    .GameBoard--tuscanyA .GameBoard-seasons,
+    .GameBoard--tuscanyB .GameBoard-seasons {
+        width: 400%;
+    }
+}
+
 .GameBoard-seasonHeader {
     font-weight: bold;
     height: 2em;

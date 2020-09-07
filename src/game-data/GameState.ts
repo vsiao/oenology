@@ -132,19 +132,23 @@ export type WorkerPlacementTurnPendingAction = (
 ) & { hasBonus: boolean };
 
 export type WorkerPlacement =
-    | "drawVine"
-    | "giveTour"
     | "buildStructure"
-    | "playSummerVisitor"
+    | "buildStructure2"
     | "buySell"
-    | "plantVine"
     | "drawOrder"
-    | "harvestField"
-    | "trainWorker"
-    | "playWinterVisitor"
-    | "makeWine"
+    | "drawVine"
     | "fillOrder"
     | "gainCoin"
+    | "giveTour"
+    | "influence"
+    | "plantVine"
+    | "playSummerVisitor"
+    | "playWinterVisitor"
+    | "harvestField"
+    | "makeWine"
+    | "sellWine"
+    | "trade"
+    | "trainWorker"
     | "yokeHarvest"
     | "yokeUproot";
 

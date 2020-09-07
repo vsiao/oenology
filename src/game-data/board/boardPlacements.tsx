@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
+import Card, { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
 import GameState, { WorkerPlacement, Season, BoardType } from "../GameState";
@@ -16,7 +16,7 @@ import {
     uprootDisabledReason,
 } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
-import WineGlass from "../../game-views/icons/WineGlass";
+import Grape from "../../game-views/icons/Grape";
 
 export interface BoardAction {
     type: WorkerPlacement,
@@ -95,6 +95,22 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                     isBonusSpot ? { kind: "discount", amount: 1 } : undefined
                 ),
             }
+        }
+    ),
+    buildStructure2: action(
+        "buildStructure2",
+        (i, { state }) => {
+            const isBonusSpot = i === 0;
+            return {
+                label: <>Build one structure{
+                    isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
+                }</>,
+                bonusIcon: isBonusSpot ? <Coins>1</Coins> : null,
+                disabledReason: buildStructureDisabledReason(
+                    state,
+                    isBonusSpot ? { kind: "discount", amount: 1 } : undefined
+                ),
+            };
         }
     ),
     buySell: action(
@@ -188,10 +204,21 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 (boardType !== "base" || numSpots > 1);
             return {
                 label: <>Harvest {
-                    isBonusSpot ? "up to 2" : "one"
-                } field</>,
+                    isBonusSpot ? "up to 2 fields" : "one field"
+                }</>,
                 bonusIcon: isBonusSpot ? "+1" : null,
                 disabledReason: harvestFieldDisabledReason(state),
+            };
+        }
+    ),
+    influence: action(
+        "influence",
+        (i, { numSpots }) => {
+            const isBonusSpot = numSpots > 1 && i === 0;
+            return {
+                label: <>Place or move STAR_TOKEN</>,
+                bonusIcon: isBonusSpot ? "STAR_TOKEN" : null,
+                disabledReason: "Unimplemented",
             };
         }
     ),
@@ -203,7 +230,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             return {
                 label: <>Make up to {
                     isBonusSpot ? "3" : "2"
-                } <WineGlass /></>,
+                } wine tokens</>,
                 bonusIcon: isBonusSpot ? "+1" : null,
                 disabledReason: needGrapesDisabledReason(state),
             };
@@ -267,6 +294,34 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                 bonusIcon: isBonusSpot ? <WinterVisitor /> : null,
                 disabledReason: needCardOfTypeDisabledReason(state, "winterVisitor"),
             };
+        }
+    ),
+    sellWine: action(
+        "sellWine",
+        (i, { numSpots }) => {
+            const isBonusSpot = numSpots > 1 && i === 0;
+            return {
+                label: <>Sell one wine token</>,
+                bonusIcon: isBonusSpot ? "STAR_TOKEN" : null,
+                disabledReason: "Unimplemented",
+            };
+        }
+    ),
+    trade: action(
+        "trade",
+        (i, { numSpots }) => {
+            const isBonusSpot = numSpots > 1 && i === 0;
+            return {
+                label: <>
+                    Trade one for one
+                    {" "}<Card /><Card style={{ marginLeft: "-.8em" }} /> /
+                    {" "}<Coins>3</Coins> /
+                    {" "}<VP>1</VP> /
+                    {" "}<Grape>1</Grape>
+                </>,
+                bonusIcon: isBonusSpot ? "+1" : null,
+                disabledReason: "Unimplemented",
+            }
         }
     ),
     trainWorker: action(
@@ -337,28 +392,28 @@ export const boardActionsBySeason = (state: GameState): Record<Season, BoardActi
         case "tuscanyB":
             return {
                 spring: [
-                    boardActions.drawVine, // draw 0
-                    boardActions.giveTour, // gain 1
-                    boardActions.buildStructure, // gain 1
-                    // place or move star token // star 1
+                    boardActions.drawVine,
+                    boardActions.giveTour,
+                    boardActions.buildStructure,
+                    boardActions.influence,
                 ],
                 summer: [
-                    boardActions.playSummerVisitor, // gain 0 play 1
-                    boardActions.plantVine, // plant 0
-                    // trade // +1 1
-                    boardActions.buySell, // gainVP 0
+                    boardActions.playSummerVisitor,
+                    boardActions.plantVine,
+                    boardActions.trade,
+                    boardActions.buySell,
                 ],
                 fall: [
-                    boardActions.drawOrder, // draw 0
-                    boardActions.harvestField, // +1 0 gain 1
-                    boardActions.makeWine, // +1 0
-                    // build 2 // gain 0
+                    boardActions.drawOrder,
+                    boardActions.harvestField,
+                    boardActions.makeWine,
+                    boardActions.buildStructure2,
                 ],
                 winter: [
-                    boardActions.playWinterVisitor, // gain 0 play 1
-                    boardActions.trainWorker, // gain 0
-                    // sell wine // star 1
-                    boardActions.fillOrder, // gainVP 1
+                    boardActions.playWinterVisitor,
+                    boardActions.trainWorker,
+                    boardActions.sellWine,
+                    boardActions.fillOrder,
                 ],
             };
     }

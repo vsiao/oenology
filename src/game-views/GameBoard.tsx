@@ -41,9 +41,17 @@ const GameBoard: React.FunctionComponent<Props> = props => {
     React.useEffect(() => {
         const scrollNode = scrollableRef.current;
         if (scrollNode) {
-            const targetPct = seasonOrder.indexOf(currentSeason) / (seasonOrder.length - 1);
+            const availableScroll = scrollNode.scrollWidth - scrollNode.clientWidth;
+            const numSeasonsVisible = seasonOrder.length * scrollNode.clientWidth / scrollNode.scrollWidth;
+            if (numSeasonsVisible === seasonOrder.length) {
+                return;
+            }
+            const targetPct = Math.min(
+                1,
+                seasonOrder.indexOf(currentSeason) / (seasonOrder.length - numSeasonsVisible)
+            );
             scrollNode.scroll({
-                left: targetPct * scrollNode.scrollWidth,
+                left: targetPct * availableScroll,
                 behavior: "smooth",
             });
         }

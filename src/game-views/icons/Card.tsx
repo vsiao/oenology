@@ -5,10 +5,11 @@ import "./Card.css";
 interface Props {
     className?: string;
     type?: CardType; 
+    style?: React.CSSProperties;
 }
 
 const Card: React.FunctionComponent<Props> = props => {
-   return <span className={`Card Card--${props.type}`}>
+   return <span className={`Card Card--${props.type}`} style={props.style}>
        {props.children || <>&nbsp;</>}
     </span>;
 };

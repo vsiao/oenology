@@ -26,6 +26,7 @@ export const boardAction = (
 
     switch (placement) {
         case "buildStructure":
+        case "buildStructure2":
             return promptToBuildStructure(
                 setPendingAction({ type: "buildStructure", hasBonus }, state),
                 hasBonus ? { kind: "discount", amount: 1 } : undefined
@@ -79,6 +80,9 @@ export const boardAction = (
                 hasBonus ? 2 : 1
             );
         }
+        case "influence":
+            return state; // TODO
+
         case "makeWine": {
             return promptToMakeWine(
                 setPendingAction({ type: "makeWine", hasBonus }, state),
@@ -109,6 +113,12 @@ export const boardAction = (
                 }, state)
             );
         }
+        case "sellWine":
+            return state; // TODO
+
+        case "trade":
+            return state; // TODO
+
         case "trainWorker": {
             return endTurn(trainWorker(payCoins(hasBonus ? 3 : 4, state)));
         }
