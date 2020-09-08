@@ -16,3 +16,24 @@
     transform: translate3d(-50%, -50%, 0);
     width: 100%;
 }
+.StarToken-icon--blue {
+    fill: royalblue;
+}
+.StarToken-icon--green {
+    fill: seagreen;
+}
+.StarToken-icon--orange {
+    fill: darkorange;
+}
+.StarToken-icon--purple {
+    fill: purple;
+}
+.StarToken-icon--red {
+    fill: firebrick;
+}
+.StarToken-icon--yellow {
+    fill: gold;
+}
+.StarToken-icon--temp {
+    fill: #999;
+}

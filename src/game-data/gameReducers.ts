@@ -8,6 +8,7 @@ import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { placeGrapes } from "./shared/grapeWineReducers";
 import { isControllingPlayer } from "./shared/sharedSelectors";
+import { GameOptions } from "../store/AppState";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
@@ -80,9 +81,9 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
             players.map((p, i) => [
                 p.id,
                 action.options && action.options.multiInheritance
-                    ? initPlayer(p, [mamas[2*i], mamas[2*i+1]], [papas[2*i], papas[2*i+1]])
+                    ? initPlayer(p, action.options, [mamas[2*i], mamas[2*i+1]], [papas[2*i], papas[2*i+1]])
                     // #PreGameShuffle
-                    : initPlayer(p, [p.mama ?? mamas[i]], [p.papa ?? papas[i]])
+                    : initPlayer(p, action.options, [p.mama ?? mamas[i]], [p.papa ?? papas[i]])
             ])
         ),
         tableOrder: players.map(({ id }) => id),
@@ -118,6 +119,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
 
 const initPlayer = (
     { id, name, color }: PlayerInit,
+    options: GameOptions | undefined,
     mamas: MamaId[],
     papas: PapaId[]
 ): PlayerState => {
@@ -160,6 +162,9 @@ const initPlayer = (
             mediumCellar: StructureState.Unbuilt,
             largeCellar: StructureState.Unbuilt
         },
+        influence: options?.tuscanyBoard
+            ? new Array(6).fill(null).map((_, i) => ({ id: `star_${color}${i}` }))
+            : [],
         mamas,
         papas,
     };

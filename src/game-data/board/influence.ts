@@ -1,6 +1,6 @@
 import { BoardType } from "../GameState";
 
-type Region =
+export type InfluenceRegion =
     | "arezzo"
     | "firenze"
     | "grosseto"
@@ -19,12 +19,12 @@ type PlacementBonus =
     | "drawWinterVisitor"
 
 export interface InfluenceData {
-    name: Region;
+    name: InfluenceRegion;
     vp: number;
     bonus: PlacementBonus;
 }
 
-const regionData: Record<Region, InfluenceData> = {
+const regionData: Record<InfluenceRegion, InfluenceData> = {
     arezzo: {
         name: "arezzo",
         vp: 2,
@@ -63,7 +63,10 @@ const regionData: Record<Region, InfluenceData> = {
 };
 
 export const influenceRegions = (boardType: BoardType): InfluenceData[] => {
-    const regionNames: Region[] = boardType === "tuscanyA"
+    if (boardType === "base") {
+        return [];
+    }
+    const regionNames: InfluenceRegion[] = boardType === "tuscanyA"
         ? ["arezzo", "firenze", "grosseto", "livorno", "pisa", "siena"]
         : ["arezzo", "firenze", "grosseto", "livorno", "lucca", "pisa", "siena"];
     return regionNames.map(r => regionData[r]);

@@ -31,6 +31,7 @@ interface Props {
     seasonOrder: Season[];
     actionsBySeason: Record<Season, BoardAction[]>;
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
+    influenceData: InfluenceRegion[];
 }
 
 const GameBoard: React.FunctionComponent<Props> = props => {
@@ -131,7 +132,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                     </div>
                     <div className="GameBoard-influence">
                         <img className="GameBoard-influenceMap" alt="Map of Tuscany" src="/influence-map.png" />
-                        {influenceRegions(boardType).map(renderInfluenceRegion)}
+                        {props.influenceData.map(renderInfluenceRegion)}
                     </div>
                 </>}
         </div>
@@ -258,13 +259,25 @@ const renderBonus = (
     }
 }
 
-const renderInfluenceRegion = (region: InfluenceData) => {
+interface InfluenceRegion extends InfluenceData {
+    tokens: {
+        id: string;
+        color: PlayerColor;
+    }[];
+}
+
+const renderInfluenceRegion = (region: InfluenceRegion) => {
     return <div
         key={region.name}
         className={cx("GameBoard-influenceRegion", `GameBoard-influenceRegion--${region.name}`)}
     >
         <span>{renderInfluencePlacementBonus(region)} <VictoryPoints>{region.vp}</VictoryPoints></span>
         <span className="GameBoard-regionName">{region.name}</span>
+        <ul className="GameBoard-mapTokens">
+            {region.tokens.map(t =>
+                <li key={t.id}><StarToken className="GameBoard-mapStarToken" color={t.color} /></li>
+            )}
+        </ul>
     </div>;
 };
 const renderInfluencePlacementBonus = ({ bonus }: InfluenceData): React.ReactNode => {
@@ -303,6 +316,16 @@ const mapStateToProps = (state: AppState) => {
             .filter(s => actionsBySeason[s].length > 0),
         actionsBySeason,
         workerPlacements,
+        influenceData: influenceRegions(boardType ?? "base").map(d => ({
+            ...d,
+            tokens: Object.values(players)
+                .map(p =>
+                    p.influence
+                        .filter(i => i.placement === d.name)
+                        .map(i => ({ ...i, color: p.color }))
+                )
+                .flat()
+        })),
     };
 };
 

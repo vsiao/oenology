@@ -1,3 +1,4 @@
+import { InfluenceRegion } from "./board/influence";
 import { SummerVisitorId, VisitorId, WinterVisitorId } from "./visitors/visitorCards";
 import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
@@ -180,6 +181,7 @@ export interface PlayerState {
     crushPad: Record<GrapeColor, TokenMap>;
     cellar: Record<WineColor, TokenMap>;
     structures: Record<StructureId, StructureState>;
+    influence: InfluenceToken[];
     mamas: MamaId[];
     papas: PapaId[];
 }
@@ -198,6 +200,11 @@ export interface BoardWorker {
     color: PlayerColor;
     isTemp?: boolean;
     source?: "Planner" | "Administrator";
+}
+
+export interface InfluenceToken {
+    id: string;
+    placement?: InfluenceRegion;
 }
 
 export type CardId =
