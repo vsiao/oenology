@@ -27,9 +27,9 @@ import {
     chooseMamaPapa,
     chooseWakeUp,
     endTurn,
-    gainWakeUpBonus,
     passToNextSeason,
     setPendingAction,
+    gainWakeUpBonusAndMaybeCottage,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
@@ -64,20 +64,6 @@ export const board = (state: GameState, action: GameAction): GameState => {
         }
         case "workerPlacement":
             return workerPlacement(state, action);
-
-        case "passToNextSeason":
-            switch (action.type) {
-                case "CHOOSE_ACTION":
-                    switch (action.choice) {
-                        case "WAKE_UP":
-                        case "DRAW_CARD":
-                            return endTurn(gainWakeUpBonus(action.data as WakeUpChoiceData, state));
-                        default:
-                            return state;
-                    }
-                default:
-                    return state;
-            }
 
         case "fallVisitor":
             switch (action.type) {
@@ -288,6 +274,24 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
         case "playVisitor":
             return visitor(state, action);
+
+        case "passToNextSeason":
+            switch (action.type) {
+                case "CHOOSE_ACTION":
+                    switch (action.choice) {
+                        case "WAKE_UP":
+                        case "DRAW_CARD":
+                            return gainWakeUpBonusAndMaybeCottage(action.data as WakeUpChoiceData, state);
+                        case "FALL_DRAW_SUMMER":
+                            return endTurn(drawCards(state, action._key!, { summerVisitor: 1 }));
+                        case "FALL_DRAW_WINTER":
+                            return endTurn(drawCards(state, action._key!, { winterVisitor: 1 }));
+                        default:
+                            return state;
+                    }
+                default:
+                    return state;
+            }
     }
 };
 

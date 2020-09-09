@@ -101,7 +101,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             return {
                 label: <>Build one structure{
                     isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
-                } or give tour to gain <Coins>{isBonusSpot ? 3 : 2}</Coins></>,
+                } or Give tour to gain <Coins>{isBonusSpot ? 3 : 2}</Coins></>,
                 bonus: isBonusSpot ? "gainCoin" : undefined,
             };
         }

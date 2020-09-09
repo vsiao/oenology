@@ -75,7 +75,6 @@ export type CurrentTurn =
     | { type: "mamaPapa"; playerId: string; }
     | { type: "wakeUpOrder"; playerId: string; }
     | WorkerPlacementTurn
-    | { type: "passToNextSeason", playerId: string; }
     | { type: "fallVisitor"; playerId: string; }
     | { type: "endOfYearDiscard"; playerId: string; };
 
@@ -124,7 +123,7 @@ export interface PlayVisitorPendingAction {
 }
 export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction
-    | { type: "buildOrGiveTour" }
+    | { type: "buildOrGiveTour"; }
     | { type: "buySell"; }
     | { type: "sellGrapes"; }
     | { type: "buyField"; }
@@ -135,6 +134,7 @@ export type WorkerPlacementTurnPendingAction = (
     | { type: "uproot"; }
     | { type: "makeWine"; }
     | { type: "fillOrder"; orderId?: OrderId; }
+    | { type: "passToNextSeason"; nextSeason: Season; }
 ) & { hasBonus: boolean };
 
 export type WorkerPlacement =

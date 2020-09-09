@@ -149,6 +149,8 @@ const renderPendingActionStatus = (
             return <span>{playerName} is selling grape(s).</span>;
         case "uproot":
             return <span>{playerName} is uprooting a <Vine />.</span>;
+        case "passToNextSeason":
+            return <span>{playerName} is passing to the {pendingAction.nextSeason}.</span>;
     }
 };
 

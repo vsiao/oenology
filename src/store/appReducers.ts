@@ -101,12 +101,13 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
                         Object.entries(gameState.players).map(([playerId, p]) =>
                             [playerId, {
                                 ...p,
-                                cardsInHand: p.cardsInHand || [],
+                                influence: p.influence ?? [],
+                                cardsInHand: p.cardsInHand ?? [],
                                 fields: Object.fromEntries(
                                     Object.entries(p.fields).map(([fieldId, f]) =>
                                         [fieldId, {
                                             ...f,
-                                            vines: f.vines || []
+                                            vines: f.vines ?? []
                                         }]
                                     )
                                 ) as PlayerState["fields"],

@@ -48,9 +48,6 @@ export const endTurn = (state: GameState): GameState => {
         case "workerPlacement":
             return endWorkerPlacementTurn(state);
 
-        case "passToNextSeason":
-            return endWorkerPlacementTurn(state);
-
         case "fallVisitor":
             return endFallVisitorTurn(state);
 
@@ -297,7 +294,32 @@ export const chooseWakeUp = (
         : gainWakeUpBonus(wakeUpData, state);
 };
 
-export const gainWakeUpBonus = (
+export const gainWakeUpBonusAndMaybeCottage = (
+    wakeUpData: WakeUpChoiceData,
+    state: GameState
+): GameState => {
+    state = gainWakeUpBonus(wakeUpData, state);
+    const playerId = state.currentTurn.playerId;
+    if (
+        // If the player hasn't built a cottage, OR
+        !state.players[state.currentTurn.playerId].structures.cottage ||
+        // they're not in the fall season
+        state.wakeUpOrder.find(pos => pos?.playerId === playerId)!.season !== "fall"
+    ) {
+        // Just end their turn.
+        return endTurn(state);
+    }
+    // Otherwise, prompt to draw a visitor!
+    return promptForAction(state, {
+        description: <p><em>Cottage: Draw <SummerVisitor /> or <WinterVisitor /> each fall.</em></p>,
+        choices: [
+            { id: "FALL_DRAW_SUMMER", label: <>Draw 1 <SummerVisitor /></>, },
+            { id: "FALL_DRAW_WINTER", label: <>Draw 1 <WinterVisitor /></>, },
+        ],
+    });
+}
+
+const gainWakeUpBonus = (
     wakeUpData: WakeUpChoiceData,
     state: GameState,
 ): GameState => {
@@ -710,10 +732,6 @@ export const endVisitor = (state: GameState): GameState => {
     return endTurn(state);
 };
 
-//
-// Pass-to-next-season turns
-// ----------------------------------------------------------------------------
-
 export const passToNextSeason = (state: GameState): GameState => {
     const playerId = state.currentTurn.playerId;
     const seasons: Season[] = state.boardType === "base"
@@ -724,24 +742,26 @@ export const passToNextSeason = (state: GameState): GameState => {
     ];
     const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
     const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
-
-    state = pushActivityLog({ type: "pass", playerId }, state);
-    if (nextSeason === "spring") {
-        return beginEOYDiscardTurn(
-            playerId,
-            doEOYForPlayer(playerId, { ...state, wakeUpOrder })
-        );
-    }
     wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
-    state = { ...state, wakeUpOrder };
 
+    state = pushActivityLog(
+        { type: "pass", playerId },
+        setPendingAction({ type: "passToNextSeason", nextSeason, hasBonus: false }, {
+            ...state,
+            wakeUpOrder
+        })
+    );
     if (state.boardType === "base") {
         return endTurn(state);
     }
+    if (nextSeason === "spring") {
+        return beginEOYDiscardTurn(playerId, doEOYForPlayer(playerId, state));
+    }
+
+    // In Tuscany, passing into the next season may yield a bonus per the wake-up chart
     const bonus = wakeUpBonuses(state.boardType!)[nextSeason][idx];
     switch (bonus) {
         case "drawCard":
-            state = { ...state, currentTurn: { type: "passToNextSeason", playerId } };
             return promptForAction<WakeUpChoiceData>(state, {
                 choices: cardTypesInPlay(state).map(cardType => ({
                     id: "DRAW_CARD",
@@ -750,7 +770,6 @@ export const passToNextSeason = (state: GameState): GameState => {
                 })),
             });
         case "drawVisitor":
-            state = { ...state, currentTurn: { type: "passToNextSeason", playerId } };
             return promptForAction<WakeUpChoiceData>(state, {
                 choices: (["summerVisitor", "winterVisitor"] as const).map(cardType => ({
                     id: "DRAW_CARD",
@@ -760,7 +779,7 @@ export const passToNextSeason = (state: GameState): GameState => {
             });
         case "influence": // TODO
         default:
-            return endTurn(gainWakeUpBonus({ idx }, state));
+            return gainWakeUpBonusAndMaybeCottage({ idx }, state);
     }
 };
 
