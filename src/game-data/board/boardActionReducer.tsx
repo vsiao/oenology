@@ -180,12 +180,12 @@ const promptToTrade = (state: GameState, hasBonus: boolean) => {
             },
             {
                 id: "TRADE_PAY",
-                label: <>Pay <Coins>2</Coins></>,
-                disabledReason: moneyDisabledReason(state, 2),
+                label: <>Pay <Coins>3</Coins></>,
+                disabledReason: moneyDisabledReason(state, 3),
             },
             {
                 id: "TRADE_LOSE",
-                label: <>Lose <VictoryPoints>2</VictoryPoints></>,
+                label: <>Lose <VictoryPoints>1</VictoryPoints></>,
             },
             {
                 id: "TRADE_DISCARD_GRAPE",

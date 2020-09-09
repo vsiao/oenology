@@ -15,7 +15,7 @@ import { AppState } from "../../store/AppState";
 interface ActionChoice {
     type: WorkerPlacement | null;
     label: React.ReactNode;
-    idx?: number | undefined;
+    idx?: number;
     disabledReason?: string | undefined;
     hasSpace: boolean;
 }
@@ -28,7 +28,7 @@ interface Props {
     onPlaceWorker: (
         placement: WorkerPlacement | null,
         workerType: WorkerType,
-        idx: number | undefined
+        idx: number | null
     ) => void;
     undo?: () => void;
 }
@@ -93,7 +93,7 @@ const PlaceWorkerPrompt: React.FunctionComponent<Props> = ({
                                 (requiresGrande ? "No space. Use a grande worker?" : undefined) ||
                                 (noAvailableWorkers ? "No available workers." : undefined)
                             }
-                            onClick={() => onPlaceWorker(type, selectedWorkerType, idx)}
+                            onClick={() => onPlaceWorker(type, selectedWorkerType, idx ?? null)}
                         >
                             {label}
                         </ChoiceButton>
@@ -177,8 +177,8 @@ const mapDispatchToProps = (
     { playerId, undoable }: { playerId: string; undoable: boolean }
 ) => {
     return {
-        onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType) =>
-            dispatch(placeWorker(placement, workerType, playerId)),
+        onPlaceWorker: (placement: WorkerPlacement | null, workerType: WorkerType, idx: number | null) =>
+            dispatch(placeWorker(placement, workerType, playerId, idx)),
         undo: undoable ? () => dispatch(undo(playerId)) : undefined,
     };
 };

@@ -17,7 +17,7 @@ import Card, { SummerVisitor, WinterVisitor, Order, Vine } from "../../game-view
 import Coins from "../../game-views/icons/Coins";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Worker from "../../game-views/icons/Worker";
-import { needCardOfTypeDisabledReason, cardTypesInPlay, gameIsOver } from "./sharedSelectors";
+import { needCardOfTypeDisabledReason, cardTypesInPlay, isLastWinter } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
 import { boardActionsBySeason } from "../board/boardPlacements";
@@ -325,7 +325,7 @@ const gainWakeUpBonus = (
 ): GameState => {
     const playerId = state.currentTurn.playerId;
     const idx = state.wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
-    const season = state.wakeUpOrder[idx]!.season!;
+    const season = state.wakeUpOrder[idx]!.season as Season;
     const playerState = state.players[playerId];
     const bonus = wakeUpBonuses(state.boardType!)[season][idx];
     const seed = state.lastActionKey!;
@@ -740,22 +740,29 @@ export const passToNextSeason = (state: GameState): GameState => {
     const nextSeason = seasons[
         (seasons.findIndex(s => s === state.season) + 1) % seasons.length
     ];
-    const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
-    const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
-    wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
 
     state = pushActivityLog(
         { type: "pass", playerId },
-        setPendingAction({ type: "passToNextSeason", nextSeason, hasBonus: false }, {
-            ...state,
-            wakeUpOrder
-        })
+        setPendingAction({ type: "passToNextSeason", nextSeason, hasBonus: false }, state)
     );
     if (state.boardType === "base") {
         return endTurn(state);
     }
+
+    const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
+    const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
+
     if (nextSeason === "spring") {
-        return beginEOYDiscardTurn(playerId, doEOYForPlayer(playerId, state));
+        state = doEOYForPlayer(playerId, state);
+        if (!isLastWinter(state)) {
+            return beginEOYDiscardTurn(playerId, state);
+        }
+        // If the game's over, don't bother discarding & choosing wake-up
+        wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: "gameOver" };
+        return endTurn({ ...state, wakeUpOrder });
+    } else {
+        wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
+        state = { ...state, wakeUpOrder };
     }
 
     // In Tuscany, passing into the next season may yield a bonus per the wake-up chart
@@ -832,7 +839,7 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 // ----------------------------------------------------------------------------
 
 const endYear = (state: GameState): GameState => {
-    if (gameIsOver(state)) {
+    if (isLastWinter(state)) {
         // End of game
         return displayGameOverPrompt(
             pushActivityLog(

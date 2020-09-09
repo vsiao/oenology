@@ -59,7 +59,7 @@ const action = (
     const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
     const firstEmptyIndex = (state: GameState) => {
         const placements = state.workerPlacements[type];
-        const firstEmpty = placements.indexOf(null); // find first empty
+        const firstEmpty = placements.findIndex(w => !w); // find first empty
         const i = firstEmpty < 0 ? placements.length : firstEmpty;
         return i >= numSpots(state)
             ? undefined // must use grande to place
@@ -81,11 +81,12 @@ const action = (
         choices: state => {
             const d = data(state);
             const firstChoice = choiceAt(firstEmptyIndex(state), state);
+            const placements = state.workerPlacements[type];
             if (firstChoice?.bonus) {
                 // return all possible bonus placements
                 return new Array(numSpots(state)).fill(null)
                     .map((_, idx) => ({ ...choice(idx, d), idx }))
-                    .filter(({ bonus }) => !!bonus);
+                    .filter(({ bonus }, i) => !placements[i] && !!bonus);
             } else {
                 return [firstChoice];
             }

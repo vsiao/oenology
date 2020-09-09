@@ -365,11 +365,10 @@ export const moneyDisabledReason = (
     return state.players[playerId].coins < cost ? "You don't have enough money." : undefined;
 };
 
-export const gameIsOver = (state: GameState) => {
+export const isLastWinter = (state: GameState) => {
     const threshold = state.boardType === "base" ? 20 : 25;
-    return state.season === "winter"
-        && state.wakeUpOrder.every(pos => !pos || pos.season !== "winter")
-        && Object.values(state.players).some(p => p.victoryPoints >= threshold);
+    return state.season === "winter" &&
+        Object.values(state.players).some(p => p.victoryPoints >= threshold);
 };
 
 export const residualPaymentsDisabledReason = (state: GameState, n: number): string | undefined => {

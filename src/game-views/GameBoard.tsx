@@ -92,7 +92,11 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                             bonusesBySeason[season].length
                                                 ? <td key={season} className={cx("GameBoard-wakeUpCell", `GameBoard-wakeUpCell--${season}`)}>
                                                     <div className="GameBoard-wakeUpPosition">
-                                                        {pos && (pos.season === season || (pos.nextYearPlayerId && season === "spring"))
+                                                        {pos && (
+                                                            pos.season === season ||
+                                                            (pos.nextYearPlayerId && season === "spring") ||
+                                                            (pos.season === "gameOver" && season === "winter")
+                                                        )
                                                             ? <Rooster color={
                                                                 pos.nextYearPlayerId && season === "spring"
                                                                     ? playerColors[pos.nextYearPlayerId]

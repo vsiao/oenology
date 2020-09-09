@@ -163,7 +163,7 @@ export const trainWorker = (
 export const placeWorker = (
     type: WorkerType,
     placement: WorkerPlacement,
-    placementIdx: number | undefined,
+    placementIdx: number | null,
     state: GameState,
     source?: "Planner" | "Administrator"
 ): [GameState, number] => {

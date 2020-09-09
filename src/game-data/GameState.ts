@@ -64,7 +64,7 @@ export default interface GameState {
 
 export interface WakeUpPosition {
     playerId: string;
-    season: Season | null;
+    season: null | Season | "gameOver";
 
     // If set, a player has chosen this wake-up position
     // for the next year (applicable to Tuscany board)
