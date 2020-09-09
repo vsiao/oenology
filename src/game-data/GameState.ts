@@ -124,6 +124,7 @@ export interface PlayVisitorPendingAction {
 }
 export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction
+    | { type: "buildOrGiveTour" }
     | { type: "buySell"; }
     | { type: "sellGrapes"; }
     | { type: "buyField"; }
@@ -137,8 +138,8 @@ export type WorkerPlacementTurnPendingAction = (
 ) & { hasBonus: boolean };
 
 export type WorkerPlacement =
+    | "buildOrGiveTour"
     | "buildStructure"
-    | "buildStructure2"
     | "buySell"
     | "drawOrder"
     | "drawVine"

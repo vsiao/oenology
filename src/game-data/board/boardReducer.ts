@@ -17,6 +17,7 @@ import {
     promptToFillOrder,
     promptToPlant,
     promptToChooseGrapes,
+    promptToBuildStructure,
 } from "../prompts/promptReducers";
 import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
@@ -33,7 +34,7 @@ import {
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
-import { boardAction } from "./boardActionReducer";
+import { boardAction, giveTour } from "./boardActionReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
@@ -65,14 +66,6 @@ export const board = (state: GameState, action: GameAction): GameState => {
             return workerPlacement(state, action);
 
         case "passToNextSeason":
-            // retrieve workers
-            // age grapes and wine
-            // discard to 7 cards
-            // collect residual payments
-            // choose wake-up position
-
-            // might need to prompt card type draw
-            // or place/move influence
             switch (action.type) {
                 case "CHOOSE_ACTION":
                     switch (action.choice) {
@@ -130,6 +123,22 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
     const pendingAction = currentTurn.pendingAction;
 
     switch (pendingAction.type) {
+        case "buildOrGiveTour":
+            if (action.type !== "CHOOSE_ACTION") {
+                return state;
+            }
+            const hasBonus = pendingAction.hasBonus;
+            switch (action.choice) {
+                case "BOARD_GIVE_TOUR":
+                    return endTurn(giveTour(hasBonus, state));
+                case "BOARD_BUILD":
+                    return promptToBuildStructure(
+                        setPendingAction({ type: "buildStructure", hasBonus }, state),
+                        hasBonus ? { kind: "discount", amount: 1 } : undefined
+                    );
+                default:
+                    return state;
+            }
         case "buildStructure": {
             if (action.type !== "BUILD_STRUCTURE") {
                 return state;

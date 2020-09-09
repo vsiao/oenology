@@ -104,6 +104,8 @@ const renderPendingActionStatus = (
     const playerName = <strong>{playerNames[playerId]}</strong>;
 
     switch (pendingAction.type) {
+        case "buildOrGiveTour":
+            return <span>{playerName} is building a structure or giving a tour.</span>;
         case "buildStructure":
             return <span>{playerName} is building a structure.</span>;
         case "buyField":

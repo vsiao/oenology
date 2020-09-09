@@ -90,8 +90,8 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
         grapeIndex: action.startingPlayer ?? Math.floor(random() * players.length),
         wakeUpOrder: [null, null, null, null, null, null, null],
         workerPlacements: {
+            buildOrGiveTour: [],
             buildStructure: [],
-            buildStructure2: [],
             buySell: [],
             drawOrder: [],
             drawVine: [],

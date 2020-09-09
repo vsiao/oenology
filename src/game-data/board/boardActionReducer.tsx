@@ -10,10 +10,22 @@ import {
     promptToUproot
 } from "../prompts/promptReducers";
 import { setPendingAction, endTurn } from "../shared/turnReducers";
-import { needGrapesDisabledReason, buyFieldDisabledReason } from "../shared/sharedSelectors";
+import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason } from "../shared/sharedSelectors";
 import { drawCards } from "../shared/cardReducers";
 import { gainCoins, markStructureUsed, trainWorker, payCoins, gainVP } from "../shared/sharedReducers";
 import { boardActions } from "./boardPlacements";
+import * as React from "react";
+import Coins from "../../game-views/icons/Coins";
+
+export const giveTour = (withBonus: boolean, state: GameState) => {
+    const player = state.players[state.currentTurn.playerId];
+    const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
+        Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
+    return gainCoins(
+        withBonus ? 3 : 2,
+        tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state
+    );
+};
 
 export const boardAction = (
     placement: WorkerPlacement,
@@ -26,8 +38,24 @@ export const boardAction = (
     const player = state.players[state.currentTurn.playerId];
 
     switch (placement) {
+        case "buildOrGiveTour":
+            return promptForAction(setPendingAction({ type: "buildOrGiveTour", hasBonus }, state), {
+                choices: [
+                    {
+                        id: "BOARD_GIVE_TOUR",
+                        label: <>Give tour to gain <Coins>{hasBonus ? 3 : 2}</Coins></>,
+                    },
+                    {
+                        id: "BOARD_BUILD",
+                        label: <>Build one structure{hasBonus ? <> at a <Coins>1</Coins> discount</> : null}</>,
+                        disabledReason: buildStructureDisabledReason(
+                            state,
+                            hasBonus ? { kind: "discount", amount: 1 } : undefined
+                        ),
+                    }
+                ]
+            });
         case "buildStructure":
-        case "buildStructure2":
             return promptToBuildStructure(
                 setPendingAction({ type: "buildStructure", hasBonus }, state),
                 hasBonus ? { kind: "discount", amount: 1 } : undefined
@@ -67,16 +95,8 @@ export const boardAction = (
             return promptToChooseOrderCard(setPendingAction({ type: "fillOrder", hasBonus }, state));
         case "gainCoin":
             return endTurn(gainCoins(1, state));
-        case "giveTour": {
-            const tastingBonus = player.structures["tastingRoom"] === StructureState.Built &&
-                Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
-            return endTurn(
-                gainCoins(
-                    hasBonus ? 3 : 2,
-                    tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state
-                )
-            );
-        }
+        case "giveTour":
+            return endTurn(giveTour(hasBonus, state));
         case "harvestField": {
             return promptToHarvest(
                 setPendingAction({

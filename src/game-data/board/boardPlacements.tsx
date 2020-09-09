@@ -94,6 +94,18 @@ const action = (
 }
 
 export const boardActions: Record<WorkerPlacement, BoardAction> = {
+    buildOrGiveTour: action(
+        "buildOrGiveTour",
+        i => {
+            const isBonusSpot = i === 0;
+            return {
+                label: <>Build one structure{
+                    isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
+                } or give tour to gain <Coins>{isBonusSpot ? 3 : 2}</Coins></>,
+                bonus: isBonusSpot ? "gainCoin" : undefined,
+            };
+        }
+    ),
     buildStructure: action(
         "buildStructure",
         (i, { numSpots, state }) => {
@@ -108,22 +120,6 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                     isBonusSpot ? { kind: "discount", amount: 1 } : undefined
                 ),
             }
-        }
-    ),
-    buildStructure2: action(
-        "buildStructure2",
-        (i, { state }) => {
-            const isBonusSpot = i === 0;
-            return {
-                label: <>Build one structure{
-                    isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
-                }</>,
-                bonus: isBonusSpot ? "gainCoin" : undefined,
-                disabledReason: buildStructureDisabledReason(
-                    state,
-                    isBonusSpot ? { kind: "discount", amount: 1 } : undefined
-                ),
-            };
         }
     ),
     buySell: action(
@@ -420,7 +416,7 @@ export const boardActionsBySeason = (state: GameState): Record<Season, BoardActi
                     boardActions.drawOrder,
                     boardActions.harvestField,
                     boardActions.makeWine,
-                    boardActions.buildStructure2,
+                    boardActions.buildOrGiveTour,
                 ],
                 winter: [
                     boardActions.playWinterVisitor,
