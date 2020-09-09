@@ -34,7 +34,7 @@ import {
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
-import { boardAction, giveTour } from "./boardActionReducer";
+import { boardAction, giveTour, trade } from "./boardActionReducer";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
@@ -292,6 +292,8 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 default:
                     return state;
             }
+        case "trade":
+            return trade(state, action);
     }
 };
 

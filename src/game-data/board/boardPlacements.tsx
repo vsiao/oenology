@@ -329,8 +329,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
                     {" "}<Grape>1</Grape>
                 </>,
                 bonus: isBonusSpot ? "plusOne" : undefined,
-                disabledReason: "Unimplemented",
-            }
+            };
         }
     ),
     trainWorker: action(

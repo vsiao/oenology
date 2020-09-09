@@ -124,17 +124,18 @@ export interface PlayVisitorPendingAction {
 export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction
     | { type: "buildOrGiveTour"; }
-    | { type: "buySell"; }
-    | { type: "sellGrapes"; }
-    | { type: "buyField"; }
-    | { type: "sellField"; }
-    | { type: "plantVine"; vineId?: VineId; }
     | { type: "buildStructure"; }
-    | { type: "harvestField"; }
-    | { type: "uproot"; }
-    | { type: "makeWine"; }
+    | { type: "buySell"; }
+    | { type: "buyField"; }
     | { type: "fillOrder"; orderId?: OrderId; }
+    | { type: "harvestField"; }
+    | { type: "makeWine"; }
     | { type: "passToNextSeason"; nextSeason: Season; }
+    | { type: "plantVine"; vineId?: VineId; }
+    | { type: "sellField"; }
+    | { type: "sellGrapes"; }
+    | { type: "trade" }
+    | { type: "uproot"; }
 ) & { hasBonus: boolean };
 
 export type WorkerPlacement =
