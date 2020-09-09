@@ -13,6 +13,7 @@ import OrderCard from "./cards/OrderCard";
 import VineCard from "./cards/VineCard";
 import { vineCards } from "../game-data/vineCards";
 import XIcon from "./icons/XIcon";
+import StarToken from "./icons/StarToken";
 
 interface Props {
     gameOver: boolean;
@@ -116,6 +117,8 @@ const renderPendingActionStatus = (
             return <span>{playerName} is filling an <Order />.</span>;
         case "harvestField":
             return <span>{playerName} is harvesting a field.</span>;
+        case "influence":
+            return <span>{playerName} is placing or moving <StarToken />.</span>;
         case "makeWine":
             return <span>{playerName} is making some wine.</span>;
         case "plantVine":

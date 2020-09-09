@@ -14,15 +14,17 @@ import {
 import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason, numCardsDisabledReason, moneyDisabledReason, cardTypesInPlay } from "../shared/sharedSelectors";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { gainCoins, markStructureUsed, trainWorker, payCoins, gainVP, loseVP } from "../shared/sharedReducers";
+import { gainCoins, markStructureUsed, trainWorker, payCoins, gainVP, loseVP, updatePlayer } from "../shared/sharedReducers";
 import { boardActions } from "./boardPlacements";
 import * as React from "react";
 import Coins from "../../game-views/icons/Coins";
-import Card from "../../game-views/icons/Card";
+import Card, { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
 import { GameAction } from "../gameActions";
 import { discardGrapes, placeGrapes } from "../shared/grapeWineReducers";
+import StarToken from "../../game-views/icons/StarToken";
+import { influenceRegions, InfluencePlacementBonus, InfluenceRegion, regions } from "./influence";
 
 export const giveTour = (withBonus: boolean, state: GameState) => {
     const player = state.players[state.currentTurn.playerId];
@@ -114,7 +116,7 @@ export const boardAction = (
             );
         }
         case "influence":
-            return state; // TODO
+            return promptToInfluence(state, hasBonus);
 
         case "makeWine": {
             return promptToMakeWine(
@@ -170,6 +172,122 @@ export const boardAction = (
     }
 };
 
+//
+// Influence action
+// ----------------------------------------------------------------------------
+
+const promptToInfluence = (state: GameState, hasBonus: boolean) => {
+    const influence = state.players[state.currentTurn.playerId].influence;
+    return promptForAction(setPendingAction({ type: "influence", hasBonus }, state), {
+        choices: [
+            {
+                id: "INFLUENCE_PLACE",
+                label: <>Place a <StarToken /></>,
+                disabledReason: influence.every(i => i.placement)
+                    ? "You don't have anything to place."
+                    : undefined,
+            },
+            {
+                id: "INFLUENCE_MOVE",
+                label: <>Move a <StarToken /></>,
+                disabledReason: influence.every(i => !i.placement)
+                    ? "You haven't placed anything yet."
+                    : undefined,
+            },
+        ],
+    });
+};
+
+const renderInfluencePlacementBonus = (bonus: InfluencePlacementBonus): React.ReactElement => {
+    switch (bonus) {
+        case "drawOrder":
+            return <>Draw <Order /></>;
+        case "drawStructure":
+            return <>XCXC</>;
+        case "drawSummerVisitor":
+            return <>Draw <SummerVisitor /></>;
+        case "drawVine":
+            return <>Draw <Vine /></>;
+        case "drawWinterVisitor":
+            return <>Draw <WinterVisitor /></>;
+        case "gain1":
+            return <>Gain <Coins>1</Coins></>;
+        case "gain2":
+            return <>Gain <Coins>2</Coins></>;
+    }
+};
+
+const gainInfluencePlacementBonus = (
+    region: InfluenceRegion,
+    seed: string,
+    state: GameState
+): GameState => {
+    const bonus = regions[region].bonus;
+    switch (bonus) {
+        case "drawOrder":
+            return drawCards(state, seed, { order: 1 });
+        case "drawStructure":
+            return state; // TODO structures
+        case "drawSummerVisitor":
+            return drawCards(state, seed, { summerVisitor: 1 });
+        case "drawVine":
+            return drawCards(state, seed, { vine: 1 });
+        case "drawWinterVisitor":
+            return drawCards(state, seed, { winterVisitor: 1 });
+        case "gain1":
+            return gainCoins(1, state);
+        case "gain2":
+            return gainCoins(2, state);
+    }
+};
+
+const maybeEndInfluence = (state: GameState): GameState => {
+    if ((state.currentTurn as WorkerPlacementTurn).pendingAction?.hasBonus) {
+        return promptToInfluence(state, /* hasBonus */ false);
+    }
+    return endTurn(state);
+};
+
+export const influence = (state: GameState, action: GameAction): GameState => {
+    switch (action.type) {
+        case "CHOOSE_ACTION":
+            switch (action.choice) {
+                case "INFLUENCE_PLACE":
+                    return promptForAction<InfluenceRegion>(state, {
+                        choices: influenceRegions(state.boardType ?? "base").map(region => ({
+                            id: "INFLUENCE_REGION",
+                            data: region.id,
+                            label: <><strong>{region.name}</strong>: {renderInfluencePlacementBonus(region.bonus)}</>,
+                        })),
+                    });
+                case "INFLUENCE_REGION":
+                    const player = state.players[state.currentTurn.playerId];
+                    const idx = player.influence.findIndex(i => !i.placement);
+                    const placement = action.data as InfluenceRegion;
+                    state = updatePlayer(
+                        gainInfluencePlacementBonus(placement, action._key!, state),
+                        player.id,
+                        {
+                            influence: player.influence.map((influence, i) =>
+                                i === idx ? { ...influence, placement } : influence
+                            ),
+                        }
+                    );
+                    return maybeEndInfluence(state);
+
+                case "INFLUENCE_MOVE":
+                default:
+                    return state;
+            }
+        default:
+            return state;
+    }
+};
+
+//
+// Trade action
+// ----------------------------------------------------------------------------
+
 const promptToTrade = (state: GameState, hasBonus: boolean) => {
     return promptForAction(setPendingAction({ type: "trade", hasBonus }, state), {
         choices: [
@@ -194,6 +312,7 @@ const promptToTrade = (state: GameState, hasBonus: boolean) => {
         ],
     });
 };
+
 const promptToGain = (state: GameState) => {
     return promptForAction(state, {
         choices: [
@@ -204,12 +323,14 @@ const promptToGain = (state: GameState) => {
         ],
     })
 };
+
 const maybeEndTrade = (state: GameState): GameState => {
     if ((state.currentTurn as WorkerPlacementTurn).pendingAction?.hasBonus) {
         return promptToTrade(state, /* hasBonus */ false);
     }
     return endTurn(state);
 };
+
 export const trade = (state: GameState, action: GameAction): GameState => {
     switch (action.type) {
         case "CHOOSE_ACTION":

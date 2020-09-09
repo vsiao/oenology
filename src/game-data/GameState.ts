@@ -129,6 +129,7 @@ export type WorkerPlacementTurnPendingAction = (
     | { type: "buyField"; }
     | { type: "fillOrder"; orderId?: OrderId; }
     | { type: "harvestField"; }
+    | { type: "influence"; }
     | { type: "makeWine"; }
     | { type: "passToNextSeason"; nextSeason: Season; }
     | { type: "plantVine"; vineId?: VineId; }

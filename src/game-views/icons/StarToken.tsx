@@ -7,19 +7,20 @@ import { PlayerColor } from "../../game-data/GameState";
 interface Props {
     className?: string;
     color?: PlayerColor;
+    isPlaceholder?: boolean;
 
     // If set, will animate instances of this worker with the given id
-    animateWithId?: number;
+    animateWithId?: string;
 }
 
-const StarToken: React.FunctionComponent<Props> = ({ className, color, animateWithId }) => {
+const StarToken: React.FunctionComponent<Props> = ({ className, isPlaceholder, color, animateWithId }) => {
     return <motion.span
         className={cx("StarToken", className)}
         {...(animateWithId === undefined
-            ? {}
+            ? null
             : {
                 layout: true,
-                layoutId: `${color}_${animateWithId}`,
+                layoutId: animateWithId,
             })}
     >
         &nbsp;
@@ -27,6 +28,7 @@ const StarToken: React.FunctionComponent<Props> = ({ className, color, animateWi
             className={cx({
                 "StarToken-icon": true,
                 [`StarToken-icon--${color}`]: color,
+                "StarToken-icon--placeholder": isPlaceholder,
             })}
             xmlns="http://www.w3.org/2000/svg"
             version="1.1"

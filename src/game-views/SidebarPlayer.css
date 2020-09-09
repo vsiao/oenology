@@ -30,6 +30,41 @@
     border-bottom-color: gold;
 }
 
+.SidebarPlayer-influence {
+    height: 2.2em;
+    margin-left: -.5em;
+    margin-right: .5em;
+    position: relative;
+    width: 2.2em;
+}
+
+.SidebarPlayer-influencePlaceholder {
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate3d(-50%, -50%, 0);
+}
+
+.SidebarPlayer-influenceTokens {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    width: 100%;
+}
+
+.SidebarPlayer-influenceToken {
+    position: absolute;
+}
+
+.SidebarPlayer-unplacedInfluence {
+    font-size: .8em;
+    font-weight: 600;
+    position: absolute;
+    top: 0;
+    left: 60%;
+}
+
 .SidebarPlayer-playerName {
     font-weight: 600;
     min-width: 1px;

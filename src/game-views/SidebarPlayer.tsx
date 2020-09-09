@@ -17,6 +17,7 @@ import { vineCards } from "../game-data/vineCards";
 import Rooster from "./icons/Rooster";
 import { AppState } from "../store/AppState";
 import { connect } from "react-redux";
+import StarToken from "./icons/StarToken";
 import "./SidebarPlayer.css";
 
 interface Props {
@@ -31,8 +32,26 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
     const playerStructures = player.structures;
     const hasMediumCellar = playerStructures["mediumCellar"];
     const hasLargeCellar = playerStructures["largeCellar"];
+    const numUnplacedStars = player.influence.filter(i => !i.placement).length;
+
     return <div className={`SidebarPlayer SidebarPlayer--${player.color}`}>
         <div className="SidebarPlayer-header">
+            {player.influence.length
+                ? <div className="SidebarPlayer-influence">
+                    <StarToken className="SidebarPlayer-influencePlaceholder" isPlaceholder={true} />
+                    <ul className="SidebarPlayer-influenceTokens">
+                        {player.influence.map(i =>
+                            !i.placement &&
+                                <li key={i.id} className="SidebarPlayer-influenceToken">
+                                    <StarToken color={player.color} animateWithId={i.id} />
+                                </li>
+                        )}
+                    </ul>
+                    <span className="SidebarPlayer-unplacedInfluence">
+                        {numUnplacedStars}
+                    </span>
+                </div>
+                : null}
             <span className="SidebarPlayer-playerName">{player.name}</span>
             <ul className="SidebarPlayer-cards">
                 {player.cardsInHand.map(card =>

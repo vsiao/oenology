@@ -228,7 +228,6 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             return {
                 label: <>Place or move <StarToken /></>,
                 bonus: isBonusSpot ? "influence" : undefined,
-                disabledReason: "Unimplemented",
             };
         }
     ),

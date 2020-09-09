@@ -9,7 +9,7 @@ export type InfluenceRegion =
     | "pisa"
     | "siena";
 
-type PlacementBonus =
+export type InfluencePlacementBonus =
     | "gain1"
     | "gain2"
     | "drawOrder"
@@ -19,47 +19,25 @@ type PlacementBonus =
     | "drawWinterVisitor"
 
 export interface InfluenceData {
-    name: InfluenceRegion;
+    id: InfluenceRegion
+    name: string;
     vp: number;
-    bonus: PlacementBonus;
+    bonus: InfluencePlacementBonus;
 }
 
-const regionData: Record<InfluenceRegion, InfluenceData> = {
-    arezzo: {
-        name: "arezzo",
-        vp: 2,
-        bonus: "drawOrder",
-    },
-    firenze: {
-        name: "firenze",
-        vp: 2,
-        bonus: "drawWinterVisitor",
-    },
-    grosseto: {
-        name: "grosseto",
-        vp: 1,
-        bonus: "drawVine",
-    },
-    livorno: {
-        name: "livorno",
-        vp: 2,
-        bonus: "drawSummerVisitor",
-    },
-    lucca: {
-        name: "lucca",
-        vp: 1,
-        bonus: "drawStructure",
-    },
-    pisa: {
-        name: "pisa",
-        vp: 1,
-        bonus: "gain2",
-    },
-    siena: {
-        name: "siena",
-        vp: 2,
-        bonus: "gain1",
-    },
+const makeRegion = (id: InfluenceRegion, vp: number, bonus: InfluencePlacementBonus): InfluenceData => {
+    const name = id.charAt(0).toUpperCase() + id.substr(1);
+    return { id, name, vp, bonus };
+};
+
+export const regions: Record<InfluenceRegion, InfluenceData> = {
+    arezzo: makeRegion("arezzo", 2, "drawOrder"),
+    firenze: makeRegion("firenze", 2, "drawWinterVisitor"),
+    grosseto: makeRegion("grosseto", 1, "drawVine"),
+    livorno: makeRegion("livorno", 2, "drawSummerVisitor"),
+    lucca: makeRegion("lucca", 1, "drawStructure"),
+    pisa: makeRegion("pisa", 1, "gain2"),
+    siena: makeRegion("siena", 2, "gain1"),
 };
 
 export const influenceRegions = (boardType: BoardType): InfluenceData[] => {
@@ -69,5 +47,5 @@ export const influenceRegions = (boardType: BoardType): InfluenceData[] => {
     const regionNames: InfluenceRegion[] = boardType === "tuscanyA"
         ? ["arezzo", "firenze", "grosseto", "livorno", "pisa", "siena"]
         : ["arezzo", "firenze", "grosseto", "livorno", "lucca", "pisa", "siena"];
-    return regionNames.map(r => regionData[r]);
+    return regionNames.map(r => regions[r]);
 };

@@ -272,14 +272,16 @@ interface InfluenceRegion extends InfluenceData {
 
 const renderInfluenceRegion = (region: InfluenceRegion) => {
     return <div
-        key={region.name}
-        className={cx("GameBoard-influenceRegion", `GameBoard-influenceRegion--${region.name}`)}
+        key={region.id}
+        className={cx("GameBoard-influenceRegion", `GameBoard-influenceRegion--${region.id}`)}
     >
         <span>{renderInfluencePlacementBonus(region)} <VictoryPoints>{region.vp}</VictoryPoints></span>
         <span className="GameBoard-regionName">{region.name}</span>
         <ul className="GameBoard-mapTokens">
             {region.tokens.map(t =>
-                <li key={t.id}><StarToken className="GameBoard-mapStarToken" color={t.color} /></li>
+                <li key={t.id}>
+                    <StarToken className="GameBoard-mapStarToken" color={t.color} animateWithId={t.id} />
+                </li>
             )}
         </ul>
     </div>;
@@ -325,7 +327,7 @@ const mapStateToProps = (state: AppState) => {
             tokens: Object.values(players)
                 .map(p =>
                     p.influence
-                        .filter(i => i.placement === d.name)
+                        .filter(i => i.placement === d.id)
                         .map(i => ({ ...i, color: p.color }))
                 )
                 .flat()
