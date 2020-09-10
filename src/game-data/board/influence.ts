@@ -30,7 +30,7 @@ const makeRegion = (id: InfluenceRegion, vp: number, bonus: InfluencePlacementBo
     return { id, name, vp, bonus };
 };
 
-export const regions: Record<InfluenceRegion, InfluenceData> = {
+export const allRegions: Record<InfluenceRegion, InfluenceData> = {
     arezzo: makeRegion("arezzo", 2, "drawOrder"),
     firenze: makeRegion("firenze", 2, "drawWinterVisitor"),
     grosseto: makeRegion("grosseto", 1, "drawVine"),
@@ -47,5 +47,5 @@ export const influenceRegions = (boardType: BoardType): InfluenceData[] => {
     const regionNames: InfluenceRegion[] = boardType === "tuscanyA"
         ? ["arezzo", "firenze", "grosseto", "livorno", "pisa", "siena"]
         : ["arezzo", "firenze", "grosseto", "livorno", "lucca", "pisa", "siena"];
-    return regionNames.map(r => regions[r]);
+    return regionNames.map(r => allRegions[r]);
 };

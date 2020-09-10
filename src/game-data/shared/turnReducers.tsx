@@ -25,6 +25,7 @@ import { Choice } from "../prompts/PromptState";
 import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
 import GrapeToken from "../../game-views/icons/GrapeToken";
 import StarToken from "../../game-views/icons/StarToken";
+import { promptToInfluence, awardInfluenceVP } from "../board/influenceReducers";
 
 export const endTurn = (state: GameState): GameState => {
     if (state.undoState?.type === "undoable") {
@@ -784,7 +785,8 @@ export const passToNextSeason = (state: GameState): GameState => {
                     label: <>Draw <Card type={cardType} /></>,
                 })),
             });
-        case "influence": // TODO
+        case "influence":
+            return promptToInfluence(state, "optional");
         default:
             return gainWakeUpBonusAndMaybeCottage({ idx }, state);
     }
@@ -841,12 +843,14 @@ const endFallVisitorTurn = (state: GameState): GameState => {
 const endYear = (state: GameState): GameState => {
     if (isLastWinter(state)) {
         // End of game
-        return displayGameOverPrompt(
-            pushActivityLog(
-                { type: "season", season: "Game Over!" },
-                { ...state, undoState: null }
-            )
+        state = pushActivityLog(
+            { type: "season", season: "Game Over!" },
+            { ...state, undoState: null }
         );
+        if (state.boardType !== "base") {
+            state = awardInfluenceVP(state)
+        }
+        return displayGameOverPrompt(state);
     }
     state = pushActivityLog({ type: "season", season: `End of Year ${state.year}` }, state);
 

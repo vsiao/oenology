@@ -34,7 +34,8 @@ import {
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
-import { boardAction, giveTour, trade, influence } from "./boardActionReducer";
+import { boardAction, giveTour, trade } from "./boardActionReducer";
+import { influence } from "./influenceReducers";
 
 export const board = (state: GameState, action: GameAction): GameState => {
     switch (state.currentTurn.type) {
