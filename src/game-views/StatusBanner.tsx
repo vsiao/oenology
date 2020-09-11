@@ -155,7 +155,9 @@ const renderPendingActionStatus = (
         case "uproot":
             return <span>{playerName} is uprooting a <Vine />.</span>;
         case "passToNextSeason":
-            return <span>{playerName} is passing to the {pendingAction.nextSeason}.</span>;
+            return pendingAction.nextSeason === "endOfYear"
+                ? <span>{playerName} is passing out of the year.</span>
+                : <span>{playerName} is passing to the {pendingAction.nextSeason}.</span>;
     }
 };
 
@@ -163,7 +165,7 @@ const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     return {
         gameOver: isLastWinter(game) &&
-            game.wakeUpOrder.every(pos => !pos || pos.season !== "winter"),
+            game.wakeUpOrder.every(pos => !pos || pos.season === "endOfYear"),
         season: game.season,
         currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(

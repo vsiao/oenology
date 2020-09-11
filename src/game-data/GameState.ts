@@ -64,7 +64,7 @@ export default interface GameState {
 
 export interface WakeUpPosition {
     playerId: string;
-    season: null | Season | "gameOver";
+    season: null | Season | "endOfYear";
 
     // If set, a player has chosen this wake-up position
     // for the next year (applicable to Tuscany board)
@@ -131,7 +131,7 @@ export type WorkerPlacementTurnPendingAction = (
     | { type: "harvestField"; }
     | { type: "influence"; }
     | { type: "makeWine"; }
-    | { type: "passToNextSeason"; nextSeason: Season; }
+    | { type: "passToNextSeason"; nextSeason: Season | "endOfYear"; }
     | { type: "plantVine"; vineId?: VineId; }
     | { type: "sellField"; }
     | { type: "sellGrapes"; }

@@ -735,35 +735,33 @@ export const endVisitor = (state: GameState): GameState => {
 
 export const passToNextSeason = (state: GameState): GameState => {
     const playerId = state.currentTurn.playerId;
-    const seasons: Season[] = state.boardType === "base"
+    const seasons: (Season | "endOfYear")[] = state.boardType === "base"
         ? ["summer", "winter"]
-        : ["spring", "summer", "fall", "winter"];
+        : ["spring", "summer", "fall", "winter", "endOfYear"];
     const nextSeason = seasons[
         (seasons.findIndex(s => s === state.season) + 1) % seasons.length
     ];
+    const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
+    const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
+    wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
 
     state = pushActivityLog(
         { type: "pass", playerId },
-        setPendingAction({ type: "passToNextSeason", nextSeason, hasBonus: false }, state)
+        setPendingAction(
+            { type: "passToNextSeason", nextSeason, hasBonus: false },
+            { ...state, wakeUpOrder }
+        )
     );
     if (state.boardType === "base") {
         return endTurn(state);
     }
-
-    const wakeUpOrder = state.wakeUpOrder.slice() as GameState["wakeUpOrder"];
-    const idx = wakeUpOrder.findIndex(pos => pos?.playerId === playerId);
-
-    if (nextSeason === "spring") {
+    if (nextSeason === "endOfYear") {
         state = doEOYForPlayer(playerId, state);
-        if (!isLastWinter(state)) {
-            return beginEOYDiscardTurn(playerId, state);
-        }
-        // If the game's over, don't bother discarding & choosing wake-up
-        wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: "gameOver" };
-        return endTurn({ ...state, wakeUpOrder });
-    } else {
-        wakeUpOrder[idx] = { ...wakeUpOrder[idx]!, season: nextSeason };
-        state = { ...state, wakeUpOrder };
+
+        return isLastWinter(state)
+            // If the game's over, don't bother discarding & choosing wake-up
+            ? endTurn(state)
+            : beginEOYDiscardTurn(playerId, state);
     }
 
     // In Tuscany, passing into the next season may yield a bonus per the wake-up chart
