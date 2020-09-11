@@ -9,7 +9,8 @@ import {
     promptToMakeWine,
     promptToUproot,
     promptToChooseGrape,
-    promptToDiscard
+    promptToDiscard,
+    promptToChooseWine
 } from "../prompts/promptReducers";
 import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason, numCardsDisabledReason, moneyDisabledReason, cardTypesInPlay } from "../shared/sharedSelectors";
@@ -148,7 +149,9 @@ export const boardAction = (
             );
         }
         case "sellWine":
-            return state; // TODO
+            return hasBonus
+                ? promptToInfluence(state, "thenSellWine")
+                : promptToSellWine(state);
 
         case "trade":
             return promptToTrade(state, hasBonus);
@@ -169,6 +172,13 @@ export const boardAction = (
             const exhaustivenessCheck: never = placement;
             return state;
     }
+};
+
+export const promptToSellWine = (state: GameState) => {
+    return promptToChooseWine(
+        setPendingAction({ type: "sellWine", hasBonus: false }, state),
+        { numWines: 1 }
+    );
 };
 
 //

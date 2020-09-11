@@ -1,5 +1,5 @@
 import * as React from "react";
-import GameState, { WorkerPlacementTurn } from "../GameState";
+import GameState, { WorkerPlacementTurn, InfluencePendingAction } from "../GameState";
 import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { promptForAction } from "../prompts/promptReducers";
 import StarToken from "../../game-views/icons/StarToken";
@@ -9,16 +9,23 @@ import Coins from "../../game-views/icons/Coins";
 import { drawCards } from "../shared/cardReducers";
 import { gainCoins, updatePlayer, gainVP } from "../shared/sharedReducers";
 import { GameAction } from "../gameActions";
+import { promptToSellWine } from "./boardActionReducer";
 
 export const promptToInfluence = (
     state: GameState,
     // "withBonus" means we should prompt an additional optional
     // influence place/move after the current one
-    type: "required" | "optional" | "withBonus"
+    type: "required" | "optional" | "withBonus" | "thenSellWine"
 ) => {
     const influence = state.players[state.currentTurn.playerId].influence;
     return promptForAction(
-        setPendingAction({ type: "influence", hasBonus: type === "withBonus" }, state),
+        setPendingAction({
+            type: "influence",
+            hasBonus: type === "withBonus",
+            ...(type === "thenSellWine"
+                ? { nextAction: "sellWine" }
+                : null)
+        }, state),
         {
             choices: [
                 {
@@ -90,8 +97,11 @@ const gainInfluencePlacementBonus = (
 };
 
 const maybeEndInfluence = (state: GameState): GameState => {
-    if ((state.currentTurn as WorkerPlacementTurn).pendingAction?.hasBonus) {
+    const pendingAction = (state.currentTurn as WorkerPlacementTurn).pendingAction as InfluencePendingAction;
+    if (pendingAction.hasBonus) {
         return promptToInfluence(state, "optional");
+    } else if (pendingAction.nextAction === "sellWine") {
+        return promptToSellWine(state);
     }
     return endTurn(state);
 };

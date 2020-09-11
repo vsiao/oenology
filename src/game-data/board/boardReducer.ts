@@ -32,7 +32,7 @@ import {
     gainWakeUpBonusAndMaybeCottage,
 } from "../shared/turnReducers";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes } from "../shared/grapeWineReducers";
+import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes, discardWines } from "../shared/grapeWineReducers";
 import { visitor } from "../visitors/visitorReducer";
 import { boardAction, giveTour, trade } from "./boardActionReducer";
 import { influence } from "./influenceReducers";
@@ -296,6 +296,21 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 default:
                     return state;
             }
+        case "sellWine":
+            if (action.type !== "CHOOSE_WINE") {
+                return state;
+            }
+            const wineType = action.wines[0].color;
+            return endTurn(
+                gainVP(
+                    wineType === "sparkling"
+                        ? 4
+                        : wineType === "blush"
+                            ? 2
+                            : 1,
+                    discardWines(state, action.wines)
+                )
+            );
         case "trade":
             return trade(state, action);
     }

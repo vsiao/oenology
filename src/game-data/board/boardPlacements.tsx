@@ -14,6 +14,7 @@ import {
     structureUsedDisabledReason,
     trainWorkerDisabledReason,
     uprootDisabledReason,
+    needWineDisabledReason,
 } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
@@ -307,12 +308,16 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
     ),
     sellWine: action(
         "sellWine",
-        (i, { numSpots }) => {
+        (i, { numSpots, state }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
-                label: <>Sell one wine token</>,
+                label: <>
+                    Sell one wine token{
+                        isBonusSpot ? <> and place/move <StarToken /></> : null
+                    }
+                </>,
                 bonus: isBonusSpot ? "influence" : undefined,
-                disabledReason: "Unimplemented",
+                disabledReason: needWineDisabledReason(state),
             };
         }
     ),

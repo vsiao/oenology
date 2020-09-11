@@ -121,6 +121,13 @@ export interface PlayVisitorPendingAction {
     // eg. using the Manager visitor to play a summer visitor.
     placementIdx?: number;
 }
+
+export type InfluencePendingAction = {
+    type: "influence";
+    nextAction?: "sellWine";
+    hasBonus?: boolean;
+};
+
 export type WorkerPlacementTurnPendingAction = (
     | PlayVisitorPendingAction
     | { type: "buildOrGiveTour"; }
@@ -129,13 +136,14 @@ export type WorkerPlacementTurnPendingAction = (
     | { type: "buyField"; }
     | { type: "fillOrder"; orderId?: OrderId; }
     | { type: "harvestField"; }
-    | { type: "influence"; }
+    | InfluencePendingAction
     | { type: "makeWine"; }
     | { type: "passToNextSeason"; nextSeason: Season | "endOfYear"; }
     | { type: "plantVine"; vineId?: VineId; }
     | { type: "sellField"; }
     | { type: "sellGrapes"; }
-    | { type: "trade" }
+    | { type: "sellWine"; }
+    | { type: "trade"; }
     | { type: "uproot"; }
 ) & { hasBonus: boolean };
 

@@ -150,6 +150,8 @@ const renderPendingActionStatus = (
             return <span>{playerName} is selling a field.</span>;
         case "sellGrapes":
             return <span>{playerName} is selling grape(s).</span>;
+        case "sellWine":
+            return <span>{playerName} is selling some wine.</span>;
         case "trade":
             return <span>{playerName} is trading.</span>
         case "uproot":
