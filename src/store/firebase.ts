@@ -29,7 +29,7 @@ export function fetchRecentGames() {
             .database()
             .ref("rooms")
             .orderByChild("gameStartedAt")
-            .limitToLast(20)
+            .limitToLast(50)
             .once("value", snap => {
                 const rooms: unknown[] = [];
                 snap.forEach(child => {

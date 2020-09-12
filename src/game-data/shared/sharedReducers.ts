@@ -7,7 +7,7 @@ import GameState, {
     WorkerType,
     PlayVisitorPendingAction,
 } from "../GameState";
-import { ActivityLogEvent } from "../ActivityLog";
+import { ActivityLogEvent, VPSource } from "../ActivityLog";
 import { StructureId } from "../structures";
 import { addCardsToHand } from "./cardReducers";
 import { VineInField } from "../prompts/promptActions";
@@ -28,7 +28,11 @@ export const plantVineInField = (
     const player = state.players[playerId];
     const field = player.fields[fieldId];
     if (player.structures["windmill"] === StructureState.Built) {
-        state = markStructureUsed("windmill", gainVP(1, state, playerId), playerId);
+        state = markStructureUsed(
+            "windmill",
+            gainVP(1, state, { playerId, source: "structure" }),
+            playerId
+        );
     }
     return pushActivityLog(
         { type: "plant", playerId: player.id, vineId },
@@ -87,19 +91,26 @@ export const buildStructure = (
     );
 };
 
-const editVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) => {
+const editVP = (
+    numVP: number,
+    state: GameState,
+    { playerId = state.currentTurn.playerId, source = "visitor" }: {
+        source?: VPSource;
+        playerId?: string;
+    } = {}
+) => {
     if (numVP === 0) {
         return state;
     }
     const playerState = state.players[playerId];
     return pushActivityLog(
-        { type: "vp", playerId, delta: numVP },
+        { type: "vp", playerId, delta: numVP, source },
         updatePlayer(state, playerId, { victoryPoints: playerState.victoryPoints + numVP, })
     );
 };
 export const gainVP = editVP;
-export const loseVP = (numVP: number, state: GameState, playerId = state.currentTurn.playerId) =>
-    editVP(-numVP, state, playerId);
+export const loseVP = (numVP: number, state: GameState, options?: { source?: VPSource; playerId?: string }) =>
+    editVP(-numVP, state, options);
 
 const editCoins = (numCoins: number, state: GameState, playerId = state.currentTurn.playerId) => {
     if (numCoins === 0) {
@@ -146,7 +157,7 @@ export const trainWorker = (
     // In Tuscany, workers can be trained by a player even if they're already passed out
     // of a current year if opponents play a winter visitor. We train the worker
     // directly into the available pool since their other workers are already retrieved.
-    const isPassedOutOfYear = state.wakeUpOrder.find(pos => pos?.playerId === playerId)!.season === "endOfYear";
+    const isPassedOutOfYear = state.wakeUpOrder.find(pos => pos?.playerId === playerId)?.season === "endOfYear";
 
     const workers = state.players[playerId].workers;
     const lastWorkerId = workers.reduce(

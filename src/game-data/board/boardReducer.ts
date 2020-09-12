@@ -147,12 +147,16 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
             const player = state.players[state.currentTurn.playerId];
             const field = player.fields[action.fields[0]];
 
-            state = updatePlayer(pendingAction.hasBonus ? gainVP(1, state) : state, player.id, {
-                fields: {
-                    ...player.fields,
-                    [field.id]: { ...field, sold: !field.sold },
-                },
-            });
+            state = updatePlayer(
+                pendingAction.hasBonus ? gainVP(1, state, { source: "bonus" }) : state,
+                player.id,
+                {
+                    fields: {
+                        ...player.fields,
+                        [field.id]: { ...field, sold: !field.sold },
+                    },
+                }
+            );
             return endTurn(
                 field.sold
                     ? pushActivityLog(
@@ -176,7 +180,10 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
 
             return endTurn(gainCoins(
                 sellValue,
-                discardGrapes(pendingAction.hasBonus ? gainVP(1, state) : state, action.grapes)
+                discardGrapes(
+                    pendingAction.hasBonus ? gainVP(1, state, { source: "bonus" }) : state,
+                    action.grapes
+                )
             ));
 
         case "buySell":
@@ -308,7 +315,8 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                         : wineType === "blush"
                             ? 2
                             : 1,
-                    discardWines(state, action.wines)
+                    discardWines(state, action.wines),
+                    { source: "trade" }
                 )
             );
         case "trade":

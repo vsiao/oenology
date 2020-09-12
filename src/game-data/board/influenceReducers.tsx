@@ -215,7 +215,13 @@ export const awardInfluenceVP = (state: GameState): GameState => {
         }));
         influencers.sort((p1, p2) => p2.numStars - p1.numStars);
         if (influencers[0].numStars > influencers[1].numStars) {
-            state = gainVP(region.vp, state, influencers[0].playerId);
+            state = gainVP(
+                region.vp,
+                state,
+                {
+                    source: "influence",
+                    playerId: influencers[0].playerId,
+                });
         }
     });
     return state;

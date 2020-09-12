@@ -273,7 +273,7 @@ export const summerVisitorReducers: Record<
                 switch (action.choice) {
                     case "BANKER_GAIN":
                         return endVisitorAction(
-                            gainCoins(3, loseVP(1, state, action.playerId), action.playerId),
+                            gainCoins(3, loseVP(1, state, { playerId: action.playerId }), action.playerId),
                             action.playerId
                         );
                     case "BANKER_PASS":

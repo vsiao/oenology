@@ -1145,7 +1145,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "QUEEN_LOSE":
-                        return endVisitor(loseVP(1, state, playerId));
+                        return endVisitor(loseVP(1, state, { playerId }));
                     case "QUEEN_GIVE":
                         return promptToChooseCard(state, {
                             title: <span>Give 2 cards to {playerName}</span>,

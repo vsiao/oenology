@@ -5,7 +5,7 @@ import ChartistGraph from "react-chartist";
 import { connect } from "react-redux";
 import PromptStructure from "./PromptStructure";
 import { AppState } from "../../store/AppState";
-import GameState, { PlayerState } from "../../game-data/GameState";
+import GameState, { PlayerState, BoardType } from "../../game-data/GameState";
 import { allWines } from "../../game-data/shared/sharedSelectors";
 import VictoryPoints from "../icons/VictoryPoints";
 import Coins from "../icons/Coins";
@@ -14,6 +14,7 @@ import { visitorCards } from "../../game-data/visitors/visitorCards";
 import Worker from "../icons/Worker";
 import { Dispatch } from "redux";
 import { endGame } from "../../game-data/gameActions";
+import { VPSource } from "../../game-data/ActivityLog";
 
 interface PlayerWithStats extends PlayerState {
     coinsGained: number;
@@ -23,9 +24,11 @@ interface PlayerWithStats extends PlayerState {
     wVisitorsPlayed: number;
     workersPlaced: number;
     accumulatedVPByYear: number[];
+    vpBySource: Record<VPSource, number>;
 }
 interface Props {
     players: PlayerWithStats[]; // Ordered by win conditions
+    boardType: BoardType;
     shouldEndGame: boolean;
     endGame: () => void;
 }
@@ -74,6 +77,14 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                             <th className="GameOverPrompt-colHeader"><Order /><br />filled</th>
                             <th className="GameOverPrompt-colHeader"><WinterVisitor /><br />played</th>
                             <th className="GameOverPrompt-colHeader"><Worker /><br />placed</th>
+                            <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />orders</th>
+                            <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />visitors</th>
+                            <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />structures</th>
+                            <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />bonus</th>
+                            {props.boardType !== "base" && <>
+                                <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />trade</th>
+                                <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />influence</th>
+                            </>}
                         </tr>
                     </thead>
                     <tbody>
@@ -89,6 +100,14 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                                 <td className="GameOverPrompt-statCell">{p.ordersFilled}</td>
                                 <td className="GameOverPrompt-statCell">{p.wVisitorsPlayed}</td>
                                 <td className="GameOverPrompt-statCell">{p.workersPlaced}</td>
+                                <td className="GameOverPrompt-statCell">{p.vpBySource.fill}</td>
+                                <td className="GameOverPrompt-statCell">{p.vpBySource.visitor}</td>
+                                <td className="GameOverPrompt-statCell">{p.vpBySource.structure}</td>
+                                <td className="GameOverPrompt-statCell">{p.vpBySource.bonus}</td>
+                                {props.boardType !== "base" && <>
+                                    <td className="GameOverPrompt-statCell">{p.vpBySource.trade}</td>
+                                    <td className="GameOverPrompt-statCell">{p.vpBySource.influence}</td>
+                                </>}
                             </tr>)}
                     </tbody>
                 </table>
@@ -144,6 +163,14 @@ const mapStateToProps = (state: AppState) => {
                 wVisitorsPlayed: 0,
                 workersPlaced: 0,
                 accumulatedVPByYear: [0, 0],
+                vpBySource: {
+                    bonus: 0,
+                    fill: 0,
+                    influence: 0,
+                    structure: 0,
+                    trade: 0,
+                    visitor: 0,
+                },
             }
         ])
     );
@@ -184,6 +211,7 @@ const mapStateToProps = (state: AppState) => {
                 return;
             case "vp":
                 playersWithStats[event.playerId].accumulatedVPByYear[year] += event.delta;
+                playersWithStats[event.playerId].vpBySource[event.source] += event.delta;
                 return;
         }
     });
@@ -202,6 +230,7 @@ const mapStateToProps = (state: AppState) => {
     });
     return {
         players,
+        boardType: game.boardType ?? "base",
         shouldEndGame: game.playerId === game.currentTurn.playerId
             && state.room.gameStatus !== "completed",
     };

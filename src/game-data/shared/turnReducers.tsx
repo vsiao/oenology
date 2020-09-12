@@ -193,7 +193,7 @@ export const chooseMamaPapa = (
             state = gainCoins(papa.coins, state);
             switch (papa.choiceA) {
                 case "victoryPoint":
-                    return endTurn(gainVP(1, state));
+                    return endTurn(gainVP(1, state, { source: "bonus" }));
                 case "worker":
                     return endTurn(trainWorker(state, { availableThisYear: true, }));
                 default:
@@ -360,7 +360,7 @@ const gainWakeUpBonus = (
         case "gainCoin":
             return gainCoins(1, state, playerId);
         case "gainVP":
-            return gainVP(1, state, playerId);
+            return gainVP(1, state, { playerId, source: "bonus" });
         case "influence":
             return state; // TODO
         case "nothing":

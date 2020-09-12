@@ -209,10 +209,13 @@ export const fillOrder = (
     return gainResiduals(
         residualIncome,
         gainVP(
-            victoryPoints + (bonusVP ? 1 : 0) + (
-                asPremiumBuyer && canFillOrderWithWines(orderId, winesToUse, /* asPremiumBuyer */ true) ? 2 : 0
-            ),
-            state
+            victoryPoints,
+            asPremiumBuyer && canFillOrderWithWines(orderId, winesToUse, /* asPremiumBuyer */ true)
+                ? gainVP(2, state, { source: "visitor" })
+                : bonusVP
+                    ? gainVP(1, state, { source: "bonus" })
+                    : state,
+            { source: "fill" }
         )
     );
 };

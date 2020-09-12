@@ -90,6 +90,8 @@ interface TrainWorkerEvent extends LogEvent<"trainWorker"> { }
 interface UprootEvent extends LogEvent<"uproot"> {
     vineId: VineId;
 }
+export type VPSource = "bonus" | "fill" | "influence" | "structure" | "trade" | "visitor";
 interface VPChangeEvent extends LogEvent<"vp"> {
     delta: number;
+    source: VPSource;
 }

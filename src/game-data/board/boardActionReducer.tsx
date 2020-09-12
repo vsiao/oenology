@@ -32,7 +32,9 @@ export const giveTour = (withBonus: boolean, state: GameState) => {
         Object.values(player.cellar).some(cellar => cellar.some(t => !!t));
     return gainCoins(
         withBonus ? 3 : 2,
-        tastingBonus ? markStructureUsed("tastingRoom", gainVP(1, state)) : state
+        tastingBonus
+            ? markStructureUsed("tastingRoom", gainVP(1, state, { source: "structure" }))
+            : state
     );
 };
 
@@ -237,7 +239,7 @@ export const trade = (state: GameState, action: GameAction): GameState => {
                 case "TRADE_PAY":
                     return promptToGain(payCoins(3, state));
                 case "TRADE_LOSE":
-                    return promptToGain(loseVP(1, state));
+                    return promptToGain(loseVP(1, state, { source: "trade" }));
                 case "TRADE_DISCARD_GRAPE":
                     return promptToChooseGrape(state);
 
@@ -267,7 +269,7 @@ export const trade = (state: GameState, action: GameAction): GameState => {
                 case "TRADE_GAIN_COINS":
                     return maybeEndTrade(gainCoins(3, state));
                 case "TRADE_GAIN_VP":
-                    return maybeEndTrade(gainVP(1, state));
+                    return maybeEndTrade(gainVP(1, state, { source: "trade" }));
                 case "TRADE_GAIN_GRAPE":
                     if (action.data) {
                         return maybeEndTrade(placeGrapes(state, { [action.data as GrapeColor]: 1 }));
