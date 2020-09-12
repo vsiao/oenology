@@ -1,12 +1,11 @@
 import "./Home.css";
 import React, { FunctionComponent, useEffect, useState } from "react";
 import { fetchRecentGames, createRoom } from "../../store/firebase";
+import { RoomState } from "../../store/AppState";
+import Worker from "../icons/Worker";
 
-interface GameRoom {
+interface GameRoom extends RoomState {
     key: string;
-    gameStartedAt: string;
-    gameStatus: string;
-    users: { name: string }[];
 }
 
 const Home: FunctionComponent<{}> = props => {
@@ -37,6 +36,7 @@ const handleNewGameClick = () => {
 };
 
 const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
+    const activePlayers = Object.values(room.users).filter(u => u.name);
     return <tr className="Home-recentGame">
         <td className="Home-recentGameCell">
             {room.gameStartedAt
@@ -50,8 +50,17 @@ const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
                 : null}{" "}
         </td>
         <td className="Home-recentGameCell">
-            {Object.values(room.users).filter(u => u.name)
-                .map(u => u.name).sort().join(", ")}
+            {activePlayers.map((p, i) => <>
+                {i > 0 ? ", " : null}
+                <span className="Home-playerName">{p.name}</span>
+            </>)}
+        </td>
+        <td className="Home-recentGameCell">
+            {activePlayers.length} <Worker isTemp={true} />
+        </td>
+        <td className="Home-recentGameCell">
+            {room.gameOptions?.rhineVisitors && <span className="Home-optionTag">rhine</span>}
+            {room.gameOptions?.tuscanyBoard && <span className="Home-optionTag">tuscany</span>}
         </td>
         <td className="Home-recentGameCell">
             <a href={`/game/${room.key}`}>

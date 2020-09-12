@@ -32,3 +32,22 @@
 .Home-recentGameCell {
     padding: 0 .5em;
 }
+
+.Home-playerName {
+    display: inline-block;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.Home-optionTag {
+    background: #eee;
+    border-radius: .2em;
+    font-size: .8em;
+    padding: .2em .4em;
+}
+.Home-optionTag + .Home-optionTag {
+    margin-left: .2em;
+}

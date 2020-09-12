@@ -157,7 +157,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     checked={gameOptions.tuscanyBoard ?? false}
                                     onChange={() => setOption("tuscanyBoard", !gameOptions.tuscanyBoard)}
                                 />
-                                Tuscany Board (ALPHA)
+                                Tuscany Board (BETA)
                             </label>
                         </li>
                         {renderComingSoonOption("Tuscany workers")}

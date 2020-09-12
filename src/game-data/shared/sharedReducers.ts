@@ -181,7 +181,7 @@ export const placeWorker = (
     placement: WorkerPlacement,
     placementIdx: number | null,
     state: GameState,
-    source?: "Planner" | "Administrator"
+    source: "Planner" | "Administrator" | null = null
 ): [GameState, number] => {
     const player = state.players[state.currentTurn.playerId];
     const workerIndex = player.workers.reduce(

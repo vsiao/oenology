@@ -211,8 +211,8 @@ export interface BoardWorker {
     id: number;
     playerId: string,
     color: PlayerColor;
-    isTemp?: boolean;
-    source?: "Planner" | "Administrator";
+    isTemp: boolean;
+    source: "Planner" | "Administrator" | null;
 }
 
 export interface InfluenceToken {

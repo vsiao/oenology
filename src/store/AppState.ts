@@ -14,7 +14,7 @@ export interface GameOptions {
     tuscanyBoard?: boolean;
 }
 
-interface RoomState {
+export interface RoomState {
     gameId: string | null;
     gameOptions?: GameOptions;
     gameStartedAt?: string;
