@@ -10,13 +10,13 @@
     left: 0;
     pointer-events: none;
     position: absolute;
-    width: 12em;
+    width: 14em;
 }
 
 .GameOverPrompt-table {
     border-spacing: 0;
     margin: 1em;
-    padding-left: 11em;
+    padding-left: 13em;
     text-align: center;
 }
 
@@ -66,7 +66,7 @@
     padding-left: 2em;
     position: absolute;
     text-align: left;
-    width: 12em;
+    width: 14em;
     z-index: 1;
 }
 .GameOverPrompt-row + .GameOverPrompt-row .GameOverPrompt-rowHeader::after {
@@ -76,11 +76,13 @@
     height: 2px;
     position: absolute;
     right: 0;
-    width: 11em;
+    width: 13em;
     box-shadow: inset 0 1px #ddd;
 }
 
-.GameOverPrompt-vpIcon {
+.GameOverPrompt-vpIcon,
+.GameOverPrompt-playerName,
+.GameOverPrompt-winnerIcon {
     margin-right: .5em;
 }
 

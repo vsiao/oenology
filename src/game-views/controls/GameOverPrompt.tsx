@@ -11,6 +11,7 @@ import VictoryPoints from "../icons/VictoryPoints";
 import Coins from "../icons/Coins";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "../icons/Card";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
+import CrownIcon from "../icons/CrownIcon";
 import Worker from "../icons/Worker";
 import { Dispatch } from "redux";
 import { endGame } from "../../game-data/gameActions";
@@ -88,11 +89,12 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                         </tr>
                     </thead>
                     <tbody>
-                        {props.players.map(p =>
+                        {props.players.map((p, i) =>
                             <tr key={p.id} className="GameOverPrompt-row">
                                 <th className="GameOverPrompt-rowHeader" scope="row">
                                     <VictoryPoints className="GameOverPrompt-vpIcon">{p.victoryPoints}</VictoryPoints>
                                     <strong className="GameOverPrompt-playerName">{p.name}</strong>
+                                    {i === 0 && <CrownIcon className="GameOverPrompt-winnerIcon" />}
                                 </th>
                                 <td className="GameOverPrompt-statCell">{p.coinsGained}</td>
                                 <td className="GameOverPrompt-statCell">{p.vinesPlanted}</td>
