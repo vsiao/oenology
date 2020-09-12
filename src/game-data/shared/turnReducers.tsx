@@ -283,7 +283,7 @@ export const chooseWakeUp = (
             if (isChoosingForNextYear) {
                 return {
                     ...pos,
-                    ...pos?.playerId === playerId ? { season: null } : null,
+                    ...pos?.playerId === playerId ? { hasChosenNextYear: true } : null,
                     ...i === wakeUpData.idx ? { nextYearPlayerId: playerId } : null,
                 };
             }
@@ -629,8 +629,8 @@ export const makeEndVisitorAction = (
 ): (state: GameState, playerId?: string) => GameState => {
     return (state, playerId) => {
         const actionOrder = state.wakeUpOrder.filter(pos => {
-            if (!pos) {
-                return false
+            if (!pos || !pos.playerId) {
+                return false;
             }
             switch (type) {
                 case "opponents":
@@ -643,7 +643,7 @@ export const makeEndVisitorAction = (
         });
         const i = playerId === undefined
             ? -1
-            : actionOrder.findIndex(pos => pos && pos.playerId === playerId);
+            : actionOrder.findIndex(pos => pos?.playerId === playerId);
 
         if (i === actionOrder.length - 1) {
             return endVisitor(state);

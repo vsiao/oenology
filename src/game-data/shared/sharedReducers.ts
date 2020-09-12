@@ -143,6 +143,11 @@ export const trainWorker = (
         availableThisYear?: boolean;
     } = {}
 ): GameState => {
+    // In Tuscany, workers can be trained by a player even if they're already passed out
+    // of a current year if opponents play a winter visitor. We train the worker
+    // directly into the available pool since their other workers are already retrieved.
+    const isPassedOutOfYear = state.wakeUpOrder.find(pos => pos?.playerId === playerId)!.season === "endOfYear";
+
     const workers = state.players[playerId].workers;
     const lastWorkerId = workers.reduce(
         (previousValue, worker, currentIndex) =>
@@ -154,7 +159,7 @@ export const trainWorker = (
         updatePlayer(state, playerId, {
             workers: [
                 ...workers,
-                { type: "normal", id: lastWorkerId + 1, available: availableThisYear },
+                { type: "normal", id: lastWorkerId + 1, available: isPassedOutOfYear || availableThisYear },
             ],
         })
     );

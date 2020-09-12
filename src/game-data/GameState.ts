@@ -64,11 +64,13 @@ export default interface GameState {
 
 export interface WakeUpPosition {
     playerId: string;
-    season: null | Season | "endOfYear";
+    season: Season | "endOfYear";
 
     // If set, a player has chosen this wake-up position
     // for the next year (applicable to Tuscany board)
     nextYearPlayerId?: string;
+    // If set, don't display playerId's rooster at this position.
+    hasChosenNextYear?: boolean;
 }
 
 export type CurrentTurn =

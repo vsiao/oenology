@@ -95,7 +95,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                                         {pos && (
                                                             pos.season === season ||
                                                             (pos.nextYearPlayerId && season === "spring") ||
-                                                            (pos.season === "endOfYear" && season === "winter")
+                                                            (pos.season === "endOfYear" && season === "winter" && !pos.hasChosenNextYear)
                                                         )
                                                             ? <Rooster color={
                                                                 pos.nextYearPlayerId && season === "spring"

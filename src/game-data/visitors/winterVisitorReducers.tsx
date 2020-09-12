@@ -1174,35 +1174,37 @@ export const winterVisitorReducers: Record<
         }
     },
     scholar: (state, action) => {
+        const [chooseAction, maybeEndVisitor] = makeChoose2Visitor((s, numChosen) => {
+            const maybeLoseVp = numChosen > 0 ? <> (lose <VP>1</VP>)</> : null;
+            return [
+                { id: "SCHOLAR_DRAW", label: <>Draw 2 <Order />{maybeLoseVp}</>, },
+                {
+                    id: "SCHOLAR_TRAIN",
+                    label: <>Pay <Coins>3</Coins> to train <Worker />{maybeLoseVp}</>,
+                    disabledReason: trainWorkerDisabledReason(s, 3),
+                },
+                ...(numChosen > 0
+                    ? [{ id: "SCHOLAR_PASS", label: <>Pass</>, }]
+                    : [])
+            ];
+        });
         switch (action.type) {
             case "CHOOSE_CARDS":
-                return promptForAction(state, {
-                    choices: [
-                        { id: "SCHOLAR_DRAW", label: <>Draw 2 <Order /></>, },
-                        {
-                            id: "SCHOLAR_TRAIN",
-                            label: <>Pay <Coins>3</Coins> to train <Worker /></>,
-                            disabledReason: trainWorkerDisabledReason(state, 3),
-                        },
-                        {
-                            id: "SCHOLAR_BOTH",
-                            label: <>Do both (lose <VP>1</VP>)</>,
-                            disabledReason: trainWorkerDisabledReason(state, 3),
-                        },
-                    ],
-                });
+                return chooseAction(state);
+
             case "CHOOSE_ACTION":
+                state = chooseAction(
+                    state,
+                    action.choice,
+                    /* loseVPOnMulti */ action.choice !== "SCHOLAR_PASS"
+                );
                 switch (action.choice) {
                     case "SCHOLAR_DRAW":
-                        return endVisitor(drawCards(state, action._key!, { order: 2 }));
+                        return maybeEndVisitor(drawCards(state, action._key!, { order: 2 }));
                     case "SCHOLAR_TRAIN":
-                        return endVisitor(trainWorker(payCoins(3, state)));
-                    case "SCHOLAR_BOTH":
-                        return endVisitor(
-                            trainWorker(payCoins(3,
-                                drawCards(loseVP(1, state), action._key!, { order: 2 })
-                            ))
-                        );
+                        return maybeEndVisitor(trainWorker(payCoins(3, state)));
+                    case "SCHOLAR_PASS":
+                        return endVisitor(state);
                     default:
                         return state;
                 }

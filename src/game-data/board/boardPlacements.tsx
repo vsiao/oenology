@@ -101,9 +101,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
         i => {
             const isBonusSpot = i === 0;
             return {
-                label: <>Build one structure{
-                    isBonusSpot ? <> at a <Coins>1</Coins> discount</> : null
-                } or Give tour to gain <Coins>{isBonusSpot ? 3 : 2}</Coins></>,
+                label: <>Build or give tour{isBonusSpot ? <> (bonus <Coins>1</Coins>)</> : null}</>,
                 bonus: isBonusSpot ? "gainCoin" : undefined,
             };
         }
@@ -227,7 +225,7 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
         (i, { numSpots }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
             return {
-                label: <>Place or move <StarToken /></>,
+                label: <>Place or move <StarToken />{isBonusSpot ? <StarToken /> : null}</>,
                 bonus: isBonusSpot ? "influence" : undefined,
             };
         }
