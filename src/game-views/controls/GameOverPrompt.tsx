@@ -5,7 +5,8 @@ import ChartistGraph from "react-chartist";
 import { connect } from "react-redux";
 import PromptStructure from "./PromptStructure";
 import { AppState } from "../../store/AppState";
-import GameState, { PlayerState, BoardType } from "../../game-data/GameState";
+import { endGame } from "../../store/firebase";
+import GameState, { PlayerStats } from "../../game-data/GameState";
 import { allWines } from "../../game-data/shared/sharedSelectors";
 import VictoryPoints from "../icons/VictoryPoints";
 import Coins from "../icons/Coins";
@@ -13,37 +14,25 @@ import { SummerVisitor, WinterVisitor, Order, Vine } from "../icons/Card";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
 import CrownIcon from "../icons/CrownIcon";
 import Worker from "../icons/Worker";
-import { Dispatch } from "redux";
-import { endGame } from "../../game-data/gameActions";
-import { VPSource } from "../../game-data/ActivityLog";
+import { useParams } from "react-router-dom";
 
-interface PlayerWithStats extends PlayerState {
-    coinsGained: number;
-    vinesPlanted: number;
-    sVisitorsPlayed: number;
-    ordersFilled: number;
-    wVisitorsPlayed: number;
-    workersPlaced: number;
-    accumulatedVPByYear: number[];
-    vpBySource: Record<VPSource, number>;
-}
 interface Props {
-    players: PlayerWithStats[]; // Ordered by win conditions
-    boardType: BoardType;
+    players: PlayerStats[]; // Ordered by win conditions
+    gameState: GameState;
     shouldEndGame: boolean;
-    endGame: () => void;
 }
 
 const GameOverPrompt: React.FunctionComponent<Props> = props => {
     const [isScrolled, setIsScrolled] = React.useState(false);
     const [showStats, setShowStats] = React.useState(true);
 
-    const { shouldEndGame, endGame } = props;
+    const { shouldEndGame, gameState, players } = props;
+    const { gameId } = useParams();
     React.useEffect(() => {
         if (shouldEndGame) {
-            endGame();
+            endGame(gameId, gameState, players);
         }
-    }, [shouldEndGame, endGame]);
+    }, [shouldEndGame, gameId, gameState, players]);
 
     const handleScroll = (event: React.UIEvent) => {
         const nowScrolled = (event.target as HTMLDivElement).scrollLeft > 5;
@@ -82,14 +71,14 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                             <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />visitors</th>
                             <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />structures</th>
                             <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />bonus</th>
-                            {props.boardType !== "base" && <>
+                            {gameState.boardType !== "base" && <>
                                 <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />trade</th>
                                 <th className="GameOverPrompt-colHeader"><VictoryPoints /><br />influence</th>
                             </>}
                         </tr>
                     </thead>
                     <tbody>
-                        {props.players.map((p, i) =>
+                        {players.map((p, i) =>
                             <tr key={p.id} className="GameOverPrompt-row">
                                 <th className="GameOverPrompt-rowHeader" scope="row">
                                     <VictoryPoints className="GameOverPrompt-vpIcon">{p.victoryPoints}</VictoryPoints>
@@ -106,7 +95,7 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
                                 <td className="GameOverPrompt-statCell">{p.vpBySource.visitor}</td>
                                 <td className="GameOverPrompt-statCell">{p.vpBySource.structure}</td>
                                 <td className="GameOverPrompt-statCell">{p.vpBySource.bonus}</td>
-                                {props.boardType !== "base" && <>
+                                {gameState.boardType !== "base" && <>
                                     <td className="GameOverPrompt-statCell">{p.vpBySource.trade}</td>
                                     <td className="GameOverPrompt-statCell">{p.vpBySource.influence}</td>
                                 </>}
@@ -154,10 +143,15 @@ const crushPadValue = (state: GameState, playerId: string) => {
 
 const mapStateToProps = (state: AppState) => {
     const game = state.game!
-    const playersWithStats: Record<string, PlayerWithStats> = Object.fromEntries(
-        Object.entries(game.players).map(([id, p]) => [
+    const playerStats: Record<string, PlayerStats> = Object.fromEntries(
+        Object.entries(game.players).map(([id, { name, color, coins, victoryPoints }]) => [
             id, {
-                ...p,
+                id,
+                rank: -1,
+                name,
+                color,
+                coins,
+                victoryPoints,
                 coinsGained: 0,
                 vinesPlanted: 0,
                 sVisitorsPlayed: 0,
@@ -181,22 +175,22 @@ const mapStateToProps = (state: AppState) => {
         switch (event.type) {
             case "coins":
                 if (event.delta > 0) {
-                    playersWithStats[event.playerId].coinsGained += event.delta;
+                    playerStats[event.playerId].coinsGained += event.delta;
                 }
                 return;
             case "fill":
-                playersWithStats[event.playerId].ordersFilled++;
+                playerStats[event.playerId].ordersFilled++;
                 return;
             case "placeWorker":
-                playersWithStats[event.playerId].workersPlaced++;
+                playerStats[event.playerId].workersPlaced++;
                 return;
             case "plant":
-                playersWithStats[event.playerId].vinesPlanted++;
+                playerStats[event.playerId].vinesPlanted++;
                 return;
             case "season":
                 if (event.season.startsWith("End of Year")) {
                     year++;
-                    Object.values(playersWithStats).forEach(p => {
+                    Object.values(playerStats).forEach(p => {
                         p.accumulatedVPByYear.push(p.accumulatedVPByYear[year - 1]);
                     });
                 }
@@ -204,21 +198,21 @@ const mapStateToProps = (state: AppState) => {
             case "visitor":
                 switch (visitorCards[event.visitorId].season) {
                     case "summer":
-                        playersWithStats[event.playerId].sVisitorsPlayed++;
+                        playerStats[event.playerId].sVisitorsPlayed++;
                         return;
                     case "winter":
-                        playersWithStats[event.playerId].wVisitorsPlayed++;
+                        playerStats[event.playerId].wVisitorsPlayed++;
                         return;
                 }
                 return;
             case "vp":
-                playersWithStats[event.playerId].accumulatedVPByYear[year] += event.delta;
-                playersWithStats[event.playerId].vpBySource[event.source] += event.delta;
+                playerStats[event.playerId].accumulatedVPByYear[year] += event.delta;
+                playerStats[event.playerId].vpBySource[event.source] += event.delta;
                 return;
         }
     });
 
-    const players = Object.values(playersWithStats);
+    const players = Object.values(playerStats);
     players.sort((p2, p1) => {
         if (p1.victoryPoints !== p2.victoryPoints) {
             return p1.victoryPoints - p2.victoryPoints;
@@ -231,15 +225,11 @@ const mapStateToProps = (state: AppState) => {
         }
     });
     return {
-        players,
-        boardType: game.boardType ?? "base",
+        players: players.map((p, rank) => ({ ...p, rank })),
+        gameState: game,
         shouldEndGame: game.playerId === game.currentTurn.playerId
-            && state.room.gameStatus !== "completed",
+            && state.room.gameStatus === "inProgress",
     };
 };
 
-const mapDispatchToProps = (dispatch: Dispatch, ownProps: { playerId: string }) => {
-    return { endGame: () => dispatch(endGame(ownProps.playerId)) };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(GameOverPrompt);
+export default connect(mapStateToProps)(GameOverPrompt);

@@ -57,7 +57,7 @@ const renderPrompt = (
         case "placeWorker":
             return <PlaceWorkerPrompt playerId={playerId} undoable={undoable} />;
         case "gameOver":
-            return <GameOverPrompt playerId={playerId} />;
+            return <GameOverPrompt />;
     }
 };
 

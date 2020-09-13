@@ -4,7 +4,7 @@ import { PromptState } from "./prompts/PromptState";
 import { VineId } from "./vineCards";
 import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
-import { ActivityLog } from "./ActivityLog";
+import { ActivityLog, VPSource } from "./ActivityLog";
 import { MamaId, PapaId } from "./mamasAndPapas";
 
 export type BoardType = "base" | "tuscanyA" | "tuscanyB";
@@ -197,6 +197,24 @@ export interface PlayerState {
     influence: InfluenceToken[];
     mamas: MamaId[];
     papas: PapaId[];
+}
+
+// Used to display end-of-game tables and charts
+export interface PlayerStats {
+    id: string;
+    rank: number;
+    name: string;
+    color: PlayerColor;
+    coins: number;
+    victoryPoints: number;
+    coinsGained: number;
+    vinesPlanted: number;
+    sVisitorsPlayed: number;
+    ordersFilled: number;
+    wVisitorsPlayed: number;
+    workersPlaced: number;
+    accumulatedVPByYear: number[];
+    vpBySource: Record<VPSource, number>;
 }
 
 export type WorkerType = "grande" | "normal";

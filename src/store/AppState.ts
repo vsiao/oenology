@@ -1,4 +1,4 @@
-import GameState from "../game-data/GameState";
+import GameState, { PlayerStats } from "../game-data/GameState";
 
 export interface AppState {
     userId: string | null;
@@ -27,4 +27,5 @@ export interface User {
     name: string;
     status: "connected" | "disconnected";
     connectedAt: number;
+    gameStats?: PlayerStats;
 }

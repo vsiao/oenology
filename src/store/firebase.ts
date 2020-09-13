@@ -2,13 +2,14 @@ import "firebase/auth";
 import "firebase/database";
 import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
-import { take, put, call, fork, throttle, select, takeEvery } from "redux-saga/effects";
+import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction, startGame as startGameAction, EndGameAction, PlayerInit } from "../game-data/gameActions";
+import { isGameAction, startGame as startGameAction, PlayerInit } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
-import GameState from "../game-data/GameState";
+import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
-import { GameOptions } from "./AppState";
+import { GameOptions, RoomState, User } from "./AppState";
+import { allPlacements } from "../game-data/board/boardPlacements";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -24,28 +25,84 @@ export function* signIn() {
 }
 
 export function fetchRecentGames() {
-    return new Promise(resolve => {
+    return new Promise<RoomState[]>(resolve => {
         firebase
             .database()
             .ref("rooms")
             .orderByChild("gameStartedAt")
             .limitToLast(50)
             .once("value", snap => {
-                const rooms: unknown[] = [];
+                const rooms: RoomState[] = [];
                 snap.forEach(child => {
-                    rooms.push({ ...child.val(), key: child.key })
+                    const room = child.val();
+                    rooms.push({
+                        ...room,
+                        key: child.key,
+                        users: Object.fromEntries(
+                            Object.entries(room.users as Record<string, User>)
+                                .map(([id, u]) => [id, ({ ...u, id })])
+                        ),
+                    });
                 });
                 resolve(rooms.reverse());
             });
     });
 }
 
+export function fetchPlayersState(gameId: string) {
+    return new Promise<Record<string, PlayerState>>(resolve => {
+        firebase.database().ref(`gameStates/${gameId}/players`).once("value", snap => {
+            resolve(hydratePlayers(snap.val() ?? {}));
+        });
+    })
+}
+
 export function getGameState(gameId: string) {
-    return new Promise(resolve => {
+    return new Promise<GameState | null>(resolve => {
         firebase.database().ref(`gameStates/${gameId}`).once("value", snap => {
-            resolve(snap.val());
+            const rawState = snap.val();
+            if (!rawState) {
+                return resolve(null);
+            }
+
+            // Firebase drops null values and empty arrays, so we have to
+            // fill them back in here
+            const gameState: GameState = {
+                ...rawState,
+                wakeUpOrder: new Array(7).fill(null).map((_, i) =>
+                    rawState.wakeUpOrder[i] || null
+                ) as GameState["wakeUpOrder"],
+                workerPlacements: Object.fromEntries(
+                    allPlacements.map(({ type }) =>
+                        [type, rawState.workerPlacements?.[type] ?? []]
+                    )
+                ) as GameState["workerPlacements"],
+                players: hydratePlayers(rawState.players),
+            };
+            resolve(gameState);
         });
     });
+}
+
+function hydratePlayers(rawPlayers: unknown): Record<string, PlayerState> {
+    return Object.fromEntries(
+        Object.entries(rawPlayers as Record<string, PlayerState>)
+            .map(([playerId, p]) =>
+                [playerId, {
+                    ...p,
+                    influence: p.influence ?? [],
+                    cardsInHand: p.cardsInHand ?? [],
+                    fields: Object.fromEntries(
+                        Object.entries(p.fields).map(([fieldId, f]) =>
+                            [fieldId, {
+                                ...f,
+                                vines: f.vines ?? []
+                            }]
+                        )
+                    ) as PlayerState["fields"],
+                }]
+            )
+    );
 }
 
 export function createRoom() {
@@ -132,18 +189,23 @@ export function startGame(gameId: string, players: PlayerInit[], options: GameOp
     });
 }
 
-function endGame(action: EndGameAction, gameId: string, gameState: GameState) {
+export function endGame(gameId: string, gameState: GameState, playerStats: PlayerStats[]) {
     const ref = firebase.database().ref();
     ref.child(".info/serverTimeOffset").once("value", snap => {
         const nowMs = new Date().getTime() + snap.val();
-        const endGameKey = ref.child(`gameLogs/${gameId}`).push().key;
         const { playerId, ...denormalizedGameState } = gameState;
-        ref.update({
-            [`gameLogs/${gameId}/${endGameKey}`]: action,
+        const updates: Record<string, any> = {
             [`gameStates/${gameId}`]: denormalizedGameState,
             [`rooms/${gameId}/gameEndedAt`]: new Date(nowMs).toJSON(),
             [`rooms/${gameId}/gameStatus`]: "completed",
+        };
+        playerStats.forEach((stats, i) => {
+            updates[`rooms/${gameId}/users/${stats.id}/gameStats`] = {
+                ...stats,
+                rank: i,
+            };
         });
+        ref.update(updates);
     });
 }
 
@@ -151,12 +213,7 @@ export function* publishGameLog(gameId: string) {
     while (true) {
         const gameAction = yield take(isGameAction);
         if (!gameAction._key) {
-            if (gameAction.type === "END_GAME") {
-                const gameState = yield select(state => state.game);
-                endGame(gameAction, gameId, gameState);
-            } else {
-                firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
-            }
+            firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
         }
     }
 }

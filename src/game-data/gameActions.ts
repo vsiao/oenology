@@ -9,7 +9,6 @@ export type GameAction = (
     | StartGameAction
     | PromptAction
     | UndoAction
-    | EndGameAction
     | CHEAT_DrawCardAction
     | CHEAT_GainGrapeAction
 ) & {
@@ -24,7 +23,6 @@ export const isGameAction = (action: Action): action is GameAction => {
         case "START_GAME":
         case "CHEAT_DRAW_CARD":
         case "CHEAT_GAIN_GRAPE":
-        case "END_GAME":
         case "UNDO":
             return true;
         default:
@@ -64,13 +62,6 @@ interface UndoAction extends Action<"UNDO"> {
 }
 export const undo = (playerId: string): GameAction => {
     return { type: "UNDO", playerId };
-};
-
-export interface EndGameAction extends Action<"END_GAME"> {
-    playerId: string;
-}
-export const endGame = (playerId: string): GameAction => {
-    return { type: "END_GAME", playerId };
 };
 
 interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {

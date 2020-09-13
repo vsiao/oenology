@@ -33,21 +33,40 @@
     padding: 0 .5em;
 }
 
+.Home-recentGamePlayers {
+    align-items: center;
+    display: flex;
+    max-width: 700px;
+}
+
 .Home-playerName {
     display: inline-block;
+    margin-left: .2em;
     max-width: 200px;
     overflow: hidden;
     text-overflow: ellipsis;
-    vertical-align: middle;
     white-space: nowrap;
 }
+.Home-playerName--winner {
+    font-weight: 600;
+}
 
-.Home-optionTag {
+.Home-recentGameCrown {
+    margin-left: .2em
+}
+
+.Home-rhineTag,
+.Home-tuscanyTag {
     background: #eee;
     border-radius: .2em;
     font-size: .8em;
     padding: .2em .4em;
 }
-.Home-optionTag + .Home-optionTag {
+.Home-rhineTag + .Home-tuscanyTag {
     margin-left: .2em;
+}
+
+.Home-tuscanyTag {
+    background: firebrick;
+    color: white;
 }

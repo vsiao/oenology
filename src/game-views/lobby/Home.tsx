@@ -1,8 +1,11 @@
 import "./Home.css";
+import cx from "classnames";
 import React, { FunctionComponent, useEffect, useState } from "react";
-import { fetchRecentGames, createRoom } from "../../store/firebase";
+import { fetchRecentGames, createRoom, fetchPlayersState } from "../../store/firebase";
 import { RoomState } from "../../store/AppState";
 import Worker from "../icons/Worker";
+import CrownIcon from "../icons/CrownIcon";
+import VP from "../icons/VictoryPoints";
 
 interface GameRoom extends RoomState {
     key: string;
@@ -36,7 +39,28 @@ const handleNewGameClick = () => {
 };
 
 const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
-    const activePlayers = Object.values(room.users).filter(u => u.name);
+    const [fetchedPlayerData, setFetchedPlayerData] = useState<Record<string, {rank:number;vp: number;}>>({});
+    const activePlayers = Object.entries(room.users).filter(([_, u]) => u.name).map(([id, u]) => ({...u, id}));
+    useEffect(() => {
+        if (room.gameStatus === "completed" && !activePlayers.every(p => p.gameStats)) {
+            fetchPlayersState(room.key).then(playerMap => {
+                const players = Object.values(playerMap);
+                players.sort((p2, p1) => {
+                    return p1.victoryPoints !== p2.victoryPoints
+                        ? p1.victoryPoints - p2.victoryPoints
+                        : p1.coins - p2.coins;
+                });
+                setFetchedPlayerData(Object.fromEntries(
+                    players.map((p, i) => [p.id, { rank: i, vp: p.victoryPoints }])
+                ));
+            });
+        }
+    }, [room.gameStatus, room.key, activePlayers]);
+    activePlayers.sort((p1, p2) =>
+        (p1.gameStats?.rank ?? fetchedPlayerData[p1.id]?.rank) -
+            (p2.gameStats?.rank ?? fetchedPlayerData[p2.id]?.rank)
+    );
+
     return <tr className="Home-recentGame">
         <td className="Home-recentGameCell">
             {room.gameStartedAt
@@ -50,17 +74,29 @@ const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
                 : null}{" "}
         </td>
         <td className="Home-recentGameCell">
-            {activePlayers.map((p, i) => <>
-                {i > 0 ? ", " : null}
-                <span className="Home-playerName">{p.name}</span>
-            </>)}
+            <div className="Home-recentGamePlayers">
+                {activePlayers.map((p, i) => {
+                    const vp = p.gameStats?.victoryPoints ?? fetchedPlayerData[p.id]?.vp;
+                    const isWinner = p.gameStats?.rank === 0 || fetchedPlayerData[p.id]?.rank === 0;
+                    return <React.Fragment key={p.id}>
+                        {vp !== undefined && isWinner
+                            ? <VP className="Home-recentGameVP">{vp}</VP>
+                            : i > 0 && ", "}
+                        <span className={cx({
+                            "Home-playerName": true,
+                            "Home-playerName--winner": isWinner,
+                        })}>{p.name}</span>
+                        {isWinner && <CrownIcon className="Home-recentGameCrown" />}
+                    </React.Fragment>
+                })}
+            </div>
         </td>
         <td className="Home-recentGameCell">
             {activePlayers.length} <Worker isTemp={true} />
         </td>
         <td className="Home-recentGameCell">
-            {room.gameOptions?.rhineVisitors && <span className="Home-optionTag">rhine</span>}
-            {room.gameOptions?.tuscanyBoard && <span className="Home-optionTag">tuscany</span>}
+            {room.gameOptions?.rhineVisitors && <span className="Home-rhineTag">rhine</span>}
+            {room.gameOptions?.tuscanyBoard && <span className="Home-tuscanyTag">tuscany</span>}
         </td>
         <td className="Home-recentGameCell">
             <a href={`/game/${room.key}`}>

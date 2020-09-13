@@ -2,8 +2,6 @@ import { AppAction } from "./appActions";
 import { AppState } from "./AppState";
 import { game } from "../game-data/gameReducers";
 import { isGameAction } from "../game-data/gameActions";
-import { allPlacements } from "../game-data/board/boardPlacements";
-import GameState, { PlayerState } from "../game-data/GameState";
 
 export const appReducer = (state: AppState | undefined, action: AppAction): AppState => {
     if (state === undefined) {
@@ -82,38 +80,10 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
             };
         case "HYDRATE_GAME":
             const gameState = action.state;
-
-            // Firebase drops null values and empty arrays, so we have to
-            // fill them back in when we hydrate
             return {
                 ...state,
                 game: {
                     ...gameState,
-                    wakeUpOrder: new Array(7).fill(null).map((_, i) =>
-                        gameState.wakeUpOrder[i] || null
-                    ) as GameState["wakeUpOrder"],
-                    workerPlacements: Object.fromEntries(
-                        allPlacements.map(({ type }) =>
-                            [type, gameState.workerPlacements?.[type] ?? []]
-                        )
-                    ) as GameState["workerPlacements"],
-                    players: Object.fromEntries(
-                        Object.entries(gameState.players).map(([playerId, p]) =>
-                            [playerId, {
-                                ...p,
-                                influence: p.influence ?? [],
-                                cardsInHand: p.cardsInHand ?? [],
-                                fields: Object.fromEntries(
-                                    Object.entries(p.fields).map(([fieldId, f]) =>
-                                        [fieldId, {
-                                            ...f,
-                                            vines: f.vines ?? []
-                                        }]
-                                    )
-                                ) as PlayerState["fields"],
-                            }]
-                        )
-                    ),
                     playerId: gameState.tableOrder.some(id => id === state.userId)
                         ? state.userId
                         : null,
