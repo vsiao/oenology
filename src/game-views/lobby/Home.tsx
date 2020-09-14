@@ -41,8 +41,9 @@ const handleNewGameClick = () => {
 const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
     const [fetchedPlayerData, setFetchedPlayerData] = useState<Record<string, {rank:number;vp: number;}>>({});
     const activePlayers = Object.entries(room.users).filter(([_, u]) => u.name).map(([id, u]) => ({...u, id}));
+    const hasStats = activePlayers.every(p => p.gameStats);
     useEffect(() => {
-        if (room.gameStatus === "completed" && !activePlayers.every(p => p.gameStats)) {
+        if (room.gameStatus === "completed" && !hasStats) {
             fetchPlayersState(room.key).then(playerMap => {
                 const players = Object.values(playerMap);
                 players.sort((p2, p1) => {
@@ -55,7 +56,7 @@ const RecentGameRow: FunctionComponent<{ room: GameRoom }> = ({ room }) => {
                 ));
             });
         }
-    }, [room.gameStatus, room.key, activePlayers]);
+    }, [room.gameStatus, room.key, hasStats]);
     activePlayers.sort((p1, p2) =>
         (p1.gameStats?.rank ?? fetchedPlayerData[p1.id]?.rank) -
             (p2.gameStats?.rank ?? fetchedPlayerData[p2.id]?.rank)
