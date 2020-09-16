@@ -49,6 +49,7 @@
 .PlayerCard--winterVisitor .PlayerCard-description {
     align-items: center;
     background: antiquewhite;
+    justify-content: center;
 }
 .PlayerCard--vine .PlayerCard-description {
     display: block;
