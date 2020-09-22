@@ -42,7 +42,7 @@ export const promptToInfluence = (
                         ? "You haven't placed anything yet."
                         : undefined,
                 },
-                ...type === "optional"
+                ...type === "optional" || type === "thenSellWine"
                     ? [{
                         id: "INFLUENCE_PASS",
                         label: <>Pass</>,

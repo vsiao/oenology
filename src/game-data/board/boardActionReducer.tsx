@@ -118,7 +118,7 @@ export const boardAction = (
             );
         }
         case "influence":
-            return promptToInfluence(state, hasBonus ? "withBonus" : "optional");
+            return promptToInfluence(state, hasBonus ? "withBonus" : "required");
 
         case "makeWine": {
             return promptToMakeWine(
@@ -156,7 +156,7 @@ export const boardAction = (
                 : promptToSellWine(state);
 
         case "trade":
-            return promptToTrade(state, hasBonus);
+            return promptToTrade(state, hasBonus ? "bonus" : "required");
 
         case "trainWorker": {
             return endTurn(trainWorker(payCoins(hasBonus ? 3 : 4, state)));
@@ -187,8 +187,8 @@ export const promptToSellWine = (state: GameState) => {
 // Trade action
 // ----------------------------------------------------------------------------
 
-const promptToTrade = (state: GameState, hasBonus: boolean) => {
-    return promptForAction(setPendingAction({ type: "trade", hasBonus }, state), {
+const promptToTrade = (state: GameState, type: "required" | "bonus" | "optional") => {
+    return promptForAction(setPendingAction({ type: "trade", hasBonus: type === "bonus" }, state), {
         choices: [
             {
                 id: "TRADE_DISCARD",
@@ -208,6 +208,12 @@ const promptToTrade = (state: GameState, hasBonus: boolean) => {
                 id: "TRADE_DISCARD_GRAPE",
                 label: <>Discard <Grape /></>,
             },
+            ...type !== "optional"
+                ? []
+                : [{
+                    id: "TRADE_PASS",
+                    label: <>Pass</>,
+                }],
         ],
     });
 };
@@ -225,7 +231,7 @@ const promptToGain = (state: GameState) => {
 
 const maybeEndTrade = (state: GameState): GameState => {
     if ((state.currentTurn as WorkerPlacementTurn).pendingAction?.hasBonus) {
-        return promptToTrade(state, /* hasBonus */ false);
+        return promptToTrade(state, "optional");
     }
     return endTurn(state);
 };
@@ -281,6 +287,8 @@ export const trade = (state: GameState, action: GameAction): GameState => {
                             label: <>Gain <Grape color={color}>1</Grape></>,
                         })),
                     });
+                case "TRADE_PASS":
+                    return maybeEndTrade(state);
                 default:
                     return state;
             }

@@ -362,7 +362,7 @@ const gainWakeUpBonus = (
         case "gainVP":
             return gainVP(1, state, { playerId, source: "bonus" });
         case "influence":
-            return state; // TODO
+            return state;
         case "nothing":
             return state;
         case "tempWorker":
