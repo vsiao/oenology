@@ -4,7 +4,7 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction, startGame as startGameAction, PlayerInit } from "../game-data/gameActions";
+import { isGameAction, startGame as startGameAction, PlayerInit, GameAction } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
 import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
@@ -213,18 +213,37 @@ export function* publishGameLog(gameId: string) {
     while (true) {
         const gameAction = yield take(isGameAction);
         if (!gameAction._key) {
-            firebase.database().ref(`gameLogs/${gameId}`).push(gameAction);
+            firebase.database().ref(`gameLogs/${gameId}`).push({
+                ...gameAction,
+                ts: firebase.database.ServerValue.TIMESTAMP,
+            });
         }
     }
 }
 
 export function* subscribeToGameLog(gameId: string) {
+    const gameLogRef = firebase.database().ref(`gameLogs/${gameId}`);
+
+    // First, apply all existing actions sorted by timestamp
+    const gameLogSnap = (yield call(() => gameLogRef.orderByChild("ts").once("value"))) as firebase.database.DataSnapshot;
+    const appliedKeys: Set<string> = new Set();
+    const orderedLog: GameAction[] = [];
+    gameLogSnap.forEach(snap => {
+        orderedLog.push({ ...snap.val(), _key: snap.key });
+    });
+    for (const action of orderedLog) {
+        yield put(action);
+        appliedKeys.add(action._key!);
+    }
+
+    // Then listen for new actions, filtering out those we've already applied
     const firebaseEventChannel = eventChannel(emit => {
-        const ref = firebase.database().ref(`gameLogs/${gameId}`);
-        ref.on("child_added", snap => {
-            emit({ ...snap.val(), _key: snap.key })
+        gameLogRef.on("child_added", snap => {
+            if (!appliedKeys.has(snap.key!)) {
+                emit({ ...snap.val(), _key: snap.key });
+            }
         });
-        return () => ref.off("child_added");
+        return () => gameLogRef.off("child_added");
     });
     while (true) {
         yield put(yield take(firebaseEventChannel));

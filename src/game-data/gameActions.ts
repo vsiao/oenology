@@ -14,8 +14,12 @@ export type GameAction = (
 ) & {
     // Every action should first be pushed to firebase to be
     // applied on other clients. Then, only on success do we
-    // apply to our own store.
+    // apply to our own store. The existence of the `_key` property
+    // implies that this action was received from firebase.
     _key?: string;
+
+    // Server timestamp of when this action was written to firebase.
+    ts?: number;
 };
 
 export const isGameAction = (action: Action): action is GameAction => {
