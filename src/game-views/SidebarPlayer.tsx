@@ -9,7 +9,7 @@ import Worker from "./icons/Worker";
 import Grape from "./icons/Grape";
 import GrapeToken from "./icons/GrapeToken";
 import WineGlass from "./icons/WineGlass";
-import { fieldYields } from "../game-data/shared/sharedSelectors";
+import { controllingPlayerIds, fieldYields } from "../game-data/shared/sharedSelectors";
 import { visitorCards } from "../game-data/visitors/visitorCards";
 import { StructureId, structures } from "../game-data/structures";
 import { AnchorSide, useTooltip } from "./shared/useTooltip";
@@ -22,6 +22,8 @@ import "./SidebarPlayer.css";
 
 interface Props {
     player: PlayerState;
+    isActive: boolean;
+    lastActionTimeMs: number;
     inWakeUpOrder: boolean;
     hasGrape?: boolean;
     yokeWorker?: BoardWorker | null;
@@ -53,6 +55,11 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                 </div>
                 : null}
             <span className="SidebarPlayer-playerName">{player.name}</span>
+            {!isNaN(player.playedTimeMs) && <PlayerTimer
+                playedTimeMs={player.playedTimeMs}
+                isActive={props.isActive}
+                lastActionTimeMs={props.lastActionTimeMs}
+            />}
             <ul className="SidebarPlayer-cards">
                 {player.cardsInHand.map(card =>
                     <li key={card.id} className="SidebarPlayer-card">
@@ -172,6 +179,68 @@ const maybeRenderYokeWorker = ({ player, yokeWorker }: Props) => {
         animateWithId={yokeWorker.id}
         isTemp={yokeWorker.isTemp}
     />;
+};
+
+const pad = (n: number) => n < 10 ? "0" + n : "" + n;
+const formatTimer = (ms: number) => {
+    const nSec = Math.floor(ms / 1000);
+    const s = nSec % 60;
+    const m = Math.floor(nSec % 3600 / 60);
+    const h = Math.floor(nSec / 3600);
+
+    if (h > 24) {
+        return ">24h";
+    }
+    return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+};
+
+const PlayerTimer: React.FunctionComponent<{
+    playedTimeMs: number;
+    lastActionTimeMs: number;
+    isActive: boolean
+}> = ({ playedTimeMs, lastActionTimeMs, isActive }) => {
+    const [displayMs, setDisplayMs] = React.useState(0);
+    const lastUpdatedMsRef = React.useRef(0);
+
+    const updateActivePlayerMs = React.useCallback(
+        (lastPlayedMs: number, lastUpdateMs: number) => {
+            const nowMs = Date.now();
+            const elapsedMs = nowMs - lastUpdateMs;
+            setDisplayMs(lastPlayedMs + elapsedMs);
+            lastUpdatedMsRef.current = nowMs;
+        },
+        []
+    );
+
+    React.useEffect(() => {
+        // When an action is played, we get a new `playedTimeMs` computed from server timestamps.
+        // Immediately update `displayMs` to reflect this, which has the side-effect of
+        // resetting the timeout below as well.
+        if (isActive) {
+            updateActivePlayerMs(playedTimeMs, lastActionTimeMs);
+        } else {
+            setDisplayMs(playedTimeMs);
+            lastUpdatedMsRef.current = lastActionTimeMs;
+        }
+    }, [isActive, updateActivePlayerMs, playedTimeMs, lastActionTimeMs]);
+
+    React.useEffect(() => {
+        if (!isActive) {
+            return;
+        }
+        // Update our state roughly every second
+        let timer = setInterval(tick, 1000);
+        function tick() {
+            updateActivePlayerMs(displayMs, lastUpdatedMsRef.current);
+        };
+        return () => clearInterval(timer);
+    }, [isActive, updateActivePlayerMs, displayMs]);
+
+    return (
+        <span className={cx("SidebarPlayer-timer", { "SidebarPlayer-timer--active": isActive })}>
+            {formatTimer(displayMs)}
+        </span>
+    );
 };
 
 const FieldTooltip: React.FunctionComponent<{
@@ -322,6 +391,8 @@ const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) =>
     const game = state.game!;
     return {
         player: game.players[playerId],
+        isActive: controllingPlayerIds(game).some(p => p === playerId),
+        lastActionTimeMs: game.lastActionTimeMs,
         inWakeUpOrder: game.wakeUpOrder.some(pos => pos && pos.playerId === playerId),
 
         // In Tuscany, only display the grape token after the game has started.

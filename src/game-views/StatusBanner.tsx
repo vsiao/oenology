@@ -5,7 +5,7 @@ import { AppState } from "../store/AppState";
 import { CurrentTurn, WorkerPlacementTurnPendingAction, WorkerPlacementTurn, Season } from "../game-data/GameState";
 import { SummerVisitor, WinterVisitor, Order, Vine } from "./icons/Card";
 import { visitorCards } from "../game-data/visitors/visitorCards";
-import { isLastWinter } from "../game-data/shared/sharedSelectors";
+import { isGameOver } from "../game-data/shared/sharedSelectors";
 import { Tooltip, useAnchoredLayer } from "./shared/useTooltip";
 import VisitorCard from "./cards/VisitorCard";
 import { orderCards } from "../game-data/orderCards";
@@ -166,8 +166,7 @@ const renderPendingActionStatus = (
 const mapStateToProps = (state: AppState) => {
     const game = state.game!;
     return {
-        gameOver: isLastWinter(game) &&
-            game.wakeUpOrder.every(pos => !pos || pos.season === "endOfYear"),
+        gameOver: isGameOver(game),
         season: game.season,
         currentTurn: game.currentTurn,
         playerNames: Object.fromEntries(

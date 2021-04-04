@@ -7,7 +7,7 @@ import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers"
 import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { placeGrapes } from "./shared/grapeWineReducers";
-import { isControllingPlayer } from "./shared/sharedSelectors";
+import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
@@ -34,6 +34,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             return placeGrapes(state, { [action.grape.color]: action.grape.value });
     }
 
+    const controllingIds = controllingPlayerIds(state);
     state = {
         ...state,
         // Actions are undoable by default when performed by the current player.
@@ -43,6 +44,16 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             prevState: state,
             isLastActionByCurrentTurnPlayer: state.playerId === action.playerId,
         },
+        // Increment played time for all controlling players
+        players: Object.fromEntries(
+            Object.entries(state.players).map(([playerId, player]) => [
+                playerId,
+                controllingIds.some(p => p === playerId)
+                    ? { ...player, playedTimeMs: player.playedTimeMs + action.ts! - state.lastActionTimeMs }
+                    : player
+            ])
+        ),
+        lastActionTimeMs: action.ts!,
         lastActionKey: action._key,
     };
     return board(prompt(state, action), action);
@@ -112,6 +123,7 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
         },
         activityLog: [],
         undoState: null,
+        lastActionTimeMs: (action as GameAction).ts!,
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };
@@ -127,6 +139,7 @@ const initPlayer = (
         id,
         name,
         color,
+        playedTimeMs: 0,
         coins: 0,
         residuals: 0,
         victoryPoints: 0,

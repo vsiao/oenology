@@ -5,15 +5,22 @@ import { WineSpec, orderCards, OrderId } from "../orderCards";
 import { Coupon, structures, StructureId } from "../structures";
 import { GrapeSpec, VineInField } from "../prompts/promptActions";
 
-export const isControllingPlayer = (state: GameState, playerId = state.playerId) => {
+export const controllingPlayerIds = (state: GameState) => {
+    if (isGameOver(state)) {
+        return [];
+    }
     if (
         state.currentTurn.type === "workerPlacement" &&
         state.currentTurn.pendingAction?.type === "playVisitor" &&
         state.currentTurn.pendingAction.actionPlayerId !== undefined
     ) {
-        return playerId === state.currentTurn.pendingAction.actionPlayerId;
+        return [state.currentTurn.pendingAction.actionPlayerId];
     }
-    return playerId === state.currentTurn.playerId;
+    return [state.currentTurn.playerId];
+}
+
+export const isControllingPlayer = (state: GameState, playerId = state.playerId) => {
+    return controllingPlayerIds(state).some(p => p === playerId)
 };
 
 export const buildStructureDisabledReason = (
@@ -369,6 +376,11 @@ export const isLastWinter = (state: GameState) => {
     const threshold = state.boardType === "base" ? 20 : 25;
     return state.season === "winter" &&
         Object.values(state.players).some(p => p.victoryPoints >= threshold);
+};
+
+export const isGameOver = (state: GameState) => {
+    return isLastWinter(state) &&
+        state.wakeUpOrder.every(pos => !pos || pos.season !== "winter");
 };
 
 export const residualPaymentsDisabledReason = (state: GameState, n: number): string | undefined => {
