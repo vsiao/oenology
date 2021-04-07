@@ -9,6 +9,7 @@ export type GameAction = (
     | StartGameAction
     | PromptAction
     | UndoAction
+    | GameActionChanged
     | CHEAT_DrawCardAction
     | CHEAT_GainGrapeAction
 ) & {
@@ -25,6 +26,7 @@ export type GameAction = (
 export const isGameAction = (action: Action): action is GameAction => {
     switch (action.type) {
         case "START_GAME":
+        case "GAME_ACTION_CHANGED":
         case "CHEAT_DRAW_CARD":
         case "CHEAT_GAIN_GRAPE":
         case "UNDO":
@@ -66,6 +68,16 @@ interface UndoAction extends Action<"UNDO"> {
 }
 export const undo = (playerId: string): GameAction => {
     return { type: "UNDO", playerId };
+};
+
+export interface GameActionChanged extends Action<"GAME_ACTION_CHANGED"> {
+    key: string;
+    // Occasionally, firebase will correct client timestamps, which
+    // affects our calculation of turn timers.
+    ts: number;
+}
+export const gameActionChanged = (key: string, ts: number): GameAction => {
+    return { type: "GAME_ACTION_CHANGED", key, ts, _key: key, };
 };
 
 interface CHEAT_DrawCardAction extends Action<"CHEAT_DRAW_CARD"> {

@@ -4,7 +4,7 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction, GameAction } from "../game-data/gameActions";
+import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
 import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
@@ -240,6 +240,9 @@ export function* subscribeToGameLog(gameId: string) {
             if (!appliedKeys.has(snap.key!)) {
                 emit({ ...snap.val(), _key: snap.key });
             }
+        });
+        gameLogRef.on("child_changed", snap => {
+            emit(gameActionChanged(snap.key!, snap.val().ts));
         });
         return () => gameLogRef.off("child_added");
     });

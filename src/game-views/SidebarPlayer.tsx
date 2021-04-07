@@ -392,7 +392,7 @@ const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) =>
     return {
         player: game.players[playerId],
         isActive: controllingPlayerIds(game).some(p => p === playerId),
-        lastActionTimeMs: game.lastActionTimeMs,
+        lastActionTimeMs: game.actionsApplied[game.lastActionKey!].ts,
         inWakeUpOrder: game.wakeUpOrder.some(pos => pos && pos.playerId === playerId),
 
         // In Tuscany, only display the grape token after the game has started.

@@ -1,6 +1,6 @@
 import Alea from "alea";
 import GameState, { PlayerState, StructureState, CardsByType } from "./GameState";
-import { GameAction, PlayerInit, StartGameAction } from "./gameActions";
+import { GameAction, GameActionChanged, PlayerInit, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
@@ -13,6 +13,9 @@ import { GameOptions } from "../store/AppState";
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     if (action.type === "START_GAME") {
         return beginMamaPapaTurn(initGame(userId, action));
+    }
+    if (action.type === "GAME_ACTION_CHANGED") {
+        return updatePlayedTime(state, action);
     }
     if (!isControllingPlayer(state, action.playerId)) {
         // It's not this player's turn. Reject the action.
@@ -35,8 +38,18 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     }
 
     const controllingIds = controllingPlayerIds(state);
+    const actionDurationMs = action.ts! - state.actionsApplied[state.lastActionKey!].ts;
     state = {
         ...state,
+        // Increment played time for all controlling players
+        players: Object.fromEntries(
+            Object.entries(state.players).map(([playerId, player]) => [
+                playerId,
+                controllingIds.some(p => p === playerId)
+                    ? { ...player, playedTimeMs: player.playedTimeMs + actionDurationMs }
+                    : player
+            ])
+        ),
         // Actions are undoable by default when performed by the current player.
         // In certain cases (ending a turn, drawing a card), this state will be cleared.
         undoState: {
@@ -44,23 +57,25 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             prevState: state,
             isLastActionByCurrentTurnPlayer: state.playerId === action.playerId,
         },
-        // Increment played time for all controlling players
-        players: Object.fromEntries(
-            Object.entries(state.players).map(([playerId, player]) => [
-                playerId,
-                controllingIds.some(p => p === playerId)
-                    ? { ...player, playedTimeMs: player.playedTimeMs + action.ts! - state.lastActionTimeMs }
-                    : player
-            ])
-        ),
-        lastActionTimeMs: action.ts!,
+        actionsApplied: {
+            ...state.actionsApplied,
+            [state.lastActionKey!]: {
+                ...state.actionsApplied[state.lastActionKey!],
+                nextActionKey: action._key!,
+            },
+            [action._key!]: {
+                controllingPlayers: controllingIds,
+                ts: action.ts!,
+            },
+        },
         lastActionKey: action._key,
     };
     return board(prompt(state, action), action);
 };
 
 const initGame = (userId: string, action: StartGameAction): GameState => {
-    const random = Alea((action as GameAction)._key!);
+    const { _key: key, ts } = action as GameAction;
+    const random = Alea(key);
     const players = action.players;
     const mamas = shuffle(Object.keys(mamaCards) as MamaId[], random);
     const papas = shuffle(Object.keys(papaCards) as PapaId[], random);
@@ -123,7 +138,12 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
         },
         activityLog: [],
         undoState: null,
-        lastActionTimeMs: (action as GameAction).ts!,
+        actionsApplied: {
+            [key!]: {
+                controllingPlayers: [],
+                ts: ts!,
+            },
+        },
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };
@@ -180,5 +200,48 @@ const initPlayer = (
             : [],
         mamas,
         papas,
+    };
+};
+
+const updatePlayedTime = (state: GameState, action: GameActionChanged): GameState => {
+    const appliedAction = state.actionsApplied[action.key];
+    if (!appliedAction) {
+        // Tried to update an action that we aren't keeping track of; ignore
+        return state;
+    }
+    const dt = action.ts - appliedAction.ts;
+
+    // Timestamp changes affect players in control before and after this action.
+    // Moving a timestamp forward should shift time taken from players in control
+    // after the action to the players in control before the action.
+    const prevPlayers = appliedAction.controllingPlayers;
+    const nextPlayers = appliedAction.nextActionKey
+        ? state.actionsApplied[appliedAction.nextActionKey].controllingPlayers
+        : [];
+
+    const adjustments: Record<string, number> = {};
+    for (const pid of prevPlayers) {
+        adjustments[pid] = dt;
+    }
+    for (const pid of nextPlayers) {
+        if (adjustments.hasOwnProperty(pid)) {
+            // existence implies this player was in control both before and after this
+            // action, so no adjustment is needed
+            delete adjustments[pid];
+        } else {
+            adjustments[pid] = -dt;
+        }
+    }
+
+    return {
+        ...state,
+        players: Object.fromEntries(
+            Object.entries(state.players).map(([playerId, player]) => [
+                playerId,
+                adjustments.hasOwnProperty(playerId)
+                    ? { ...player, playedTimeMs: player.playedTimeMs + adjustments[playerId] }
+                    : player
+            ])
+        ),
     };
 };

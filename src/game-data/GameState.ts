@@ -49,7 +49,12 @@ export default interface GameState {
         // Nothing to undo, usually indicating game beginning or game end
         | null;
 
-    lastActionTimeMs: number;
+    // Metadata to facilitate correcting turn timers on server updates
+    actionsApplied: Record<string, {
+        controllingPlayers: string[];
+        nextActionKey?: string;
+        ts: number;
+    }>
 
     // Published key of the most-recently received action.
     // Used as a PRNG seed for on-demand shuffling.
