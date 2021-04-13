@@ -4,11 +4,11 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { firebaseConfig } from "./config";
-import { isGameAction, startGame as startGameAction, PlayerInit, GameAction } from "../game-data/gameActions";
+import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
 import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
-import { GameOptions, RoomState, User } from "./AppState";
+import { RoomState, User } from "./AppState";
 import { allPlacements } from "../game-data/board/boardPlacements";
 
 firebase.initializeApp(firebaseConfig);
@@ -176,13 +176,11 @@ export function* subscribeToRoom(gameId: string, userId: string) {
     }
 }
 
-export function startGame(gameId: string, players: PlayerInit[], options: GameOptions) {
+export function startGame(gameId: string) {
     const ref = firebase.database().ref();
     ref.child(".info/serverTimeOffset").once("value", snap => {
         const nowMs = new Date().getTime() + snap.val();
-        const startGameKey = ref.child(`gameLogs/${gameId}`).push().key;
         ref.update({
-            [`gameLogs/${gameId}/${startGameKey}`]: startGameAction(players, options),
             [`rooms/${gameId}/gameStartedAt`]: new Date(nowMs).toJSON(),
             [`rooms/${gameId}/gameStatus`]: "inProgress",
         });
@@ -242,6 +240,9 @@ export function* subscribeToGameLog(gameId: string) {
             if (!appliedKeys.has(snap.key!)) {
                 emit({ ...snap.val(), _key: snap.key });
             }
+        });
+        gameLogRef.on("child_changed", snap => {
+            emit(gameActionChanged(snap.key!, snap.val().ts));
         });
         return () => gameLogRef.off("child_added");
     });

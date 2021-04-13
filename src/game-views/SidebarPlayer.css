@@ -72,6 +72,18 @@
     text-overflow: ellipsis;
 }
 
+.SidebarPlayer-timer {
+    border-radius: 4px;
+    box-shadow: inset 0 0 0 1px #666;
+    font-size: .8em;
+    margin-left: .5em;
+    padding: 2px 4px;
+}
+.SidebarPlayer-timer--active {
+    background: #fff;
+    font-weight: 600;
+}
+
 .SidebarPlayer-cards {
     display: flex;
     margin-left: 1.5em;

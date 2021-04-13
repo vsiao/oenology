@@ -3,6 +3,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { AppState, User, GameOptions } from "../../store/AppState";
 import ChoiceButton from "../controls/ChoiceButton";
+import { startGame as startGameAction } from "../../game-data/gameActions";
 import { PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
 import { setCurrentUserName, setGameOption } from "../../store/appActions";
@@ -218,11 +219,13 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) =>
         setOption: (option: string, value: string | number | boolean) =>
             dispatch(setGameOption(option, value)),
         startGame: (users: User[], options: GameOptions) => {
-            startGame(
-                ownProps.gameId,
-                users.map(({ id, name }, i) => ({ id, name, color: colors[i] })),
-                options
+            dispatch(
+                startGameAction(
+                    users.map(({ id, name }, i) => ({ id, name, color: colors[i] })),
+                    options
+                )
             );
+            startGame(ownProps.gameId);
         },
     };
 }

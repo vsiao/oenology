@@ -49,6 +49,13 @@ export default interface GameState {
         // Nothing to undo, usually indicating game beginning or game end
         | null;
 
+    // Metadata to facilitate correcting turn timers on server updates
+    actionsApplied: Record<string, {
+        controllingPlayers: string[];
+        nextActionKey?: string;
+        ts: number;
+    }>
+
     // Published key of the most-recently received action.
     // Used as a PRNG seed for on-demand shuffling.
     lastActionKey?: string;
@@ -185,6 +192,13 @@ export interface PlayerState {
     id: string;
     name: string;
     color: PlayerColor;
+
+    /**
+     * Duration in ms that this player was active according to server-recorded
+     * timestamps on game actions. Does not update in between actions; clients are
+     * responsible for displaying a ticking timer for the currently-active player.
+     */
+    playedTimeMs: number;
     coins: number;
     residuals: number;
     victoryPoints: number;
