@@ -114,7 +114,7 @@ export const boardAction = (
                     type: "harvestField",
                     hasBonus: bonus === "plusOne",
                 }, bonus === "gainCoin" ? gainCoins(1, state) : state),
-                hasBonus ? 2 : 1
+                bonus === "plusOne" ? 2 : 1
             );
         }
         case "influence":
