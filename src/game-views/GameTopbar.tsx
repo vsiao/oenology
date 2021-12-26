@@ -20,7 +20,7 @@ const GameTopbar: FunctionComponent<Props> = props => {
     const [cheatInputValue, setCheatInputValue] = useState("");
     const [anchorRef, maybeTooltip] = useTooltip(
         "bottom",
-        props.undoDisabledReason ?? "Undo last action"
+        props.undoDisabledReason
     );
 
     return <>
@@ -36,7 +36,7 @@ const GameTopbar: FunctionComponent<Props> = props => {
                 !props.undoDisabledReason ? () => props.undo(props.playerId!) : undefined
             }
         >
-            <UndoIcon className="GameTopbar-undoIcon" />
+            <UndoIcon className="GameTopbar-undoIcon" /> Undo
         </button>
         {maybeTooltip}
         <input type="text"
@@ -59,11 +59,9 @@ const mapStateToProps = (state: AppState) => {
         playerId: game.playerId,
         undoDisabledReason: !game.undoState
             ? "Nothing to undo"
-            : game.undoState.type === "drawnCard"
-                ? "Can't undo a card draw"
-                : isControllingPlayer(game)
-                    ? undefined
-                    : "Only the current player can undo",
+            : isControllingPlayer(game)
+                ? undefined
+                : "Only the current player can undo the last action.",
     };
 };
 

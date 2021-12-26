@@ -44,8 +44,6 @@ export default interface GameState {
             // the next turn's player to undo, if necessary)
             isLastActionByCurrentTurnPlayer: boolean;
         }
-        // If a card was drawn, don't allow undoing since information was revealed
-        | { type: "drawnCard" }
         // Nothing to undo, usually indicating game beginning or game end
         | null;
 

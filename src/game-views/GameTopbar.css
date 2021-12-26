@@ -1,28 +1,37 @@
 .GameTopbar-undoButton {
+  align-items: center;
   background: none;
   border: 1px solid white;
-  border-radius: 50%;
+  border-radius: 4px;
+  display: inline-flex;
   fill: white;
+  font-size: .7em;
   margin-left: 1em;
-  padding: .1em;
+  padding: .2em .4em;
+  text-transform: uppercase;
 }
 .GameTopbar-undoButton--enabled {
-    border-color: white;
+  border-color: white;
+  color: white;
   cursor: pointer;
   fill: white;
   transition: .2s background-color;
 }
 .GameTopbar-undoButton--enabled:hover {
   background: white;
+  color: black;
   fill: black;
 }
 .GameTopbar-undoButton--disabled {
   border-color: #666;
+  color: #666;
   fill: #666;
 }
 
 .GameTopbar-undoIcon {
   display: block;
+  font-size: 14px;
+  margin-right: .2em;
 }
 
 .GameTopbar-cheatBox {

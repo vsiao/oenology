@@ -77,9 +77,6 @@ export const drawCards = (
         );
     });
 
-    // Can't undo a card draw
-    state = { ...state, undoState: { type: "drawnCard" }, };
-
     return pushActivityLog(
         {
             type: "draw",
