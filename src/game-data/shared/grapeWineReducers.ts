@@ -2,7 +2,7 @@ import GameState, { PlayerState, TokenMap, FieldId, WorkerPlacementTurn, PlayVis
 import { WineSpec, orderCards } from "../orderCards";
 import { updatePlayer, pushActivityLog, gainResiduals, gainVP } from "./sharedReducers";
 import { WineIngredients, GrapeSpec } from "../prompts/promptActions";
-import { fieldYields, canFillOrderWithWines } from "./sharedSelectors";
+import { fieldYields, canFillOrderWithWines, devaluedIndex } from "./sharedSelectors";
 import { addToDiscard } from "./cardReducers";
 
 //
@@ -67,15 +67,6 @@ export const ageSingleWine = (wine: WineSpec, state: GameState): GameState => {
             )
         }
     })
-};
-
-export const devaluedIndex = (value: number, tokens: TokenMap) => {
-    for (value--; value >= 0; --value) {
-        if (!tokens[value]) {
-            return value;
-        }
-    }
-    return -1;
 };
 
 //

@@ -60,6 +60,7 @@ import {
     cardTypesInPlay,
     residualPaymentsDisabledReason,
     needsGrandeDisabledReason,
+    gainWineDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
 import Grape from "../../game-views/icons/Grape";
@@ -1812,6 +1813,7 @@ export const rhineSummerVisitorReducers: Record<
                                 id: "FHELPER_GAIN",
                                 data: color,
                                 label: <>Gain <WineGlass color={color}>1</WineGlass></>,
+                                disabledReason: gainWineDisabledReason(state, color, 1),
                             })
                         ),
                     ],
@@ -1877,7 +1879,8 @@ export const rhineSummerVisitorReducers: Record<
                         {
                             id: "GMERCHANT_GAIN",
                             label: <>Discard 2 <Grape /> to gain <WineGlass color="blush">6</WineGlass></>,
-                            disabledReason: needGrapesDisabledReason(state),
+                            disabledReason: needGrapesDisabledReason(state) ??
+                                gainWineDisabledReason(state, "blush", 6, /* bypassCellars */ true),
                         },
                     ],
                 });
@@ -2150,21 +2153,20 @@ export const rhineSummerVisitorReducers: Record<
     premiumWineDealer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const cellar = state.players[state.currentTurn.playerId].cellar;
                 return promptForAction(state, {
                     choices: [
                         { id: "PWDEALER_GAIN", label: <>Gain <Coins>3</Coins></>, },
                         {
                             id: "PWDEALER_SPARKLING",
                             label: <>Pay <Coins>9</Coins> to gain <WineGlass color="sparkling">7</WineGlass></>,
-                            disabledReason: moneyDisabledReason(state, 9) ||
-                                (cellar.sparkling[6] ? "You already have one." : undefined),
+                            disabledReason: moneyDisabledReason(state, 9) ??
+                                gainWineDisabledReason(state, "sparkling", 7, /* bypassCellars */ true),
                         },
                         {
                             id: "PWDEALER_BLUSH",
                             label: <>Pay <Coins>9</Coins> to gain <WineGlass color="blush">7</WineGlass></>,
                             disabledReason: moneyDisabledReason(state, 9) ||
-                                (cellar.blush[6] ? "You already have one." : undefined),
+                                gainWineDisabledReason(state, "blush", 7, /* bypassCellars */ true),
                         },
                     ],
                 });
@@ -2238,11 +2240,8 @@ export const rhineSummerVisitorReducers: Record<
                                 {
                                     id: "SCULPTOR_LOSE",
                                     label: <>Lose <Residuals>1</Residuals> to gain <WineGlass color="blush">4</WineGlass></>,
-                                    disabledReason: residualPaymentsDisabledReason(state, 1) || (
-                                        player.structures.mediumCellar
-                                            ? undefined
-                                            : "You don't have a Medium Cellar."
-                                    ),
+                                    disabledReason: residualPaymentsDisabledReason(state, 1) ??
+                                        gainWineDisabledReason(state, "blush", 4),
                                 },
                                 {
                                     id: "SCULPTOR_PLANT",
@@ -2448,12 +2447,14 @@ export const rhineSummerVisitorReducers: Record<
                         {
                             id: "WTRADER_RWINE",
                             label: <>Pay <Coins>6</Coins> to gain <WineGlass color="red">7</WineGlass></>,
-                            disabledReason: moneyDisabledReason(state, 6),
+                            disabledReason: moneyDisabledReason(state, 6) ??
+                                gainWineDisabledReason(state, "red", 7, /* bypassCellars */ true),
                         },
                         {
                             id: "WTRADER_WWINE",
                             label: <>Pay <Coins>6</Coins> to gain <WineGlass color="white">7</WineGlass></>,
-                            disabledReason: moneyDisabledReason(state, 6),
+                            disabledReason: moneyDisabledReason(state, 6) ??
+                                gainWineDisabledReason(state, "white", 7, /* bypassCellars */ true),
                         },
                     ],
                 });
@@ -2494,12 +2495,12 @@ export const rhineSummerVisitorReducers: Record<
                     ],
                 });
             case "CHOOSE_ACTION":
-                const mediumCellarBuilt = state.players[state.currentTurn.playerId].structures.mediumCellar;
+                const player = state.players[state.currentTurn.playerId];
+                const mediumCellarBuilt = player.structures.mediumCellar;
                 switch (action.choice) {
                     case "WRITER_GAIN":
                         return promptToChooseWine(state);
                     case "WRITER_LOSE":
-                        const mediumCellarDisabledReason = mediumCellarBuilt ? undefined : "Requires a Medium Cellar.";
                         return promptForAction(loseResiduals(2, state), {
                             choices: [
                                 ...(["red", "white"] as GrapeColor[]).map(color => ({
@@ -2515,7 +2516,7 @@ export const rhineSummerVisitorReducers: Record<
                                             {color === "blush" || mediumCellarBuilt ? 4 : 3}
                                         </WineGlass>
                                     </>,
-                                    disabledReason: color === "blush" ? mediumCellarDisabledReason : undefined,
+                                    disabledReason: gainWineDisabledReason(state, color, 4),
                                 }))
                             ],
                         });

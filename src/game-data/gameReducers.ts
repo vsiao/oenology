@@ -1,14 +1,16 @@
 import Alea from "alea";
-import GameState, { PlayerState, StructureState, CardsByType } from "./GameState";
+import GameState, { PlayerState, StructureState, CardsByType, GrapeColor, WineColor } from "./GameState";
 import { GameAction, GameActionChanged, PlayerInit, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
 import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
-import { placeGrapes } from "./shared/grapeWineReducers";
+import { gainWine, placeGrapes } from "./shared/grapeWineReducers";
 import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
+import { buildStructure, gainResiduals } from "./shared/sharedReducers";
+import { StructureId } from "./structures";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     // Actions aren't applied until they are published by firebase and have a server key assigned
@@ -36,11 +38,25 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             }
             return state.undoState.prevState;
 
-        case "CHEAT_DRAW_CARD":
-            return CHEAT_drawCard(action.id, action.playerId, state);
-
-        case "CHEAT_GAIN_GRAPE":
-            return placeGrapes(state, { [action.grape.color]: action.grape.value });
+        case "APPLY_CHEAT_CODE":
+            const [cmd, ...parts] = action.code.split(":");
+            switch (cmd) {
+                case "d":
+                    return CHEAT_drawCard(parts[0], action.playerId, state);
+                case "g":
+                    return placeGrapes(state, {
+                        [parts[0] as GrapeColor]: parseInt(parts[1], 10),
+                    });
+                case "r":
+                    return gainResiduals(1, state, action.playerId)
+                case "w":
+                    return gainWine(
+                        { color: parts[0] as WineColor, value: parseInt(parts[1], 10) },
+                        state
+                    );
+                case "s":
+                    return buildStructure(state, parts[0] as StructureId, action.playerId);
+            }
     }
 
     const controllingIds = controllingPlayerIds(state);

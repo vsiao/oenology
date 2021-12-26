@@ -4,19 +4,16 @@ import React, { FunctionComponent, useState, RefObject } from "react";
 import { connect } from "react-redux";
 import { AppState } from "../store/AppState";
 import { Dispatch } from "redux";
-import { GameAction, undo, CHEAT_drawCard, CHEAT_gainGrape } from "../game-data/gameActions";
+import { GameAction, undo, applyCheatCode } from "../game-data/gameActions";
 import { isControllingPlayer } from "../game-data/shared/sharedSelectors";
 import { useTooltip } from "./shared/useTooltip";
 import UndoIcon from "./icons/UndoIcon";
-import { GrapeSpec } from "../game-data/prompts/promptActions";
-import { GrapeColor } from "../game-data/GameState";
 
 interface Props {
     playerId: string | null;
     undoDisabledReason: string | undefined;
     undo: (playerId: string) => void;
-    drawCard: (playerId: string, id: string) => void;
-    gainGrape: (playerId: string, grape: GrapeSpec) => void;
+    applyCheatCode: (playerId: string, code: string) => void;
 }
 
 const GameTopbar: FunctionComponent<Props> = props => {
@@ -48,18 +45,7 @@ const GameTopbar: FunctionComponent<Props> = props => {
             onChange={e => setCheatInputValue(e.target.value)}
             onKeyDown={e => {
                 if (e.key === "Enter") {
-                    const [cmd, ...parts] = cheatInputValue.split(":");
-                    switch (cmd) {
-                        case "d":
-                            props.drawCard(props.playerId!, parts[0]);
-                            break;
-                        case "g":
-                            props.gainGrape(props.playerId!, {
-                                color: parts[0] as GrapeColor,
-                                value: parseInt(parts[1], 10),
-                            });
-                            break;
-                    }
+                    props.applyCheatCode(props.playerId!, cheatInputValue);
                     setCheatInputValue("");
                 }
             }}
@@ -84,8 +70,7 @@ const mapStateToProps = (state: AppState) => {
 const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
     return {
         undo: (playerId: string) => dispatch(undo(playerId)),
-        drawCard: (playerId: string, id: string) => dispatch(CHEAT_drawCard(id, playerId)),
-        gainGrape: (playerId: string, grape: GrapeSpec) => dispatch(CHEAT_gainGrape(grape, playerId)),
+        applyCheatCode: (playerId: string, code: string) => dispatch(applyCheatCode(code, playerId)),
     };
 };
 

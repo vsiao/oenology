@@ -1,4 +1,4 @@
-import GameState, { Field, FieldId, CardType, WineColor, StructureState, WorkerPlacement } from "../GameState";
+import GameState, { Field, FieldId, CardType, WineColor, StructureState, WorkerPlacement, TokenMap } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
@@ -74,13 +74,13 @@ export const structureUsedDisabledReason = (
 
 export const fieldYields = (field: Field): { red: number; white: number; } => {
     return {
-        red: field.vines.reduce(
-            (r, v) => r + (vineCards[v].yields.red! || 0),
-            0
+        red: Math.min(
+            9,
+            field.vines.reduce((r, v) => r + (vineCards[v].yields.red! ?? 0), 0)
         ),
-        white: field.vines.reduce(
-            (w, v) => w + (vineCards[v].yields.white! || 0),
-            0
+        white: Math.min(
+            9,
+            field.vines.reduce((w, v) => w + (vineCards[v].yields.white! ?? 0), 0)
         ),
     };
 };
@@ -203,6 +203,44 @@ export const allWines = (state: GameState, playerId = state.currentTurn.playerId
         });
     });
     return cellarWines;
+};
+
+export const devaluedIndex = (value: number, tokens: TokenMap) => {
+    for (value--; value >= 0; --value) {
+        if (!tokens[value]) {
+            return value;
+        }
+    }
+    return -1;
+};
+
+export const gainWineDisabledReason = (
+    state: GameState,
+    color: WineColor,
+    value: number,
+    bypassCellars = false,
+    playerId = state.currentTurn.playerId
+): string | undefined => {
+    const player = state.players[playerId];
+    const hasMediumCellar = player.structures.mediumCellar;
+    const hasLargeCellar = player.structures.largeCellar;
+    const maxValue = bypassCellars || hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3;
+    const cellarValue = devaluedIndex(Math.min(value, maxValue), player.cellar[color]) + 1;
+
+    if (!bypassCellars) {
+        if (color === "sparkling" && !hasLargeCellar) {
+            return "Requires a Large Cellar.";
+        } else if (color === "blush" && !hasMediumCellar) {
+            return "Requires a Medium Cellar.";
+        }
+    }
+    if (
+        cellarValue < 1 ||
+        (color === "blush" && cellarValue < 4) ||
+        (color === "sparkling" && cellarValue < 7)
+    ) {
+        return "You don't have space in your cellar.";
+    }
 };
 
 export const needWineDisabledReason = (

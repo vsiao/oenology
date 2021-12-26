@@ -11,8 +11,7 @@ import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
 import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
-import { devaluedIndex } from "../../game-data/shared/grapeWineReducers";
-import { allGrapes } from "../../game-data/shared/sharedSelectors";
+import { allGrapes, devaluedIndex } from "../../game-data/shared/sharedSelectors";
 import { MakeWinePromptState } from "../../game-data/prompts/PromptState";
 
 
@@ -184,8 +183,8 @@ interface OwnProps {
 
 const mapStateToProps = (state: AppState, { prompt, playerId }: OwnProps) => {
     const currentPlayer = state.game!.players[playerId];
-    const hasMediumCellar = currentPlayer.structures["mediumCellar"];
-    const hasLargeCellar = currentPlayer.structures["largeCellar"];
+    const hasMediumCellar = currentPlayer.structures.mediumCellar;
+    const hasLargeCellar = currentPlayer.structures.largeCellar;
     return {
         cellar: currentPlayer.cellar,
         cellarLimit: prompt.asZymologist || hasLargeCellar ? 9 : hasMediumCellar ? 6 : 3,
