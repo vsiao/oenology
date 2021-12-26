@@ -41,7 +41,7 @@ export const structures: Record<StructureId, StructureData> = {
     },
     cottage: {
         name: "Cottage",
-        description: "Draw an extra visitor in the fall.",
+        description: "Draw a visitor card each fall.",
         cost: 4
     },
     tastingRoom: {

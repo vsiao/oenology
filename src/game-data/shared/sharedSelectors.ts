@@ -348,6 +348,11 @@ export const needCardOfTypeDisabledReason = (
             return "You don't have enough vine cards.";
         case "winterVisitor":
             return "You don't have enough winter visitors.";
+        case "visitor":
+            return "You don't have enough visitor cards.";
+        default:
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _exhaustivenessCheck: never = type;
     }
 };
 
