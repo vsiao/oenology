@@ -58,7 +58,7 @@ export default interface GameState {
 
     // Published key of the most-recently received action.
     // Used as a PRNG seed for on-demand shuffling.
-    lastActionKey?: string;
+    lastActionKey: string;
 
     // Published key of the most-recently applied PlaceWorkerAction,
     // mostly for debugging purposes.

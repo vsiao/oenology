@@ -11,8 +11,14 @@ import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelect
 import { GameOptions } from "../store/AppState";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
+    // Actions aren't applied until they are published by firebase and have a server key assigned
+    if (!action._key) {
+        return state;
+    }
+    const actionKey = action._key;
+
     if (action.type === "START_GAME") {
-        return beginMamaPapaTurn(initGame(userId, action));
+        return beginMamaPapaTurn(initGame(userId, action, actionKey));
     }
     if (action.type === "GAME_ACTION_CHANGED") {
         return updatePlayedTime(state, action);
@@ -38,7 +44,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     }
 
     const controllingIds = controllingPlayerIds(state);
-    const actionDurationMs = action.ts! - state.actionsApplied[state.lastActionKey!].ts;
+    const actionDurationMs = action.ts! - state.actionsApplied[state.lastActionKey].ts;
     state = {
         ...state,
         // Increment played time for all controlling players
@@ -59,22 +65,22 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         },
         actionsApplied: {
             ...state.actionsApplied,
-            [state.lastActionKey!]: {
-                ...state.actionsApplied[state.lastActionKey!],
-                nextActionKey: action._key!,
+            [state.lastActionKey]: {
+                ...state.actionsApplied[state.lastActionKey],
+                nextActionKey: actionKey,
             },
-            [action._key!]: {
+            [actionKey]: {
                 controllingPlayers: controllingIds,
                 ts: action.ts!,
             },
         },
-        lastActionKey: action._key,
+        lastActionKey: actionKey,
     };
     return board(prompt(state, action), action);
 };
 
-const initGame = (userId: string, action: StartGameAction): GameState => {
-    const { _key: key, ts } = action as GameAction;
+const initGame = (userId: string, action: StartGameAction, key: string): GameState => {
+    const { ts } = action as GameAction;
     const random = Alea(key);
     const players = action.players;
     const mamas = shuffle(Object.keys(mamaCards) as MamaId[], random);
@@ -139,11 +145,12 @@ const initGame = (userId: string, action: StartGameAction): GameState => {
         activityLog: [],
         undoState: null,
         actionsApplied: {
-            [key!]: {
+            [key]: {
                 controllingPlayers: [],
                 ts: ts!,
             },
         },
+        lastActionKey: key,
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         actionPrompts: [],
     };

@@ -329,7 +329,7 @@ const gainWakeUpBonus = (
     const season = state.wakeUpOrder[idx]!.season as Season;
     const playerState = state.players[playerId];
     const bonus = wakeUpBonuses(state.boardType!)[season][idx];
-    const seed = state.lastActionKey!;
+    const seed = state.lastActionKey;
 
     switch (bonus) {
         case "ageGrapes":

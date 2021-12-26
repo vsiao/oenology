@@ -12,10 +12,6 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
         };
     }
     if (isGameAction(action)) {
-        if (!action._key) {
-            // Wait for action to be published to server before applying
-            return state;
-        }
         return {
             ...state,
             game: game(state.game!, action, state.userId!),
