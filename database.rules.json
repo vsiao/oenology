@@ -1,0 +1,50 @@
+{
+  "rules": {
+    "gameLogs": {
+      ".read": true,
+
+      "$gameid": {
+        "$logentry": {
+          ".indexOn": "ts",
+          ".write": "!data.exists()"
+        }
+      }
+    },
+    "gameStates": {
+      ".read": true,
+      "$gameid": {
+        ".write": "!data.exists()"
+      }
+    },
+    "rooms": {
+      ".indexOn": "gameStartedAt",
+      ".read": true,
+
+      "$roomid": {
+        "createdAt": {
+          ".write": "auth !== null && !data.exists()"
+        },
+        "gameEndedAt": {
+          ".write": "auth !== null && !data.exists()"
+        },
+        "gameOptions": {
+          ".write": "auth !== null"
+        },
+        "gameStartedAt": {
+          ".write": "auth !== null && !data.exists()"
+        },
+        "gameStatus": {
+          ".write": "auth !== null"
+        },
+        "users": {
+          "$uid": {
+            ".write": "auth.uid === $uid",
+            "gameStats": {
+              ".write": "auth !== null && !data.exists()"
+            }
+          }
+        }
+      }
+    }
+  }
+}
