@@ -67,7 +67,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                     <span className="GameBoard-currentSeason">{currentSeason}</span>
                     <ol className="GameBoard-wakeUpOrder">
                         {props.wakeUpOrder.map((pos, i) =>
-                            <WakeUpSpot key={i} pos={pos} playerColors={playerColors} season={currentSeason} i={i} />
+                            <WakeUpCell key={i} pos={pos} playerColors={playerColors} season={currentSeason} i={i} />
                         )}
                     </ol>
                 </>
@@ -180,7 +180,7 @@ const colors: Record<PlayerColor, string> = {
     yellow: "#ffd700", // gold
 };
 
-const WakeUpSpot: React.FunctionComponent<{
+const WakeUpCell: React.FunctionComponent<{
     pos: WakeUpSpot | null;
     playerColors: Record<string, PlayerColor>;
     season: Season;

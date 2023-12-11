@@ -3,7 +3,6 @@ import "firebase/database";
 import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
-import { firebaseConfig } from "./config";
 import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
 import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
@@ -11,7 +10,15 @@ import shortid from "shortid";
 import { RoomState, User } from "./AppState";
 import { allPlacements } from "../game-data/board/boardPlacements";
 
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp({
+    apiKey: "AIzaSyD0OE8rvJyvuKjCOXBrgBYVNcR_eMR51nM",
+    authDomain: "make-wine.firebaseapp.com",
+    databaseURL: "https://make-wine.firebaseio.com",
+    projectId: "make-wine",
+    storageBucket: "make-wine.appspot.com",
+    messagingSenderId: "353430663930",
+    appId: "1:353430663930:web:91e28b918740857aef0f43"
+  });
 
 function signInAnonymously() {
     return firebase.auth().signInAnonymously();
