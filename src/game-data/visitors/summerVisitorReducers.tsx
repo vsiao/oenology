@@ -1782,12 +1782,12 @@ export const rhineSummerVisitorReducers: Record<
                     case "FREELANCER_DRAW":
                         return endVisitor(drawCards(state, action._key!, { [action.data as CardType]: 1 }));
                     case "FREELANCER_BUILD":
-                        return promptToBuildStructure(loseVP(2, state), coupon);
+                        return promptToBuildStructure(state, coupon);
                     default:
                         return state;
                 }
             case "BUILD_STRUCTURE":
-                return endVisitor(buildStructure(state, action.structureId));
+                return endVisitor(buildStructure(loseVP(2, state), action.structureId));
             default:
                 return state;
         }
