@@ -4,8 +4,8 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
-import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions } from "./appActions";
-import GameState, { PlayerState, PlayerStats } from "../game-data/GameState";
+import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions, SetPlayerColorAction } from "./appActions";
+import GameState, { PlayerColor, PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
 import { RoomState, User } from "./AppState";
 import { allPlacements } from "../game-data/board/boardPlacements";
@@ -139,8 +139,22 @@ function publishGameOption(gameId: string, action: SetGameOptionAction) {
     ref.set(action.value);
 }
 
+function publishPlayerColor(gameId: string, userId: string, action: SetPlayerColorAction) {
+    const ref = firebase.database().ref(`rooms/${gameId}/gameOptions/playerColors`);
+    ref.transaction((currentColors: Record<PlayerColor, string> | undefined) => {
+        if (!currentColors) {
+            return { [userId]: action.color };
+        }
+        if (Object.values(currentColors).some(c => c === action.color)) {
+            return; // Already chosen; abort
+        }
+        return { ...currentColors, [userId]: action.color };
+    });
+}
+
 export function* subscribeToRoom(gameId: string, userId: string) {
     yield takeEvery("SET_GAME_OPTION", publishGameOption, gameId);
+    yield takeEvery("SET_PLAYER_COLOR", publishPlayerColor, gameId, userId);
     yield fork(throttledPublishUserName, gameId, userId);
 
     const firebaseEventChannel = eventChannel(emit => {
@@ -159,6 +173,7 @@ export function* subscribeToRoom(gameId: string, userId: string) {
             emit(setUser({ ...snap.val(), id: snap.key })));
 
         const userRef = usersRef.child(userId);
+        const playerColorsRef = gameOptionsRef.child(`playerColors`);
         firebase.database().ref(".info/connected").on("value", snap => {
             if (!snap.val()) {
                 return;
@@ -167,6 +182,23 @@ export function* subscribeToRoom(gameId: string, userId: string) {
                 userRef.update({
                     status: "connected",
                     connectedAt: firebase.database.ServerValue.TIMESTAMP,
+                });
+            });
+            playerColorsRef.onDisconnect().update({ [userId]: null }).then(() => {
+                playerColorsRef.transaction(currentColors => {
+                    const takenColors = new Set(Object.values(currentColors ?? {}));
+                    const colors: PlayerColor[] = [
+                        "purple",
+                        "orange",
+                        "green",
+                        "red",
+                        "yellow",
+                        "blue"
+                    ];
+                    const i = colors.findIndex(c => !takenColors.has(c))
+                    if (i >= 0) {
+                        return { ...currentColors, [userId]: colors[i] };
+                    }
                 });
             });
         });

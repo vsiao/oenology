@@ -1,12 +1,13 @@
 import { Action } from "redux";
 import { GameAction } from "../game-data/gameActions";
 import { User, GameStatus, GameOptions } from "./AppState";
-import GameState from "../game-data/GameState";
+import GameState, { PlayerColor } from "../game-data/GameState";
 
 export type AppAction =
     | SetCurrentUserIdAction
     | SetCurrentUserNameAction
     | SetGameOptionAction
+    | SetPlayerColorAction
     | GameOptionsAction
     | GameStatusAction
     | HydrateGameAction
@@ -34,6 +35,13 @@ export interface SetGameOptionAction extends Action<"SET_GAME_OPTION"> {
 }
 export const setGameOption = (option: string, value: string | number | boolean): AppAction => {
     return { type: "SET_GAME_OPTION", option, value };
+};
+
+export interface SetPlayerColorAction extends Action<"SET_PLAYER_COLOR"> {
+    color: PlayerColor;
+}
+export const setPlayerColor = (color: PlayerColor): AppAction => {
+    return { type: "SET_PLAYER_COLOR", color };
 };
 
 export interface JoinGameAction extends Action<"JOIN_GAME"> {

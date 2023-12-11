@@ -1,4 +1,4 @@
-import GameState, { PlayerStats } from "../game-data/GameState";
+import GameState, { PlayerColor, PlayerStats } from "../game-data/GameState";
 
 export interface AppState {
     userId: string | null;
@@ -12,6 +12,7 @@ export interface GameOptions {
     multiInheritance?: boolean;
     rhineVisitors?: boolean;
     tuscanyBoard?: boolean;
+    playerColors?: Record<string, PlayerColor>;
 }
 
 export interface RoomState {

@@ -1,4 +1,5 @@
 import "./Lobby.css";
+import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
 import { AppState, User, GameOptions } from "../../store/AppState";
@@ -6,7 +7,7 @@ import ChoiceButton from "../controls/ChoiceButton";
 import { startGame as startGameAction } from "../../game-data/gameActions";
 import { PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
-import { setCurrentUserName, setGameOption } from "../../store/appActions";
+import { setCurrentUserName, setGameOption, setPlayerColor } from "../../store/appActions";
 import { startGame } from "../../store/firebase";
 import VineCard from "../cards/VineCard";
 import { vineCards } from "../../game-data/vineCards";
@@ -17,6 +18,7 @@ import VisitorCard from "../cards/VisitorCard";
 import { Vine, Order } from "../icons/Card";
 import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
+import Worker from "../icons/Worker";
 
 interface Props {
     gameId: string;
@@ -26,6 +28,7 @@ interface Props {
     gameOptions: GameOptions;
     setName: (name: string) => void;
     setOption: (option: string, value: string | number | boolean) => void;
+    setColor: (c: PlayerColor) => void;
     startGame: (players: User[], options: GameOptions) => void;
 }
 
@@ -37,6 +40,7 @@ const Lobby: React.FunctionComponent<Props> = ({
     gameStatus,
     setName,
     setOption,
+    setColor,
     startGame
 }) => {
     const [copiedToClipboard, setCopiedToClipboard] = React.useState(false);
@@ -118,6 +122,12 @@ const Lobby: React.FunctionComponent<Props> = ({
                     <ul className="Lobby-users">
                         {users.map((u, i) =>
                             <li key={u.id} className="Lobby-user">
+                                <PlayerColorPicker
+                                    color={gameOptions.playerColors?.[u.id]}
+                                    playerColors={gameOptions.playerColors}
+                                    isCurrentUser={u.id === currentUser?.id}
+                                    setColor={setColor}
+                                />
                                 {u.name || <em>…</em>}
                                 {i === 0 && <span className="Lobby-hostTag">host</span>}
                             </li>
@@ -178,6 +188,73 @@ const Lobby: React.FunctionComponent<Props> = ({
     </>;
 };
 
+const PlayerColorPicker: React.FC<{
+    color?: PlayerColor;
+    playerColors?: Record<string, PlayerColor>;
+    isCurrentUser: boolean;
+    setColor: (c: PlayerColor) => void;
+}> = ({ color, playerColors = {}, isCurrentUser, setColor }) => {
+    const ref = React.useRef<HTMLSpanElement>(null);
+    const [isEditing, setIsEditing] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!isEditing) {
+            return;
+        }
+        const onMouseDown = (event: MouseEvent) => {
+            if (ref.current && !ref.current.contains(event.target as Node)) {
+                setIsEditing(false);
+            }
+        };
+        document.addEventListener("mousedown", onMouseDown, /* capture */ true);
+        return () => document.removeEventListener("mousedown", onMouseDown, /* capture */ true);
+    }, [isEditing]);
+
+    return <span
+        ref={ref}
+        className={cx(
+            "Lobby-playerColor",
+            { "Lobby-playerColor--editable": isCurrentUser }
+        )}
+        onClick={isCurrentUser
+            ? event => {
+                if (event.defaultPrevented) {
+                    return;
+                }
+                setIsEditing(!isEditing);
+            }
+            : undefined}
+    >
+        <Worker color={color} />
+        {isEditing && <div className="Lobby-playerColorPicker" onClick={event => event.preventDefault()}>
+            {([
+                "purple",
+                "orange",
+                "green",
+                "red",
+                "yellow",
+                "blue"
+            ] as const).map((c, i) => 
+                <>
+                    <button
+                        className={cx("Lobby-playerColorButton", {
+                            "Lobby-playerColorButton--selected": color === c,
+                        })}
+                        disabled={color !== c && Object.values(playerColors).includes(c)}
+                        onClick={() => {
+                            setColor(c);
+                            setIsEditing(false);
+                        }}
+                    >
+                        <Worker color={c} />
+                    </button>
+                    {i === 2 ? <br /> : null}
+                </>
+            )}
+        </div>}
+    </span>;
+};
+
 const renderComingSoonOption = (label: string) => {
     return <li className="Lobby-gameOption">
         <label className="Lobby-optionLabel">
@@ -206,22 +283,16 @@ const mapStateToProps = (state: AppState) => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) => {
-    const colors: PlayerColor[] = [
-        "purple",
-        "orange",
-        "green",
-        "red",
-        "yellow",
-        "blue"
-    ];
     return {
         setName: (name: string) => dispatch(setCurrentUserName(name)),
         setOption: (option: string, value: string | number | boolean) =>
             dispatch(setGameOption(option, value)),
+        setColor: (color: PlayerColor) =>
+            dispatch(setPlayerColor(color)),
         startGame: (users: User[], options: GameOptions) => {
             dispatch(
                 startGameAction(
-                    users.map(({ id, name }, i) => ({ id, name, color: colors[i] })),
+                    users.map(({ id, name }, i) => ({ id, name, color: options.playerColors![id] })),
                     options
                 )
             );

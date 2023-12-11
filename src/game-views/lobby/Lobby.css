@@ -116,6 +116,44 @@
     height: 2em;
 }
 
+.Lobby-playerColor {
+    margin-right: .5em;
+    position: relative;
+}
+.Lobby-playerColor--editable {
+    cursor: pointer;
+}
+
+.Lobby-playerColorPicker {
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: .5em;
+    box-shadow: 0 0 1em rgba(0, 0, 0, .3);
+    cursor: default;
+    margin-right: .5em;
+    padding: .5em .8em;
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+
+.Lobby-playerColorButton {
+    background: none;
+    border-radius: 1.2em;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0.5em;
+}
+.Lobby-playerColorButton--selected {
+    background: #61dafb;
+}
+.Lobby-playerColorButton:disabled {
+    cursor: default;
+    opacity: .2;
+}
+
 .Lobby-hostTag {
     background: #333;
     border-radius: .2em;
