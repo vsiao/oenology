@@ -1787,7 +1787,7 @@ export const rhineSummerVisitorReducers: Record<
                         return state;
                 }
             case "BUILD_STRUCTURE":
-                return endVisitor(buildStructure(state, action.structureId));
+                return endVisitor(buildStructure(loseVP(2, state), action.structureId));
             default:
                 return state;
         }
