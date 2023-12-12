@@ -30,7 +30,6 @@ export const RHINE_UNIMPLEMENTED_CARDS = {
     wineEngineer: true,
     // winter
     cheapBuyer: true,
-    chemist: true,
     influencer: true, // tuscany
     lobbyist: true, // tuscany
     middleman: true,
