@@ -693,6 +693,7 @@ export const summerVisitorReducers: Record<
                 return state;
         }
     },
+    importer: (state, action) => state,
     landscaper: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -1614,6 +1615,7 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    brickMason: (state, action) => state,
     cicerone: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -1654,6 +1656,7 @@ export const rhineSummerVisitorReducers: Record<
         }
     },
     contractor: summerVisitorReducers.contractor,
+    dismantler: (state, action) => state,
     docent: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -1998,6 +2001,7 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    oldGeneral: (state, action) => state,
     owner: (state, action) => {
         const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
             {
@@ -2114,6 +2118,7 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    plantDealer: (state, action) => state,
     plantReorganizer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -2321,6 +2326,9 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    sonInLaw: (state, action) => state,
+    structureReorganizer: (state, action) => state,
+    subsidizer: (state, action) => state,
     supporter: (state, action) => {
         const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
             { id: "SUPPORTER_VINE", label: <>Draw 1 <Vine /></>, },
@@ -2378,6 +2386,8 @@ export const rhineSummerVisitorReducers: Record<
                 return state;
         }
     },
+    vineTrader: (state, action) => state,
+    wineEngineer: (state, action) => state,
     wineLover: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":

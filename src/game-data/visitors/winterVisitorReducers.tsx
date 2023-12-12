@@ -13,6 +13,7 @@ import {
     loseResiduals,
     loseVP,
     updatePlayer,
+    plantVineInField,
 } from "../shared/sharedReducers";
 import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, WorkerPlacement, CardType } from "../GameState";
 import {
@@ -28,6 +29,8 @@ import {
     promptToChooseVisitor,
     promptToDiscard,
     promptToChooseGrape,
+    promptToChooseVineCard,
+    promptToPlant,
 } from "../prompts/promptReducers";
 import { GameAction } from "../gameActions";
 import { visitorCards, winterVisitorCards, rhineWinterVisitorCards } from "./visitorCards";
@@ -42,6 +45,7 @@ import {
     needCardOfTypeDisabledReason,
     residualPaymentsDisabledReason,
     cardTypesInPlay,
+    plantVinesDisabledReason,
 } from "../shared/sharedSelectors";
 import WineGlass from "../../game-views/icons/WineGlass";
 import Residuals from "../../game-views/icons/Residuals";
@@ -150,6 +154,7 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    caravan: (state, action) => state,
     craftsman: (state, action) => {
         const player = state.players[state.currentTurn.playerId];
         const upgradeCellar = player.structures.mediumCellar ? "largeCellar" : "mediumCellar";
@@ -534,6 +539,7 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
+    innkeeper: (state, action) => state,
     jackOfAllTrades: (state, action) => {
         const [chooseAction, maybeEndVisitor] = makeChoose2Visitor(s => [
             {
@@ -1567,29 +1573,65 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
-    // chemist: (state, action) => {
-    //     switch (action.type) {
-    //         case "CHOOSE_CARDS":
-    //             const card = action.cards![0];
-    //             switch (card.type) {
-    //                 case "visitor":
-    //                     return promptForAction(state, {
-    //                         choices: [
-    //                             {
-    //                                 id: "CHEMIST_PLANT",
-    //                                 label: <>Plant 2 <Vine /></>,
-    //                                 disabledReason: plantVinesDisabledReason(state),
-    //                             },
-    //                             {
-    //                                 id: "CHEMIST_HARVEST",
-    //                                 label: <>Harvest devalued grapes to gain <VP>1</VP></>,
-    //                                 disabledReason: harvestFieldDisabledReason(state),
-    //                             }
-    //                         ]
-    //                     })
-    //             }
-    //     }
-    // },
+    cheapBuyer: (state, action) => state,
+    chemist: (state, action, pendingAction) => {
+        const chemistAction = pendingAction as PlayVisitorPendingAction & {
+            harvesting: boolean;
+            secondPlant: boolean;
+        };
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const card = action.cards![0];
+                switch (card.type) {
+                    case "visitor":
+                        return promptForAction(state, {
+                            choices: [
+                                {
+                                    id: "CHEMIST_PLANT",
+                                    label: <>Plant 2 <Vine /></>,
+                                    disabledReason: plantVinesDisabledReason(state),
+                                },
+                                {
+                                    id: "CHEMIST_HARVEST",
+                                    label: <>Harvest devalued grapes to gain <VP>1</VP></>,
+                                    disabledReason: harvestFieldDisabledReason(state),
+                                }
+                            ]
+                        })
+                    case "vine":
+                        return promptToPlant(state, card.id);
+                    default:
+                        return state;
+                }
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "CHEMIST_PLANT":
+                        return promptToChooseVineCard(state);
+                    case "CHEMIST_HARVEST":
+                        return promptToHarvest(
+                            setPendingAction({ ...chemistAction, harvesting: true }, state)
+                        );
+                    default:
+                        return state;
+                }
+            case "CHOOSE_FIELD":
+                if (chemistAction.harvesting) {
+                    state = harvestField(state, action.fields[0], { asChemist: true });
+                    return endVisitor(gainVP(1, state));
+                }
+
+                state = plantVineInField(action.fields[0], state);
+
+                if (!chemistAction.secondPlant) {
+                    return promptToChooseVineCard(
+                        setPendingAction({ ...chemistAction, secondPlant: true }, state)
+                    );
+                }
+                return endVisitor(state);
+            default:
+                return state;
+        }
+    },
     craftsman: winterVisitorReducers.craftsman,
     duchess: (state, action, pendingAction) => {
         const duchessAction = pendingAction as PlayVisitorPendingAction & {
@@ -1907,6 +1949,7 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    influencer: (state, action) => state,
     laborer: winterVisitorReducers.laborer,
     lecturer: (state, action) => {
         switch (action.type) {
@@ -1940,6 +1983,7 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    lobbyist: (state, action) => state,
     lovebirds: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -1975,6 +2019,7 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    middleman: (state, action) => state,
     premiumBuyer: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
@@ -2173,8 +2218,14 @@ export const rhineWinterVisitorReducers: Record<
                 return state;
         }
     },
+    specialHarvester: (state, action) => state,
     supervisor: winterVisitorReducers.supervisor,
+    theologian: (state, action) => state,
+    trainer: (state, action) => state,
+    tutor: (state, action) => state,
     uncertifiedOenologist: winterVisitorReducers.uncertifiedOenologist,
+    virtuoso: (state, action) => state,
+    wineStoreOwner: (state, action) => state,
     winterAgent: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":

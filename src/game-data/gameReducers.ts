@@ -1,5 +1,5 @@
 import Alea from "alea";
-import GameState, { PlayerState, StructureState, CardsByType, GrapeColor, WineColor } from "./GameState";
+import GameState, { PlayerState, StructureState, CardsByType, GrapeColor, WineColor, FieldId } from "./GameState";
 import { GameAction, GameActionChanged, PlayerInit, StartGameAction } from "./gameActions";
 import { board } from "./board/boardReducer";
 import { prompt } from "./prompts/promptReducers";
@@ -9,8 +9,9 @@ import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { gainWine, placeGrapes } from "./shared/grapeWineReducers";
 import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
-import { buildStructure, gainResiduals } from "./shared/sharedReducers";
+import { buildStructure, gainResiduals, plantVineInField, updatePlayer } from "./shared/sharedReducers";
 import { StructureId } from "./structures";
+import { VineId } from "./vineCards";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     // Actions aren't applied until they are published by firebase and have a server key assigned
@@ -41,20 +42,30 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         case "APPLY_CHEAT_CODE":
             const [cmd, ...parts] = action.code.split(":");
             switch (cmd) {
-                case "d":
+                case "d": // draw
                     return CHEAT_drawCard(parts[0], action.playerId, state);
-                case "g":
+                case "g": // grape; eg. `g:red:5`
                     return placeGrapes(state, {
                         [parts[0] as GrapeColor]: parseInt(parts[1], 10),
                     });
-                case "r":
+                case "p": // plant; eg. `p:field5:cab1`
+                    const fieldId = parts[0] as FieldId;
+                    const vineId = parts[1] as VineId;
+                    const fields = state.players[action.playerId].fields;
+                    return updatePlayer(state, action.playerId, {
+                        fields: {
+                            ...fields,
+                            [fieldId]: { ...fields[fieldId], vines: [...fields[fieldId].vines, vineId] },
+                        },
+                    });
+                case "r": // residual
                     return gainResiduals(1, state, action.playerId)
-                case "w":
+                case "w": // wine; eg. `w:sparkling:7`
                     return gainWine(
                         { color: parts[0] as WineColor, value: parseInt(parts[1], 10) },
                         state
                     );
-                case "s":
+                case "s": // structure
                     return buildStructure(state, parts[0] as StructureId, action.playerId);
             }
     }
