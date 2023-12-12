@@ -211,6 +211,14 @@ const PlayerColorPicker: React.FC<{
         return () => document.removeEventListener("mousedown", onMouseDown, /* capture */ true);
     }, [isEditing]);
 
+    React.useEffect(() => {
+        const takenColors = new Set(Object.values(playerColors))
+        if (isCurrentUser && !color && takenColors.size < MAX_NUM_PLAYERS) {
+            const i = PLAYER_COLORS.findIndex(c => !takenColors.has(c));
+            setColor(PLAYER_COLORS[i]);
+        }
+    }, [isCurrentUser, color, setColor, playerColors])
+
     return <span
         ref={ref}
         className={cx(
