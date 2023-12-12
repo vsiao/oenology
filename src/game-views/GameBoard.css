@@ -206,6 +206,9 @@
 .GameBoard-currentPlayerIndicator--yellow {
     border-color: gold;
 }
+.GameBoard-currentPlayerIndicator--pink {
+    border-color: hotpink
+}
 
 .GameBoard-actionsScroller {
     grid-area: actions;

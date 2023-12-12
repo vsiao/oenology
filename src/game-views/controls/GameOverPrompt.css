@@ -128,3 +128,7 @@
 .GameOverPrompt-line--yellow .ct-line {
     stroke: gold;
 }
+.GameOverPrompt-line--pink .ct-point,
+.GameOverPrompt-line--pink .ct-line {
+    stroke: hotpink;
+}

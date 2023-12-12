@@ -38,6 +38,9 @@
 .Worker-icon--yellow {
     fill: gold;
 }
+.Worker-icon--pink {
+    fill: hotpink;
+}
 .Worker-icon--temp {
     fill: #999;
 }
