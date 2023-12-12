@@ -9,7 +9,7 @@ import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { gainWine, placeGrapes } from "./shared/grapeWineReducers";
 import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
-import { buildStructure, gainResiduals, plantVineInField, updatePlayer } from "./shared/sharedReducers";
+import { buildStructure, gainResiduals, updatePlayer } from "./shared/sharedReducers";
 import { StructureId } from "./structures";
 import { VineId } from "./vineCards";
 
