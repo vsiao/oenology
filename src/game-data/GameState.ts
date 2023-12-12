@@ -177,7 +177,7 @@ export type WorkerPlacement =
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";
-export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red";
+export type PlayerColor = "blue" | "green" | "orange" | "yellow" | "purple" | "red" | "pink";
 export type TokenMap = [boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean];
 export type WineColor = "red" | "white" | "blush" | "sparkling";
 export enum StructureState {
@@ -185,6 +185,17 @@ export enum StructureState {
     Built,
     Used
 }
+
+export const MAX_NUM_PLAYERS = 6;
+export const PLAYER_COLORS: PlayerColor[] = [
+    "purple",
+    "yellow",
+    "orange",
+    "blue",
+    "green",
+    "pink",
+    "red",
+];
 
 export interface PlayerState {
     id: string;

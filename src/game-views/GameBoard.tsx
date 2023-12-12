@@ -178,6 +178,7 @@ const colors: Record<PlayerColor, string> = {
     purple: "#800080", // purple
     red: "#b22222", // firebrick
     yellow: "#ffd700", // gold
+    pink: "#ff69b4", // hotpink
 };
 
 const WakeUpCell: React.FunctionComponent<{

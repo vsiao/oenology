@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { AppState, User, GameOptions } from "../../store/AppState";
 import ChoiceButton from "../controls/ChoiceButton";
 import { startGame as startGameAction } from "../../game-data/gameActions";
-import { PlayerColor } from "../../game-data/GameState";
+import { MAX_NUM_PLAYERS, PLAYER_COLORS, PlayerColor } from "../../game-data/GameState";
 import { Dispatch } from "redux";
 import { setCurrentUserName, setGameOption, setPlayerColor } from "../../store/appActions";
 import { startGame } from "../../store/firebase";
@@ -122,12 +122,13 @@ const Lobby: React.FunctionComponent<Props> = ({
                     <ul className="Lobby-users">
                         {users.map((u, i) =>
                             <li key={u.id} className="Lobby-user">
-                                <PlayerColorPicker
-                                    color={gameOptions.playerColors?.[u.id]}
-                                    playerColors={gameOptions.playerColors}
-                                    isCurrentUser={u.id === currentUser?.id}
-                                    setColor={setColor}
-                                />
+                                {i < MAX_NUM_PLAYERS &&
+                                    <PlayerColorPicker
+                                        color={gameOptions.playerColors?.[u.id]}
+                                        playerColors={gameOptions.playerColors}
+                                        isCurrentUser={u.id === currentUser?.id}
+                                        setColor={setColor}
+                                    />}
                                 {u.name || <em>…</em>}
                                 {i === 0 && <span className="Lobby-hostTag">host</span>}
                             </li>
@@ -176,8 +177,8 @@ const Lobby: React.FunctionComponent<Props> = ({
                     {isHost
                         ? <ChoiceButton
                             className="Lobby-startGame"
-                            onClick={() => startGame(users, gameOptions)}
-                            disabled={users.length < 2 || users.length > 6}
+                            onClick={() => startGame(users.slice(0, MAX_NUM_PLAYERS), gameOptions)}
+                            disabled={users.length < 2}
                         >
                             Start Game
                         </ChoiceButton>
@@ -227,14 +228,7 @@ const PlayerColorPicker: React.FC<{
     >
         <Worker color={color} />
         {isEditing && <div className="Lobby-playerColorPicker" onClick={event => event.preventDefault()}>
-            {([
-                "purple",
-                "orange",
-                "green",
-                "red",
-                "yellow",
-                "blue"
-            ] as const).map((c, i) => 
+            {PLAYER_COLORS.map((c, i) =>
                 <>
                     <button
                         className={cx("Lobby-playerColorButton", {
@@ -248,7 +242,7 @@ const PlayerColorPicker: React.FC<{
                     >
                         <Worker color={c} />
                     </button>
-                    {i === 2 ? <br /> : null}
+                    {i === 3 ? <br /> : null}
                 </>
             )}
         </div>}

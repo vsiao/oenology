@@ -5,7 +5,7 @@ import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
 import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions, SetPlayerColorAction } from "./appActions";
-import GameState, { PlayerColor, PlayerState, PlayerStats } from "../game-data/GameState";
+import GameState, { MAX_NUM_PLAYERS, PLAYER_COLORS, PlayerColor, PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
 import { RoomState, User } from "./AppState";
 import { allPlacements } from "../game-data/board/boardPlacements";
@@ -187,17 +187,12 @@ export function* subscribeToRoom(gameId: string, userId: string) {
             playerColorsRef.onDisconnect().update({ [userId]: null }).then(() => {
                 playerColorsRef.transaction(currentColors => {
                     const takenColors = new Set(Object.values(currentColors ?? {}));
-                    const colors: PlayerColor[] = [
-                        "purple",
-                        "orange",
-                        "green",
-                        "red",
-                        "yellow",
-                        "blue"
-                    ];
-                    const i = colors.findIndex(c => !takenColors.has(c))
+                    if (takenColors.size >= MAX_NUM_PLAYERS) {
+                        return;
+                    }
+                    const i = PLAYER_COLORS.findIndex(c => !takenColors.has(c))
                     if (i >= 0) {
-                        return { ...currentColors, [userId]: colors[i] };
+                        return { ...currentColors, [userId]: PLAYER_COLORS[i] };
                     }
                 });
             });

@@ -29,6 +29,9 @@
 .SidebarPlayer--yellow .SidebarPlayer-header {
     border-bottom-color: gold;
 }
+.SidebarPlayer--pink .SidebarPlayer-header {
+    border-bottom-color: hotpink;
+}
 
 .SidebarPlayer-influence {
     height: 2.2em;

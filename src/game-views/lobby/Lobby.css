@@ -134,6 +134,7 @@
     padding: .5em .8em;
     position: absolute;
     right: 100%;
+    text-align: center;
     top: 50%;
     transform: translateY(-50%);
     white-space: nowrap;

@@ -34,6 +34,9 @@
 .StarToken-icon--yellow {
     fill: gold;
 }
+.StarToken-icon--pink {
+    fill: hotpink;
+}
 .StarToken-icon--placeholder {
     fill: white;
 }
