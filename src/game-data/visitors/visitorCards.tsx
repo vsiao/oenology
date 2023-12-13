@@ -20,7 +20,6 @@ export const UNIMPLEMENTED_CARDS = {
 export const RHINE_UNIMPLEMENTED_CARDS = {
     // summer
     brickMason: true,
-    dismantler: true,
     oldGeneral: true, // tuscany
     plantDealer: true,
     sonInLaw: true,

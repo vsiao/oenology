@@ -94,6 +94,8 @@ const renderActivity = (
             return <>{player} built the <strong>{structures[event.structureId].name}</strong></>;
         case "coins":
             return <>{player} {event.delta < 0 ? "paid" : "gained"} <Coins>{Math.abs(event.delta)}</Coins></>;
+        case "destroy":
+            return <>{player} destroyed their <strong>{structures[event.structureId].name}</strong></>
         case "discard":
             return <>{player} discarded {event.cards.map((t, i) => <Card key={i} type={t} />)}</>;
         case "discardGrapes":
