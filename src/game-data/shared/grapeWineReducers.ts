@@ -78,9 +78,16 @@ export const harvestFields = (state: GameState, fields: FieldId[]): GameState =>
     return state;
 };
 
-export const harvestField = (state: GameState, fieldId: FieldId): GameState => {
+export const harvestField = (
+    state: GameState,
+    fieldId: FieldId,
+    { asChemist = false }: { asChemist?: boolean } = {}
+): GameState => {
     const player = state.players[state.currentTurn.playerId];
-    const yields = fieldYields(player.fields[fieldId]);
+    const { red, white } = fieldYields(player.fields[fieldId]);
+    const yields = asChemist
+        ? { red: Math.max(0, red - 1), white: Math.max(0, white - 1) }
+        : { red, white };
     return pushActivityLog(
         { type: "harvest", playerId: player.id, yields },
         placeGrapes(updatePlayer(state, player.id, {

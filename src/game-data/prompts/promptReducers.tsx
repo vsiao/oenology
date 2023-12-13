@@ -86,6 +86,10 @@ export const promptToChooseCard = (
         playerId?: string;
     }
 ): GameState => {
+    if (numCards > 1 && style === "oneClick") {
+        // If multiple cards need to be chosen, `style` must be `selector`
+        throw new Error("Cannot display multi-card prompt with oneClick style");
+    }
     if (state.playerId !== playerId) {
         return state;
     }
