@@ -1581,6 +1581,10 @@ export const rhineWinterVisitorReducers: Record<
         };
         switch (action.type) {
             case "CHOOSE_CARDS":
+                if (!action.cards) {
+                    // Passing on the second plant action
+                    return endVisitor(state);
+                }
                 const card = action.cards![0];
                 switch (card.type) {
                     case "visitor":
