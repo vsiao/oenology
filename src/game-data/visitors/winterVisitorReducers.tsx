@@ -1624,7 +1624,8 @@ export const rhineWinterVisitorReducers: Record<
 
                 if (!chemistAction.secondPlant) {
                     return promptToChooseVineCard(
-                        setPendingAction({ ...chemistAction, secondPlant: true }, state)
+                        setPendingAction({ ...chemistAction, secondPlant: true }, state),
+                        { optional: true }
                     );
                 }
                 return endVisitor(state);
