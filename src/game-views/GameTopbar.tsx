@@ -22,6 +22,7 @@ const GameTopbar: FunctionComponent<Props> = props => {
         "bottom",
         props.undoDisabledReason
     );
+    const [notificationPermission, setNotificationPermission] = useState(Notification.permission);
 
     return <>
         <button
@@ -38,6 +39,9 @@ const GameTopbar: FunctionComponent<Props> = props => {
         >
             <UndoIcon className="GameTopbar-undoIcon" /> Undo
         </button>
+        {notificationPermission === "default"
+            ? <button onClick={() => Notification.requestPermission().then(setNotificationPermission)}>Enable turn notifications</button>
+            : null}
         {maybeTooltip}
         <input type="text"
             className="GameTopbar-cheatBox"
