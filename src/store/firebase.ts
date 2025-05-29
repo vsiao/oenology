@@ -1,6 +1,6 @@
-import "firebase/auth";
-import "firebase/database";
-import * as firebase from "firebase/app";
+import "firebase/compat/auth";
+import "firebase/compat/database";
+import firebase from "firebase/compat/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
