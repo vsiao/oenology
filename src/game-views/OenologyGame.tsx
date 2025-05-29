@@ -18,7 +18,7 @@ interface Props {
 
 const OenologyGame: React.FunctionComponent<Props> = props => {
     const { isPlaying, joinGame } = props;
-    const { gameId } = useParams();
+    const { gameId } = useParams<{ gameId: string }>();
     React.useEffect(() => { joinGame(gameId); }, [joinGame, gameId]);
 
     return <div className="OenologyGame">

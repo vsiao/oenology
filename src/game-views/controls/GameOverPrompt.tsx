@@ -27,7 +27,7 @@ const GameOverPrompt: React.FunctionComponent<Props> = props => {
     const [showStats, setShowStats] = React.useState(true);
 
     const { shouldEndGame, gameState, players } = props;
-    const { gameId } = useParams();
+    const { gameId } = useParams<{ gameId: string }>();
     React.useEffect(() => {
         if (shouldEndGame) {
             endGame(gameId, gameState, players);

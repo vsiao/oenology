@@ -10,6 +10,7 @@ import {
 import { JoinGameAction, hydrateGame } from "./appActions";
 import { appReducer } from "./appReducers";
 import { call, take, fork, actionChannel, put } from "redux-saga/effects";
+import GameState from "../game-data/GameState";
 
 const sagaMiddleware = createSagaMiddleWare();
 const store = createStore(
@@ -31,7 +32,7 @@ sagaMiddleware.run(function* () {
 });
 
 function* gameSaga(action: JoinGameAction, userId: string) {
-    const cachedGameState = yield call(getGameState, action.gameId);
+    const cachedGameState: GameState = yield call(getGameState, action.gameId);
 
     if (cachedGameState) {
         yield put(hydrateGame(cachedGameState));
