@@ -4,7 +4,7 @@ import * as firebase from "firebase/app";
 import { eventChannel } from "redux-saga";
 import { take, put, call, fork, throttle, takeEvery } from "redux-saga/effects";
 import { isGameAction, GameAction, gameActionChanged } from "../game-data/gameActions";
-import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions, SetPlayerColorAction } from "./appActions";
+import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGameOptionAction, gameOptions, SetPlayerColorAction, AppAction } from "./appActions";
 import GameState, { MAX_NUM_PLAYERS, PLAYER_COLORS, PlayerColor, PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
 import { RoomState, User } from "./AppState";
@@ -25,8 +25,8 @@ function signInAnonymously() {
 }
 
 export function* signIn() {
-    const userCredential = yield call(signInAnonymously);
-    const userId = (userCredential as unknown as firebase.auth.UserCredential).user!.uid;
+    const userCredential: firebase.auth.UserCredential = yield call(signInAnonymously);
+    const userId = userCredential.user!.uid;
     yield put(setCurrentUserId(userId));
     return userId;
 }
@@ -157,7 +157,7 @@ export function* subscribeToRoom(gameId: string, userId: string) {
     yield takeEvery("SET_PLAYER_COLOR", publishPlayerColor, gameId, userId);
     yield fork(throttledPublishUserName, gameId, userId);
 
-    const firebaseEventChannel = eventChannel(emit => {
+    const firebaseEventChannel = eventChannel<AppAction>(emit => {
         const roomRef = firebase.database().ref(`rooms/${gameId}`);
 
         const gameOptionsRef = roomRef.child("gameOptions");
@@ -206,7 +206,7 @@ export function* subscribeToRoom(gameId: string, userId: string) {
         };
     });
     while (true) {
-        yield put(yield take(firebaseEventChannel));
+        yield put((yield take(firebaseEventChannel)) as AppAction);
     }
 }
 
@@ -243,7 +243,7 @@ export function endGame(gameId: string, gameState: GameState, playerStats: Playe
 
 export function* publishGameLog(gameId: string) {
     while (true) {
-        const gameAction = yield take(isGameAction);
+        const gameAction: GameAction = yield take(isGameAction);
         if (!gameAction._key) {
             firebase.database().ref(`gameLogs/${gameId}`).push({
                 ...gameAction,
@@ -269,7 +269,7 @@ export function* subscribeToGameLog(gameId: string) {
     }
 
     // Then listen for new actions, filtering out those we've already applied
-    const firebaseEventChannel = eventChannel(emit => {
+    const firebaseEventChannel = eventChannel<GameAction>(emit => {
         gameLogRef.on("child_added", snap => {
             if (!appliedKeys.has(snap.key!)) {
                 emit({ ...snap.val(), _key: snap.key });
@@ -281,6 +281,6 @@ export function* subscribeToGameLog(gameId: string) {
         return () => gameLogRef.off("child_added");
     });
     while (true) {
-        yield put(yield take(firebaseEventChannel));
+        yield put((yield take(firebaseEventChannel)) as GameAction);
     }
 }
