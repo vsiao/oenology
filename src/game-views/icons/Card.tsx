@@ -3,6 +3,7 @@ import { CardType } from "../../game-data/GameState";
 import "./Card.css"; 
 
 interface Props {
+    children?: React.ReactNode;
     className?: string;
     type?: CardType; 
     style?: React.CSSProperties;

@@ -3,6 +3,7 @@ import * as React from "react";
 import "./Residuals.css";
 
 interface Props {
+    children?: number | string;
     className?: string;
 }
 

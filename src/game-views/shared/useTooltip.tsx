@@ -72,6 +72,7 @@ const LayerSideContext = createContext<AnchorSide>("bottom");
 export type AnchorSide = "top" | "right" | "bottom" | "left";
 const AnchoredLayer: FunctionComponent<{
     anchorNode: Element;
+    children: React.ReactNode;
     side: AnchorSide;
 }> = ({ anchorNode, side, children, }) => {
     const anchorRect = anchorNode.getBoundingClientRect();
@@ -93,7 +94,10 @@ const AnchoredLayer: FunctionComponent<{
     </div>;
 };
 
-export const Tooltip: FunctionComponent<{ className?: string }> = ({ className, children, }) => {
+export const Tooltip: FunctionComponent<{
+    children: React.ReactNode;
+    className?: string
+}> = ({ className, children, }) => {
     const side = useContext(LayerSideContext);
 
     return <div className={cx("Tooltip", `Tooltip--${side}`, className)}>

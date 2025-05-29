@@ -4,6 +4,7 @@ import * as React from "react";
 import XIcon from "../icons/XIcon";
 
 interface Props {
+    children?: React.ReactNode;
     className?: string;
     title: React.ReactNode;
     onClose?: () => void;

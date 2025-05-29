@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import OenologyGame from './game-views/OenologyGame';
 import Home from './game-views/lobby/Home';
 import { connect } from 'react-redux';
@@ -18,14 +18,10 @@ const App: React.FunctionComponent<Props> = props => {
                 <a className="App-homeLink" href="/">oenology</a>
                 {props.isGameStarted && <GameTopbar />}
             </header>
-            <Switch>
-                <Route path="/game/:gameId">
-                    <OenologyGame />
-                </Route>
-                <Route path="/">
-                    <Home />
-                </Route>
-            </Switch>
+            <Routes>
+                <Route path="/game/:gameId" element={<OenologyGame />} />
+                <Route path="/" element={<Home />} />
+            </Routes>
         </div>
     </BrowserRouter>;
 };
