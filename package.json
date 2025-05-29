@@ -32,7 +32,7 @@
     "redux-thunk": "^2.3.0",
     "shortid": "^2.2.15",
     "source-map-explorer": "^2.4.2",
-    "typescript": "~3.7.2"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
