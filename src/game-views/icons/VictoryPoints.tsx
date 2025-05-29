@@ -3,6 +3,7 @@ import * as React from "react";
 import "./VictoryPoints.css";
 
 interface Props {
+    children?: number | string;
     className?: string;
 }
 

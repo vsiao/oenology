@@ -4,6 +4,7 @@ import { GrapeColor } from "../../game-data/GameState";
 import "./Grape.css";
 
 interface Props {
+    children?: number | string;
     className?: string;
     color?: GrapeColor;
 }

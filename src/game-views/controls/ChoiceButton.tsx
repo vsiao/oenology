@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTooltip } from "../shared/useTooltip";
 
 interface Props {
+    children?: React.ReactNode;
     className?: string;
     disabled?: boolean;
     disabledReason?: string | undefined;

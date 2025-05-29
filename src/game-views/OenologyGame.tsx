@@ -19,12 +19,12 @@ interface Props {
 const OenologyGame: React.FunctionComponent<Props> = props => {
     const { isPlaying, joinGame } = props;
     const { gameId } = useParams<{ gameId: string }>();
-    React.useEffect(() => { joinGame(gameId); }, [joinGame, gameId]);
+    React.useEffect(() => { joinGame(gameId!); }, [joinGame, gameId]);
 
     return <div className="OenologyGame">
         {isPlaying
             ? <AnimateSharedLayout><GameBoard /><PlayerMat /><Sidebar /></AnimateSharedLayout>
-            : <Lobby gameId={gameId} />}
+            : <Lobby gameId={gameId!} />}
     </div>;
 };
 
