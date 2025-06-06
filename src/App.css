@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   font-size: 14px;
-  height: 100vh;
+  height: 100dvh;
 }
 
 /* xwide monitors */
