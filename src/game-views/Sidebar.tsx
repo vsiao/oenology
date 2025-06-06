@@ -27,7 +27,7 @@ interface Props {
 }
 
 const Sidebar: React.FunctionComponent<Props> = props => {
-    return <div className="Sidebar">
+    return <>
         <div className="Sidebar-players">
             {props.tableOrder.map(playerId => <SidebarPlayer key={playerId} playerId={playerId} />)}
         </div>
@@ -40,7 +40,7 @@ const Sidebar: React.FunctionComponent<Props> = props => {
                 )}
             </div>
         </div>
-    </div>;
+    </>;
 };
 
 const ActivityLogItem: React.FunctionComponent<{

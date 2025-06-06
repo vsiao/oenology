@@ -1,34 +1,24 @@
-.Sidebar {
+.Sidebar-players {
     background: #ddd;
     display: flex;
-    flex-direction: column;
-    grid-area: sidebar;
-    overflow: hidden;
-}
-
-@media (min-width: 800px) {
-    .Sidebar {
-        border-left: 3px solid #282c34;
-    }
-}
-
-@media (min-width: 1750px) {
-    .Sidebar {
-        flex-direction: row;
-    }
-    .Sidebar-players {
-        width: 510px;
-    }
-}
-
-.Sidebar-players {
+    flex-direction: row;
+    grid-area: playerboards;
     overflow-y: auto;
+}
+
+/* xwide monitors */
+@media (min-width: 1750px) {
+    .Sidebar-players {
+        border-left: 3px solid #282c34;
+        flex-direction: column;
+    }
 }
 
 .Sidebar-activityLog {
     background: #282c34;
     box-sizing: border-box;
     flex: 1 0 240px;
+    grid-area: activitylog;
     overflow-y: auto;
 }
 
