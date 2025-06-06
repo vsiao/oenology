@@ -5,10 +5,10 @@
     color: black;
     display: inline-flex;
     flex-direction: column;
-    height: 200px;
-    max-height: 200px;
-    padding: 4px;
-    width: 140px;
+    height: 18em;
+    max-height: 18em;
+    padding: .5em;
+    width: 12em;
 }
 .PlayerCard--order {
     background: purple;
@@ -25,7 +25,7 @@
 
 .PlayerCard-name {
     font-weight: 600;
-    padding: 4px 4px 8px;
+    padding: .2em .5em .4em;
     text-transform: uppercase;
 }
 .PlayerCard--order .PlayerCard-name,
@@ -73,7 +73,7 @@
     background: #ccc;
     border-radius: 0.2em;
     display: inline-block;
-    font-size: 14px;
+    font-size: 1em;
     margin: 0 6px 4px 0;
     padding: 0 6px;
 }

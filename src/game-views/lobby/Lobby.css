@@ -2,9 +2,19 @@
     align-items: center;
     display: flex;
     flex-direction: column;
-    grid-area: main;
+    grid-area: 1 / 1 / 3 / 1;
     justify-content: center;
     position: relative;
+}
+@media (min-width: 1750px) {
+    .Lobby-main {
+        grid-area: main;
+    }
+}
+@media (max-width: 500px) {
+    .Lobby-main {
+        grid-area: 1 / 1 / 3 / 3;
+    }
 }
 
 .Lobby-nameLabel {
@@ -78,17 +88,17 @@
     border-top: 1px solid #ddd;
     display: flex;
     flex-direction: column;
-    grid-area: bottom;
+    grid-area: playermat;
     min-width: 1px;
 }
 
 .Lobby-exampleHeader {
-    margin: 16px 26px 0;
+    margin: 1em 1.5em 0;
 }
 
 .Lobby-cards {
     display: flex;
-    min-height: 240px;
+    min-height: 20em;
     overflow-x: auto;
     padding: 8px 1.6em 1em;
 }
@@ -105,8 +115,18 @@
 
 .Lobby-sidebar {
     background: #ddd;
-    grid-area: sidebar;
+    grid-area: 1 / 2 / 4 / 2;
     padding: 0 1em;
+}
+@media (min-width: 1750px) {
+    .Lobby-sidebar {
+        grid-area: 1 / 2 / 3 / 4;
+    }
+}
+@media (max-width: 500px) {
+    .Lobby-sidebar {
+        grid-area: activitylog;
+    }
 }
 
 .Lobby-user {

@@ -1,7 +1,7 @@
 .OenologyGame {
     display: grid;
     grid-template-columns: 1fr 360px;
-    grid-template-rows: 15em 1fr 280px;
+    grid-template-rows: 15em 1fr 22em;
     grid-template-areas:
         "playerboards playerboards"
         "main         activitylog"
@@ -14,7 +14,7 @@
 @media (min-width: 1750px) {
     .OenologyGame {
         grid-template-columns: 1fr 520px 360px;
-        grid-template-rows: 1fr 280px;
+        grid-template-rows: 1fr 20em;
         grid-template-areas:
             "main      playerboards activitylog"
             "playermat playerboards activitylog";
@@ -25,6 +25,7 @@
 @media (max-width: 500px) {
     .OenologyGame {
         grid-template-columns: 1fr 2fr;
+        grid-template-rows: 15em 1fr 25em;
         grid-template-areas:
             "playerboards playerboards"
             "main         main"
