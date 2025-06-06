@@ -193,7 +193,7 @@ const WakeUpCell: React.FunctionComponent<{
         React.useMemo(() => {
             return <>Wake-up bonus: {renderBonus(bonus, () => "(none)")}</>;
         }, [bonus])
-    )
+    );
 
     return <li
         ref={anchorRef as React.RefObject<HTMLLIElement>}
@@ -244,7 +244,7 @@ const renderBonus = (
         case "drawVine":
             return <Vine />;
         case "drawVisitor":
-            return <span><SummerVisitor /> or <WinterVisitor /></span>;
+            return <span style={{whiteSpace: "nowrap"}}><SummerVisitor /> or <WinterVisitor /></span>;
         case "drawWinterVisitor":
             return <WinterVisitor />;
         case "firstPlayer":
@@ -259,7 +259,7 @@ const renderBonus = (
             return renderNothing();
         case "tempWorker":
             return <span>
-                <Worker isTemp={true} animateWithId={withAnimatedTokens ? 999 : undefined} /> <em>for this year</em>
+                <Worker isTemp={true} animateWithId={withAnimatedTokens ? 999 : undefined} />
             </span>;
     }
 }

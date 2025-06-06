@@ -5,6 +5,7 @@
     box-shadow: 0 0 1em rgba(0, 0, 0, .3);
     display: flex;
     flex-direction: column;
+    grid-area: playermat;
     min-width: 1px;
     position: relative;
     z-index: 1;

@@ -2,6 +2,21 @@
   display: flex;
   flex-direction: column;
   font-size: 14px;
+  height: 100vh;
+}
+
+/* xwide monitors */
+@media (min-width: 1750px) {
+  .App {
+    font-size: 16px;
+  }
+}
+
+/* mobile */
+@media (max-width: 500px) {
+  .App {
+    font-size: 8px;
+  }
 }
 
 .App-header {
@@ -15,23 +30,13 @@
   padding: 0 16px;
 }
 
-.App-homeLink {
-  color: white;
-  text-decoration: none;
-}
-
-@media (min-width: 800px) {
-  .App {
-    height: 100vh;
-  }
-
+@media (min-width: 1750px) {
   .App-header {
     height: 48px;
   }
 }
 
-@media (min-width: 900px) {
-  .App {
-    font-size: 16px;
-  }
+.App-homeLink {
+  color: white;
+  text-decoration: none;
 }

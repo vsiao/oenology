@@ -1,30 +1,34 @@
 .OenologyGame {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 70vh 280px 1fr;
-    /* 36px = App-header height; 280px = PlayerMat height */
-    grid-template-rows: calc(100vh - 36px - 280px) 280px 1fr;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: 15em 1fr 280px;
     grid-template-areas:
-        "main"
-        "bottom"
-        "sidebar";
+        "playerboards playerboards"
+        "main         activitylog"
+        "playermat    activitylog";
     flex: 1 1 auto;
     min-height: 1px;
 }
 
-@media (min-width: 800px) {
+/* xwide monitors */
+@media (min-width: 1750px) {
     .OenologyGame {
-        grid-template-columns: 1fr 520px;
-        grid-template-rows: 1fr 320px;
+        grid-template-columns: 1fr 520px 360px;
+        grid-template-rows: 1fr 280px;
         grid-template-areas:
-            "main sidebar"
-            "bottom sidebar";
+            "main      playerboards activitylog"
+            "playermat playerboards activitylog";
     }
 }
 
-@media (min-width: 1750px) {
+/* mobile */
+@media (max-width: 500px) {
     .OenologyGame {
-        grid-template-columns: 1fr 880px;
+        grid-template-columns: 1fr 2fr;
+        grid-template-areas:
+            "playerboards playerboards"
+            "main         main"
+            "activitylog  playermat";
     }
 }
 
