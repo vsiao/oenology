@@ -31,6 +31,7 @@ import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
 import {
     buildStructure,
+    destroyStructure,
     gainCoins,
     gainVP,
     loseVP,
@@ -84,6 +85,7 @@ import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements, boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
+import { WineSpec } from "../orderCards";
 
 export const summerVisitorReducers: Record<
     keyof typeof summerVisitorCards,
@@ -1656,7 +1658,69 @@ export const rhineSummerVisitorReducers: Record<
         }
     },
     contractor: summerVisitorReducers.contractor,
-    dismantler: (state, action) => state,
+    dismantler: (state, action) => {
+        switch (action.type) {
+            case "CHOOSE_CARDS":
+                const player = state.players[state.currentTurn.playerId];
+                const builtStructures = (Object.keys(player.structures) as StructureId[])
+                    .filter((id) => player.structures[id] !== StructureState.Unbuilt);
+                return promptForAction<StructureId>(state, {
+                    title: "Destroy a structure",
+                    choices: builtStructures.map(id => {
+                        const { name, cost } = structures[id];
+                        return {
+                            id: "DISMANTLER_DESTROY",
+                            data: id,
+                            label: <>{name} <WineGlass>{cost}</WineGlass></>,
+                        };
+                    })
+                });
+            case "CHOOSE_ACTION":
+                switch (action.choice) {
+                    case "DISMANTLER_DESTROY":
+                        const structureId = action.data! as StructureId;
+                        state = destroyStructure(state, structureId);
+                        const { cost: value, name } = structures[structureId];
+                        return promptForAction(state, {
+                            title: "Gain wine",
+                            description: <p>You destroyed <strong>{name}</strong> <Coins>{value}</Coins>.</p>,
+                            choices: [
+                                {
+                                    id: "DISMANTLER_GAIN",
+                                    data: { color: "red", value },
+                                    label: <>Gain <WineGlass color="red">{value}</WineGlass></>,
+                                    disabledReason: gainWineDisabledReason(state, "red", value),
+                                },
+                                {
+                                    id: "DISMANTLER_GAIN",
+                                    data: { color: "white", value },
+                                    label: <>Gain <WineGlass color="white">{value}</WineGlass></>,
+                                    disabledReason: gainWineDisabledReason(state, "white", value),
+                                },
+                                ...(value >= 4 ? [{
+                                    id: "DISMANTLER_GAIN",
+                                    data: { color: "blush", value },
+                                    label: <>Gain <WineGlass color="blush">{value}</WineGlass></>,
+                                    disabledReason: gainWineDisabledReason(state, "blush", value),
+                                }] : []),
+                                ...(value >= 7 ? [{
+                                    id: "DISMANTLER_GAIN",
+                                    data: { color: "sparkling", value },
+                                    label: <>Gain <WineGlass color="sparkling">{value}</WineGlass></>,
+                                    disabledReason: gainWineDisabledReason(state, "sparkling", value),
+                                }] : []),
+                            ],
+                        });
+                    case "DISMANTLER_GAIN":
+                        const wine = action.data! as WineSpec;
+                        return endVisitor(gainWine(wine, state));
+                    default:
+                        return state;
+                }
+            default:
+                return state;
+        }
+    },
     docent: (state, action) => {
         switch (action.type) {
             case "CHOOSE_CARDS":
