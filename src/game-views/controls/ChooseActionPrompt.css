@@ -21,7 +21,7 @@
 }
 
 .ChooseActionPrompt-choiceButton {
-    margin: 6px;
+    margin: .5em;
 }
 .ChooseActionPrompt-choiceButton--selected {
     box-shadow: 0 0 0 3px #61dafb;

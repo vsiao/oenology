@@ -116,6 +116,7 @@
 .Lobby-sidebar {
     background: #ddd;
     grid-area: 1 / 2 / 4 / 2;
+    overflow-y: auto;
     padding: 0 1em;
 }
 @media (min-width: 1750px) {
@@ -216,6 +217,6 @@
 }
 
 .Lobby-startGame {
-    margin-top: 2em;
+    margin: 2em 0;
 }
 

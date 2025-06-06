@@ -5,7 +5,7 @@
     display: inline-block;
     height: 2.8em;
     outline: none;
-    padding: 0 16px;
+    padding: 0 1em;
 }
 .ChoiceButton[aria-disabled=true] {
     background: #ddd;
@@ -17,4 +17,10 @@
     border-color: black;
     cursor: pointer;
     transition: 150ms border-color;
+}
+
+@media (max-width: 500px) {
+    .ChoiceButton {
+        height: 4em;
+    }
 }
