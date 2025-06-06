@@ -1,6 +1,5 @@
 .PlayerMat {
     background: #ddd;
-    border-bottom: 4px solid #222;
     border-top: 1px solid #aaa;
     box-shadow: 0 0 1em rgba(0, 0, 0, .3);
     display: flex;
@@ -43,9 +42,8 @@
 
 .PlayerMat-cards {
     display: flex;
-    min-height: 240px;
     overflow-x: auto;
-    padding: 8px 1.6em 1em;
+    padding: .5em 1.6em 1em;
 }
 .PlayerMat-cards::after {
     content: "";
@@ -54,14 +52,5 @@
     width: 1.6em;
 }
 .PlayerMat-card + .PlayerMat-card {
-    margin-left: 8px;
-}
-
-@media (min-width: 800px) {
-    .PlayerMat {
-        border-bottom: 0;
-    }
-    .PlayerMat-card + .PlayerMat-card {
-        margin-left: 16px;
-    }
+    margin-left: 1em;
 }
