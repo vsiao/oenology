@@ -10,6 +10,16 @@
     z-index: 1;
 }
 
+@media (max-width: 500px) {
+    .PlayerMat {
+        font-size: 1.2em;
+    }
+}
+
+.PlayerMat-spectator {
+    padding: 0 1em;
+}
+
 .PlayerMat-header {
     align-items: center;
     display: flex;
