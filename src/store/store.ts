@@ -7,7 +7,7 @@ import {
     signIn,
     getGameState,
 } from "./firebase";
-import { JoinGameAction, hydrateGame } from "./appActions";
+import { JoinGameAction, hydrateGame, setCurrentUserId } from "./appActions";
 import { appReducer } from "./appReducers";
 import { call, take, fork, actionChannel, put } from "redux-saga/effects";
 import GameState from "../game-data/GameState";
@@ -28,6 +28,9 @@ sagaMiddleware.run(function* () {
     const userId = (yield call(signIn)) as unknown as string;
 
     const joinGameAction = (yield take(joinGameChannel)) as unknown as JoinGameAction;
+    if (joinGameAction.playerOverride) {
+        yield put(setCurrentUserId(joinGameAction.playerOverride))
+    }
     yield call(gameSaga, joinGameAction, userId);
 });
 

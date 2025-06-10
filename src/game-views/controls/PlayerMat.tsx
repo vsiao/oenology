@@ -16,41 +16,57 @@ import VineCard from "../cards/VineCard";
 import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 import MamaPapaCard from "../cards/MamaPapaCard";
+import ChoiceButton from "./ChoiceButton";
 
 interface Props {
     shouldShowMamaPapas: boolean;
-    playerState: PlayerState | undefined;
+    playerStates: Record<string, PlayerState>;
+    playerId: string | null;
 }
 
 const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { playerState } = props;
+    const { playerStates, playerId } = props;
+    const playerState = playerId && playerStates[playerId];
 
     return <div className={cx("PlayerMat", playerState && `PlayerMat--${playerState.color}`)}>
-        <ActionPrompt />
-        <div className="PlayerMat-header">
-            {playerState && <>
-                <Residuals className="PlayerMat-residualPayments">{playerState.residuals}</Residuals>
-                <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
-                <VictoryPoints className="PlayerMat-victoryPoints">{playerState.victoryPoints}</VictoryPoints>
-                <ul className="PlayerMat-workers">
-                    {playerState.workers.map((worker, i) =>
-                        <li key={i} className="PlayerMat-worker" >
-                            <Worker
-                                workerType={worker.type}
-                                color={playerState.color}
-                                isTemp={worker.isTemp}
-                                disabled={!worker.available}
-                            />
-                        </li>
-                    )}
-                </ul>
-            </>}
-        </div>
-        <ul className="PlayerMat-cards">
-            {playerState && (props.shouldShowMamaPapas
-                ? renderMamaPapas(playerState)
-                : renderCards(playerState))}
-        </ul>
+        {
+            playerState
+                ?  <>
+                    <ActionPrompt />
+                    <div className="PlayerMat-header">
+                        {playerState && <>
+                            <Residuals className="PlayerMat-residualPayments">{playerState.residuals}</Residuals>
+                            <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
+                            <VictoryPoints className="PlayerMat-victoryPoints">{playerState.victoryPoints}</VictoryPoints>
+                            <ul className="PlayerMat-workers">
+                                {playerState.workers.map((worker, i) =>
+                                    <li key={i} className="PlayerMat-worker" >
+                                        <Worker
+                                            workerType={worker.type}
+                                            color={playerState.color}
+                                            isTemp={worker.isTemp}
+                                            disabled={!worker.available}
+                                        />
+                                    </li>
+                                )}
+                            </ul>
+                        </>}
+                    </div>
+                    <ul className="PlayerMat-cards">
+                        {playerState && (props.shouldShowMamaPapas
+                            ? renderMamaPapas(playerState)
+                            : renderCards(playerState))}
+                    </ul>
+                </>
+                : <div className="PlayerMat-spectator">
+                    <p>You're currently <strong>spectating</strong> this game.</p>
+                    <ul>
+                        {Object.values(playerStates).map(p =>
+                            <li><a href={`?p=${p.id}`}><ChoiceButton>Play as <Worker color={p.color} /> <strong>{p.name}</strong></ChoiceButton></a></li>
+                        )}
+                    </ul>
+                </div>
+        }
     </div>;
 };
 
@@ -93,7 +109,8 @@ const mapStateToProps = (state: AppState) => {
     return {
         shouldShowMamaPapas: game.currentTurn.type === "mamaPapa" &&
             !!game.playerId && game.players[game.playerId].cardsInHand.length === 0,
-        playerState: game.playerId ? game.players[game.playerId] : undefined,
+        playerStates: game.players,
+        playerId: game.playerId,
     };
 };
 

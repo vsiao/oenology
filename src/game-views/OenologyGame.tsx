@@ -1,7 +1,7 @@
 import "./OenologyGame.css";
 import { AnimateSharedLayout } from "framer-motion";
 import * as React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import GameBoard from "./GameBoard";
 import PlayerMat from "./controls/PlayerMat";
@@ -13,13 +13,14 @@ import Lobby from "./lobby/Lobby";
 
 interface Props {
     isPlaying: boolean;
-    joinGame: (gameId: string) => void;
+    joinGame: (gameId: string, playerOverride: string | null) => void;
 }
 
 const OenologyGame: React.FunctionComponent<Props> = props => {
     const { isPlaying, joinGame } = props;
     const { gameId } = useParams<{ gameId: string }>();
-    React.useEffect(() => { joinGame(gameId!); }, [joinGame, gameId]);
+    const [searchParams] = useSearchParams();
+    React.useEffect(() => { joinGame(gameId!, searchParams.get("p")); }, [joinGame, gameId, searchParams]);
 
     return <div className="OenologyGame">
         {isPlaying
@@ -34,7 +35,8 @@ const mapStateToProps = (state: AppState) => {
 
 const mapDispatchToProps = (dispatch: Dispatch) => {
     return {
-        joinGame: (gameId: string) => dispatch(joinGame(gameId)),
+        joinGame: (gameId: string, playerOverride: string | null) =>
+            dispatch(joinGame(gameId, playerOverride)),
     };
 };
 

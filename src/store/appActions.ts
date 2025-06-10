@@ -46,9 +46,10 @@ export const setPlayerColor = (color: PlayerColor): AppAction => {
 
 export interface JoinGameAction extends Action<"JOIN_GAME"> {
     gameId: string;
+    playerOverride: string | null;
 }
-export const joinGame = (gameId: string): AppAction => {
-    return { type: "JOIN_GAME", gameId };
+export const joinGame = (gameId: string, playerOverride: string | null): AppAction => {
+    return { type: "JOIN_GAME", gameId, playerOverride };
 };
 
 interface GameOptionsAction extends Action<"GAME_OPTIONS"> {
