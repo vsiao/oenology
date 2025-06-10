@@ -5,10 +5,10 @@
     color: black;
     display: inline-flex;
     flex-direction: column;
-    height: 18em;
+    height: 16em;
     max-height: 18em;
-    padding: .5em;
-    width: 12em;
+    padding: .3em;
+    width: 11em;
 }
 .PlayerCard--order {
     background: purple;
@@ -76,13 +76,4 @@
     font-size: 1em;
     margin: 0 6px 4px 0;
     padding: 0 6px;
-}
-
-@media (min-width: 800px) {
-    .PlayerCard {
-        height: 240px;
-        max-height: 240px;
-        padding: 4px;
-        width: 160px;
-    }
 }

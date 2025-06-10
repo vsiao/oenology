@@ -1,7 +1,14 @@
 .SidebarPlayer {
-    background-color: white;
-    border-bottom: 1px solid #aaa;
     border-right: 3px solid #282c34;
+    display: flex;
+    flex-direction: column;
+    height: 15em;
+}
+@media (min-width: 1750px) {
+    .SidebarPlayer {
+        border-bottom: 1px solid #aaa;
+        border-right: none;
+    }
 }
 
 .SidebarPlayer-header {
@@ -114,6 +121,8 @@
 }
 
 .SidebarPlayer-contents {
+    background: #fff;
+    flex: 1 1 auto;
     overflow: hidden;
     white-space: nowrap;
 }

@@ -1,16 +1,27 @@
 .Sidebar-players {
     background: #ddd;
+    box-shadow: inset 0 -1em 0 #282c34;;
     display: flex;
     flex-direction: row;
     grid-area: playerboards;
-    overflow-y: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
 }
 
 /* xwide monitors */
 @media (min-width: 1750px) {
     .Sidebar-players {
         border-left: 3px solid #282c34;
+        box-shadow: none;
         flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 500px) {
+    .Sidebar-players {
+        box-shadow: inset 0 -2px 0 #282c34;;
     }
 }
 
