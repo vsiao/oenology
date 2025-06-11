@@ -61,6 +61,18 @@ const StatusBanner: React.FunctionComponent<Props> = props => {
         return () => maybeUnmount();
     }, [props.currentTurn, mount, maybeUnmount]);
 
+    const isCurrentPlayerTurn = props.currentTurn.playerId === props.playerId;
+    React.useEffect(() => {
+        if (
+            isCurrentPlayerTurn &&
+            Notification.permission === "granted" &&
+            document.visibilityState === "hidden"
+        ) {
+            const n = new Notification("Viticulture", { body: "It's your turn!", icon: "/favicon.ico" })
+            return () => n.close();
+        }
+    }, [isCurrentPlayerTurn]);
+
     return <>
         <div ref={ref} className="StatusBanner">
             {props.gameOver ? "Game over! Thanks for playing!" : renderStatus(props)}
