@@ -91,6 +91,23 @@ export const buildStructure = (
     );
 };
 
+export const destroyStructure = (
+    state: GameState,
+    structureId: StructureId,
+    playerId = state.currentTurn.playerId
+): GameState => {
+    const player = state.players[playerId];
+    return pushActivityLog(
+        { type: "destroy", playerId: player.id, structureId },
+        updatePlayer(state, player.id, {
+            structures: {
+                ...player.structures,
+                [structureId]: StructureState.Unbuilt,
+            },
+        })
+    );
+};
+
 const editVP = (
     numVP: number,
     state: GameState,
