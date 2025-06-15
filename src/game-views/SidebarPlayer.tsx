@@ -1,6 +1,6 @@
 import cx from "classnames";
 import * as React from "react";
-import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, BoardWorker } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, BoardWorker, WorkerType } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -77,27 +77,33 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
         </div>
         <div className="SidebarPlayer-contents">
             <ul className="SidebarPlayer-workers">
-                {player.workers
-                    // Force temp worker to be last in the list
-                    .sort((w1, w2) => (w1.isTemp ? 1 : 0) - (w2.isTemp ? 1 : 0))
-                    .map((worker, i) =>
-                        <li key={worker.id} className="SidebarPlayer-worker">
-                            <Worker
-                                workerType={worker.type}
-                                color={player.color}
-                                isTemp={worker.isTemp}
-                                disabled={true}
-                            />
-                            {worker.available &&
+                {(["grande", "special1", "special2", "normal"] as WorkerType[]).map(workerType => {
+                    const workersOfType = player.workers.filter(w => w.type === workerType);
+                    if (workersOfType.length === 0) {
+                        return null;
+                    }
+                    return workersOfType
+                        // Force temp worker to be last in the list
+                        .sort((w1, w2) => (w1.isTemp ? 1 : 0) - (w2.isTemp ? 1 : 0))
+                        .map(worker =>
+                            <li key={worker.id} className="SidebarPlayer-worker">
                                 <Worker
-                                    className="SidebarPlayer-animatedWorker"
                                     workerType={worker.type}
                                     color={player.color}
                                     isTemp={worker.isTemp}
-                                    animateWithId={worker.id}
-                                />}
-                        </li>
-                    )}
+                                    disabled={true}
+                                />
+                                {worker.available &&
+                                    <Worker
+                                        className="SidebarPlayer-animatedWorker"
+                                        workerType={worker.type}
+                                        color={player.color}
+                                        isTemp={worker.isTemp}
+                                        animateWithId={worker.id}
+                                    />}
+                            </li>
+                        )
+                })}
             </ul>
             <ul className="SidebarPlayer-fields">
                 {Object.keys(player.fields).sort().map(fieldId => {

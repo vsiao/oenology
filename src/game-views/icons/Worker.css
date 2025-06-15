@@ -10,6 +10,12 @@
     width: 2em;
 }
 
+.Worker--special1,
+.Worker--special2 {
+    height: 1.8em;
+    width: 1.8em;
+}
+
 .Worker-icon {
     height: 100%;
     left: 50%;
@@ -19,6 +25,9 @@
     top: 50%;
     transform: translate3d(-50%, -50%, 0);
     width: 100%;
+}
+.Worker-icon--special {
+    stroke: none;
 }
 .Worker-icon--blue {
     fill: royalblue;

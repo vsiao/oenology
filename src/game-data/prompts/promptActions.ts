@@ -131,13 +131,13 @@ export const buildStructure = (structureId: StructureId, playerId: string): Prom
 };
 
 interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
-    placement: WorkerPlacement | null; // null means pass
+    placement: WorkerPlacement | "messenger" | null; // null means pass
     idx: number | null; // undefined means first available
     workerType: WorkerType;
     playerId: string;
 }
 export const placeWorker = (
-    placement: WorkerPlacement | null,
+    placement: WorkerPlacement | "messenger" | null,
     workerType: WorkerType,
     playerId: string,
     idx: number | null

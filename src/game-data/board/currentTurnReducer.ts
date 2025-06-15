@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn } from "../GameState";
+import GameState, { BoardPlacement, CardType, WorkerPlacement, WorkerPlacementTurn, WorkerType } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -9,7 +9,6 @@ import {
     updatePlayer,
     pushActivityLog,
     uprootVineFromField,
-    placeWorker,
 } from "../shared/sharedReducers";
 import {
     promptToChooseField,
@@ -18,8 +17,9 @@ import {
     promptToPlant,
     promptToChooseGrapes,
     promptToBuildStructure,
+    promptForAction,
 } from "../prompts/promptReducers";
-import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
+import { plantVinesDisabledReason, moneyDisabledReason, hasOpenActionSpace } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import {
     MamaPapaChoiceData,
@@ -36,8 +36,19 @@ import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes, discardWin
 import { visitor } from "../visitors/visitorReducer";
 import { boardAction, giveTour, trade } from "./boardActionReducer";
 import { influence } from "./influenceReducers";
+import { placeWorker, gainWorker } from "../shared/workerReducers";
+import { Action } from "redux";
+import { boardActionsBySeason, isBoardAction } from "./workerPlacements";
+import { structureAction } from "../structures/structureActionReducer";
 
-export const board = (state: GameState, action: GameAction): GameState => {
+export type InternalGameAction = GameAction | InternalAction;
+
+type InternalAction = WorkerTrainedAction;
+interface WorkerTrainedAction extends Action<"WORKER_TRAINED"> {
+    playerId: string;
+}
+
+export const currentTurn = (state: GameState, action: InternalGameAction): GameState => {
     switch (state.currentTurn.type) {
         case "mamaPapa":
             if (action.type === "CHOOSE_ACTION") {
@@ -100,14 +111,14 @@ export const board = (state: GameState, action: GameAction): GameState => {
     }
 };
 
-const workerPlacement = (state: GameState, action: GameAction): GameState => {
-    const currentTurn = state.currentTurn as WorkerPlacementTurn;
-    if (!currentTurn.pendingAction) {
+const workerPlacement = (state: GameState, action: InternalGameAction): GameState => {
+    const placementTurn = state.currentTurn as WorkerPlacementTurn;
+    if (!placementTurn.pendingAction) {
         // Player must either place a worker or pass
         return workerPlacementInit(state, action);
     }
 
-    const pendingAction = currentTurn.pendingAction;
+    const pendingAction = placementTurn.pendingAction;
 
     switch (pendingAction.type) {
         case "buildOrGiveTour":
@@ -144,7 +155,7 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 return state;
             }
             const playerId = state.currentTurn.playerId;
-            const player = state.players[state.currentTurn.playerId];
+            const player = state.players[playerId];
             const field = player.fields[action.fields[0]];
 
             state = updatePlayer(
@@ -255,6 +266,20 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                 return state;
             }
             return endTurn(makeWineFromGrapes(state, action.ingredients));
+        
+        case "placeMessenger":
+            if (action.type !== "CHOOSE_ACTION") {
+                return state;
+            }
+            return endTurn(
+                placeWorker(
+                    state.specialWorkers!.Messenger!,
+                    action.choice as WorkerPlacement,
+                    action.data as number,
+                    state,
+                    "Messenger"
+                )[0]
+            );
 
         case "plantVine":
             switch (action.type) {
@@ -319,27 +344,87 @@ const workerPlacement = (state: GameState, action: GameAction): GameState => {
                     { source: "trade" }
                 )
             );
+
         case "trade":
             return trade(state, action);
+
+        case "trainWorker":
+            switch (action.type) {
+                case "CHOOSE_ACTION":
+                    if (action.choice !== "TRAIN_WORKER") {
+                        return state;
+                    }
+                    state = gainWorker(state, pendingAction.cost, {
+                        workerType: action.data as WorkerType,
+                        playerId: action.playerId,
+                        availableThisYear: pendingAction.availableThisYear,
+                    });
+                    if (pendingAction.fromAction) {
+                        // Return to previous action
+                        state = setPendingAction(pendingAction.fromAction, state);
+                        return currentTurn(state, { type: "WORKER_TRAINED", playerId: action.playerId });
+                    }
+                    return endTurn(state);
+            }
+            return state;
     }
 };
 
-const workerPlacementInit = (state: GameState, action: GameAction): GameState => {
+const workerPlacementInit = (state: GameState, action: InternalGameAction): GameState => {
     switch (action.type) {
         case "PLACE_WORKER": {
             state = { ...state, lastPlaceWorkerActionKey: action._key };
             if (!action.placement) {
                 return passToNextSeason(state);
             }
+            if (action.placement === "messenger") {
+                const seasons = ["spring", "summer", "fall", "winter"] as const;
+                const futureSeasons = seasons.slice(seasons.indexOf(state.season) + 1);
+                const actions = boardActionsBySeason(state);
+                return promptForAction<number>(setPendingAction({ type: "placeMessenger" }, state), {
+                    choices: futureSeasons.map(season =>
+                        actions[season].map(({ type, choices }) =>
+                            choices(state).map(({ label, idx }) => ({
+                                id: type,
+                                data: idx,
+                                label,
+                                disabledReason: hasOpenActionSpace(state, type)
+                                    ? undefined
+                                    : "There are no available action spaces."
+                            }))
+                        ).flat(),
+                    ).flat(),
+                });
+            }
             let placementIdx: number;
             [state, placementIdx] = placeWorker(action.workerType, action.placement, action.idx, state);
-            return boardAction(action.placement, state, action._key!, placementIdx);
+            if (isBoardAction(action.placement)) {
+                if (
+                    state.specialWorkers?.[action.workerType] === "Merchant" &&
+                    state.wakeUpOrder.every(p => !p || p?.playerId === state.currentTurn.playerId || p?.season !== state.season)
+                ) {
+                    state = {
+                        ...state,
+                        currentTurn: {
+                            ...state.currentTurn as WorkerPlacementTurn,
+                            hasMerchantBonus: true,
+                        },
+                    };
+                }
+                return boardAction(action.placement, state, action._key!, placementIdx);
+            } else {
+                return structureAction(action.placement, state, action._key!, placementIdx);
+            }
         }
         case "CHOOSE_ACTION":
             switch (action.choice) {
+                case "MERCHANT_DRAW_CARD":
+                    return endTurn(drawCards(state, state.lastActionKey, { [action.data as CardType]: 1 }));
+
                 case "PLANNER_ACT":
-                    const { placement, idx } = action.data as any;
+                    const { placement, idx } = action.data as { placement: BoardPlacement; idx: number };
                     return boardAction(placement, state, action._key!, idx);
+
                 case "PLANNER_PASS":
                     return endTurn(state);
 

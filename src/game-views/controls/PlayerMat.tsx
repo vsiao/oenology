@@ -2,7 +2,7 @@ import "./PlayerMat.css";
 import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
-import { CardId, PlayerState } from "../../game-data/GameState";
+import { CardId, PlayerState, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
@@ -39,16 +39,19 @@ const PlayerMat: React.FunctionComponent<Props> = props => {
                             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
                             <VictoryPoints className="PlayerMat-victoryPoints">{playerState.victoryPoints}</VictoryPoints>
                             <ul className="PlayerMat-workers">
-                                {playerState.workers.map((worker, i) =>
-                                    <li key={i} className="PlayerMat-worker" >
-                                        <Worker
-                                            workerType={worker.type}
-                                            color={playerState.color}
-                                            isTemp={worker.isTemp}
-                                            disabled={!worker.available}
-                                        />
-                                    </li>
-                                )}
+                                {(["grande", "special1", "special2", "normal"] as WorkerType[]).map(workerType => {
+                                    const workersOfType = playerState.workers.filter(w => w.type === workerType);
+                                    return workersOfType.map((worker, i) =>
+                                        <li key={i} className="PlayerMat-worker" >
+                                            <Worker
+                                                workerType={worker.type}
+                                                color={playerState.color}
+                                                isTemp={worker.isTemp}
+                                                disabled={!worker.available}
+                                            />
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </>}
                     </div>

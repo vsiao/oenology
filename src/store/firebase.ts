@@ -8,7 +8,7 @@ import { gameStatus, setUser, setCurrentUserId, SetCurrentUserNameAction, SetGam
 import GameState, { MAX_NUM_PLAYERS, PLAYER_COLORS, PlayerColor, PlayerState, PlayerStats } from "../game-data/GameState";
 import shortid from "shortid";
 import { RoomState, User } from "./AppState";
-import { allPlacements } from "../game-data/board/boardPlacements";
+import { allPlacements } from "../game-data/board/workerPlacements";
 
 firebase.initializeApp({
     apiKey: "AIzaSyD0OE8rvJyvuKjCOXBrgBYVNcR_eMR51nM",

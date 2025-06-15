@@ -262,14 +262,14 @@
     width: 100%;
 }
 /* three-season display */
-@media (max-width: 1500px), (min-width: 1750px) and (max-width: 2000px){
+@media (max-width: 1400px), (min-width: 1750px) and (max-width: 2000px){
     .GameBoard--tuscanyA .GameBoard-seasons,
     .GameBoard--tuscanyB .GameBoard-seasons {
         width: calc(400% / 3);
     }
 }
 /* two-season display */
-@media (max-width: 1300px) {
+@media (max-width: 1200px) {
     .GameBoard--tuscanyA .GameBoard-seasons,
     .GameBoard--tuscanyB .GameBoard-seasons {
         width: 200%;

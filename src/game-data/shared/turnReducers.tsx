@@ -10,7 +10,7 @@ import GameState, {
     Season,
 } from "../GameState";
 import { ageAllTokens, ageCellar } from "./grapeWineReducers";
-import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, trainWorker, loseVP } from "./sharedReducers";
+import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, loseVP } from "./sharedReducers";
 import { promptForAction, promptToChooseVisitor, promptToPlaceWorker, displayGameOverPrompt, promptToDiscard } from "../prompts/promptReducers";
 import { addToDiscard, drawCards } from "./cardReducers";
 import Card, { SummerVisitor, WinterVisitor, Order, Vine } from "../../game-views/icons/Card";
@@ -20,12 +20,13 @@ import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, cardTypesInPlay, isLastWinter } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
-import { boardActionsBySeason } from "../board/boardPlacements";
+import { boardActionsBySeason } from "../board/workerPlacements";
 import { Choice } from "../prompts/PromptState";
 import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
 import GrapeToken from "../../game-views/icons/GrapeToken";
 import StarToken from "../../game-views/icons/StarToken";
 import { promptToInfluence, awardInfluenceVP } from "../board/influenceReducers";
+import { gainWorker } from "./workerReducers";
 
 export const endTurn = (state: GameState): GameState => {
     if (state.undoState?.type === "undoable") {
@@ -195,7 +196,10 @@ export const chooseMamaPapa = (
                 case "victoryPoint":
                     return endTurn(gainVP(1, state, { source: "bonus" }));
                 case "worker":
-                    return endTurn(trainWorker(state, { availableThisYear: true, }));
+                    return endTurn(gainWorker(state, [0, "coins"], {
+                        workerType: "normal",
+                        availableThisYear: true,
+                    }));
                 default:
                     return endTurn(buildStructure(state, papa.choiceA));
             }
@@ -505,9 +509,10 @@ const startPlannerTurn = (
         currentTurn: { type: "workerPlacement", playerId, isPlannerTurn: true },
     };
     const plannerAction = boardActionsBySeason(state)[season].find(action =>
-        state.workerPlacements[action.type].some(w => w && w.playerId === playerId)
+        state.workerPlacements[action.type].some(w =>
+            w && w.playerId === playerId && w.source !== "Messenger"
+        )
     );
-
     if (!plannerAction) {
         return endPlannerTurn(state);
     }
@@ -557,15 +562,55 @@ const startWorkerPlacementTurn = (
         ...state,
         currentTurn: { type: "workerPlacement", playerId },
     };
+    // Look for unresolved Messengers
+    const messengerAction = boardActionsBySeason(state)[state.season].find(action =>
+        state.workerPlacements[action.type].some(w =>
+            w && w.playerId === playerId && w.source === "Messenger"
+        )
+    );
     const player = state.players[playerId];
-    if (player.workers.every(w => !w.available)) {
-        // player is out of workers, auto-pass them
-        return passToNextSeason(state);
+    if (!messengerAction) {
+        if (player.workers.every(w => !w.available)) {
+            // player is out of workers, auto-pass them
+            return passToNextSeason(state);
+        }
+        return promptToPlaceWorker(state);
     }
-    return promptToPlaceWorker(state);
+    const workerIdx = state.workerPlacements[messengerAction.type]
+        .findIndex(w => w?.playerId === playerId);
+    const placement = messengerAction.choiceAt(workerIdx, state);
+
+    const workerPlacement = state.workerPlacements[messengerAction.type].slice();
+    workerPlacement[workerIdx] = {
+        ...workerPlacement[workerIdx]!,
+        source: null, // Reset source to mark this worker as resolved
+    };
+    state = {
+        ...state,
+        workerPlacements: {
+            ...state.workerPlacements,
+            [messengerAction.type]: workerPlacement,
+        }
+    };
+
+    return promptForAction(state, {
+        description: <p>
+            You placed a <Worker color={player.color} workerType={state.specialWorkers!.Messenger!} />
+            {" "}<strong>Messenger</strong>.
+        </p>,
+        choices: [
+            {
+                id: "PLANNER_ACT",
+                data: { placement: messengerAction.type, idx: workerIdx },
+                label: placement.label,
+                disabledReason: placement.disabledReason,
+            },
+            { id: "PLANNER_PASS", label: "Pass" },
+        ],
+    });
 };
 
-export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
+export const setPendingAction = <T extends WorkerPlacementTurnPendingAction | undefined>(
     pendingAction: T,
     state: GameState
 ): GameState => {
@@ -580,7 +625,20 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction>(
 
 const endWorkerPlacementTurn = (state: GameState): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
-    if (currentTurn.isPlannerTurn) {
+    if (currentTurn.hasMerchantBonus) {
+        state = setPendingAction(undefined, {
+            ...state,
+            currentTurn: { ...currentTurn, hasMerchantBonus: undefined },
+        });
+        return promptForAction<CardType>(state, {
+            description: <p>You played the <strong>Merchant</strong>.</p>,
+            choices: cardTypesInPlay(state).map(cardType => ({
+                id: "MERCHANT_DRAW_CARD",
+                data: cardType,
+                label: <>Draw <Card type={cardType} /></>,
+            })),
+        });
+    } else if (currentTurn.isPlannerTurn) {
         return endPlannerTurn(state);
     } else if (currentTurn.managerPendingAction) {
         // Restore Manager state; end the visitor

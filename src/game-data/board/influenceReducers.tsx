@@ -8,8 +8,8 @@ import { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icon
 import Coins from "../../game-views/icons/Coins";
 import { drawCards } from "../shared/cardReducers";
 import { gainCoins, updatePlayer, gainVP } from "../shared/sharedReducers";
-import { GameAction } from "../gameActions";
 import { promptToSellWine } from "./boardActionReducer";
+import { InternalGameAction } from "./currentTurnReducer";
 
 export const promptToInfluence = (
     state: GameState,
@@ -111,7 +111,7 @@ interface MoveInfluenceChoiceData {
     toRegion: InfluenceRegion;
 }
 
-export const influence = (state: GameState, action: GameAction): GameState => {
+export const influence = (state: GameState, action: InternalGameAction): GameState => {
     const player = state.players[state.currentTurn.playerId];
     const regions = influenceRegions(state.boardType ?? "base")
     switch (action.type) {

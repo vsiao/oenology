@@ -7,7 +7,6 @@ import {
     buildStructure,
     gainVP,
     gainCoins,
-    trainWorker,
     payCoins,
     gainResiduals,
     loseResiduals,
@@ -15,7 +14,7 @@ import {
     updatePlayer,
     plantVineInField,
 } from "../shared/sharedReducers";
-import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, WorkerPlacement, CardType } from "../GameState";
+import GameState, { PlayVisitorPendingAction, WorkerPlacementTurn, WineColor, CardType, BoardPlacement } from "../GameState";
 import {
     promptForAction,
     promptToMakeWine,
@@ -32,7 +31,6 @@ import {
     promptToChooseVineCard,
     promptToPlant,
 } from "../prompts/promptReducers";
-import { GameAction } from "../gameActions";
 import { visitorCards, winterVisitorCards, rhineWinterVisitorCards } from "./visitorCards";
 import {
     fillOrderDisabledReason,
@@ -66,11 +64,13 @@ import {
     ageSingleWine,
 } from "../shared/grapeWineReducers";
 import { boardAction } from "../board/boardActionReducer";
-import { boardActionsBySeason } from "../board/boardPlacements";
+import { boardActionsBySeason } from "../board/workerPlacements";
+import { trainMaybeSpecialWorker } from "../shared/workerReducers";
+import { InternalGameAction } from "../board/currentTurnReducer";
 
 export const winterVisitorReducers: Record<
     keyof typeof winterVisitorCards,
-    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+    (state: GameState, action: InternalGameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     assessor: (state, action) => {
         const player = state.players[state.currentTurn.playerId];
@@ -320,7 +320,7 @@ export const winterVisitorReducers: Record<
                     choices: [
                         {
                             id: "GOVERNESS_TRAIN",
-                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 3),
                         },
                         {
@@ -333,7 +333,7 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "GOVERNESS_TRAIN":
-                        return endVisitor(trainWorker(payCoins(3, state), { availableThisYear: true }));
+                        return trainMaybeSpecialWorker(state, [3, "coins"]);
                     case "GOVERNESS_DISCARD":
                         return promptToChooseWine(state);
                     default:
@@ -341,11 +341,13 @@ export const winterVisitorReducers: Record<
                 }
             case "CHOOSE_WINE":
                 return endVisitor(gainVP(2, discardWines(state, action.wines)));
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
     },
-    guestSpeaker: (state, action) => {
+    guestSpeaker: (state, action, pendingAction) => {
         const endVisitorAction = makeEndVisitorAction("allPlayers", (s, playerId) => {
             const playerName = <strong>{s.players[s.currentTurn.playerId].name}</strong>;
             return promptForAction(s, {
@@ -354,7 +356,7 @@ export const winterVisitorReducers: Record<
                     {
                         id: "GSPEAKER_TRAIN",
                         label: <>
-                            Pay <Coins>1</Coins> to train 1 <Worker />
+                            Train <Worker />
                             {playerId !== s.currentTurn.playerId
                                 ? <> ({playerName} gains <VP>1</VP>)</>
                                 : null}
@@ -371,20 +373,19 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "GSPEAKER_TRAIN":
-                        state = trainWorker(payCoins(1, state, action.playerId), {
-                            playerId: action.playerId,
+                        if (action.playerId !== state.currentTurn.playerId) {
+                            state = gainVP(1, state);
+                        }
+                        return trainMaybeSpecialWorker(state, [1, "coins"], {
+                            playerId: action.playerId
                         });
-                        return endVisitorAction(
-                            action.playerId !== state.currentTurn.playerId
-                                ? gainVP(1, state)
-                                : state,
-                            action.playerId
-                        );
                     case "GSPEAKER_PASS":
                         return endVisitorAction(state, action.playerId);
                     default:
                         return state;
                 }
+            case "WORKER_TRAINED":
+                return endVisitorAction(state, action.playerId);
             default:
                 return state;
         }
@@ -680,7 +681,7 @@ export const winterVisitorReducers: Record<
                 });
             case "CHOOSE_ACTION":
                 return boardAction(
-                    action.choice as WorkerPlacement,
+                    action.choice as BoardPlacement,
                     {
                         ...state,
                         currentTurn: {
@@ -1051,7 +1052,7 @@ export const winterVisitorReducers: Record<
                     choices: [
                         {
                             id: "PROFESSOR_TRAIN",
-                            label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 2),
                         },
                         {
@@ -1067,12 +1068,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "PROFESSOR_TRAIN":
-                        return endVisitor(trainWorker(payCoins(2, state)));
+                        return trainMaybeSpecialWorker(state, [2, "coins"]);
                     case "PROFESSOR_GAIN":
                         return endVisitor(gainVP(2, state));
                     default:
                         return state;
                 }
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -1179,14 +1182,14 @@ export const winterVisitorReducers: Record<
                 return state;
         }
     },
-    scholar: (state, action) => {
+    scholar: (state, action, pendingAction) => {
         const [chooseAction, maybeEndVisitor] = makeChoose2Visitor((s, numChosen) => {
             const maybeLoseVp = numChosen > 0 ? <> (lose <VP>1</VP>)</> : null;
             return [
                 { id: "SCHOLAR_DRAW", label: <>Draw 2 <Order />{maybeLoseVp}</>, },
                 {
                     id: "SCHOLAR_TRAIN",
-                    label: <>Pay <Coins>3</Coins> to train <Worker />{maybeLoseVp}</>,
+                    label: <>Train <Worker />{maybeLoseVp}</>,
                     disabledReason: trainWorkerDisabledReason(s, 3),
                 },
                 ...(numChosen > 0
@@ -1208,12 +1211,16 @@ export const winterVisitorReducers: Record<
                     case "SCHOLAR_DRAW":
                         return maybeEndVisitor(drawCards(state, action._key!, { order: 2 }));
                     case "SCHOLAR_TRAIN":
-                        return maybeEndVisitor(trainWorker(payCoins(3, state)));
+                        return trainMaybeSpecialWorker(state, [3, "coins"]);
                     case "SCHOLAR_PASS":
                         return endVisitor(state);
                     default:
                         return state;
                 }
+
+            case "WORKER_TRAINED":
+                return maybeEndVisitor(state);
+
             default:
                 return state;
         }
@@ -1267,7 +1274,7 @@ export const winterVisitorReducers: Record<
                         },
                         {
                             id: "TEACHER_TRAIN",
-                            label: <>Pay <Coins>2</Coins> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 2),
                         },
                     ],
@@ -1277,12 +1284,14 @@ export const winterVisitorReducers: Record<
                     case "TEACHER_MAKE":
                         return promptToMakeWine(state, /* upToN */ 2);
                     case "TEACHER_TRAIN":
-                        return endVisitor(trainWorker(payCoins(2, state)));
+                        return trainMaybeSpecialWorker(state, [2, "coins"]);
                     default:
                         return state;
                 }
             case "MAKE_WINE":
                 return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -1335,12 +1344,12 @@ export const winterVisitorReducers: Record<
                     choices: [
                         {
                             id: "UTEACHER_LOSE",
-                            label: <>Lose <VP>1</VP> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 0),
                         },
                         {
                             id: "UTEACHER_GAIN",
-                            label: <>Gain <VP>1</VP> for each opponent who has at least 6 <Worker /></>,
+                            label: <>Gain <VP>{opponentsWith6}</VP></>,
                             disabledReason: opponentsWith6 > 0
                                 ? undefined
                                 : "There aren't any opponents with 6 workers.",
@@ -1350,12 +1359,14 @@ export const winterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "UTEACHER_LOSE":
-                        return endVisitor(trainWorker(loseVP(1, state)));
+                        return trainMaybeSpecialWorker(state, [1, "vp"]);
                     case "UTEACHER_GAIN":
                         return endVisitor(gainVP(opponentsWith6, state));
                     default:
                         return state;
                 }
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -1379,7 +1390,7 @@ export const winterVisitorReducers: Record<
 
 export const rhineWinterVisitorReducers: Record<
     keyof typeof rhineWinterVisitorCards,
-    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+    (state: GameState, action: InternalGameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     advertiser: (state, action) => {
         switch (action.type) {
@@ -1968,7 +1979,7 @@ export const rhineWinterVisitorReducers: Record<
                         },
                         {
                             id: "LECTURER_TRAIN",
-                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 3),
                         },
                     ],
@@ -1978,12 +1989,14 @@ export const rhineWinterVisitorReducers: Record<
                     case "LECTURER_MAKE":
                         return promptToMakeWine(state, /* upToN */ 3);
                     case "LECTURER_TRAIN":
-                        return endVisitor(trainWorker(payCoins(3, state)));
+                        return trainMaybeSpecialWorker(state, [3, "coins"]);
                     default:
                         return state;
                 }
             case "MAKE_WINE":
                 return endVisitor(makeWineFromGrapes(state, action.ingredients));
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -2051,7 +2064,7 @@ export const rhineWinterVisitorReducers: Record<
                         { id: "RESEARCHER_DRAW", label: <>Draw 2 <Order /></>, },
                         {
                             id: "RESEARCHER_TRAIN",
-                            label: <>Pay <Coins>3</Coins> to train 1 <Worker /></>,
+                            label: <>Train <Worker /></>,
                             disabledReason: trainWorkerDisabledReason(state, 3),
                         },
                     ],
@@ -2061,10 +2074,12 @@ export const rhineWinterVisitorReducers: Record<
                     case "RESEARCHER_DRAW":
                         return endVisitor(drawCards(state, action._key!, { order: 2 }));
                     case "RESEARCHER_TRAIN":
-                        return endVisitor(trainWorker(payCoins(3, state)));
+                        return trainMaybeSpecialWorker(state, [3, "coins"]);
                     default:
                         return state;
                 }
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -2090,7 +2105,7 @@ export const rhineWinterVisitorReducers: Record<
                     choices: [
                         {
                             id: "STEACHER_TRAIN",
-                            label: <>Pay <Coins>4</Coins> to train 1 <Worker /> to use this year</>,
+                            label: <>Train <Worker /> to use this year</>,
                             disabledReason: trainWorkerDisabledReason(state, 4),
                         },
                         {
@@ -2103,14 +2118,16 @@ export const rhineWinterVisitorReducers: Record<
             case "CHOOSE_ACTION":
                 switch (action.choice) {
                     case "STEACHER_TRAIN":
-                        return endVisitor(
-                            trainWorker(payCoins(4, state), { availableThisYear: true })
-                        );
+                        return trainMaybeSpecialWorker(state, [3, "coins"], {
+                            availableThisYear: true,
+                        });
                     case "STEACHER_DISCARD":
                         return promptToChooseWine(state);
                     default:
                         return state;
                 }
+            case "WORKER_TRAINED":
+                return endVisitor(state);
             case "CHOOSE_WINE":
                 return endVisitor(gainVP(2, discardWines(state, action.wines)));
             default:

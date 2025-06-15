@@ -10,6 +10,10 @@
     margin-bottom: 1em;
 }
 
+.PlaceWorkerPrompt-workerTypeLabel {
+    margin-right: .5em;
+}
+
 .PlaceWorkerPrompt-workerTypeButton {
     align-items: center;
     background: none;
@@ -17,7 +21,6 @@
     display: flex;
     height: 2.4em;
     justify-content: center;
-    margin-left: .5em;
     min-width: 2.4em;
     outline: none;
     padding: 0 .2em;

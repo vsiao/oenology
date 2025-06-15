@@ -2,8 +2,9 @@ import { VineId, VineYields } from "./vineCards";
 import { WineSpec, OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { VisitorId } from "./visitors/visitorCards";
-import { CardType } from "./GameState";
+import { CardType, WorkerType } from "./GameState";
 import { GrapeSpec } from "./prompts/promptActions";
+import { SpecialWorkerId } from "./specialWorkers";
 
 export type ActivityLog = ActivityLogEvent[];
 
@@ -86,7 +87,11 @@ interface SeasonEvent {
 interface SellGrapeEvent extends LogEvent<"sellGrapes"> {
     grapes: GrapeSpec[];
 }
-interface TrainWorkerEvent extends LogEvent<"trainWorker"> { }
+interface TrainWorkerEvent extends LogEvent<"trainWorker"> {
+    cost: [number, "coins" | "vp"];
+    workerType: WorkerType;
+    workerName: SpecialWorkerId | null;
+}
 interface UprootEvent extends LogEvent<"uproot"> {
     vineId: VineId;
 }
