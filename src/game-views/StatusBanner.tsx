@@ -121,6 +121,8 @@ const renderPendingActionStatus = (
             return <span>{playerName} is placing or moving <StarToken />.</span>;
         case "makeWine":
             return <span>{playerName} is making some wine.</span>;
+        case "placeMessenger":
+            return <span>{playerName} is placing their Messenger.</span>
         case "plantVine":
             return <span>{playerName} is planting a <Vine />.</span>;
         case "playVisitor":
@@ -153,7 +155,9 @@ const renderPendingActionStatus = (
         case "sellWine":
             return <span>{playerName} is selling some wine.</span>;
         case "trade":
-            return <span>{playerName} is trading.</span>
+            return <span>{playerName} is trading.</span>;
+        case "trainWorker":
+            return <span><strong>{playerNames[pendingAction.actionPlayerId ?? playerId]}</strong> is training a worker.</span>;
         case "uproot":
             return <span>{playerName} is uprooting a <Vine />.</span>;
         case "passToNextSeason":

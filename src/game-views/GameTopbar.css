@@ -5,8 +5,7 @@
   border-radius: 4px;
   display: inline-flex;
   fill: white;
-  font-size: .7em;
-  margin-left: 1em;
+  margin: 0 1em;
   padding: .2em .4em;
   text-transform: uppercase;
 }
@@ -32,6 +31,10 @@
   display: block;
   font-size: 14px;
   margin-right: .2em;
+}
+
+.GameTopbar-specialWorkerInfo {
+  margin-right: .5em;
 }
 
 .GameTopbar-cheatBox {

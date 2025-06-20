@@ -1,4 +1,4 @@
-import GameState, { WorkerPlacement, StructureState, CardType, GrapeColor, WorkerPlacementTurn } from "../GameState";
+import GameState, { StructureState, CardType, GrapeColor, WorkerPlacementTurn, BoardPlacement } from "../GameState";
 import {
     promptForAction,
     promptToBuildStructure,
@@ -7,7 +7,6 @@ import {
     promptToChooseVisitor,
     promptToHarvest,
     promptToMakeWine,
-    promptToUproot,
     promptToChooseGrape,
     promptToDiscard,
     promptToChooseWine
@@ -15,16 +14,17 @@ import {
 import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason, numCardsDisabledReason, moneyDisabledReason, cardTypesInPlay } from "../shared/sharedSelectors";
 import { drawCards, discardCards } from "../shared/cardReducers";
-import { gainCoins, markStructureUsed, trainWorker, payCoins, gainVP, loseVP } from "../shared/sharedReducers";
-import { boardActions } from "./boardPlacements";
+import { gainCoins, markStructureUsed, payCoins, gainVP, loseVP } from "../shared/sharedReducers";
+import { boardActions } from "./workerPlacements";
 import * as React from "react";
 import Coins from "../../game-views/icons/Coins";
 import Card from "../../game-views/icons/Card";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
-import { GameAction } from "../gameActions";
 import { discardGrapes, placeGrapes } from "../shared/grapeWineReducers";
 import { promptToInfluence } from "./influenceReducers";
+import { trainMaybeSpecialWorker } from "../shared/workerReducers";
+import { InternalGameAction } from "./currentTurnReducer";
 
 export const giveTour = (withBonus: boolean, state: GameState) => {
     const player = state.players[state.currentTurn.playerId];
@@ -39,7 +39,7 @@ export const giveTour = (withBonus: boolean, state: GameState) => {
 };
 
 export const boardAction = (
-    placement: WorkerPlacement,
+    placement: BoardPlacement,
     state: GameState,
     seed: string,
     placementIdx?: number
@@ -159,16 +159,10 @@ export const boardAction = (
             return promptToTrade(state, hasBonus ? "bonus" : "required");
 
         case "trainWorker": {
-            return endTurn(trainWorker(payCoins(hasBonus ? 3 : 4, state)));
+            return trainMaybeSpecialWorker(state, [hasBonus ? 3 : 4, "coins"], {
+                andThen: "endTurn"
+            });
         }
-        case "yokeHarvest":
-            return promptToHarvest(
-                setPendingAction({ type: "harvestField", hasBonus }, markStructureUsed("yoke", state))
-            );
-        case "yokeUproot":
-            return promptToUproot(
-                setPendingAction({ type: "uproot", hasBonus }, markStructureUsed("yoke", state))
-            );
         default:
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const exhaustivenessCheck: never = placement;
@@ -230,13 +224,13 @@ const promptToGain = (state: GameState) => {
 };
 
 const maybeEndTrade = (state: GameState): GameState => {
-    if ((state.currentTurn as WorkerPlacementTurn).pendingAction?.hasBonus) {
+    if (((state.currentTurn as WorkerPlacementTurn).pendingAction as any).hasBonus) {
         return promptToTrade(state, "optional");
     }
     return endTurn(state);
 };
 
-export const trade = (state: GameState, action: GameAction): GameState => {
+export const trade = (state: GameState, action: InternalGameAction): GameState => {
     switch (action.type) {
         case "CHOOSE_ACTION":
             switch (action.choice) {

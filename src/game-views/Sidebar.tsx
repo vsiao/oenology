@@ -19,6 +19,7 @@ import { useTooltip } from "./shared/useTooltip";
 import VisitorCard from "./cards/VisitorCard";
 import { orderCards } from "../game-data/orderCards";
 import OrderCard from "./cards/OrderCard";
+import SpecialWorkerCard from "./cards/SpecialWorkerCard";
 
 interface Props {
     tableOrder: string[];
@@ -57,6 +58,10 @@ const ActivityLogItem: React.FunctionComponent<{
                 event.type === "fill" && event.orderId // #FillEventOrderId
             ) {
                 return <OrderCard className="Sidebar-cardTip" cardData={orderCards[event.orderId]} />;
+            } else if (
+                event.type === "trainWorker" && event.workerType !== "normal"
+            ) {
+                return <SpecialWorkerCard className="Sidebar-cardTip" id={event.workerName!} />;
             }
             return null;
         }, [event])
@@ -124,7 +129,19 @@ const renderActivity = (
         case "sellGrapes":
             return <>{player} sold {event.grapes.map((g, i) => <Grape key={i} color={g.color}>{g.value}</Grape>)}</>;
         case "trainWorker":
-            return <>{player} trained a <Worker /></>;
+            const [cost, costType] = event.cost ?? [];
+            const isSpecialWorker = event.workerType !== "normal";
+            return <>{player} {
+                cost
+                    ? <>paid {
+                        costType === "vp"
+                            ? <><VP>{cost}</VP>{isSpecialWorker ? <Coins>1</Coins> : null}</>
+                            : <Coins>{cost + (isSpecialWorker ? 1 : 0)}</Coins>
+                    } to train</>
+                    : "trained"
+            } a <Worker workerType={event.workerType} /> {
+                event.workerType !== "normal" ? <strong>{event.workerName}</strong> : null
+            }</>;
         case "visitor":
             return <>{player} played <strong>{visitorCards[event.visitorId].name}</strong></>;
         case "vp":

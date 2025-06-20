@@ -6,6 +6,7 @@ import { OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { ActivityLog, VPSource } from "./ActivityLog";
 import { MamaId, PapaId } from "./mamasAndPapas";
+import { SpecialWorkerId } from "./specialWorkers";
 
 export type BoardType = "base" | "tuscanyA" | "tuscanyB";
 export type Season = "spring" | "summer" | "fall" | "winter";
@@ -29,6 +30,10 @@ export default interface GameState {
     drawPiles: CardsByType;
     discardPiles: CardsByType;
     boardType?: BoardType;
+    specialWorkers: undefined | (
+        Partial<Record<WorkerType, SpecialWorkerId>> &
+        Partial<Record<SpecialWorkerId, "special1" | "special2">>
+    );
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     activityLog: ActivityLog;
 
@@ -102,6 +107,10 @@ export interface WorkerPlacementTurn {
     // While resolving the prior-season action, the Manager's
     // pendingAction will be stored here.
     managerPendingAction?: PlayVisitorPendingAction;
+
+    // If the player placed the Merchant after all opponents have passed,
+    // prompt them to draw 1 of any card at the end of the turn.
+    hasMerchantBonus?: true;
 }
 
 export interface PlayVisitorPendingAction {
@@ -135,26 +144,32 @@ export type InfluencePendingAction = {
     hasBonus?: boolean;
 };
 
-export type WorkerPlacementTurnPendingAction = (
+export type WorkerPlacementTurnPendingAction =
     | PlayVisitorPendingAction
-    | { type: "buildOrGiveTour"; }
-    | { type: "buildStructure"; }
-    | { type: "buySell"; }
-    | { type: "buyField"; }
-    | { type: "fillOrder"; orderId?: OrderId; }
-    | { type: "harvestField"; }
+    | { type: "buildOrGiveTour"; hasBonus: boolean; }
+    | { type: "buildStructure"; hasBonus: boolean; }
+    | { type: "buySell"; hasBonus: boolean; }
+    | { type: "buyField"; hasBonus: boolean; }
+    | { type: "fillOrder"; orderId?: OrderId; hasBonus: boolean; }
+    | { type: "harvestField"; hasBonus: boolean; }
     | InfluencePendingAction
-    | { type: "makeWine"; }
+    | { type: "makeWine"; hasBonus: boolean; }
     | { type: "passToNextSeason"; nextSeason: Season | "endOfYear"; }
-    | { type: "plantVine"; vineId?: VineId; }
-    | { type: "sellField"; }
-    | { type: "sellGrapes"; }
-    | { type: "sellWine"; }
-    | { type: "trade"; }
-    | { type: "uproot"; }
-) & { hasBonus: boolean };
+    | { type: "plantVine"; vineId?: VineId; hasBonus: boolean;}
+    | { type: "sellField"; hasBonus: boolean; }
+    | { type: "sellGrapes"; hasBonus: boolean; }
+    | { type: "sellWine"; hasBonus: boolean; }
+    | { type: "trade"; hasBonus: boolean; }
+    | { type: "trainWorker";
+        cost: [number, "coins" | "vp"];
+        actionPlayerId?: string;
+        availableThisYear?: boolean;
+        fromAction?: WorkerPlacementTurnPendingAction;
+      }
+    | { type: "placeMessenger"; }
+    | { type: "uproot"; };
 
-export type WorkerPlacement =
+export type BoardPlacement =
     | "buildOrGiveTour"
     | "buildStructure"
     | "buySell"
@@ -172,8 +187,14 @@ export type WorkerPlacement =
     | "sellWine"
     | "trade"
     | "trainWorker"
+
+export type StructurePlacement =
     | "yokeHarvest"
     | "yokeUproot";
+
+export type WorkerPlacement =
+    | BoardPlacement
+    | StructurePlacement;
 
 export type CardType = "vine" | "summerVisitor" | "order" | "winterVisitor";
 export type GrapeColor = "red" | "white";
@@ -211,7 +232,7 @@ export interface PlayerState {
     coins: number;
     residuals: number;
     victoryPoints: number;
-    workers: Worker[];
+    workers: PlayerWorker[];
     cardsInHand: CardId[];
     fields: Record<FieldId, Field>;
     crushPad: Record<GrapeColor, TokenMap>;
@@ -240,8 +261,8 @@ export interface PlayerStats {
     vpBySource: Record<VPSource, number>;
 }
 
-export type WorkerType = "grande" | "normal";
-export interface Worker {
+export type WorkerType = "grande" | "normal" | "special1" | "special2";
+export interface PlayerWorker {
     type: WorkerType;
     id: number;
     available: boolean;
@@ -253,7 +274,7 @@ export interface BoardWorker {
     playerId: string,
     color: PlayerColor;
     isTemp: boolean;
-    source: "Planner" | "Administrator" | null;
+    source: "Planner" | "Administrator" | "Messenger" | null;
 }
 
 export interface InfluenceToken {

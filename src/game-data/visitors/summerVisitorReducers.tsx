@@ -27,7 +27,6 @@ import {
     promptToChooseGrape,
     promptToChooseGrapes,
 } from "../prompts/promptReducers";
-import { GameAction } from "../gameActions";
 import { summerVisitorCards, rhineSummerVisitorCards } from "./visitorCards";
 import {
     buildStructure,
@@ -40,9 +39,7 @@ import {
     uprootVinesFromFields,
     gainResiduals,
     updatePlayer,
-    placeWorker,
     loseResiduals,
-    retrieveWorker,
 } from "../shared/sharedReducers";
 import {
     buildStructureDisabledReason,
@@ -82,12 +79,14 @@ import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
-import { allPlacements, boardActionsBySeason } from "../board/boardPlacements";
+import { allPlacements, boardActionsBySeason } from "../board/workerPlacements";
 import { Choice } from "../prompts/PromptState";
+import { placeWorker, retrieveWorker } from "../shared/workerReducers";
+import { InternalGameAction } from "../board/currentTurnReducer";
 
 export const summerVisitorReducers: Record<
     keyof typeof summerVisitorCards,
-    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+    (state: GameState, action: InternalGameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     agriculturist: (state, action) => {
         switch (action.type) {
@@ -901,8 +900,12 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptToPlaceWorker(state);
             case "PLACE_WORKER":
+                if (!action.placement || action.placement === "messenger") {
+                    // Planner cannot pass, and cannot use Messenger ability
+                    throw new Error(`Unexpected Planner placement: ${action.placement}`);
+                }
                 return endVisitor(
-                    placeWorker(action.workerType, action.placement!, action.idx, state, "Planner")[0]
+                    placeWorker(action.workerType, action.placement, action.idx, state, "Planner")[0]
                 );
             default:
                 return state;
@@ -1438,7 +1441,7 @@ export const summerVisitorReducers: Record<
 
 export const rhineSummerVisitorReducers: Record<
     keyof typeof rhineSummerVisitorCards,
-    (state: GameState, action: GameAction, pendingAction: PlayVisitorPendingAction) => GameState
+    (state: GameState, action: InternalGameAction, pendingAction: PlayVisitorPendingAction) => GameState
 > = {
     accountant: (state, action) => {
         const endVisitorAction = makeEndVisitorAction("opponents", (s, playerId) => {

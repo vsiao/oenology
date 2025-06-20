@@ -1,10 +1,10 @@
 import GameState from "../GameState";
-import { GameAction } from "../gameActions";
 import { summerVisitorReducers, rhineSummerVisitorReducers } from "./summerVisitorReducers";
 import { winterVisitorReducers, rhineWinterVisitorReducers } from "./winterVisitorReducers";
 import { pushActivityLog } from "../shared/sharedReducers";
 import { removeCardsFromHand } from "../shared/cardReducers";
 import { setPendingAction, endTurn } from "../shared/turnReducers";
+import { InternalGameAction } from "../board/currentTurnReducer";
 
 const visitorReducers = {
     ...summerVisitorReducers,
@@ -13,7 +13,7 @@ const visitorReducers = {
     ...rhineWinterVisitorReducers,
 };
 
-export const visitor = (state: GameState, action: GameAction) => {
+export const visitor = (state: GameState, action: InternalGameAction) => {
     const { currentTurn } = state;
     if (
         currentTurn.type !== "workerPlacement" ||

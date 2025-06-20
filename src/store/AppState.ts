@@ -1,4 +1,5 @@
 import GameState, { PlayerColor, PlayerStats } from "../game-data/GameState";
+import { SpecialWorkerId } from "../game-data/specialWorkers";
 
 export interface AppState {
     userId: string | null;
@@ -12,6 +13,7 @@ export interface GameOptions {
     multiInheritance?: boolean;
     rhineVisitors?: boolean;
     tuscanyBoard?: boolean;
+    specialWorkers?: boolean | [SpecialWorkerId, SpecialWorkerId];
     playerColors?: Record<string, PlayerColor>;
 }
 

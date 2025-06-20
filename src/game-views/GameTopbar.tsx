@@ -1,6 +1,6 @@
 import "./GameTopbar.css";
 import cx from "classnames";
-import React, { FunctionComponent, useState, RefObject } from "react";
+import React, { FC, useState, RefObject, useMemo } from "react";
 import { connect } from "react-redux";
 import { AppState } from "../store/AppState";
 import { Dispatch } from "redux";
@@ -8,44 +8,55 @@ import { GameAction, undo, applyCheatCode } from "../game-data/gameActions";
 import { isControllingPlayer } from "../game-data/shared/sharedSelectors";
 import { useTooltip } from "./shared/useTooltip";
 import UndoIcon from "./icons/UndoIcon";
+import Worker from "./icons/Worker";
+import { SpecialWorkerId } from "../game-data/specialWorkers";
+import SpecialWorkerCard from "./cards/SpecialWorkerCard";
 
 interface Props {
     playerId: string | null;
     undoDisabledReason: string | undefined;
     undo: (playerId: string) => void;
     applyCheatCode: (playerId: string, code: string) => void;
+    specialWorker1: SpecialWorkerId | undefined;
+    specialWorker2: SpecialWorkerId | undefined;
 }
 
-const GameTopbar: FunctionComponent<Props> = props => {
+const GameTopbar: FC<Props> = ({
+    playerId,
+    undoDisabledReason,
+    undo,
+    applyCheatCode,
+    specialWorker1,
+    specialWorker2,
+}) => {
     const [cheatInputValue, setCheatInputValue] = useState("");
-    const [anchorRef, maybeTooltip] = useTooltip(
-        "bottom",
-        props.undoDisabledReason
-    );
+    const [undoAnchorRef, maybeUndoTooltip] = useTooltip("bottom", undoDisabledReason);
 
     return <>
         <button
-            ref={anchorRef as RefObject<HTMLButtonElement>}
+            ref={undoAnchorRef as RefObject<HTMLButtonElement>}
             className={cx({
                 "GameTopbar-undoButton": true,
-                "GameTopbar-undoButton--enabled": !props.undoDisabledReason,
-                "GameTopbar-undoButton--disabled": !!props.undoDisabledReason,
+                "GameTopbar-undoButton--enabled": !undoDisabledReason,
+                "GameTopbar-undoButton--disabled": !!undoDisabledReason,
             })}
-            aria-disabled={!!props.undoDisabledReason}
-            onClick={
-                !props.undoDisabledReason ? () => props.undo(props.playerId!) : undefined
-            }
+            aria-disabled={!!undoDisabledReason}
+            onClick={!undoDisabledReason ? () => undo(playerId!) : undefined}
         >
             <UndoIcon className="GameTopbar-undoIcon" /> Undo
         </button>
-        {maybeTooltip}
+        {maybeUndoTooltip}
+
+        {specialWorker1 && <SpecialWorkerInfo workerType="special1" id={specialWorker1} />}
+        {specialWorker2 && <SpecialWorkerInfo workerType="special2" id={specialWorker2} />}
+
         <input type="text"
             className="GameTopbar-cheatBox"
             value={cheatInputValue}
             onChange={e => setCheatInputValue(e.target.value)}
             onKeyDown={e => {
                 if (e.key === "Enter") {
-                    props.applyCheatCode(props.playerId!, cheatInputValue);
+                    applyCheatCode(playerId!, cheatInputValue);
                     setCheatInputValue("");
                 }
             }}
@@ -62,6 +73,8 @@ const mapStateToProps = (state: AppState) => {
             : isControllingPlayer(game)
                 ? undefined
                 : "Only the current player can undo the last action.",
+        specialWorker1: game.specialWorkers?.special1,
+        specialWorker2: game.specialWorkers?.special2,
     };
 };
 
@@ -73,3 +86,19 @@ const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameTopbar);
+
+const SpecialWorkerInfo: FC<{
+    workerType: "special1" | "special2";
+    id: SpecialWorkerId
+}> = ({ workerType, id }) => {
+    const tooltip = useMemo(() => <SpecialWorkerCard id={id} />, [id]);
+    const [anchorRef, maybeTooltip] = useTooltip("bottom", tooltip);
+    return <>
+        <Worker
+            className="GameTopbar-specialWorkerInfo"
+            ref={anchorRef as RefObject<HTMLSpanElement>}
+            workerType={workerType}
+        />
+        {maybeTooltip}
+    </>;
+};

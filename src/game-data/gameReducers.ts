@@ -1,7 +1,7 @@
 import Alea from "alea";
 import GameState, { PlayerState, StructureState, CardsByType, GrapeColor, WineColor, FieldId } from "./GameState";
 import { GameAction, GameActionChanged, PlayerInit, StartGameAction } from "./gameActions";
-import { board } from "./board/boardReducer";
+import { currentTurn } from "./board/currentTurnReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
 import { beginMamaPapaTurn } from "./shared/turnReducers";
@@ -12,6 +12,7 @@ import { GameOptions } from "../store/AppState";
 import { buildStructure, gainResiduals, updatePlayer } from "./shared/sharedReducers";
 import { StructureId } from "./structures";
 import { VineId } from "./vineCards";
+import { SpecialWorkerId, specialWorkers } from "./specialWorkers";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
     // Actions aren't applied until they are published by firebase and have a server key assigned
@@ -103,7 +104,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         },
         lastActionKey: actionKey,
     };
-    return board(prompt(state, action), action);
+    return currentTurn(prompt(state, action), action);
 };
 
 const initGame = (userId: string, action: StartGameAction, key: string): GameState => {
@@ -112,6 +113,9 @@ const initGame = (userId: string, action: StartGameAction, key: string): GameSta
     const players = action.players;
     const mamas = shuffle(Object.keys(mamaCards) as MamaId[], random);
     const papas = shuffle(Object.keys(papaCards) as PapaId[], random);
+    const [specialWorker1, specialWorker2] = Array.isArray(action.options?.specialWorkers)
+        ? [action.options.specialWorkers[0], action.options.specialWorkers[1]]
+        : shuffle(Object.keys(specialWorkers) as SpecialWorkerId[], random);
 
     // ##PreGameShuffle
     // Newer games use on-demand seeded PRNG shuffling. Older games
@@ -128,6 +132,14 @@ const initGame = (userId: string, action: StartGameAction, key: string): GameSta
         year: 0,
         season: "spring",
         boardType: action.options && action.options.tuscanyBoard ? "tuscanyA" : "base",
+        specialWorkers: action.options?.specialWorkers
+            ? {
+                special1: specialWorker1,
+                special2: specialWorker2,
+                [specialWorker1]: "special1",
+                [specialWorker2]: "special2",
+            }
+            : {},
         currentTurn: {
             type: "mamaPapa",
             playerId: players[0].id,

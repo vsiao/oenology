@@ -11,7 +11,8 @@ export const controllingPlayerIds = (state: GameState) => {
     }
     if (
         state.currentTurn.type === "workerPlacement" &&
-        state.currentTurn.pendingAction?.type === "playVisitor" &&
+        (state.currentTurn.pendingAction?.type === "playVisitor" ||
+            state.currentTurn.pendingAction?.type === "trainWorker") &&
         state.currentTurn.pendingAction.actionPlayerId !== undefined
     ) {
         return [state.currentTurn.pendingAction.actionPlayerId];
@@ -292,11 +293,14 @@ export const cardTypesInPlay = (state: GameState): CardType[] => {
     return ["vine", "summerVisitor", "order", "winterVisitor"];
 };
 
-export const needsGrandeDisabledReason = (state: GameState, placement: WorkerPlacement) => {
+export const hasOpenActionSpace = (state: GameState, placement: WorkerPlacement) => {
     const numSpots = Math.ceil(state.tableOrder.length / 2);
     const placements = state.workerPlacements[placement];
-    return placements.length < numSpots ||
-        placements.slice(0, numSpots).some(w => !w)
+    return placements.length < numSpots || placements.slice(0, numSpots).some(w => !w);
+}
+
+export const needsGrandeDisabledReason = (state: GameState, placement: WorkerPlacement) => {
+    return hasOpenActionSpace(state, placement)
         ? undefined
         : "You need a grande to play here.";
 };

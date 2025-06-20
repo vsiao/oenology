@@ -12,7 +12,7 @@ interface Props {
 }
 
 const ChoiceButton: React.FunctionComponent<Props> = props => {
-    const [anchorRef, maybeTooltip] = useTooltip("bottom", props.disabledReason);
+    const [anchorRef, maybeTooltip] = useTooltip("top", props.disabledReason);
     const isDisabled = props.disabled || props.disabledReason !== undefined;
 
     return <>

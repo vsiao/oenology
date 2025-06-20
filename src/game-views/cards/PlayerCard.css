@@ -6,7 +6,7 @@
     display: inline-flex;
     flex-direction: column;
     height: 16em;
-    max-height: 18em;
+    max-height: 16em;
     padding: .3em;
     width: 11em;
 }
@@ -42,7 +42,7 @@
     line-height: 1.6em;
     margin: 0;
     overflow-y: auto;
-    padding: 8px;
+    padding: .5em;
     text-align: center;
 }
 .PlayerCard--summerVisitor .PlayerCard-description,
@@ -75,5 +75,5 @@
     display: inline-block;
     font-size: 1em;
     margin: 0 6px 4px 0;
-    padding: 0 6px;
+    padding: 0 .4em;
 }

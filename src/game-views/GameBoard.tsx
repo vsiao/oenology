@@ -3,7 +3,7 @@ import cx from "classnames";
 import { motion } from "framer-motion";
 import * as React from "react";
 import { connect } from "react-redux";
-import { BoardAction, boardActionsBySeason } from "../game-data/board/boardPlacements";
+import { WorkerAction, boardActionsBySeason } from "../game-data/board/workerPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
 import { BoardWorker, PlayerColor, WorkerPlacement, Season, BoardType, WakeUpPosition } from "../game-data/GameState";
@@ -29,7 +29,7 @@ interface Props {
     boardType: BoardType;
     currentSeason: Season;
     seasonOrder: Season[];
-    actionsBySeason: Record<Season, BoardAction[]>;
+    actionsBySeason: Record<Season, WorkerAction[]>;
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     influenceData: InfluenceRegion[];
 }

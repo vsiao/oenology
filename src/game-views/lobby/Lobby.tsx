@@ -154,6 +154,25 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     className="Lobby-optionCheckbox"
                                     type="checkbox"
                                     disabled={!isHost}
+                                    checked={gameOptions.tuscanyBoard ?? false}
+                                    onChange={() => {
+                                        if (!gameOptions.tuscanyBoard) {
+                                            setOption("tuscanyBoard", true);
+                                        } else {
+                                            setOption("tuscanyBoard", false);
+                                            setOption("specialWorkers", false);
+                                        }
+                                    }}
+                                />
+                                Tuscany Board
+                            </label>
+                        </li>
+                        <li className="Lobby-gameOption">
+                            <label className="Lobby-optionLabel">
+                                <input
+                                    className="Lobby-optionCheckbox"
+                                    type="checkbox"
+                                    disabled={!isHost}
                                     checked={gameOptions.rhineVisitors ?? false}
                                     onChange={() => setOption("rhineVisitors", !gameOptions.rhineVisitors)}
                                 />
@@ -166,13 +185,20 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     className="Lobby-optionCheckbox"
                                     type="checkbox"
                                     disabled={!isHost}
-                                    checked={gameOptions.tuscanyBoard ?? false}
-                                    onChange={() => setOption("tuscanyBoard", !gameOptions.tuscanyBoard)}
+                                    checked={!!gameOptions.specialWorkers}
+                                    onChange={() => {
+                                        if (!gameOptions.specialWorkers) {
+                                            setOption("tuscanyBoard", true);
+                                            setOption("specialWorkers", true);
+                                        } else {
+                                            setOption("specialWorkers", false);
+                                        }
+                                    }}
                                 />
-                                Tuscany Board (BETA)
+                                Special Workers (ALPHA)
                             </label>
                         </li>
-                        {renderComingSoonOption("Tuscany workers")}
+                        {renderComingSoonOption("Moor Visitors")}
                     </ul>
                     {isHost
                         ? <ChoiceButton
@@ -295,7 +321,10 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) =>
             dispatch(
                 startGameAction(
                     users.map(({ id, name }, i) => ({ id, name, color: options.playerColors![id] })),
-                    options
+                    {
+                        ...options,
+                        specialWorkers: options.specialWorkers && ["Merchant", "Messenger"],
+                    }
                 )
             );
             startGame(ownProps.gameId);

@@ -3,8 +3,6 @@ import GameState, {
     PlayerState,
     WorkerPlacementTurn,
     StructureState,
-    WorkerPlacement,
-    WorkerType,
     PlayVisitorPendingAction,
 } from "../GameState";
 import { ActivityLogEvent, VPSource } from "../ActivityLog";
@@ -12,7 +10,21 @@ import { StructureId } from "../structures";
 import { addCardsToHand } from "./cardReducers";
 import { VineInField } from "../prompts/promptActions";
 
+let suppressActivityLog = false;
+export const withoutActivityLog = <T>(func: () => T): T => {
+    const previousState = suppressActivityLog;
+    suppressActivityLog = true;
+    try {
+        return func();
+    } finally {
+        suppressActivityLog = previousState;
+    }
+};
+
 export const pushActivityLog = (event: ActivityLogEvent, state: GameState): GameState => {
+    if (suppressActivityLog) {
+        return state;
+    }
     return { ...state, activityLog: [...state.activityLog, event], };
 };
 
@@ -146,120 +158,6 @@ const editResiduals = (
 export const gainResiduals = editResiduals;
 export const loseResiduals = (numResiduals: number, state: GameState, playerId = state.currentTurn.playerId) =>
     editResiduals(-numResiduals, state, playerId);
-
-export const trainWorker = (
-    state: GameState,
-    { playerId = state.currentTurn.playerId, availableThisYear = false }: {
-        playerId?: string;
-        availableThisYear?: boolean;
-    } = {}
-): GameState => {
-    // In Tuscany, workers can be trained by a player even if they're already passed out
-    // of a current year if opponents play a winter visitor. We train the worker
-    // directly into the available pool since their other workers are already retrieved.
-    const isPassedOutOfYear = state.wakeUpOrder.find(pos => pos?.playerId === playerId)?.season === "endOfYear";
-
-    const workers = state.players[playerId].workers;
-    const lastWorkerId = workers.reduce(
-        (previousValue, worker, currentIndex) =>
-            !worker.isTemp && worker.type === "normal" ? currentIndex : previousValue,
-        -1
-    );
-    return pushActivityLog(
-        { type: "trainWorker", playerId },
-        updatePlayer(state, playerId, {
-            workers: [
-                ...workers,
-                { type: "normal", id: lastWorkerId + 1, available: isPassedOutOfYear || availableThisYear },
-            ],
-        })
-    );
-};
-
-export const placeWorker = (
-    type: WorkerType,
-    placement: WorkerPlacement,
-    placementIdx: number | null,
-    state: GameState,
-    source: "Planner" | "Administrator" | null = null
-): [GameState, number] => {
-    const player = state.players[state.currentTurn.playerId];
-    const workerIndex = player.workers.reduce(
-        (previousValue, worker, currentIndex) =>
-            worker.available && worker.type === type
-                ? currentIndex
-                : previousValue,
-        null as number | null
-    );
-    if (workerIndex === null) {
-        throw new Error("Unexpected state: no available workers");
-    }
-    state = pushActivityLog({ type: "placeWorker", playerId: player.id, }, state);
-    const placements = state.workerPlacements[placement].slice();
-    placementIdx = placementIdx ?? placements.findIndex(w => w === null);
-    if (placementIdx < 0) {
-        placementIdx = placements.length;
-    }
-    placements[placementIdx] = {
-        type,
-        id: player.workers[workerIndex].id,
-        playerId: state.currentTurn.playerId,
-        color: player.color,
-        isTemp: !!player.workers[workerIndex].isTemp,
-        source,
-    };
-    return [
-        {
-            ...updatePlayer(state, player.id, {
-                workers: player.workers.map(
-                    (w, i) => i === workerIndex ? { ...w, available: false } : w
-                ),
-            }),
-            workerPlacements: {
-                ...state.workerPlacements,
-                [placement]: placements,
-            },
-        },
-        placementIdx
-    ];
-};
-
-export const retrieveWorker = (
-    placement: WorkerPlacement,
-    index: number,
-    state: GameState
-): GameState => {
-    let retrievedWorker: { type: WorkerType | "temp", id: number } | null = null;
-    state = {
-        ...state,
-        workerPlacements: {
-            ...state.workerPlacements,
-            [placement]: state.workerPlacements[placement].map((w, i) => {
-                if (!w || i !== index) {
-                    return w;
-                }
-                retrievedWorker = {
-                    type: w.isTemp ? "temp" : w.type,
-                    id: w.id,
-                };
-                return null;
-            }),
-        },
-    };
-    if (!retrievedWorker) {
-        throw new Error(`Failed to retrieve worker from ${placement} ${index}`);
-    }
-    const { type, id } = retrievedWorker;
-    const player = state.players[state.currentTurn.playerId];
-    const idx = player.workers.findIndex(
-        w => ((type === "temp" && w.isTemp) || w.type === type) && w.id === id
-    );
-    return updatePlayer(state, player.id, {
-        workers: player.workers.map((w, i) =>
-            i === idx ? { ...w, available: true } : w
-        ),
-    })
-};
 
 export const markStructureUsed = (structureId: StructureId, state: GameState, playerId = state.currentTurn.playerId): GameState => {
     const player = state.players[playerId];

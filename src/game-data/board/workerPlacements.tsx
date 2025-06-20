@@ -2,7 +2,7 @@ import * as React from "react";
 import Card, { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import GameState, { WorkerPlacement, Season, BoardType } from "../GameState";
+import GameState, { WorkerPlacement, Season, BoardType, BoardPlacement } from "../GameState";
 import {
     buildStructureDisabledReason,
     fillOrderDisabledReason,
@@ -11,16 +11,15 @@ import {
     needCardOfTypeDisabledReason,
     needGrapesDisabledReason,
     plantVinesDisabledReason,
-    structureUsedDisabledReason,
     trainWorkerDisabledReason,
-    uprootDisabledReason,
     needWineDisabledReason,
 } from "../shared/sharedSelectors";
 import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
 import StarToken from "../../game-views/icons/StarToken";
+import { structureActions } from "../structures/structureActionReducer";
 
-export interface BoardAction {
+export interface WorkerAction {
     type: WorkerPlacement,
     label: (state: GameState) => React.ReactNode;
     choices: (state: GameState) => PlacementChoice[];
@@ -45,7 +44,9 @@ interface PlacementChoice {
     idx: number | undefined; // undefined indicates grande is required
 }
 
-const action = (
+export const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
+
+export const action = (
     type: WorkerPlacement,
     choice: (placementIdx: number | undefined, data: {
         state: GameState;
@@ -56,8 +57,7 @@ const action = (
         bonus?: PlacementBonus;
         disabledReason?: string | undefined;
     }
-): BoardAction => {
-    const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
+): WorkerAction => {
     const firstEmptyIndex = (state: GameState) => {
         const placements = state.workerPlacements[type];
         const firstEmpty = placements.findIndex(w => !w); // find first empty
@@ -95,7 +95,10 @@ const action = (
     };
 }
 
-export const boardActions: Record<WorkerPlacement, BoardAction> = {
+export const isBoardAction = (placement: string): placement is BoardPlacement =>
+    placement in boardActions;
+
+export const boardActions: Record<BoardPlacement, WorkerAction> = {
     buildOrGiveTour: action(
         "buildOrGiveTour",
         i => {
@@ -349,33 +352,17 @@ export const boardActions: Record<WorkerPlacement, BoardAction> = {
             };
         }
     ),
-    yokeHarvest: action(
-        "yokeHarvest",
-        (i, { state }) => ({
-            label: "Yoke: Harvest one field",
-            disabledReason: structureUsedDisabledReason(state, "yoke") ||
-                harvestFieldDisabledReason(state),
-        })
-    ),
-    yokeUproot: action(
-        "yokeUproot",
-        (i, { state }) => ({
-            label: "Yoke: Uproot",
-            disabledReason: structureUsedDisabledReason(state, "yoke") ||
-                uprootDisabledReason(state),
-        })
-    ),
 };
 
-export const yearRoundActions: BoardAction[] = [
-    boardActions.yokeHarvest,
-    boardActions.yokeUproot,
+export const yearRoundActions: WorkerAction[] = [
+    structureActions.yokeHarvest,
+    structureActions.yokeUproot,
     boardActions.gainCoin,
 ];
 
 export const allPlacements = Object.values(boardActions);
 
-export const boardActionsBySeason = (state: GameState): Record<Season, BoardAction[]> => {
+export const boardActionsBySeason = (state: GameState): Record<Season, WorkerAction[]> => {
     switch (state.boardType) {
         case undefined:
         case "base":
