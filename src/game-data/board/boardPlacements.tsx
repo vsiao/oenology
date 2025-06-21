@@ -285,7 +285,7 @@ export const yearRoundActions: PlacementAction[] = [
     boardActions.gainCoin,
 ];
 
-export const allPlacements = Object.values(boardActions);
+export const allPlacements = Object.values({ ...boardActions, ...structureActions });
 
 export const boardActionsBySeason = (state: GameState): Record<Season, PlacementAction[]> => {
     switch (state.boardType) {
