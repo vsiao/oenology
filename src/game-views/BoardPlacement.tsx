@@ -4,12 +4,12 @@ import { connect } from "react-redux";
 import "./BoardPlacement.css";
 import Worker from "./icons/Worker";
 import { BoardWorker, BoardType, Season } from "../game-data/GameState";
-import { WorkerAction, PlacementBonus } from "../game-data/board/workerPlacements";
 import { AppState } from "../store/AppState";
 import { Order, Vine, SummerVisitor, WinterVisitor } from "./icons/Card";
 import Coins from "./icons/Coins";
 import VictoryPoints from "./icons/VictoryPoints";
 import StarToken from "./icons/StarToken";
+import { PlacementAction, PlacementBonus } from "../game-data/shared/placementAction";
 
 interface Props {
     boardType: BoardType;
@@ -99,7 +99,7 @@ const renderBonusIcon = (bonus: PlacementBonus): React.ReactNode => {
     }
 };
 
-const mapStateToProps = (state: AppState, { placement }: { placement: WorkerAction; }) => {
+const mapStateToProps = (state: AppState, { placement }: { placement: PlacementAction; }) => {
     const game = state.game!;
     const numSpots = Math.ceil(Object.keys(game.players).length / 2);
     return {

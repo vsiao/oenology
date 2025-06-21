@@ -64,7 +64,7 @@ import {
     ageSingleWine,
 } from "../shared/grapeWineReducers";
 import { boardAction } from "../board/boardActionReducer";
-import { boardActionsBySeason } from "../board/workerPlacements";
+import { boardActionsBySeason } from "../board/boardPlacements";
 import { trainMaybeSpecialWorker } from "../shared/workerReducers";
 import { InternalGameAction } from "../board/currentTurnReducer";
 

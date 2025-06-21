@@ -8,7 +8,7 @@ import PromptStructure from "./PromptStructure";
 import ChoiceButton from "./ChoiceButton";
 import GameState, { WorkerType, WorkerPlacementTurn, WorkerPlacement, PlayerColor, PlayerWorker } from "../../game-data/GameState";
 import Worker from "../icons/Worker";
-import { yearRoundActions, boardActionsBySeason } from "../../game-data/board/workerPlacements";
+import { yearRoundActions, boardActionsBySeason } from "../../game-data/board/boardPlacements";
 import { placeWorker } from "../../game-data/prompts/promptActions";
 import { AppState } from "../../store/AppState";
 

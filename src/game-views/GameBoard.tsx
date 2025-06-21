@@ -3,7 +3,7 @@ import cx from "classnames";
 import { motion } from "framer-motion";
 import * as React from "react";
 import { connect } from "react-redux";
-import { WorkerAction, boardActionsBySeason } from "../game-data/board/workerPlacements";
+import { boardActionsBySeason } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
 import { BoardWorker, PlayerColor, WorkerPlacement, Season, BoardType, WakeUpPosition } from "../game-data/GameState";
@@ -18,6 +18,7 @@ import { wakeUpBonuses, WakeUpBonus } from "../game-data/board/wakeUpOrder";
 import GrapeToken from "./icons/GrapeToken";
 import { influenceRegions, InfluenceData } from "../game-data/board/influence";
 import StarToken from "./icons/StarToken";
+import { PlacementAction } from "../game-data/shared/placementAction";
 
 interface WakeUpSpot extends WakeUpPosition {
     current: boolean;
@@ -29,7 +30,7 @@ interface Props {
     boardType: BoardType;
     currentSeason: Season;
     seasonOrder: Season[];
-    actionsBySeason: Record<Season, WorkerAction[]>;
+    actionsBySeason: Record<Season, PlacementAction[]>;
     workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     influenceData: InfluenceRegion[];
 }
