@@ -15,7 +15,7 @@ import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason, numCardsDisabledReason, moneyDisabledReason, cardTypesInPlay } from "../shared/sharedSelectors";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { gainCoins, markStructureUsed, payCoins, gainVP, loseVP } from "../shared/sharedReducers";
-import { boardActions } from "./workerPlacements";
+import { boardActions } from "./boardPlacements";
 import * as React from "react";
 import Coins from "../../game-views/icons/Coins";
 import Card from "../../game-views/icons/Card";

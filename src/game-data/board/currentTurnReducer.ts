@@ -38,7 +38,7 @@ import { boardAction, giveTour, trade } from "./boardActionReducer";
 import { influence } from "./influenceReducers";
 import { placeWorker, gainWorker } from "../shared/workerReducers";
 import { Action } from "redux";
-import { boardActionsBySeason, isBoardAction } from "./workerPlacements";
+import { boardActionsBySeason, isBoardAction } from "./boardPlacements";
 import { structureAction } from "../structures/structureActionReducer";
 
 export type InternalGameAction = GameAction | InternalAction;

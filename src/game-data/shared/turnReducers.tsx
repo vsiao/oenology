@@ -20,7 +20,7 @@ import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, cardTypesInPlay, isLastWinter } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
-import { boardActionsBySeason } from "../board/workerPlacements";
+import { boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
 import GrapeToken from "../../game-views/icons/GrapeToken";

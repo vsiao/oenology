@@ -2,7 +2,7 @@ import * as React from "react";
 import Card, { Order, SummerVisitor, Vine, WinterVisitor } from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import Worker from "../../game-views/icons/Worker";
-import GameState, { WorkerPlacement, Season, BoardType, BoardPlacement } from "../GameState";
+import GameState, { Season, BoardPlacement } from "../GameState";
 import {
     buildStructureDisabledReason,
     fillOrderDisabledReason,
@@ -18,88 +18,13 @@ import { default as VP } from "../../game-views/icons/VictoryPoints";
 import Grape from "../../game-views/icons/Grape";
 import StarToken from "../../game-views/icons/StarToken";
 import { structureActions } from "../structures/structureActionReducer";
-
-export interface WorkerAction {
-    type: WorkerPlacement,
-    label: (state: GameState) => React.ReactNode;
-    choices: (state: GameState) => PlacementChoice[];
-    choiceAt: (i: number | undefined, state: GameState) => PlacementChoice;
-}
-
-export type PlacementBonus =
-    | "gainCoin"
-    | "gainVP"
-    | "drawOrder"
-    | "drawVine"
-    | "plantVine"
-    | "influence"
-    | "playSummerVisitor"
-    | "playWinterVisitor"
-    | "plusOne";
-
-interface PlacementChoice {
-    label: React.ReactNode;
-    bonus?: PlacementBonus;
-    disabledReason?: string | undefined;
-    idx: number | undefined; // undefined indicates grande is required
-}
-
-export const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
-
-export const action = (
-    type: WorkerPlacement,
-    choice: (placementIdx: number | undefined, data: {
-        state: GameState;
-        boardType: BoardType;
-        numSpots: number;
-    }) => {
-        label: React.ReactNode;
-        bonus?: PlacementBonus;
-        disabledReason?: string | undefined;
-    }
-): WorkerAction => {
-    const firstEmptyIndex = (state: GameState) => {
-        const placements = state.workerPlacements[type];
-        const firstEmpty = placements.findIndex(w => !w); // find first empty
-        const i = firstEmpty < 0 ? placements.length : firstEmpty;
-        return i >= numSpots(state)
-            ? undefined // must use grande to place
-            : i;
-    };
-    const data = (state: GameState) => ({
-        boardType: state.boardType ?? "base",
-        numSpots: numSpots(state),
-        state,
-    });
-    const choiceAt = (idx: number | undefined, state: GameState) => {
-        return { ...choice(idx, data(state)), idx };
-    };
-
-    return {
-        type,
-        label: state => choice(-1, data(state)).label,
-        choiceAt,
-        choices: state => {
-            const d = data(state);
-            const firstChoice = choiceAt(firstEmptyIndex(state), state);
-            const placements = state.workerPlacements[type];
-            if (firstChoice?.bonus) {
-                // return all possible bonus placements
-                return new Array(numSpots(state)).fill(null)
-                    .map((_, idx) => ({ ...choice(idx, d), idx }))
-                    .filter(({ bonus }, i) => !placements[i] && !!bonus);
-            } else {
-                return [firstChoice];
-            }
-        },
-    };
-}
+import { placementAction, PlacementAction } from "../shared/placementAction";
 
 export const isBoardAction = (placement: string): placement is BoardPlacement =>
     placement in boardActions;
 
-export const boardActions: Record<BoardPlacement, WorkerAction> = {
-    buildOrGiveTour: action(
+export const boardActions: Record<BoardPlacement, PlacementAction> = {
+    buildOrGiveTour: placementAction(
         "buildOrGiveTour",
         i => {
             const isBonusSpot = i === 0;
@@ -109,7 +34,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    buildStructure: action(
+    buildStructure: placementAction(
         "buildStructure",
         (i, { numSpots, state }) => {
             const isBonusSpot = i === 0 && numSpots > 1;
@@ -125,7 +50,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             }
         }
     ),
-    buySell: action(
+    buySell: placementAction(
         "buySell",
         (i, { boardType, numSpots, state }) => {
             const player = state.players[state.currentTurn.playerId];
@@ -151,7 +76,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    drawOrder: action(
+    drawOrder: placementAction(
         "drawOrder",
         (i, { boardType, numSpots }) => {
             const isBonusSpot = i === 0 &&
@@ -162,7 +87,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    drawVine: action(
+    drawVine: placementAction(
         "drawVine",
         (i, { boardType, numSpots }) => {
             const isBonusSpot = i === 0 &&
@@ -173,7 +98,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    fillOrder: action(
+    fillOrder: placementAction(
         "fillOrder",
         (i, { numSpots, state }) => {
             const isBonusSpot = i === 0 && numSpots > 1;
@@ -186,11 +111,11 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    gainCoin: action(
+    gainCoin: placementAction(
         "gainCoin",
         () => ({ label: <>Gain <Coins>1</Coins></> })
     ),
-    giveTour: action(
+    giveTour: placementAction(
         "giveTour",
         (i, { numSpots }) => {
             const isBonusSpot = i === 0 && numSpots > 1;
@@ -202,7 +127,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    harvestField: action(
+    harvestField: placementAction(
         "harvestField",
         (i, { boardType, numSpots, state }) => {
             if (boardType !== "base" && i === 1) {
@@ -223,7 +148,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    influence: action(
+    influence: placementAction(
         "influence",
         (i, { numSpots }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
@@ -233,7 +158,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    makeWine: action(
+    makeWine: placementAction(
         "makeWine",
         (i, { boardType, numSpots, state }) => {
             const isBonusSpot = i === 0 &&
@@ -247,7 +172,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    plantVine: action(
+    plantVine: placementAction(
         "plantVine",
         (i, { boardType, numSpots, state }) => {
             const isBonusSpot = i === 0 &&
@@ -261,7 +186,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    playSummerVisitor: action(
+    playSummerVisitor: placementAction(
         "playSummerVisitor",
         (i, { boardType, numSpots, state }) => {
             if (boardType !== "base" && i === 0) {
@@ -284,7 +209,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    playWinterVisitor: action(
+    playWinterVisitor: placementAction(
         "playWinterVisitor",
         (i, { boardType, numSpots, state }) => {
             if (boardType !== "base" && i === 0) {
@@ -307,7 +232,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    sellWine: action(
+    sellWine: placementAction(
         "sellWine",
         (i, { numSpots, state }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
@@ -322,7 +247,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    trade: action(
+    trade: placementAction(
         "trade",
         (i, { numSpots }) => {
             const isBonusSpot = numSpots > 1 && i === 0;
@@ -338,7 +263,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
             };
         }
     ),
-    trainWorker: action(
+    trainWorker: placementAction(
         "trainWorker",
         (i, { boardType, numSpots, state }) => {
             const isBonusSpot = i === 0 &&
@@ -354,7 +279,7 @@ export const boardActions: Record<BoardPlacement, WorkerAction> = {
     ),
 };
 
-export const yearRoundActions: WorkerAction[] = [
+export const yearRoundActions: PlacementAction[] = [
     structureActions.yokeHarvest,
     structureActions.yokeUproot,
     boardActions.gainCoin,
@@ -362,7 +287,7 @@ export const yearRoundActions: WorkerAction[] = [
 
 export const allPlacements = Object.values(boardActions);
 
-export const boardActionsBySeason = (state: GameState): Record<Season, WorkerAction[]> => {
+export const boardActionsBySeason = (state: GameState): Record<Season, PlacementAction[]> => {
     switch (state.boardType) {
         case undefined:
         case "base":

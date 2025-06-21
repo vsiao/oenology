@@ -79,7 +79,7 @@ import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
-import { allPlacements, boardActionsBySeason } from "../board/workerPlacements";
+import { allPlacements, boardActionsBySeason } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { placeWorker, retrieveWorker } from "../shared/workerReducers";
 import { InternalGameAction } from "../board/currentTurnReducer";

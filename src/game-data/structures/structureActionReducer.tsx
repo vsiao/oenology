@@ -1,6 +1,6 @@
-import { action, WorkerAction } from "../board/workerPlacements";
 import GameState, { StructurePlacement } from "../GameState";
 import { promptToHarvest, promptToUproot } from "../prompts/promptReducers";
+import { placementAction, PlacementAction } from "../shared/placementAction";
 import { markStructureUsed } from "../shared/sharedReducers";
 import { harvestFieldDisabledReason, structureUsedDisabledReason, uprootDisabledReason } from "../shared/sharedSelectors";
 import { setPendingAction } from "../shared/turnReducers";
@@ -27,8 +27,8 @@ export const structureAction = (
     }
 }
 
-export const structureActions: Record<StructurePlacement, WorkerAction> = {
-    yokeHarvest: action(
+export const structureActions: Record<StructurePlacement, PlacementAction> = {
+    yokeHarvest: placementAction(
         "yokeHarvest",
         (i, { state }) => ({
             label: "Yoke: Harvest one field",
@@ -36,7 +36,7 @@ export const structureActions: Record<StructurePlacement, WorkerAction> = {
                 harvestFieldDisabledReason(state),
         })
     ),
-    yokeUproot: action(
+    yokeUproot: placementAction(
         "yokeUproot",
         (i, { state }) => ({
             label: "Yoke: Uproot",
