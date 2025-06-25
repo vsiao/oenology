@@ -1,9 +1,10 @@
 .ChoiceButton {
     background: white;
-    border: 2px solid #ccc;
+    border: .2em solid #ccc;
     border-radius: .4em;
     color: black;
     display: inline-block;
+    flex-shrink: 0;
     height: 2.8em;
     outline: none;
     padding: 0 1em;

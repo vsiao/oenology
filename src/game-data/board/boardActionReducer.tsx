@@ -42,7 +42,7 @@ export const boardAction = (
     placement: BoardPlacement,
     state: GameState,
     seed: string,
-    placementIdx?: number
+    placementIdx: number
 ): GameState => {
     const bonus = boardActions[placement].choiceAt(placementIdx, state).bonus;
     const hasBonus = !!bonus;

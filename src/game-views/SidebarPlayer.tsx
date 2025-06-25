@@ -1,6 +1,6 @@
 import cx from "classnames";
 import * as React from "react";
-import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, BoardWorker, WorkerType } from "../game-data/GameState";
+import { PlayerState, CardId, StructureState, FieldId, Field, TokenMap, WineColor, GrapeColor, PlacedWorker, WorkerType } from "../game-data/GameState";
 import VictoryPoints from "./icons/VictoryPoints";
 import Residuals from "./icons/Residuals";
 import Coins from "./icons/Coins";
@@ -26,17 +26,39 @@ interface Props {
     lastActionTimeMs: number;
     inWakeUpOrder: boolean;
     hasGrape?: boolean;
-    yokeWorker?: BoardWorker | null;
+    yokeWorker?: PlacedWorker | null;
+    pendingWorkerId?: number;
 }
 
-const SidebarPlayer: React.FunctionComponent<Props> = props => {
-    const { player } = props;
+const SidebarPlayer: React.FunctionComponent<Props> = ({
+    player,
+    isActive,
+    lastActionTimeMs,
+    inWakeUpOrder,
+    hasGrape,
+    yokeWorker,
+    pendingWorkerId,
+}) => {
     const playerStructures = player.structures;
     const hasMediumCellar = playerStructures["mediumCellar"];
     const hasLargeCellar = playerStructures["largeCellar"];
     const numUnplacedStars = player.influence.filter(i => !i.placement).length;
 
-    return <div className={`SidebarPlayer SidebarPlayer--${player.color}`}>
+    const ref = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+        if (isActive) {
+            ref.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [isActive]);
+
+    return <div
+        ref={ref}
+        className={cx({
+            SidebarPlayer: true,
+            [`SidebarPlayer--${player.color}`]: true,
+            "SidebarPlayer--active": isActive,
+        })}
+    >
         <div className="SidebarPlayer-header">
             {player.influence.length
                 ? <div className="SidebarPlayer-influence">
@@ -57,8 +79,8 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
             <span className="SidebarPlayer-playerName">{player.name}</span>
             {!isNaN(player.playedTimeMs) && <PlayerTimer
                 playedTimeMs={player.playedTimeMs}
-                isActive={props.isActive}
-                lastActionTimeMs={props.lastActionTimeMs}
+                isActive={isActive}
+                lastActionTimeMs={lastActionTimeMs}
             />}
             <ul className="SidebarPlayer-cards">
                 {player.cardsInHand.map(card =>
@@ -67,8 +89,8 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                     </li>
                 )}
             </ul>
-            {props.hasGrape && <GrapeToken className="SidebarPlayer-grapeToken" animated={true} />}
-            {props.inWakeUpOrder
+            {hasGrape && <GrapeToken className="SidebarPlayer-grapeToken" animated={true} />}
+            {inWakeUpOrder
                 ? null
                 : <Rooster className="SidebarPlayer-rooster" color={player.color} />}
             <Residuals className="SidebarPlayer-residualPayments">{player.residuals}</Residuals>
@@ -93,7 +115,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                                     isTemp={worker.isTemp}
                                     disabled={true}
                                 />
-                                {worker.available &&
+                                {worker.available && worker.id !== pendingWorkerId &&
                                     <Worker
                                         className="SidebarPlayer-animatedWorker"
                                         workerType={worker.type}
@@ -169,7 +191,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
                                 })}
                             >
                                 {structure.name}&nbsp;
-                                {structureId === "yoke" && maybeRenderYokeWorker(props)}
+                                {structureId === "yoke" && maybeRenderYokeWorker(player, yokeWorker)}
                             </li>}
                     </StructureTooltip>;
                 })}
@@ -178,7 +200,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = props => {
     </div>;
 };
 
-const maybeRenderYokeWorker = ({ player, yokeWorker }: Props) => {
+const maybeRenderYokeWorker = (player: PlayerState, yokeWorker?: PlacedWorker | null) => {
     return yokeWorker && <Worker
         color={player.color}
         workerType={yokeWorker.type}
@@ -395,8 +417,9 @@ const renderCard = (card: CardId): React.ReactNode => {
 
 const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) => {
     const game = state.game!;
+    const player = game.players[playerId];
     return {
-        player: game.players[playerId],
+        player,
         isActive: controllingPlayerIds(game).some(p => p === playerId),
         lastActionTimeMs: game.actionsApplied[game.lastActionKey].ts,
         inWakeUpOrder: game.wakeUpOrder.some(pos => pos && pos.playerId === playerId),
@@ -406,8 +429,11 @@ const mapStateToProps = (state: AppState, { playerId }: { playerId: string }) =>
         hasGrape: (game.boardType === "base" || game.year >= 1) &&
             game.grapeIndex === game.tableOrder.indexOf(playerId),
 
-        yokeWorker: game.workerPlacements.yokeHarvest.find(w => w && w.playerId === playerId) ||
-            game.workerPlacements.yokeUproot.find(w => w && w.playerId === playerId),
+        yokeWorker: typeof player.structures.yoke === "object"
+            ? player.structures.yoke
+            : null,
+        
+        pendingWorkerId: game.playerId === playerId ? game.pendingWorker?.id : undefined,
     };
 };
 

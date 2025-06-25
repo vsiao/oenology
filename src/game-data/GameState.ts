@@ -34,7 +34,7 @@ export default interface GameState {
         Partial<Record<WorkerType, SpecialWorkerId>> &
         Partial<Record<SpecialWorkerId, "special1" | "special2">>
     );
-    workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
+    workerPlacements: Record<BoardPlacement, (PlacedWorker | null)[]>;
     activityLog: ActivityLog;
 
     undoState:
@@ -42,12 +42,6 @@ export default interface GameState {
             type: "undoable",
             // Contains a copy of the game state prior to the most recent action.
             prevState: GameState
-
-            // `true` if the last action was by the current controlling player
-            // within the context of the current turn. Ending a turn causes this
-            // to flip to `false` (though `prevState` will still exist to allow
-            // the next turn's player to undo, if necessary)
-            isLastActionByCurrentTurnPlayer: boolean;
         }
         // Nothing to undo, usually indicating game beginning or game end
         | null;
@@ -70,6 +64,11 @@ export default interface GameState {
     // local state
     playerId: string | null;
     actionPrompts: PromptState[];
+    selectedWorkerType: WorkerType;
+    pendingWorker?: PlacedWorker & {
+        placement: WorkerPlacement;
+        space: number;
+    };
 }
 
 export interface WakeUpPosition {
@@ -166,7 +165,6 @@ export type WorkerPlacementTurnPendingAction =
         availableThisYear?: boolean;
         fromAction?: WorkerPlacementTurnPendingAction;
       }
-    | { type: "placeMessenger"; }
     | { type: "uproot"; };
 
 export type BoardPlacement =
@@ -237,7 +235,7 @@ export interface PlayerState {
     fields: Record<FieldId, Field>;
     crushPad: Record<GrapeColor, TokenMap>;
     cellar: Record<WineColor, TokenMap>;
-    structures: Record<StructureId, StructureState>;
+    structures: Record<StructureId, StructureState | PlacedWorker>;
     influence: InfluenceToken[];
     mamas: MamaId[];
     papas: PapaId[];
@@ -268,13 +266,13 @@ export interface PlayerWorker {
     available: boolean;
     isTemp?: boolean;
 }
-export interface BoardWorker {
+export interface PlacedWorker {
     type: WorkerType,
     id: number;
     playerId: string,
     color: PlayerColor;
     isTemp: boolean;
-    source: "Planner" | "Administrator" | "Messenger" | null;
+    source: "Planner" | "Administrator" | "Messenger" | "pending" | null;
 }
 
 export interface InfluenceToken {

@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
-import GameState, { BoardType, WorkerPlacement } from "../GameState";
+import GameState, { BoardPlacement, BoardType } from "../GameState";
+import { numActionSpaces } from "./sharedSelectors";
 
 export type PlacementBonus =
     | "gainCoin"
@@ -12,7 +13,7 @@ export type PlacementBonus =
     | "playWinterVisitor"
     | "plusOne";
 
-interface PlacementChoice {
+export interface PlacementChoice {
     label: ReactNode;
     bonus?: PlacementBonus;
     disabledReason?: string | undefined;
@@ -20,17 +21,14 @@ interface PlacementChoice {
 }
 
 export interface PlacementAction {
-    type: WorkerPlacement,
+    type: BoardPlacement,
     label: (state: GameState) => React.ReactNode;
-    choices: (state: GameState) => PlacementChoice[];
-    choiceAt: (i: number | undefined, state: GameState) => PlacementChoice;
+    choiceAt: (i: number, state: GameState) => PlacementChoice;
 }
 
-export const numSpots = (state: GameState) => Math.ceil(state.tableOrder.length / 2);
-
 export const placementAction = (
-    type: WorkerPlacement,
-    choice: (placementIdx: number | undefined, data: {
+    type: BoardPlacement,
+    choice: (placementIdx: number, data: {
         state: GameState;
         boardType: BoardType;
         numSpots: number;
@@ -40,20 +38,12 @@ export const placementAction = (
         disabledReason?: string | undefined;
     }
 ): PlacementAction => {
-    const firstEmptyIndex = (state: GameState) => {
-        const placements = state.workerPlacements[type];
-        const firstEmpty = placements.findIndex(w => !w); // find first empty
-        const i = firstEmpty < 0 ? placements.length : firstEmpty;
-        return i >= numSpots(state)
-            ? undefined // must use grande to place
-            : i;
-    };
     const data = (state: GameState) => ({
         boardType: state.boardType ?? "base",
-        numSpots: numSpots(state),
+        numSpots: numActionSpaces(state),
         state,
     });
-    const choiceAt = (idx: number | undefined, state: GameState) => {
+    const choiceAt = (idx: number, state: GameState) => {
         return { ...choice(idx, data(state)), idx };
     };
 
@@ -61,18 +51,5 @@ export const placementAction = (
         type,
         label: state => choice(-1, data(state)).label,
         choiceAt,
-        choices: state => {
-            const d = data(state);
-            const firstChoice = choiceAt(firstEmptyIndex(state), state);
-            const placements = state.workerPlacements[type];
-            if (firstChoice?.bonus) {
-                // return all possible bonus placements
-                return new Array(numSpots(state)).fill(null)
-                    .map((_, idx) => ({ ...choice(idx, d), idx }))
-                    .filter(({ bonus }, i) => !placements[i] && !!bonus);
-            } else {
-                return [firstChoice];
-            }
-        },
     };
 }

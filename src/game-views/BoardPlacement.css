@@ -1,7 +1,3 @@
-.BoardPlacement--interactive:hover {
-    background: #eee;
-    cursor: pointer;
-}
 .GameBoard--base .BoardPlacement + .BoardPlacement .BoardPlacement-cell {
     box-shadow: 0 -1px #ccc;
 }
@@ -12,9 +8,20 @@
 }
 
 .BoardPlacement-spots {
-    display: flex;
+    border: .2em solid transparent;
+    display: inline-flex;
     justify-content: center;
-    margin-top: .8em;
+    margin: .5em .5em 0;
+    padding: 0 1em;
+}
+.BoardPlacement--interactive .BoardPlacement-spots {
+    border-color: #ccc;
+    border-radius: 2em;
+    cursor: pointer;
+    transition: 150ms border-color;
+}
+.BoardPlacement--interactive .BoardPlacement-spots:hover {
+    border-color: #000;
 }
 
 .BoardPlacement-spotCell {
@@ -34,12 +41,6 @@
     justify-content: center;
     margin: .2em .4em;
     width: 3.2em;
-}
-.BoardPlacement-spot--summer {
-    border-color: gold;
-}
-.BoardPlacement-spot--winter {
-    border-color: royalblue;
 }
 .BoardPlacement-spot--taken {
     background: #ddd;
@@ -67,6 +68,7 @@
 
 .BoardPlacement-title {
     font-weight: 600;
-    padding: .5em 1em;
+    margin-bottom: .5em;
+    padding: 0 1em;
     text-transform: uppercase;
 }

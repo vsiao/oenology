@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { boardActionsBySeason } from "../game-data/board/boardPlacements";
 import BoardPlacement from "./BoardPlacement";
 import { AppState } from "../store/AppState";
-import { BoardWorker, PlayerColor, WorkerPlacement, Season, BoardType, WakeUpPosition } from "../game-data/GameState";
+import { PlayerColor, Season, BoardType, WakeUpPosition } from "../game-data/GameState";
 import Rooster from "./icons/Rooster";
 import StatusBanner from "./StatusBanner";
 import Card, { Vine, Order, SummerVisitor, WinterVisitor } from "./icons/Card";
@@ -25,21 +25,32 @@ interface WakeUpSpot extends WakeUpPosition {
 }
 
 interface Props {
+    playerId: string | null;
     wakeUpOrder: (WakeUpSpot | null)[];
     playerColors: Record<string, PlayerColor>;
     boardType: BoardType;
     currentSeason: Season;
-    seasonOrder: Season[];
     actionsBySeason: Record<Season, PlacementAction[]>;
-    workerPlacements: Record<WorkerPlacement, (BoardWorker | null)[]>;
     influenceData: InfluenceRegion[];
 }
 
-const GameBoard: React.FunctionComponent<Props> = props => {
-    const { boardType, currentSeason, seasonOrder, playerColors, workerPlacements } = props;
+const GameBoard: React.FunctionComponent<Props> = ({
+    playerId,
+    wakeUpOrder,
+    playerColors,
+    boardType,
+    currentSeason,
+    actionsBySeason,
+    influenceData,
+}) => {
     const bonusesBySeason = wakeUpBonuses(boardType);
-
     const scrollableRef = React.useRef<HTMLDivElement>(null);
+    const seasonOrder = React.useMemo(() =>
+        (["spring", "summer", "fall", "winter"] as const).filter(season =>
+            actionsBySeason[season].length > 0),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [boardType]
+    );
 
     React.useEffect(() => {
         const scrollNode = scrollableRef.current;
@@ -67,7 +78,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                 ? <>
                     <span className="GameBoard-currentSeason">{currentSeason}</span>
                     <ol className="GameBoard-wakeUpOrder">
-                        {props.wakeUpOrder.map((pos, i) =>
+                        {wakeUpOrder.map((pos, i) =>
                             <WakeUpCell key={i} pos={pos} playerColors={playerColors} season={currentSeason} i={i} />
                         )}
                     </ol>
@@ -87,7 +98,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {props.wakeUpOrder.map((pos, i) =>
+                                {wakeUpOrder.map((pos, i) =>
                                     <tr key={i} className="GameBoard-wakeUpRow">
                                         {(["spring", "summer", "fall", "winter"] as const).map(season =>
                                             bonusesBySeason[season].length
@@ -137,7 +148,7 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                     </div>
                     <div className="GameBoard-influence">
                         <img className="GameBoard-influenceMap" alt="Map of Tuscany" src="/influence-map.png" />
-                        {props.influenceData.map(renderInfluenceRegion)}
+                        {influenceData.map(renderInfluenceRegion)}
                     </div>
                 </>}
         </div>
@@ -155,13 +166,12 @@ const GameBoard: React.FunctionComponent<Props> = props => {
                                 </tr>
                             </thead>
                             <tbody>
-                            {props.actionsBySeason[season].map(action =>
+                            {actionsBySeason[season].map(action =>
                                 <BoardPlacement
+                                    playerId={playerId}
                                     boardType={boardType}
                                     key={action.type}
                                     placement={action}
-                                    season={season}
-                                    workers={workerPlacements[action.type]}
                                 />)}
                             </tbody>
                         </table>
@@ -308,9 +318,10 @@ const renderInfluencePlacementBonus = ({ bonus }: InfluenceData): React.ReactNod
 };
 
 const mapStateToProps = (state: AppState) => {
-    const { boardType, currentTurn, season, wakeUpOrder, workerPlacements, players } = state.game!;
+    const { playerId, boardType, currentTurn, season, wakeUpOrder, players } = state.game!;
     const actionsBySeason = boardActionsBySeason(state.game!);
     return {
+        playerId,
         wakeUpOrder: wakeUpOrder.map(pos => {
             return !pos ? null : {
                 ...pos,
@@ -320,10 +331,7 @@ const mapStateToProps = (state: AppState) => {
         playerColors: Object.fromEntries(Object.entries(players).map(([id, p]) => [id, p.color])),
         boardType: boardType ?? "base",
         currentSeason: season,
-        seasonOrder: (["spring", "summer", "fall", "winter"] as const)
-            .filter(s => actionsBySeason[s].length > 0),
         actionsBySeason,
-        workerPlacements,
         influenceData: influenceRegions(boardType ?? "base").map(d => ({
             ...d,
             tokens: Object.values(players)

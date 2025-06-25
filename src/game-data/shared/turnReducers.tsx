@@ -29,17 +29,6 @@ import { promptToInfluence, awardInfluenceVP } from "../board/influenceReducers"
 import { gainWorker } from "./workerReducers";
 
 export const endTurn = (state: GameState): GameState => {
-    if (state.undoState?.type === "undoable") {
-        state = {
-            ...state,
-            undoState: {
-                ...state.undoState,
-                // Mark the current turn as ended. The action is still undoable,
-                // but only by the next turn's player.
-                isLastActionByCurrentTurnPlayer: false,
-            },
-        };
-    }
     switch (state.currentTurn.type) {
         case "mamaPapa":
             return endMamaPapaTurn(state);

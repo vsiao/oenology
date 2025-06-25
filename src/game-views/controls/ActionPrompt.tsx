@@ -10,9 +10,9 @@ import MakeWinePrompt from "./MakeWinePrompt";
 import BuildStructurePrompt from "./BuildStructurePrompt";
 import ChooseCardPrompt from "./ChooseCardPrompt";
 import ChooseWinePrompt from "./ChooseWinePrompt";
-import PlaceWorkerPrompt from "./PlaceWorkerPrompt";
 import GameOverPrompt from "./GameOverPrompt";
 import ChooseGrapePrompt from "./ChooseGrapePrompt";
+import { wasLastActionByPlayer } from "../../game-data/shared/sharedSelectors";
 
 interface Props {
     actionPrompt: PromptState | undefined;
@@ -22,7 +22,7 @@ interface Props {
 
 const ActionPrompt: React.FunctionComponent<Props> = props => {
     return <TransitionGroup className="ActionPrompt">
-        {props.actionPrompt === undefined
+        {props.actionPrompt === undefined || props.actionPrompt.type === "placeWorker"
             ? null
             : <CSSTransition
                 key={JSON.stringify(props.actionPrompt)} // #ForcePromptRemount
@@ -55,7 +55,7 @@ const renderPrompt = (
         case "makeWine":
             return <MakeWinePrompt prompt={prompt} playerId={playerId} undoable={undoable} />;
         case "placeWorker":
-            return <PlaceWorkerPrompt playerId={playerId} undoable={undoable} />;
+            return null; // managed by the PlayerMat & BoardPlacement components
         case "gameOver":
             return <GameOverPrompt />;
     }
@@ -67,7 +67,7 @@ const mapStateToProps = (state: AppState) => {
         actionPrompt: game.actionPrompts[0],
         playerId: game.playerId!,
         undoable: !!game.undoState && game.undoState.type === "undoable" &&
-            game.undoState.isLastActionByCurrentTurnPlayer,
+            wasLastActionByPlayer(game, game.playerId),
     };
 };
 

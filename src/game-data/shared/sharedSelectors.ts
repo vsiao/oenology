@@ -1,4 +1,4 @@
-import GameState, { Field, FieldId, CardType, WineColor, StructureState, WorkerPlacement, TokenMap } from "../GameState";
+import GameState, { Field, FieldId, CardType, WineColor, StructureState, TokenMap } from "../GameState";
 import { vineCards, VineId } from "../vineCards";
 import { visitorCards } from "../visitors/visitorCards";
 import { WineSpec, orderCards, OrderId } from "../orderCards";
@@ -20,8 +20,16 @@ export const controllingPlayerIds = (state: GameState) => {
     return [state.currentTurn.playerId];
 }
 
+export const wasLastActionByPlayer = (state: GameState, playerId: string | null) => {
+    const lastAction = state.actionsApplied[state.lastActionKey];
+    if (!lastAction) {
+        return false;
+    }
+    return playerId !== null && lastAction.controllingPlayers.includes(playerId);
+};
+
 export const isControllingPlayer = (state: GameState, playerId = state.playerId) => {
-    return controllingPlayerIds(state).some(p => p === playerId)
+    return wasLastActionByPlayer(state, playerId) || controllingPlayerIds(state).some(p => p === playerId);
 };
 
 export const buildStructureDisabledReason = (
@@ -66,10 +74,14 @@ export const structureUsedDisabledReason = (
 ): string | undefined => {
     const player = state.players[playerId];
     switch (player.structures[id]) {
+        case StructureState.Built:
+            return undefined;
         case StructureState.Used:
             return "Can only be used once per year.";
         case StructureState.Unbuilt:
             return "You haven’t built this structure yet.";
+        default:
+            return "Already used.";
     }
 };
 
@@ -293,17 +305,8 @@ export const cardTypesInPlay = (state: GameState): CardType[] => {
     return ["vine", "summerVisitor", "order", "winterVisitor"];
 };
 
-export const hasOpenActionSpace = (state: GameState, placement: WorkerPlacement) => {
-    const numSpots = Math.ceil(state.tableOrder.length / 2);
-    const placements = state.workerPlacements[placement];
-    return placements.length < numSpots || placements.slice(0, numSpots).some(w => !w);
-}
-
-export const needsGrandeDisabledReason = (state: GameState, placement: WorkerPlacement) => {
-    return hasOpenActionSpace(state, placement)
-        ? undefined
-        : "You need a grande to play here.";
-};
+export const numActionSpaces = (state: GameState) =>
+    Math.ceil(state.tableOrder.length / 2);
 
 export const numCardsDisabledReason = (
     state: GameState,

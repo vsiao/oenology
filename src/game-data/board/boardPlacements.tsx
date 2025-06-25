@@ -279,7 +279,7 @@ export const boardActions: Record<BoardPlacement, PlacementAction> = {
     ),
 };
 
-export const yearRoundActions: PlacementAction[] = [
+export const yearRoundActions = [
     structureActions.yokeHarvest,
     structureActions.yokeUproot,
     boardActions.gainCoin,
@@ -341,3 +341,59 @@ export const boardActionsBySeason = (state: GameState): Record<Season, Placement
             };
     }
 };
+
+export const seasonByBoardAction = (state: GameState, placement: BoardPlacement): Season => {
+    switch (state.boardType) {
+        case undefined:
+        case "base":
+            switch (placement) {
+                case "drawVine":
+                case "playSummerVisitor":
+                case "giveTour":
+                case "buySell":
+                case "buildStructure":
+                case "plantVine":
+                    return "summer";
+                case "drawOrder":
+                case "playWinterVisitor":
+                case "harvestField":
+                case "trainWorker":
+                case "makeWine":
+                case "fillOrder":
+                    return "winter";
+                case "gainCoin":
+                case "buildOrGiveTour":
+                case "influence":
+                case "sellWine":
+                case "trade":
+                    throw new Error(`Unexpected season lookup for ${placement}`);
+            }
+            break;
+        case "tuscanyA":
+        case "tuscanyB":
+            switch (placement) {
+                case "drawVine":
+                case "giveTour":
+                case "buildStructure":
+                case "influence":
+                    return "spring";
+                case "playSummerVisitor":
+                case "plantVine":
+                case "trade":
+                case "buySell":
+                    return "summer";
+                case "drawOrder":
+                case "harvestField":
+                case "makeWine":
+                case "buildOrGiveTour":
+                    return "fall";
+                case "playWinterVisitor":
+                case "trainWorker":
+                case "sellWine":
+                case "fillOrder":
+                    return "winter";
+                case "gainCoin":
+                    throw new Error(`Unexpected season lookup for ${placement}`);
+            }
+    }
+}

@@ -1,6 +1,6 @@
 import Alea from "alea";
 import GameState, { PlayerState, StructureState, CardsByType, GrapeColor, WineColor, FieldId } from "./GameState";
-import { GameAction, GameActionChanged, PlayerInit, StartGameAction } from "./gameActions";
+import { GameAction, GameActionChanged, isLocalGameAction, PlayerInit, PublishedGameAction, StartGameAction } from "./gameActions";
 import { currentTurn } from "./board/currentTurnReducer";
 import { prompt } from "./prompts/promptReducers";
 import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers";
@@ -13,9 +13,13 @@ import { buildStructure, gainResiduals, updatePlayer } from "./shared/sharedRedu
 import { StructureId } from "./structures";
 import { VineId } from "./vineCards";
 import { SpecialWorkerId, specialWorkers } from "./specialWorkers";
+import { localGameAction } from "./shared/localGameReducer";
 
 export const game = (state: GameState, action: GameAction, userId: string): GameState => {
-    // Actions aren't applied until they are published by firebase and have a server key assigned
+    if (isLocalGameAction(action)) {
+        return localGameAction(state, action);
+    }
+    // Public actions aren't applied until they are published by firebase and have a server key assigned
     if (!action._key) {
         return state;
     }
@@ -84,12 +88,9 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
                     : player
             ])
         ),
-        // Actions are undoable by default when performed by the current player.
-        // In certain cases (ending a turn, drawing a card), this state will be cleared.
         undoState: {
             type: "undoable",
             prevState: state,
-            isLastActionByCurrentTurnPlayer: state.playerId === action.playerId,
         },
         actionsApplied: {
             ...state.actionsApplied,
@@ -104,11 +105,16 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         },
         lastActionKey: actionKey,
     };
-    return currentTurn(prompt(state, action), action);
+    try {
+        return currentTurn(prompt(state, action), action);
+    } catch (e) {
+        console.error("Error applying action", action);
+        throw e;
+    }
 };
 
 const initGame = (userId: string, action: StartGameAction, key: string): GameState => {
-    const { ts } = action as GameAction;
+    const { ts } = action as PublishedGameAction;
     const random = Alea(key);
     const players = action.players;
     const mamas = shuffle(Object.keys(mamaCards) as MamaId[], random);
@@ -178,8 +184,6 @@ const initGame = (userId: string, action: StartGameAction, key: string): GameSta
             sellWine: [],
             trade: [],
             trainWorker: [],
-            yokeHarvest: [],
-            yokeUproot: []
         },
         activityLog: [],
         undoState: null,
@@ -191,6 +195,7 @@ const initGame = (userId: string, action: StartGameAction, key: string): GameSta
         },
         lastActionKey: key,
         playerId: players.some(({ id }) => id === userId) ? userId : null,
+        selectedWorkerType: "normal",
         actionPrompts: [],
     };
 };

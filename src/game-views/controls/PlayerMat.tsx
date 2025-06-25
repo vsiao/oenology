@@ -2,7 +2,7 @@ import "./PlayerMat.css";
 import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
-import { CardId, PlayerState, WorkerType } from "../../game-data/GameState";
+import { CardId, PlacedWorker, PlayerState, StructureState, WorkerPlacement, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
@@ -17,50 +17,112 @@ import VisitorCard from "../cards/VisitorCard";
 import ActionPrompt from "./ActionPrompt";
 import MamaPapaCard from "../cards/MamaPapaCard";
 import ChoiceButton from "./ChoiceButton";
+import { Dispatch } from "redux";
+import { GameAction, placeWorker, setWorkerType } from "../../game-data/gameActions";
 
 interface Props {
     shouldShowMamaPapas: boolean;
+    shouldSelectWorkerType: boolean;
+    shouldShowWorkerControls: boolean;
     playerStates: Record<string, PlayerState>;
     playerId: string | null;
+    selectedWorkerType: WorkerType;
+    yokeState: StructureState | PlacedWorker;
+    setWorkerType: (workerType: WorkerType) => void;
+    placeWorker: (playerId: string, placement: WorkerPlacement | null, workerType: WorkerType) => void;
 }
 
-const PlayerMat: React.FunctionComponent<Props> = props => {
-    const { playerStates, playerId } = props;
-    const playerState = playerId && playerStates[playerId];
+const PlayerMat: React.FunctionComponent<Props> = ({
+    shouldShowMamaPapas,
+    shouldSelectWorkerType,
+    shouldShowWorkerControls,
+    playerStates,
+    playerId,
+    selectedWorkerType,
+    yokeState,
+    setWorkerType,
+    placeWorker,
+}) => {
+    const playerState = playerId !== null ? playerStates[playerId] : null;
+    const workerTypes = ["grande", "special1", "special2", "normal"] as WorkerType[];
 
     return <div className={cx("PlayerMat", playerState && `PlayerMat--${playerState.color}`)}>
+        <ActionPrompt />
         {
             playerState
-                ?  <>
-                    <ActionPrompt />
+                ? <div className="PlayerMat-playerContents">
                     <div className="PlayerMat-header">
                         {playerState && <>
                             <Residuals className="PlayerMat-residualPayments">{playerState.residuals}</Residuals>
                             <Coins className="PlayerMat-coins">{playerState.coins}</Coins>
                             <VictoryPoints className="PlayerMat-victoryPoints">{playerState.victoryPoints}</VictoryPoints>
-                            <ul className="PlayerMat-workers">
-                                {(["grande", "special1", "special2", "normal"] as WorkerType[]).map(workerType => {
+                            <div className="PlayerMat-workerTypeSelector">
+                                {workerTypes.map(workerType => {
                                     const workersOfType = playerState.workers.filter(w => w.type === workerType);
-                                    return workersOfType.map((worker, i) =>
-                                        <li key={i} className="PlayerMat-worker" >
+                                    if (workersOfType.length === 0) {
+                                        return null;
+                                    }
+                                    const disabled = !shouldSelectWorkerType || workersOfType.every(w => !w.available);
+                                    return <button
+                                        key={workerType}
+                                        className={cx({
+                                            "PlayerMat-workerTypeButton": true,
+                                            "PlayerMat-workerTypeButton--selected":
+                                                shouldSelectWorkerType && workerType === selectedWorkerType,
+                                        })}
+                                        disabled={disabled}
+                                        onClick={disabled ? undefined : () => setWorkerType(workerType)}
+                                    >
+                                        {workersOfType.map((worker, i) =>
                                             <Worker
+                                                key={i}
                                                 workerType={worker.type}
                                                 color={playerState.color}
                                                 isTemp={worker.isTemp}
                                                 disabled={!worker.available}
                                             />
-                                        </li>
-                                    );
+                                        )}
+                                    </button>
                                 })}
-                            </ul>
+                            </div>
+                            {shouldShowWorkerControls && <>
+                                <ChoiceButton
+                                    className="PlayerMat-choiceButton"
+                                    onClick={() => placeWorker(playerId!, "gainCoin", selectedWorkerType)}
+                                >
+                                    Gain <Coins>1</Coins>
+                                </ChoiceButton>
+                                {yokeState !== StructureState.Unbuilt && <>
+                                    <ChoiceButton
+                                        className="PlayerMat-choiceButton"
+                                        onClick={() => placeWorker(playerId!, "yokeHarvest", selectedWorkerType)}
+                                        disabledReason={typeof yokeState === "object" ? "Already used" : undefined}
+                                    >
+                                        Yoke: Harvest
+                                    </ChoiceButton>
+                                    <ChoiceButton
+                                        className="PlayerMat-choiceButton"
+                                        onClick={() => placeWorker(playerId!, "yokeUproot", selectedWorkerType)}
+                                        disabledReason={typeof yokeState === "object" ? "Already used" : undefined}
+                                    >
+                                        Yoke: Uproot
+                                    </ChoiceButton>
+                                </>}
+                                <ChoiceButton
+                                    className="PlayerMat-choiceButton"
+                                    onClick={() => placeWorker(playerId!, null, selectedWorkerType)}
+                                >
+                                    Pass
+                                </ChoiceButton>
+                            </>}
                         </>}
                     </div>
                     <ul className="PlayerMat-cards">
-                        {playerState && (props.shouldShowMamaPapas
+                        {playerState && (shouldShowMamaPapas
                             ? renderMamaPapas(playerState)
                             : renderCards(playerState))}
                     </ul>
-                </>
+                </div>
                 : <div className="PlayerMat-spectator">
                     <p>You're currently <strong>spectating</strong> this game.</p>
                     <ul>
@@ -109,12 +171,36 @@ const renderCard = (card: CardId) => {
 
 const mapStateToProps = (state: AppState) => {
     const game = state.game!;
+    const isAdministratorPlacement = game.currentTurn.type === "workerPlacement" &&
+        game.currentTurn.pendingAction?.type === "playVisitor" &&
+        game.currentTurn.pendingAction.visitorId === "administrator";
+    const isPlannerPlacement = game.currentTurn.type === "workerPlacement" &&
+        game.currentTurn.pendingAction?.type === "playVisitor" &&
+        game.currentTurn.pendingAction.visitorId === "planner";
     return {
         shouldShowMamaPapas: game.currentTurn.type === "mamaPapa" &&
             !!game.playerId && game.players[game.playerId].cardsInHand.length === 0,
         playerStates: game.players,
         playerId: game.playerId,
+        shouldSelectWorkerType: game.actionPrompts[0]?.type === "placeWorker" &&
+            // Administrator moves the worker placed on the visitor
+            !isAdministratorPlacement,
+        shouldShowWorkerControls: game.actionPrompts[0]?.type === "placeWorker" &&
+            // Administrator and Planner cannot be passed
+            !isAdministratorPlacement && !isPlannerPlacement,
+        selectedWorkerType: game.selectedWorkerType,
+        yokeState: !!game.playerId
+            ? game.players[game.playerId].structures.yoke
+            : StructureState.Unbuilt,
     };
 };
 
-export default connect(mapStateToProps)(PlayerMat);
+const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
+    return {
+        setWorkerType: (workerType: WorkerType) => dispatch(setWorkerType(workerType)),
+        placeWorker: (playerId: string, placement: WorkerPlacement | null, workerType: WorkerType) =>
+            dispatch(placeWorker(workerType, placement, null, playerId)),
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(PlayerMat);

@@ -4,6 +4,7 @@ import GameState, {
     WorkerPlacementTurn,
     StructureState,
     PlayVisitorPendingAction,
+    PlacedWorker,
 } from "../GameState";
 import { ActivityLogEvent, VPSource } from "../ActivityLog";
 import { StructureId } from "../structures";
@@ -43,7 +44,7 @@ export const plantVineInField = (
         state = markStructureUsed(
             "windmill",
             gainVP(1, state, { playerId, source: "structure" }),
-            playerId
+            { playerId }
         );
     }
     return pushActivityLog(
@@ -159,13 +160,23 @@ export const gainResiduals = editResiduals;
 export const loseResiduals = (numResiduals: number, state: GameState, playerId = state.currentTurn.playerId) =>
     editResiduals(-numResiduals, state, playerId);
 
-export const markStructureUsed = (structureId: StructureId, state: GameState, playerId = state.currentTurn.playerId): GameState => {
+export const markStructureUsed = (
+    structureId: StructureId,
+    state: GameState,
+    {
+        playerId = state.currentTurn.playerId,
+        worker,
+    }: {
+        playerId?: string;
+        worker?: PlacedWorker;
+    } = {}
+): GameState => {
     const player = state.players[playerId];
 
     return updatePlayer(state, playerId, {
         structures: {
             ...player.structures,
-            [structureId]: StructureState.Used,
+            [structureId]: worker ?? StructureState.Used,
         },
     });
 };

@@ -121,8 +121,6 @@ const renderPendingActionStatus = (
             return <span>{playerName} is placing or moving <StarToken />.</span>;
         case "makeWine":
             return <span>{playerName} is making some wine.</span>;
-        case "placeMessenger":
-            return <span>{playerName} is placing their Messenger.</span>
         case "plantVine":
             return <span>{playerName} is planting a <Vine />.</span>;
         case "playVisitor":
