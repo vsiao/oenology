@@ -76,7 +76,7 @@ const PlayerMat: React.FunctionComponent<Props> = ({
                                         {workersOfType.map((worker, i) =>
                                             <Worker
                                                 key={i}
-                                                workerType={worker.type}
+                                                type={worker.type}
                                                 color={playerState.color}
                                                 isTemp={worker.isTemp}
                                                 disabled={!worker.available}

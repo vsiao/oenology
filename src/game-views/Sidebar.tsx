@@ -97,6 +97,8 @@ const renderActivity = (
     switch (event.type) {
         case "build":
             return <>{player} built the <strong>{structures[event.structureId].name}</strong></>;
+        case "chefBump":
+            return <>{player} bumped <Worker {...event.bumpedWorker} /> with a <strong>Chef</strong></>;
         case "coins":
             return <>{player} {event.delta < 0 ? "paid" : "gained"} <Coins>{Math.abs(event.delta)}</Coins></>;
         case "discard":
@@ -114,6 +116,9 @@ const renderActivity = (
             return <>{player} {event.buy ? "bought" : "sold"} a field</>;
         case "harvest":
             return <>{player} harvested {renderYields(event.yields)}</>;
+        case "innkeeperTake":
+            return <>{player} paid <Coins>1</Coins> to <strong>{playerNameById[event.fromPlayerId]}</strong>
+                {" "}and took <Card type={event.cardType} /> with the <strong>Innkeeper</strong></>;
         case "makeWine":
             return <>{player} made {
                 event.wines.map((w, i) => <WineGlass key={i} color={w.color}>{w.value}</WineGlass>)
@@ -139,7 +144,7 @@ const renderActivity = (
                             : <Coins>{cost + (isSpecialWorker ? 1 : 0)}</Coins>
                     } to train</>
                     : "trained"
-            } a <Worker workerType={event.workerType} /> {
+            } a <Worker type={event.workerType} /> {
                 event.workerType !== "normal" ? <strong>{event.workerName}</strong> : null
             }</>;
         case "visitor":

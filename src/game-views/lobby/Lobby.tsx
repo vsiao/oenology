@@ -323,7 +323,7 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) =>
                     users.map(({ id, name }, i) => ({ id, name, color: options.playerColors![id] })),
                     {
                         ...options,
-                        specialWorkers: options.specialWorkers && ["Merchant", "Messenger"],
+                        specialWorkers: options.specialWorkers && ["Mafioso", "Chef"],
                     }
                 )
             );

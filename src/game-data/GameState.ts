@@ -92,6 +92,7 @@ export type CurrentTurn =
 export interface WorkerPlacementTurn {
     type: "workerPlacement";
     playerId: string;
+    placement?: [WorkerPlacement, number];
 
     // Used to enact actions for workers placed in future seasons
     // by the Planner and Administrator visitors.
@@ -107,9 +108,7 @@ export interface WorkerPlacementTurn {
     // pendingAction will be stored here.
     managerPendingAction?: PlayVisitorPendingAction;
 
-    // If the player placed the Merchant after all opponents have passed,
-    // prompt them to draw 1 of any card at the end of the turn.
-    hasMerchantBonus?: true;
+    specialWorkerBonus?: "Mafioso" | "Merchant";
 }
 
 export interface PlayVisitorPendingAction {

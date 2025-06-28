@@ -675,7 +675,7 @@ export const winterVisitorReducers: Record<
                 return promptForAction(state, {
                     choices: [...spring, ...summer, ...fall]
                         .map(a => ({
-                            ...a.choiceAt(-1, state),
+                            ...a.spaceAt(-1, state),
                             id: a.type,
                         }))
                 });
@@ -690,7 +690,7 @@ export const winterVisitorReducers: Record<
                         },
                     },
                     action._key!,
-                    -1 // not an action space to force no bonus
+                    /* bonus */ undefined
                 );
             default:
                 return state;
@@ -915,7 +915,7 @@ export const winterVisitorReducers: Record<
                     {
                         id: "MOTIVATOR_RETRIEVE",
                         label: <>
-                            Retrieve <Worker workerType="grande" color={s.players[playerId].color} />
+                            Retrieve <Worker type="grande" color={s.players[playerId].color} />
                             {playerId !== s.currentTurn.playerId
                                 ? <> (<strong>{playerName}</strong> gains <VP>1</VP>)</>
                                 : null}

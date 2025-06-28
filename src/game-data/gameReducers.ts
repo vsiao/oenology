@@ -9,7 +9,7 @@ import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { gainWine, placeGrapes } from "./shared/grapeWineReducers";
 import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
-import { buildStructure, gainResiduals, updatePlayer } from "./shared/sharedReducers";
+import { buildStructure, gainCoins, gainResiduals, updatePlayer } from "./shared/sharedReducers";
 import { StructureId } from "./structures";
 import { VineId } from "./vineCards";
 import { SpecialWorkerId, specialWorkers } from "./specialWorkers";
@@ -47,6 +47,8 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         case "APPLY_CHEAT_CODE":
             const [cmd, ...parts] = action.code.split(":");
             switch (cmd) {
+                case "c": // coins
+                    return gainCoins(parseInt(parts[0], 10), state, action.playerId);
                 case "d": // draw
                     return CHEAT_drawCard(parts[0], action.playerId, state);
                 case "g": // grape; eg. `g:red:5`

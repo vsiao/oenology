@@ -15,6 +15,7 @@ import { useTooltip } from "./shared/useTooltip";
 import { Dispatch } from "redux";
 import { GameAction, placeWorker } from "../game-data/gameActions";
 import { seasonByBoardAction } from "../game-data/board/boardPlacements";
+import { openSpaceOrDisabledReason } from "../game-data/shared/workerReducers";
 
 const CANNOT_PLACE_WORKER = "Can't place a worker right now.";
 
@@ -57,7 +58,11 @@ const BoardPlacement: React.FunctionComponent<Props> = ({
             }}
         >
             {worker
-                ? <Worker workerType={worker.type} color={worker.color} isTemp={worker.isTemp} animateWithId={worker.id} />
+                ? <Worker
+                    key={`${worker.color}${worker.id}`}
+                    {...worker}
+                    animateWithId={worker.id}
+                />
                 : ((bonus && renderBonusIcon(bonus)) || <>&nbsp;</>)}
         </div>
     };
@@ -116,7 +121,7 @@ const BoardPlacement: React.FunctionComponent<Props> = ({
 const renderOverflow = (overflowWorkers: PlacedWorker[]) => {
     return <div className="BoardPlacement-overflow">
         {overflowWorkers.map((w, i) =>
-            w && <Worker key={`${w.color}${i}`} workerType={w.type} color={w.color} animateWithId={w.id} />
+            w && <Worker key={`${w.color}${i}`} {...w} animateWithId={w.id} />
         )}
     </div>;
 };
@@ -162,27 +167,40 @@ const mapStateToProps = (state: AppState, { placement }: { placement: PlacementA
     const isPlannerPlacement = game.currentTurn.type === "workerPlacement" &&
         game.currentTurn.pendingAction?.type === "playVisitor" &&
         game.currentTurn.pendingAction.visitorId === "planner";
-    const isPlaceableSeason = (isAdministratorPlacement || isPlannerPlacement)
-        ? isFutureSeason
-        : (isCurrentSeason ||
-        (game.specialWorkers?.[game.selectedWorkerType] === "Messenger" && isFutureSeason));
+    const isPlaceableSeason = isCurrentSeason ||
+        (isFutureSeason && (
+            isPlannerPlacement ||
+            isAdministratorPlacement ||
+            game.specialWorkers?.[game.selectedWorkerType] === "Messenger"
+        ));
 
     const workers = game.workerPlacements[placement.type].slice();
     if (game.pendingWorker?.placement === placement.type) {
         workers[game.pendingWorker.space] = game.pendingWorker;
     }
+    const actionSpaces = new Array(numSpots).fill(null).map((_, i) => ({
+        bonus: placement.spaceAt(i, game).bonus,
+        worker: workers[i] ?? null,
+    }));
+    const spaceOrDisabledReason = openSpaceOrDisabledReason(
+        game,
+        game.selectedWorkerType,
+        placement.type,
+        null,
+    );
     return {
         placement: placement.type,
         title: placement.label(game),
-        actionSpaces: new Array(numSpots).fill(null).map((_, i) => ({
-            bonus: placement.choiceAt(i, game).bonus,
-            worker: workers[i] ?? null,
-        })),
+        actionSpaces,
         overflow: workers.slice(numSpots).filter((w): w is PlacedWorker => !!w),
         selectedWorkerType: game.selectedWorkerType,
-        disabledReason: game.actionPrompts[0]?.type === "placeWorker" && isPlaceableSeason
-            ? (isFutureSeason ? undefined : placement.choiceAt(0, game).disabledReason)
-            : CANNOT_PLACE_WORKER,
+        disabledReason:
+            (game.actionPrompts[0]?.type === "placeWorker" && isPlaceableSeason
+                ? undefined
+                : CANNOT_PLACE_WORKER) ??
+            (typeof spaceOrDisabledReason === "string"
+                ? spaceOrDisabledReason
+                : undefined),
     };
 };
 
