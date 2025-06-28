@@ -65,7 +65,7 @@ export default interface GameState {
     playerId: string | null;
     actionPrompts: PromptState[];
     selectedWorkerType: WorkerType;
-    pendingWorker?: PlacedWorker & {
+    pendingWorker: null | PlacedWorker & {
         placement: WorkerPlacement;
         space: number;
     };

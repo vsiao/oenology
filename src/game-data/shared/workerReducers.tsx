@@ -159,9 +159,10 @@ export const openSpaceOrDisabledReason = (
     requestedSpace: number | null,
 ): number | string => {
     if (isBoardAction(placement)) {
-        const placementSeason = seasonByBoardAction(state, placement);
         const allSeasons = ["spring", "summer", "fall", "winter"] as const;
-        const isFutureSeason = allSeasons.indexOf(placementSeason) > allSeasons.indexOf(state.season);
+        const isUnrestrictedAction = placement === "gainCoin" ||
+            // Placement is in a future season; don't check action restrictions
+            allSeasons.indexOf(seasonByBoardAction(state, placement)) > allSeasons.indexOf(state.season);
 
         const placements = state.workerPlacements[placement];
         const numSpaces = numActionSpaces(state);
@@ -175,7 +176,7 @@ export const openSpaceOrDisabledReason = (
         ];
         const isPlaceable = (w: PlacedWorker | null, i: number) =>
             // Action must be not be restricted (or skipped due to future placement)
-            (isFutureSeason
+            (isUnrestrictedAction
                 || !boardActions[placement].spaceAt(i, state).disabledReason) &&
             // Space must be empty or bumpable by the Chef
             (w === null ||

@@ -27,7 +27,7 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
     switch (action.type) {
         case "PLACE_WORKER": {
             const { placement, workerType } = action;
-            state = { ...state, lastPlaceWorkerActionKey: action._key, pendingWorker: undefined };
+            state = { ...state, lastPlaceWorkerActionKey: action._key, pendingWorker: null };
             if (!placement) {
                 return passToNextSeason(state);
             }
@@ -170,6 +170,7 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                 }
                 case "PLANNER_ACT": {
                     const { placement, idx } = action.data as { placement: BoardPlacement; idx: number };
+                    state = { ...state, currentTurn: { ...currentTurn, placement: [placement, idx] } };
                     const bonus = boardActions[placement].spaceAt(idx, state).bonus;
                     return boardAction(placement, state, action._key!, bonus);
                 }

@@ -21,27 +21,25 @@ export const localGameAction = (state: GameState, action: LocalGameAction): Game
                 : availableWorkerOfType(state, state.selectedWorkerType);
 
             if (!action.placement) {
-                return { ...state, pendingWorker: undefined };
+                return { ...state, pendingWorker: null };
             }
             const [placement, idx] = action.placement;
             const space = openSpaceOrDisabledReason(state, state.selectedWorkerType, placement, idx);
             if (typeof space === "string") {
-                return { ...state, pendingWorker: undefined };
+                return { ...state, pendingWorker: null };
             }
             return {
                 ...state,
-                pendingWorker: action.placement
-                    ? {
-                        placement,
-                        space,
-                        type: worker.type,
-                        id: worker.id,
-                        playerId: state.currentTurn.playerId,
-                        color: state.players[state.currentTurn.playerId].color,
-                        isTemp: !!worker.isTemp,
-                        source: "pending",
-                    }
-                    : undefined,
+                pendingWorker: {
+                    placement,
+                    space,
+                    type: worker.type,
+                    id: worker.id,
+                    playerId: state.currentTurn.playerId,
+                    color: state.players[state.currentTurn.playerId].color,
+                    isTemp: !!worker.isTemp,
+                    source: "pending",
+                },
             }
         default:
             return state;

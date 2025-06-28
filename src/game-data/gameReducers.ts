@@ -199,6 +199,7 @@ const initGame = (userId: string, action: StartGameAction, key: string): GameSta
         playerId: players.some(({ id }) => id === userId) ? userId : null,
         selectedWorkerType: "normal",
         actionPrompts: [],
+        pendingWorker: null,
     };
 };
 
