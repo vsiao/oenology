@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { BoardPlacement, CardType, WorkerPlacement, WorkerPlacementTurn, WorkerType } from "../GameState";
+import GameState, { BoardPlacement, CardType, WorkerPlacementTurn, WorkerType } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -17,9 +17,8 @@ import {
     promptToPlant,
     promptToChooseGrapes,
     promptToBuildStructure,
-    promptForAction,
 } from "../prompts/promptReducers";
-import { plantVinesDisabledReason, moneyDisabledReason, hasOpenActionSpace } from "../shared/sharedSelectors";
+import { plantVinesDisabledReason, moneyDisabledReason } from "../shared/sharedSelectors";
 import { structures } from "../structures";
 import {
     MamaPapaChoiceData,
@@ -38,7 +37,7 @@ import { boardAction, giveTour, trade } from "./boardActionReducer";
 import { influence } from "./influenceReducers";
 import { placeWorker, gainWorker } from "../shared/workerReducers";
 import { Action } from "redux";
-import { boardActionsBySeason, isBoardAction } from "./boardPlacements";
+import { isBoardAction, seasonByBoardAction } from "./boardPlacements";
 import { structureAction } from "../structures/structureActionReducer";
 
 export type InternalGameAction = GameAction | InternalAction;
@@ -266,20 +265,6 @@ const workerPlacement = (state: GameState, action: InternalGameAction): GameStat
                 return state;
             }
             return endTurn(makeWineFromGrapes(state, action.ingredients));
-        
-        case "placeMessenger":
-            if (action.type !== "CHOOSE_ACTION") {
-                return state;
-            }
-            return endTurn(
-                placeWorker(
-                    state.specialWorkers!.Messenger!,
-                    action.choice as WorkerPlacement,
-                    action.data as number,
-                    state,
-                    "Messenger"
-                )[0]
-            );
 
         case "plantVine":
             switch (action.type) {
@@ -373,33 +358,31 @@ const workerPlacement = (state: GameState, action: InternalGameAction): GameStat
 const workerPlacementInit = (state: GameState, action: InternalGameAction): GameState => {
     switch (action.type) {
         case "PLACE_WORKER": {
-            state = { ...state, lastPlaceWorkerActionKey: action._key };
+            state = { ...state, lastPlaceWorkerActionKey: action._key, pendingWorker: undefined };
             if (!action.placement) {
                 return passToNextSeason(state);
             }
-            if (action.placement === "messenger") {
-                const seasons = ["spring", "summer", "fall", "winter"] as const;
-                const futureSeasons = seasons.slice(seasons.indexOf(state.season) + 1);
-                const actions = boardActionsBySeason(state);
-                return promptForAction<number>(setPendingAction({ type: "placeMessenger" }, state), {
-                    choices: futureSeasons.map(season =>
-                        actions[season].map(({ type, choices }) =>
-                            choices(state).map(({ label, idx }) => ({
-                                id: type,
-                                data: idx,
-                                label,
-                                disabledReason: hasOpenActionSpace(state, type)
-                                    ? undefined
-                                    : "There are no available action spaces."
-                            }))
-                        ).flat(),
-                    ).flat(),
-                });
-            }
+            const allSeasons = ["spring", "summer", "fall", "winter"] as const;
+            const isFutureMessengerPlacement =
+                isBoardAction(action.placement) &&
+                    action.placement !== "gainCoin" &&
+                    state.specialWorkers?.[action.workerType] === "Messenger" &&
+                    allSeasons.indexOf(state.season) < allSeasons.indexOf(seasonByBoardAction(state, action.placement))
+
             let placementIdx: number;
-            [state, placementIdx] = placeWorker(action.workerType, action.placement, action.idx, state);
+            [state, placementIdx] = placeWorker(
+                action.workerType,
+                action.placement,
+                action.idx ?? null,
+                state,
+                isFutureMessengerPlacement ? "Messenger" : undefined
+            );
+
             if (isBoardAction(action.placement)) {
-                if (
+                if (isFutureMessengerPlacement) {
+                    // The Messenger will be resolved in a future season
+                    return endTurn(state);
+                } else if (
                     state.specialWorkers?.[action.workerType] === "Merchant" &&
                     state.wakeUpOrder.every(p => !p || p?.playerId === state.currentTurn.playerId || p?.season !== state.season)
                 ) {

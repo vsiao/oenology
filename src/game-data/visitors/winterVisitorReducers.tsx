@@ -689,7 +689,8 @@ export const winterVisitorReducers: Record<
                             managerPendingAction: pendingAction,
                         },
                     },
-                    action._key!
+                    action._key!,
+                    -1 // not an action space to force no bonus
                 );
             default:
                 return state;

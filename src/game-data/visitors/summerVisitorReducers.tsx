@@ -56,7 +56,6 @@ import {
     fieldYields,
     cardTypesInPlay,
     residualPaymentsDisabledReason,
-    needsGrandeDisabledReason,
     gainWineDisabledReason,
 } from "../shared/sharedSelectors";
 import Card, { Vine, Order, WinterVisitor, SummerVisitor } from "../../game-views/icons/Card";
@@ -79,7 +78,7 @@ import { drawCards, discardCards } from "../shared/cardReducers";
 import { placeGrapes, makeWineFromGrapes, harvestField, discardGrapes, discardWines, fillOrder, gainWine, harvestFields } from "../shared/grapeWineReducers";
 import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
-import { allPlacements, boardActionsBySeason } from "../board/boardPlacements";
+import { allPlacements, isBoardAction } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { placeWorker, retrieveWorker } from "../shared/workerReducers";
 import { InternalGameAction } from "../board/currentTurnReducer";
@@ -900,8 +899,7 @@ export const summerVisitorReducers: Record<
             case "CHOOSE_CARDS":
                 return promptToPlaceWorker(state);
             case "PLACE_WORKER":
-                if (!action.placement || action.placement === "messenger") {
-                    // Planner cannot pass, and cannot use Messenger ability
+                if (!action.placement) {
                     throw new Error(`Unexpected Planner placement: ${action.placement}`);
                 }
                 return endVisitor(
@@ -993,18 +991,31 @@ export const summerVisitorReducers: Record<
                                 // Must retrieve from *other* actions
                                 return [];
                             }
-                            return state.workerPlacements[type]
-                                .map((w, i) => w && w.playerId === playerId
-                                    ? {
-                                        id: `${type}_${i}`,
+                            if (isBoardAction(type)) {
+                                return state.workerPlacements[type]
+                                    .map((w, i) => w && w.playerId === playerId
+                                        ? {
+                                            id: `${type}_${i}`,
+                                            label: <>
+                                                <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
+                                                &nbsp;{choiceAt(i, state).label}
+                                            </>,
+                                        } as Choice
+                                        : null
+                                    )
+                                    .filter((c: Choice | null): c is Choice => !!c);
+                            } else {
+                                const yoke = state.players[playerId].structures.yoke;
+                                return typeof yoke === "object"
+                                    ? [{
+                                        id: `${type}_0`,
                                         label: <>
-                                            <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
-                                            &nbsp;{choiceAt(i, state).label}
-                                        </>,
-                                    } as Choice
-                                    : null
-                                )
-                                .filter((c: Choice | null): c is Choice => !!c);
+                                            <Worker color={yoke.color} workerType={yoke.type} isTemp={yoke.isTemp} />
+                                            &nbsp;{choiceAt(0, state).label}
+                                        </>
+                                    }]
+                                    : [];
+                            }
                         })
                         .flat(),
                 });
@@ -1476,26 +1487,13 @@ export const rhineSummerVisitorReducers: Record<
     },
     administrator: (state, action, pendingAction) => {
         const placedWorker = state.workerPlacements.playSummerVisitor[pendingAction.placementIdx!]!
-        type ChoiceData = number;
-
         switch (action.type) {
             case "CHOOSE_CARDS":
-                const { fall, winter } = boardActionsBySeason(state);
-                const isGrande = placedWorker.type === "grande";
-                return promptForAction<ChoiceData>(state, {
-                    choices: [...fall, ...winter]
-                        .map(({ type, choices }) =>
-                            choices(state).map(({ label, idx }) => ({
-                                id: type,
-                                data: idx,
-                                label,
-                                disabledReason: isGrande
-                                    ? undefined
-                                    : needsGrandeDisabledReason(state, type),
-                            }))
-                        ).flat(),
-                });
-            case "CHOOSE_ACTION":
+                return promptToPlaceWorker(state);
+            case "PLACE_WORKER":
+                if (!action.placement) {
+                    throw new Error(`Unexpected Administrator placement: ${action.placement}`);
+                }
                 state = retrieveWorker(
                     "playSummerVisitor",
                     pendingAction.placementIdx!,
@@ -1504,8 +1502,8 @@ export const rhineSummerVisitorReducers: Record<
                 return endVisitor(
                     placeWorker(
                         placedWorker.type,
-                        action.choice as WorkerPlacement,
-                        action.data as ChoiceData,
+                        action.placement,
+                        action.idx,
                         state,
                         "Administrator"
                     )[0]

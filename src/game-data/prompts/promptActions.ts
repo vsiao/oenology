@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { FieldId, GrapeColor, WineColor, CardId, WorkerPlacement, WorkerType } from "../GameState";
+import { FieldId, GrapeColor, WineColor, CardId } from "../GameState";
 import { StructureId } from "../structures";
 import { WineSpec } from "../orderCards";
 import { Choice } from "./PromptState";
@@ -14,8 +14,7 @@ export type PromptAction =
     | ChooseGrapeAction
     | ChooseVineAction
     | ChooseWineAction
-    | MakeWineAction
-    | PlaceWorkerAction;
+    | MakeWineAction;
 
 export const isPromptAction = (action: Action): action is PromptAction => {
     switch (action.type) {
@@ -128,19 +127,4 @@ interface BuildStructureAction extends Action<"BUILD_STRUCTURE"> {
 }
 export const buildStructure = (structureId: StructureId, playerId: string): PromptAction => {
     return { type: "BUILD_STRUCTURE", structureId, playerId };
-};
-
-interface PlaceWorkerAction extends Action<"PLACE_WORKER"> {
-    placement: WorkerPlacement | "messenger" | null; // null means pass
-    idx: number | null; // undefined means first available
-    workerType: WorkerType;
-    playerId: string;
-}
-export const placeWorker = (
-    placement: WorkerPlacement | "messenger" | null,
-    workerType: WorkerType,
-    playerId: string,
-    idx: number | null
-): PlaceWorkerAction => {
-    return { type: "PLACE_WORKER", placement, idx, workerType, playerId };
 };

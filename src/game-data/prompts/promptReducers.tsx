@@ -1,5 +1,5 @@
 import * as React from "react";
-import GameState, { CardId, WorkerPlacementTurn, Field } from "../GameState";
+import GameState, { CardId, WorkerPlacementTurn, Field, WorkerType } from "../GameState";
 import { GameAction } from "../gameActions";
 import { Choice, PromptState } from "./PromptState";
 import { Coupon } from "../structures";
@@ -347,7 +347,11 @@ export const promptToPlaceWorker = (state: GameState) => {
     if (state.playerId !== state.currentTurn.playerId) {
         return state;
     }
-    return enqueueActionPrompt(state, {
+    const workerTypes = ["grande", "special1", "special2", "normal"] as WorkerType[];
+    const defaultWorkerType = workerTypes.findLast(workerType =>
+        state.players[state.playerId!].workers.some(w => w.type === workerType && w.available)
+    )!;
+    return enqueueActionPrompt({ ...state, selectedWorkerType: defaultWorkerType }, {
         type: "placeWorker",
         key: state.lastPlaceWorkerActionKey || "",
     });

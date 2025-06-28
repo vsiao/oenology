@@ -1,7 +1,7 @@
 import { AppAction } from "./appActions";
 import { AppState } from "./AppState";
 import { game } from "../game-data/gameReducers";
-import { isGameAction } from "../game-data/gameActions";
+import { isLocalGameAction, isPublishedGameAction } from "../game-data/gameActions";
 
 export const appReducer = (state: AppState | undefined, action: AppAction): AppState => {
     if (state === undefined) {
@@ -11,7 +11,7 @@ export const appReducer = (state: AppState | undefined, action: AppAction): AppS
             game: null,
         };
     }
-    if (isGameAction(action)) {
+    if (isPublishedGameAction(action) || isLocalGameAction(action)) {
         return {
             ...state,
             game: game(state.game!, action, state.userId!),

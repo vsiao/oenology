@@ -2,8 +2,6 @@
     background: #ddd;
     border-top: 1px solid #aaa;
     box-shadow: 0 0 1em rgba(0, 0, 0, .3);
-    display: flex;
-    flex-direction: column;
     grid-area: playermat;
     min-width: 1px;
     position: relative;
@@ -20,10 +18,23 @@
     padding: 0 1em;
 }
 
+.PlayerMat-playerContents {
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+}
+
 .PlayerMat-header {
     align-items: center;
     display: flex;
-    padding: 12px 1.6em 8px;
+    height: 2.8em;
+    padding: .5em 1.6em .2em;
+}
+
+@media (max-width: 500px) {
+    .PlayerMat-header {
+        height: 4em;
+    }
 }
 
 .PlayerMat-coins,
@@ -35,24 +46,37 @@
     margin-right: .7em;
 }
 
-.PlayerMat-workers {
-    display: inline-flex;
-    margin-left: 12px;
-}
-.PlayerMat-worker {
+.PlayerMat-workerTypeSelector {
     align-items: center;
-    border-radius: 1em;
-    display: inline-flex;
-    justify-content: center;
-    margin-right: 4px;
+    display: flex;
+    font-style: italic;
+    margin: 0 .5em;
 }
-.PlayerMat-worker--highlighted {
-    background: white;
+
+.PlayerMat-workerTypeButton {
+    align-items: center;
+    background: none;
+    border-radius: 1.2em;
+    display: flex;
+    height: 2.4em;
+    justify-content: center;
+    min-width: 2.4em;
+    outline: none;
+    padding: 0 .2em;
+}
+.PlayerMat-workerTypeButton:enabled {
+    cursor: pointer;
+}
+.PlayerMat-workerTypeButton--selected {
+    background: #61dafb;
+}
+
+.PlayerMat-choiceButton {
+    margin-left: .5em;
 }
 
 .PlayerMat-cards {
     display: flex;
-    overflow-x: auto;
     padding: .5em 1.6em 1em;
 }
 .PlayerMat-cards::after {
