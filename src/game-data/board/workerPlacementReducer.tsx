@@ -20,6 +20,7 @@ import { visitorCards } from "../visitors/visitorCards";
 import Card from "../../game-views/icons/Card";
 import Coins from "../../game-views/icons/Coins";
 import { InternalGameAction } from "./currentTurnReducer";
+import Alea from "alea";
 
 export const workerPlacement = (state: GameState, action: InternalGameAction): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
@@ -155,7 +156,8 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                     const visitorCardsOfSeason = otherPlayer.cardsInHand.filter(c =>
                         c.type === "visitor" && visitorCards[c.id].season === season
                     );
-                    const card = visitorCardsOfSeason[Math.floor(Math.random() * visitorCardsOfSeason.length)];
+                    const random = Alea(action._key);
+                    const card = visitorCardsOfSeason[Math.floor(random() * visitorCardsOfSeason.length)];
                     state = withoutActivityLog(() => payCoins(1, gainCoins(1, state, otherPlayerId)));
                     state = removeCardsFromHand([card], state, otherPlayerId);
                     state = addCardsToHand([card], state, playerId)
