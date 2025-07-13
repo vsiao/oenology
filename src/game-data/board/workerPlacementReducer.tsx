@@ -60,6 +60,7 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                     if (!isBoardAction(placement)) {
                         break;
                     }
+                    const bonus = boardActions[placement].spaceAt(placementIdx, state).bonus;
                     const visitorsAtPlacement: Choice<string>[] = state.tableOrder.map(otherPlayerId =>
                         (["summer", "winter"] as const).filter(season =>
                             otherPlayerId !== playerId &&
@@ -75,7 +76,12 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                                 <Card type={`${season}Visitor`} /> from
                                 {" "}<strong>{state.players[otherPlayerId].name}</strong>
                             </>,
-                            disabledReason: moneyDisabledReason(state, 1),
+                            disabledReason: moneyDisabledReason(
+                                state,
+                                1 + (placement === "trainWorker"
+                                    ? (bonus === "gainCoin" ? 3 : 4)
+                                    : 0)
+                            ),
                         }))
                     ).flat();
                     if (visitorsAtPlacement.length > 0) {
