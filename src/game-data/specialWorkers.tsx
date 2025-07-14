@@ -3,6 +3,15 @@ import Coins from "../game-views/icons/Coins";
 import Card from "../game-views/icons/Card";
 import VictoryPoints from "../game-views/icons/VictoryPoints";
 
+export const implementedSpecialWorkers: SpecialWorkerId[] = [
+    "Chef",
+    "Innkeeper",
+    "Mafioso",
+    "Merchant",
+    "Messenger",
+    "Professore",
+];
+
 export const tuscanyWorkers = {
     Chef: <p>You may place the Chef on an action space already occupied by an opponent's worker by “bumping” that worker back to the opponent's pool of available workers. Chefs can't bump Chefs.</p>,
     Farmer: <p>When you place the Farmer on the board, you may gain a total of one bonus of your choice among the bonuses on that action even if the Farmer is not on a bonus action space. All bonuses on each action are available regardless of player count.</p>,

@@ -3,7 +3,7 @@
     border-radius: 4px;
     box-sizing: border-box;
     color: black;
-    display: flex;
+    display: inline-flex;
     flex-direction: column;
     height: 60em;
     max-height: 16em;
