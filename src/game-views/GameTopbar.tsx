@@ -47,8 +47,8 @@ const GameTopbar: FC<Props> = ({
         </button>
         {maybeUndoTooltip}
 
-        {specialWorker1 && <SpecialWorkerInfo workerType="special1" id={specialWorker1} />}
-        {specialWorker2 && <SpecialWorkerInfo workerType="special2" id={specialWorker2} />}
+        {specialWorker1 && <SpecialWorkerInfo type="special1" id={specialWorker1} />}
+        {specialWorker2 && <SpecialWorkerInfo type="special2" id={specialWorker2} />}
 
         <input type="text"
             className="GameTopbar-cheatBox"
@@ -88,16 +88,16 @@ const mapDispatchToProps = (dispatch: Dispatch<GameAction>) => {
 export default connect(mapStateToProps, mapDispatchToProps)(GameTopbar);
 
 const SpecialWorkerInfo: FC<{
-    workerType: "special1" | "special2";
+    type: "special1" | "special2";
     id: SpecialWorkerId
-}> = ({ workerType, id }) => {
+}> = ({ type, id }) => {
     const tooltip = useMemo(() => <SpecialWorkerCard id={id} />, [id]);
     const [anchorRef, maybeTooltip] = useTooltip("bottom", tooltip);
     return <>
         <Worker
             className="GameTopbar-specialWorkerInfo"
             ref={anchorRef as RefObject<HTMLSpanElement>}
-            workerType={workerType}
+            type={type}
         />
         {maybeTooltip}
     </>;

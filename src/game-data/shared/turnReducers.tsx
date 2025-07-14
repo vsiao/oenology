@@ -20,13 +20,14 @@ import Worker from "../../game-views/icons/Worker";
 import { needCardOfTypeDisabledReason, cardTypesInPlay, isLastWinter } from "./sharedSelectors";
 import { papaCards, mamaCards, MamaId, PapaId, MamaCard, PapaCard } from "../mamasAndPapas";
 import { StructureId, structures } from "../structures";
-import { boardActionsBySeason } from "../board/boardPlacements";
+import { boardActions, boardActionsBySeason, isBoardAction } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { wakeUpBonuses, WakeUpBonus } from "../board/wakeUpOrder";
 import GrapeToken from "../../game-views/icons/GrapeToken";
 import StarToken from "../../game-views/icons/StarToken";
 import { promptToInfluence, awardInfluenceVP } from "../board/influenceReducers";
 import { gainWorker } from "./workerReducers";
+import { structureActions } from "../structures/structureActionReducer";
 
 export const endTurn = (state: GameState): GameState => {
     switch (state.currentTurn.type) {
@@ -506,8 +507,8 @@ const startPlannerTurn = (
         return endPlannerTurn(state);
     }
     const workerIdx = state.workerPlacements[plannerAction.type]
-        .findIndex(w => w?.playerId === playerId);
-    const placement = plannerAction.choiceAt(workerIdx, state);
+        .findIndex(w => w?.playerId === playerId && w.source !== "Messenger");
+    const placement = plannerAction.spaceAt(workerIdx, state);
 
     return promptForAction(state, {
         description: <p>
@@ -566,8 +567,8 @@ const startWorkerPlacementTurn = (
         return promptToPlaceWorker(state);
     }
     const workerIdx = state.workerPlacements[messengerAction.type]
-        .findIndex(w => w?.playerId === playerId);
-    const placement = messengerAction.choiceAt(workerIdx, state);
+        .findIndex(w => w?.playerId === playerId && w.source === "Messenger");
+    const placement = messengerAction.spaceAt(workerIdx, state);
 
     const workerPlacement = state.workerPlacements[messengerAction.type].slice();
     workerPlacement[workerIdx] = {
@@ -584,7 +585,7 @@ const startWorkerPlacementTurn = (
 
     return promptForAction(state, {
         description: <p>
-            You placed a <Worker color={player.color} workerType={state.specialWorkers!.Messenger!} />
+            You placed a <Worker color={player.color} type={state.specialWorkers!.Messenger!} />
             {" "}<strong>Messenger</strong>.
         </p>,
         choices: [
@@ -594,7 +595,7 @@ const startWorkerPlacementTurn = (
                 label: placement.label,
                 disabledReason: placement.disabledReason,
             },
-            { id: "PLANNER_PASS", label: "Pass" },
+            { id: "PASS", label: "Pass" },
         ],
     });
 };
@@ -614,10 +615,31 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction | un
 
 const endWorkerPlacementTurn = (state: GameState): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
-    if (currentTurn.hasMerchantBonus) {
+    if (currentTurn.specialWorkerBonus === "Mafioso") {
+        const [placement] = currentTurn.placement!;
         state = setPendingAction(undefined, {
             ...state,
-            currentTurn: { ...currentTurn, hasMerchantBonus: undefined },
+            currentTurn: { ...currentTurn, specialWorkerBonus: undefined },
+        });
+        return promptForAction(state, {
+            title: "Mafioso",
+            description: <p>You may take the action again.</p>,
+            choices: [
+                {
+                    id: "MAFIOSO_ACT",
+                    label: <>{
+                        isBoardAction(placement)
+                            ? boardActions[placement].label(state)
+                            : structureActions[placement].label(state)
+                    }</>
+                },
+                { id: "PASS", label: "Pass" },
+            ]
+        });
+    } else if (currentTurn.specialWorkerBonus === "Merchant") {
+        state = setPendingAction(undefined, {
+            ...state,
+            currentTurn: { ...currentTurn, specialWorkerBonus: undefined },
         });
         return promptForAction<CardType>(state, {
             description: <p>You played the <strong>Merchant</strong>.</p>,

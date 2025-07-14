@@ -3,7 +3,7 @@ import GameState, { StructurePlacement } from "../GameState";
 import { promptToHarvest, promptToUproot } from "../prompts/promptReducers";
 import { harvestFieldDisabledReason, structureUsedDisabledReason, uprootDisabledReason } from "../shared/sharedSelectors";
 import { setPendingAction } from "../shared/turnReducers";
-import type { PlacementChoice } from "../shared/placementAction";
+import type { ActionSpace } from "../shared/placementAction";
 
 export const structureAction = (
     placement: StructurePlacement,
@@ -30,7 +30,7 @@ export const structureAction = (
 interface StructureAction {
     type: StructurePlacement;
     label: (state: GameState) => ReactNode;
-    choiceAt: (i: number, state: GameState) => PlacementChoice;
+    spaceAt: (i: number, state: GameState) => ActionSpace;
 }
 
 const structurePlacement = (type: StructurePlacement, makeSpace: (state: GameState) =>{
@@ -40,7 +40,7 @@ const structurePlacement = (type: StructurePlacement, makeSpace: (state: GameSta
     return {
         type,
         label: state => makeSpace(state).label,
-        choiceAt: (i, state) => ({ ...makeSpace(state), idx: 0 }),
+        spaceAt: (i, state) => ({ ...makeSpace(state), idx: 0 }),
     };
 }
 

@@ -44,7 +44,7 @@ const MamaPapaCard: React.FunctionComponent<Props> = props => {
                     <div>
                         Gain {
                             cardData.coins ? <Coins>{cardData.coins}</Coins> : null
-                        } <Worker workerType="grande" />
+                        } <Worker type="grande" />
                         <hr className="MamaPapaCard-divider" />
                         {renderPapaChoice(cardData.choiceA)}
                         <br />

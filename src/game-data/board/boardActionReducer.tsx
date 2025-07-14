@@ -15,7 +15,6 @@ import { setPendingAction, endTurn } from "../shared/turnReducers";
 import { needGrapesDisabledReason, buyFieldDisabledReason, buildStructureDisabledReason, numCardsDisabledReason, moneyDisabledReason, cardTypesInPlay } from "../shared/sharedSelectors";
 import { drawCards, discardCards } from "../shared/cardReducers";
 import { gainCoins, markStructureUsed, payCoins, gainVP, loseVP } from "../shared/sharedReducers";
-import { boardActions } from "./boardPlacements";
 import * as React from "react";
 import Coins from "../../game-views/icons/Coins";
 import Card from "../../game-views/icons/Card";
@@ -25,6 +24,7 @@ import { discardGrapes, placeGrapes } from "../shared/grapeWineReducers";
 import { promptToInfluence } from "./influenceReducers";
 import { trainMaybeSpecialWorker } from "../shared/workerReducers";
 import { InternalGameAction } from "./currentTurnReducer";
+import { PlacementBonus } from "../shared/placementAction";
 
 export const giveTour = (withBonus: boolean, state: GameState) => {
     const player = state.players[state.currentTurn.playerId];
@@ -42,9 +42,8 @@ export const boardAction = (
     placement: BoardPlacement,
     state: GameState,
     seed: string,
-    placementIdx: number
+    bonus?: PlacementBonus
 ): GameState => {
-    const bonus = boardActions[placement].choiceAt(placementIdx, state).bonus;
     const hasBonus = !!bonus;
     const player = state.players[state.currentTurn.playerId];
 
@@ -136,7 +135,7 @@ export const boardAction = (
                 setPendingAction({
                     type: "playVisitor",
                     hasBonus: bonus === "playSummerVisitor",
-                    placementIdx,
+                    placementIdx: (state.currentTurn as WorkerPlacementTurn).placement![1],
                 }, bonus === "gainCoin" ? gainCoins(1, state) : state)
             );
         }
@@ -146,7 +145,7 @@ export const boardAction = (
                 setPendingAction({
                     type: "playVisitor",
                     hasBonus: bonus === "playWinterVisitor",
-                    placementIdx,
+                    placementIdx: (state.currentTurn as WorkerPlacementTurn).placement![1],
                 }, bonus === "gainCoin" ? gainCoins(1, state) : state)
             );
         }

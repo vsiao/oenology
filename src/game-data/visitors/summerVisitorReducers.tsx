@@ -986,7 +986,7 @@ export const summerVisitorReducers: Record<
                     upToN: 2,
                     title: "Retrieve up to 2 workers",
                     choices: allPlacements
-                        .map(({ type, choiceAt }) => {
+                        .map(({ type, spaceAt }) => {
                             if (type === "playSummerVisitor") {
                                 // Must retrieve from *other* actions
                                 return [];
@@ -997,21 +997,21 @@ export const summerVisitorReducers: Record<
                                         ? {
                                             id: `${type}_${i}`,
                                             label: <>
-                                                <Worker color={w.color} workerType={w.type} isTemp={w.isTemp} />
-                                                &nbsp;{choiceAt(i, state).label}
+                                                <Worker {...w} />
+                                                &nbsp;{spaceAt(i, state).label}
                                             </>,
                                         } as Choice
                                         : null
                                     )
                                     .filter((c: Choice | null): c is Choice => !!c);
                             } else {
-                                const yoke = state.players[playerId].structures.yoke;
-                                return typeof yoke === "object"
+                                const yokeWorker = state.players[playerId].structures.yoke;
+                                return typeof yokeWorker === "object"
                                     ? [{
                                         id: `${type}_0`,
                                         label: <>
-                                            <Worker color={yoke.color} workerType={yoke.type} isTemp={yoke.isTemp} />
-                                            &nbsp;{choiceAt(0, state).label}
+                                            <Worker {...yokeWorker} />
+                                            &nbsp;{spaceAt(0, state).label}
                                         </>
                                     }]
                                     : [];

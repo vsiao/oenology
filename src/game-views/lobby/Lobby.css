@@ -32,6 +32,13 @@
     width: 8em;
 }
 
+.Lobby-specialWorkers {
+    background: #eee;
+    border-radius: 4px;
+    margin-top: 2vh;
+    padding: .5em;
+}
+
 .Lobby-howto {
     background: #eee;
     border-radius: 4px;

@@ -2,7 +2,7 @@ import { VineId, VineYields } from "./vineCards";
 import { WineSpec, OrderId } from "./orderCards";
 import { StructureId } from "./structures";
 import { VisitorId } from "./visitors/visitorCards";
-import { CardType, WorkerType } from "./GameState";
+import { BoardPlacement, CardType, PlacedWorker, WorkerType } from "./GameState";
 import { GrapeSpec } from "./prompts/promptActions";
 import { SpecialWorkerId } from "./specialWorkers";
 
@@ -11,6 +11,7 @@ export type ActivityLog = ActivityLogEvent[];
 export type ActivityLogEvent =
     | BuildEvent
     | BuySellFieldEvent
+    | ChefBumpEvent
     | CoinsEvent
     | DiscardEvent
     | DiscardGrapesEvent
@@ -18,6 +19,7 @@ export type ActivityLogEvent =
     | FillEvent
     | GainWineEvent
     | HarvestEvent
+    | InnkeeperTakeEvent
     | MakeWineEvent
     | PassEvent
     | PlaceWorkerEvent
@@ -41,6 +43,12 @@ interface BuildEvent extends LogEvent<"build"> {
 interface BuySellFieldEvent extends LogEvent<"buySellField"> {
     buy: boolean;
 }
+
+interface ChefBumpEvent extends LogEvent<"chefBump"> {
+    placement: BoardPlacement;
+    bumpedWorker: PlacedWorker;
+}
+
 interface CoinsEvent extends LogEvent<"coins"> {
     delta: number;
 }
@@ -70,6 +78,10 @@ interface VisitorEvent extends LogEvent<"visitor"> {
 }
 interface HarvestEvent extends LogEvent<"harvest"> {
     yields: VineYields;
+}
+interface InnkeeperTakeEvent extends LogEvent<"innkeeperTake"> {
+    cardType: "summerVisitor" | "winterVisitor";
+    fromPlayerId: string;
 }
 interface MakeWineEvent extends LogEvent<"makeWine"> {
     wines: WineSpec[];

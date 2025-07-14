@@ -19,6 +19,8 @@ import { Vine, Order } from "../icons/Card";
 import Grape from "../icons/Grape";
 import WineGlass from "../icons/WineGlass";
 import Worker from "../icons/Worker";
+import { implementedSpecialWorkers } from "../../game-data/specialWorkers";
+import SpecialWorkerCard from "../cards/SpecialWorkerCard";
 
 interface Props {
     gameId: string;
@@ -27,7 +29,7 @@ interface Props {
     gameStatus: string | null | undefined;
     gameOptions: GameOptions;
     setName: (name: string) => void;
-    setOption: (option: string, value: string | number | boolean) => void;
+    setOption: (option: string, value: string | number | boolean | string[] | null) => void;
     setColor: (c: PlayerColor) => void;
     startGame: (players: User[], options: GameOptions) => void;
 }
@@ -46,6 +48,14 @@ const Lobby: React.FunctionComponent<Props> = ({
     const [copiedToClipboard, setCopiedToClipboard] = React.useState(false);
     const gameUrl = `https://make-wine.web.app/game/${gameId}`;
     const isHost = currentUser === users[0];
+    const randomizeSpecialWorker = (worker: number) => {
+        const chosenWorkers = gameOptions.specialWorkers!.slice();
+        const otherWorkers = implementedSpecialWorkers.slice();
+        otherWorkers.splice(otherWorkers.indexOf(chosenWorkers[worker]), 1);
+        const i = Math.floor(Math.random() * otherWorkers.length);
+        chosenWorkers[worker] = otherWorkers[i];
+        setOption("specialWorkers", chosenWorkers);
+    };
     return <>
         <div className="Lobby-main">
             {gameStatus === null
@@ -60,19 +70,25 @@ const Lobby: React.FunctionComponent<Props> = ({
                             onChange={e => setName(e.target.value)}
                         />
                     </label>
-                    <div className="Lobby-howto">
-                        <h4 className="Lobby-howtoHeader">
-                            Winemaking for Dummies™
-                        </h4>
-                        <ol className="Lobby-howtoList">
-                            <li className="Lobby-howtoItem">Plant <Vine /></li>
-                            <li className="Lobby-howtoItem">
-                                Harvest field—<Grape color="red">1</Grape><Grape color="white">5</Grape>
-                            </li>
-                            <li className="Lobby-howtoItem">Make wine—<WineGlass color="blush">6</WineGlass></li>
-                            <li className="Lobby-howtoItem">Fill <Order /></li>
-                        </ol>
-                    </div>
+                    {gameOptions.specialWorkers
+                        ? <div className="Lobby-specialWorkers">
+                            <SpecialWorkerCard id={gameOptions.specialWorkers[0]} />
+                            {" "}
+                            <SpecialWorkerCard id={gameOptions.specialWorkers[1]} />
+                        </div>
+                        : <div className="Lobby-howto">
+                            <h4 className="Lobby-howtoHeader">
+                                Winemaking for Dummies™
+                            </h4>
+                            <ol className="Lobby-howtoList">
+                                <li className="Lobby-howtoItem">Plant <Vine /></li>
+                                <li className="Lobby-howtoItem">
+                                    Harvest field—<Grape color="red">1</Grape><Grape color="white">5</Grape>
+                                </li>
+                                <li className="Lobby-howtoItem">Make wine—<WineGlass color="blush">6</WineGlass></li>
+                                <li className="Lobby-howtoItem">Fill <Order /></li>
+                            </ol>
+                        </div>}
                     <div className="Lobby-shareBanner">
                         <a href={gameUrl} className="Lobby-shareLink">
                             {gameUrl}
@@ -160,7 +176,7 @@ const Lobby: React.FunctionComponent<Props> = ({
                                             setOption("tuscanyBoard", true);
                                         } else {
                                             setOption("tuscanyBoard", false);
-                                            setOption("specialWorkers", false);
+                                            setOption("specialWorkers", null);
                                         }
                                     }}
                                 />
@@ -189,16 +205,29 @@ const Lobby: React.FunctionComponent<Props> = ({
                                     onChange={() => {
                                         if (!gameOptions.specialWorkers) {
                                             setOption("tuscanyBoard", true);
-                                            setOption("specialWorkers", true);
+                                            const n = implementedSpecialWorkers.length;
+                                            const i = Math.floor(Math.random() * n);
+                                            const j = Math.floor(Math.random() * (n - 1));
+                                            const copy = implementedSpecialWorkers.slice();
+                                            const workers = [...copy.splice(i, 1), ...copy.splice(j, 1)];
+                                            setOption("specialWorkers", workers);
                                         } else {
-                                            setOption("specialWorkers", false);
+                                            setOption("specialWorkers", null);
                                         }
                                     }}
                                 />
-                                Special Workers (ALPHA)
+                                Special Workers (BETA)
                             </label>
+                            {gameOptions.specialWorkers && <p>
+                                <ChoiceButton onClick={() => randomizeSpecialWorker(0)}>
+                                    <Worker type="special1" /> {gameOptions.specialWorkers[0]}
+                                </ChoiceButton>
+                                <ChoiceButton onClick={() => randomizeSpecialWorker(1)}>
+                                    <Worker type="special2" /> {gameOptions.specialWorkers[1]}
+                                </ChoiceButton>
+                            </p>}
                         </li>
-                        {renderComingSoonOption("Moor Visitors")}
+                        {/* {renderComingSoonOption("Moor Visitors")} */}
                     </ul>
                     {isHost
                         ? <ChoiceButton
@@ -283,21 +312,21 @@ const PlayerColorPicker: React.FC<{
     </span>;
 };
 
-const renderComingSoonOption = (label: string) => {
-    return <li className="Lobby-gameOption">
-        <label className="Lobby-optionLabel">
-            <input
-                className="Lobby-optionCheckbox"
-                type="checkbox"
-                disabled={true}
-                checked={false}
-            />
-            <span className="Lobby-comingSoonOption">
-                <em className="Lobby-comingSoon">Coming Soon</em>—{label}
-            </span>
-        </label>
-    </li>;
-};
+// const renderComingSoonOption = (label: string) => {
+//     return <li className="Lobby-gameOption">
+//         <label className="Lobby-optionLabel">
+//             <input
+//                 className="Lobby-optionCheckbox"
+//                 type="checkbox"
+//                 disabled={true}
+//                 checked={false}
+//             />
+//             <span className="Lobby-comingSoonOption">
+//                 <em className="Lobby-comingSoon">Coming Soon</em>—{label}
+//             </span>
+//         </label>
+//     </li>;
+// };
 
 const mapStateToProps = (state: AppState) => {
     return {
@@ -313,7 +342,7 @@ const mapStateToProps = (state: AppState) => {
 const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) => {
     return {
         setName: (name: string) => dispatch(setCurrentUserName(name)),
-        setOption: (option: string, value: string | number | boolean) =>
+        setOption: (option: string, value: string | number | boolean | string[] | null) =>
             dispatch(setGameOption(option, value)),
         setColor: (color: PlayerColor) =>
             dispatch(setPlayerColor(color)),
@@ -321,10 +350,7 @@ const mapDispatchToProps = (dispatch: Dispatch, ownProps: { gameId: string }) =>
             dispatch(
                 startGameAction(
                     users.map(({ id, name }, i) => ({ id, name, color: options.playerColors![id] })),
-                    {
-                        ...options,
-                        specialWorkers: options.specialWorkers && ["Merchant", "Messenger"],
-                    }
+                    options,
                 )
             );
             startGame(ownProps.gameId);

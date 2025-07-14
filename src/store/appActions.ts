@@ -31,9 +31,9 @@ export const setCurrentUserName = (name: string): AppAction => {
 
 export interface SetGameOptionAction extends Action<"SET_GAME_OPTION"> {
     option: string;
-    value: string | boolean | number;
+    value: string | boolean | number | string[] | null;
 }
-export const setGameOption = (option: string, value: string | number | boolean): AppAction => {
+export const setGameOption = (option: string, value: string | number | boolean | string[] | null): AppAction => {
     return { type: "SET_GAME_OPTION", option, value };
 };
 

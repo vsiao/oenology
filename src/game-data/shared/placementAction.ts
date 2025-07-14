@@ -13,7 +13,7 @@ export type PlacementBonus =
     | "playWinterVisitor"
     | "plusOne";
 
-export interface PlacementChoice {
+export interface ActionSpace {
     label: ReactNode;
     bonus?: PlacementBonus;
     disabledReason?: string | undefined;
@@ -23,12 +23,12 @@ export interface PlacementChoice {
 export interface PlacementAction {
     type: BoardPlacement,
     label: (state: GameState) => React.ReactNode;
-    choiceAt: (i: number, state: GameState) => PlacementChoice;
+    spaceAt: (i: number, state: GameState) => ActionSpace;
 }
 
 export const placementAction = (
     type: BoardPlacement,
-    choice: (placementIdx: number, data: {
+    makeSpace: (placementIdx: number, data: {
         state: GameState;
         boardType: BoardType;
         numSpots: number;
@@ -43,13 +43,9 @@ export const placementAction = (
         numSpots: numActionSpaces(state),
         state,
     });
-    const choiceAt = (idx: number, state: GameState) => {
-        return { ...choice(idx, data(state)), idx };
-    };
-
     return {
         type,
-        label: state => choice(-1, data(state)).label,
-        choiceAt,
+        label: state => makeSpace(-1, data(state)).label,
+        spaceAt: (idx, state) => ({ ...makeSpace(idx, data(state)), idx }),
     };
 }

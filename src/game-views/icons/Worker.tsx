@@ -16,7 +16,7 @@ const COLORS = {
 
 interface Props {
     className?: string;
-    workerType?: WorkerType;
+    type?: WorkerType;
     color?: PlayerColor;
     isTemp?: boolean;
     disabled?: boolean;
@@ -27,7 +27,7 @@ interface Props {
 
 const Worker = React.forwardRef<HTMLSpanElement, Props>(({
     className,
-    workerType,
+    type,
     color,
     isTemp,
     disabled,
@@ -35,16 +35,16 @@ const Worker = React.forwardRef<HTMLSpanElement, Props>(({
 }, ref) => {
     return <motion.span
         ref={ref}
-        className={cx("Worker", `Worker--${workerType}`, className)}
+        className={cx("Worker", `Worker--${type}`, className)}
         {...(animateWithId === undefined
             ? {}
             : {
                 layout: true,
-                layoutId: isTemp ? "temp999" : `${color}_${workerType}${animateWithId}`,
+                layoutId: isTemp ? "temp999" : `${color}_${type}${animateWithId}`,
             })}
     >
         &nbsp;
-        {workerType === "special1" || workerType === "special2"
+        {type === "special1" || type === "special2"
             ? <svg
                 className={cx({
                     "Worker-icon": true,
@@ -55,7 +55,7 @@ const Worker = React.forwardRef<HTMLSpanElement, Props>(({
                 version="1.1"
                 viewBox="9 3 85 97"
             >
-                {workerType === "special1"
+                {type === "special1"
                     ? <>
                         <path
                             d="M50.0001 7C55.5944 7.00003 60.6516 9.29775 64.2813 13H69.0001C71.6753 13.0001 73.8595 15.1011 73.9932 17.7432L74.0001 18V19C74.0001 21.5007 72.1641 23.5715 69.7667 23.9404C69.9198 24.9379 70.0001 25.9596 70.0001 27C70.0001 29.4628 69.5536 31.8212 68.7393 34H68.9083C68.9971 33.4592 69.5095 33.0852 70.0587 33.1768L74.1368 33.8564C74.2731 33.8792 74.3984 33.9296 74.5089 34H75.0001C80.1667 34.8334 88.0357 38.1425 90.0001 46C91.9644 53.8575 87.0001 64.4998 83.0001 64.5H82.2198C82.6784 64.5003 83.0783 64.8128 83.1895 65.2578L89.379 90.0146C89.6944 91.2768 88.7395 92.4999 87.4385 92.5H61.0509C60.3935 92.5 59.7777 92.1768 59.4044 91.6357L50.8233 79.1934C50.4258 78.6174 49.5743 78.6173 49.1768 79.1934L40.5968 91.6357C40.2235 92.1769 39.6077 92.4998 38.9503 92.5H12.5616C11.2606 92.4999 10.3057 91.2769 10.6212 90.0146L16.8106 65.2578C16.9219 64.8126 17.3225 64.5 17.7813 64.5H17.0001C13.0001 64.4999 8.40008 53.6 10.0001 46C11.6001 38.4 19.8334 34.8333 24.5001 34H25.5128C25.6249 33.927 25.753 33.8749 25.8927 33.8516L29.9425 33.1768C30.4914 33.0856 31.0032 33.4593 31.0919 34H31.2608C30.4466 31.8212 30.0001 29.4628 30.0001 27C30.0001 25.9597 30.0794 24.9379 30.2325 23.9404C27.9182 23.5838 26.1276 21.6411 26.0069 19.2568L26.0001 19V18C26.0001 15.2386 28.2387 13 31.0001 13H35.7188C39.3486 9.29779 44.4057 7.00001 50.0001 7Z"

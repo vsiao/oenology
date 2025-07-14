@@ -13,7 +13,7 @@ export interface GameOptions {
     multiInheritance?: boolean;
     rhineVisitors?: boolean;
     tuscanyBoard?: boolean;
-    specialWorkers?: boolean | [SpecialWorkerId, SpecialWorkerId];
+    specialWorkers?: [SpecialWorkerId, SpecialWorkerId] | null;
     playerColors?: Record<string, PlayerColor>;
 }
 

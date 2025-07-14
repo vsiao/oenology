@@ -109,16 +109,11 @@ const SidebarPlayer: React.FunctionComponent<Props> = ({
                         .sort((w1, w2) => (w1.isTemp ? 1 : 0) - (w2.isTemp ? 1 : 0))
                         .map(worker =>
                             <li key={worker.id} className="SidebarPlayer-worker">
-                                <Worker
-                                    workerType={worker.type}
-                                    color={player.color}
-                                    isTemp={worker.isTemp}
-                                    disabled={true}
-                                />
+                                <Worker {...worker} disabled={true} />
                                 {worker.available && worker.id !== pendingWorkerId &&
                                     <Worker
                                         className="SidebarPlayer-animatedWorker"
-                                        workerType={worker.type}
+                                        type={worker.type}
                                         color={player.color}
                                         isTemp={worker.isTemp}
                                         animateWithId={worker.id}
@@ -201,12 +196,7 @@ const SidebarPlayer: React.FunctionComponent<Props> = ({
 };
 
 const maybeRenderYokeWorker = (player: PlayerState, yokeWorker?: PlacedWorker | null) => {
-    return yokeWorker && <Worker
-        color={player.color}
-        workerType={yokeWorker.type}
-        animateWithId={yokeWorker.id}
-        isTemp={yokeWorker.isTemp}
-    />;
+    return yokeWorker && <Worker {...yokeWorker} />;
 };
 
 const pad = (n: number) => n < 10 ? "0" + n : "" + n;
