@@ -1,5 +1,5 @@
 import { GameAction } from "../gameActions";
-import GameState, { WorkerPlacementTurn, WorkerType } from "../GameState";
+import GameState, { WorkerPlacement, WorkerPlacementTurn, WorkerType } from "../GameState";
 import {
     buildStructure,
     gainCoins,
@@ -40,7 +40,13 @@ import { workerPlacement } from "./workerPlacementReducer";
 
 export type InternalGameAction = GameAction | InternalAction;
 
-type InternalAction = WorkerTrainedAction;
+type InternalAction = WorkerPlacedAction | WorkerTrainedAction;
+interface WorkerPlacedAction extends Action<"WORKER_PLACED"> {
+    workerType: WorkerType;
+    placement: WorkerPlacement;
+    idx: number;
+    key: string;
+}
 interface WorkerTrainedAction extends Action<"WORKER_TRAINED"> {
     playerId: string;
 }
@@ -337,17 +343,7 @@ const workerPlacementTurn = (state: GameState, action: InternalGameAction): Game
                     if (action.choice !== "TRAIN_WORKER") {
                         return state;
                     }
-                    state = gainWorker(state, pendingAction.cost, {
-                        workerType: action.data as WorkerType,
-                        playerId: action.playerId,
-                        availableThisYear: pendingAction.availableThisYear,
-                    });
-                    if (pendingAction.fromAction) {
-                        // Return to previous action
-                        state = setPendingAction(pendingAction.fromAction, state);
-                        return currentTurn(state, { type: "WORKER_TRAINED", playerId: action.playerId });
-                    }
-                    return endTurn(state);
+                    return endTrainWorker(state, action.data as WorkerType);
             }
             return state;
     }

@@ -2,14 +2,17 @@ import React from "react";
 import Coins from "../game-views/icons/Coins";
 import Card from "../game-views/icons/Card";
 import VictoryPoints from "../game-views/icons/VictoryPoints";
+import Grape from "../game-views/icons/Grape";
 
 export const implementedSpecialWorkers: SpecialWorkerId[] = [
     "Chef",
     "Innkeeper",
     "Mafioso",
+    "Mama Grande",
     "Merchant",
     "Messenger",
     "Professore",
+    "Traveler",
 ];
 
 export const tuscanyWorkers = {
@@ -27,10 +30,10 @@ export const tuscanyWorkers = {
 };
 
 export const promoWorkers = {
-    Alchemist: <p>When you place the Alchemist, you may change one white-grape token on your crush pad into a red-grape token of equal of lesser value (or vice versa red into white).</p>,
+    Alchemist: <p>When you place the Alchemist, you may change one <Grape color="white" /> on your crush pad into a <Grape color="red" /> of equal of lesser value (or vice versa).</p>,
     Apprentice: <p>After taking an action with the Apprentice, you may immediately place your Grande Worker on the same action (not on an action space).</p>,
     Builder: <p>When using the Builder to build a structure (on a “Build One Structure” action or a visitor card action), pay <Coins>2</Coins> less per structure.</p>,
-    Martyr: <p>After placing the Martyr, instead of taking the action, you may remove the Martyr from the game. If you do, immediately place any/all of your other workers in the current season and their actions.</p>,
+    Martyr: <p>After placing the Martyr, instead of taking the action, you may remove the Martyr from the game. If you do, immediately place any/all of your other workers in the current season and take their actions.</p>,
     "Mama Grande": <p>This is a second Grande Worker. If you place Mama Grande on the same action on the board as your Grande Worker, gain <VictoryPoints>1</VictoryPoints>.</p>,
     Salesman: <p>After using the Salesman to fill a wine order (on the “Fill One Wine Order” action or a visitor card action), you may pay <Coins>2</Coins> to fill a second wine order.</p>,
     Sommelier: <p>After taking an action with the Sommelier, you may age X different wine tokens each, where X is the total number of workers on the Sommelier's action (including the Sommelier).</p>,

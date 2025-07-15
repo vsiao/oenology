@@ -80,7 +80,7 @@ import Residuals from "../../game-views/icons/Residuals";
 import Worker from "../../game-views/icons/Worker";
 import { allPlacements, isBoardAction } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
-import { placeWorker, retrieveWorker } from "../shared/workerReducers";
+import { beginPlaceWorker, retrieveWorker } from "../shared/workerReducers";
 import { InternalGameAction } from "../board/currentTurnReducer";
 
 export const summerVisitorReducers: Record<
@@ -902,9 +902,10 @@ export const summerVisitorReducers: Record<
                 if (!action.placement) {
                     throw new Error(`Unexpected Planner placement: ${action.placement}`);
                 }
-                return endVisitor(
-                    placeWorker(action.workerType, action.placement, action.idx, state, "Planner")[0]
-                );
+                const { workerType, placement, idx, _key } = action;
+                return beginPlaceWorker(workerType, placement, idx, state, _key!);
+            case "WORKER_PLACED":
+                return endVisitor(state);
             default:
                 return state;
         }
@@ -1499,15 +1500,10 @@ export const rhineSummerVisitorReducers: Record<
                     pendingAction.placementIdx!,
                     state
                 );
-                return endVisitor(
-                    placeWorker(
-                        placedWorker.type,
-                        action.placement,
-                        action.idx,
-                        state,
-                        "Administrator"
-                    )[0]
-                );
+                const { placement, idx, _key } = action;
+                return beginPlaceWorker(placedWorker.type, placement, idx, state, _key!);
+            case "WORKER_PLACED":
+                return endVisitor(state);
             default:
                 return state;
         }

@@ -271,7 +271,7 @@ export interface PlacedWorker {
     playerId: string,
     color: PlayerColor;
     isTemp: boolean;
-    source: "Planner" | "Administrator" | "Messenger" | "pending" | null;
+    source: "Messenger" | "pending" | null;
 }
 
 export interface InfluenceToken {

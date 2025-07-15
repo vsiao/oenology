@@ -6,19 +6,17 @@ import {
     withoutActivityLog,
 } from "../shared/sharedReducers";
 import { promptForAction } from "../prompts/promptReducers";
-import { moneyDisabledReason, numActionSpaces } from "../shared/sharedSelectors";
+import { numActionSpaces } from "../shared/sharedSelectors";
 import { endTurn, passToNextSeason } from "../shared/turnReducers";
 import { drawCards, addCardsToHand, removeCardsFromHand } from "../shared/cardReducers";
 import { boardAction } from "./boardActionReducer";
-import { placeWorker, retrieveWorker } from "../shared/workerReducers";
-import { boardActions, boardActionsBySeason, isBoardAction, seasonByBoardAction } from "./boardPlacements";
+import { beginPlaceWorker, retrieveWorker } from "../shared/workerReducers";
+import { boardActions, boardActionsBySeason, isBoardAction } from "./boardPlacements";
 import { structureAction, structureActions } from "../structures/structureActionReducer";
 import React from "react";
 import Worker from "../../game-views/icons/Worker";
 import { Choice } from "../prompts/PromptState";
 import { visitorCards } from "../visitors/visitorCards";
-import Card from "../../game-views/icons/Card";
-import Coins from "../../game-views/icons/Coins";
 import { InternalGameAction } from "./currentTurnReducer";
 import Alea from "alea";
 
@@ -27,74 +25,24 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
     const playerId = currentTurn.playerId;
     switch (action.type) {
         case "PLACE_WORKER": {
-            const { placement, workerType } = action;
-            state = { ...state, lastPlaceWorkerActionKey: action._key, pendingWorker: null };
+            const { placement, workerType, idx, _key } = action;
+            state = { ...state, lastPlaceWorkerActionKey: _key, pendingWorker: null };
             if (!placement) {
                 return passToNextSeason(state);
             }
-            const workerName = state.specialWorkers?.[workerType];
-            const allSeasons = ["spring", "summer", "fall", "winter"] as const;
-            const isFutureMessengerPlacement =
-                isBoardAction(placement) &&
-                    placement !== "gainCoin" &&
-                    workerName === "Messenger" &&
-                    allSeasons.indexOf(state.season) < allSeasons.indexOf(seasonByBoardAction(state, placement))
-
-            let placementIdx: number;
-            [state, placementIdx] = placeWorker(
-                workerType,
-                placement,
-                action.idx ?? null,
-                state,
-                isFutureMessengerPlacement ? "Messenger" : undefined
-            );
+            return beginPlaceWorker(workerType, placement, idx ?? null, state, _key!);
+        }
+        case "WORKER_PLACED": {
+            const { workerType, placement, idx: placementIdx } = action;
             state = { ...state, currentTurn: { ...currentTurn, placement: [placement, placementIdx] } };
 
             const placementAction = isBoardAction(placement)
                 ? boardActions[placement]
                 : structureActions[placement];
             const actionSpace = placementAction.spaceAt(placementIdx, state);
+            const workerName = state.specialWorkers?.[workerType];
 
             switch (workerName) {
-                case "Innkeeper":
-                    if (!isBoardAction(placement)) {
-                        break;
-                    }
-                    const bonus = boardActions[placement].spaceAt(placementIdx, state).bonus;
-                    const visitorsAtPlacement: Choice<string>[] = state.tableOrder.map(otherPlayerId =>
-                        (["summer", "winter"] as const).filter(season =>
-                            otherPlayerId !== playerId &&
-                            state.workerPlacements[placement].some(w => w?.playerId === otherPlayerId) &&
-                                state.players[otherPlayerId].cardsInHand.some(c =>
-                                    c.type === "visitor" &&
-                                    visitorCards[c.id].season === season
-                                )
-                        ).map(season => ({
-                            id: "INNKEEPER_TAKE",
-                            data: `${otherPlayerId}_${season}`,
-                            label: <>
-                                <Card type={`${season}Visitor`} /> from
-                                {" "}<strong>{state.players[otherPlayerId].name}</strong>
-                            </>,
-                            disabledReason: moneyDisabledReason(
-                                state,
-                                1 + (placement === "trainWorker"
-                                    ? (bonus === "gainCoin" ? 3 : 4)
-                                    : 0)
-                            ),
-                        }))
-                    ).flat();
-                    if (visitorsAtPlacement.length > 0) {
-                        return promptForAction(state, {
-                            title: "Innkeeper",
-                            description: <p>You may pay an opponent <Coins>1</Coins> to take a visitor.</p>,
-                            choices: visitorsAtPlacement.concat({
-                                id: "INNKEEPER_PASS",
-                                label: <>Pass</>
-                            })
-                        });
-                    }
-                    break;
                 case "Mafioso":
                     if (placementIdx < numActionSpaces(state) && actionSpace.bonus === undefined) {
                         state = {
@@ -115,6 +63,8 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                     }
                     break;
                 case "Messenger":
+                    const isFutureMessengerPlacement = isBoardAction(placement) &&
+                        state.workerPlacements[placement][placementIdx]!.source === "Messenger";
                     if (isFutureMessengerPlacement) {
                         // The Messenger will be resolved in a future season
                         return endTurn(state);
@@ -145,7 +95,7 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                         });
                     }
             }
-            return handlePlacementAction(placement, state, action._key!, placementIdx);
+            return handlePlacementAction(placement, state, action.key, placementIdx);
         }
         case "CHOOSE_ACTION":
             switch (action.choice) {
@@ -200,6 +150,8 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                 default:
                     return state;
             }
+        case "WORKER_TRAINED":
+            return endTurn(state);
         default:
             return state;
     }
