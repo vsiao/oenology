@@ -1,25 +1,18 @@
 import GameState, { BoardPlacement, CardType, WorkerPlacement, WorkerPlacementTurn } from "../GameState";
-import {
-    gainCoins,
-    payCoins,
-    pushActivityLog,
-    withoutActivityLog,
-} from "../shared/sharedReducers";
-import { promptForAction } from "../prompts/promptReducers";
 import { numActionSpaces } from "../shared/sharedSelectors";
 import { endTurn, passToNextSeason } from "../shared/turnReducers";
-import { drawCards, addCardsToHand, removeCardsFromHand } from "../shared/cardReducers";
+import { drawCards } from "../shared/cardReducers";
 import { boardAction } from "./boardActionReducer";
-import { beginPlaceWorker, retrieveWorker } from "../shared/workerReducers";
-import { boardActions, boardActionsBySeason, isBoardAction } from "./boardPlacements";
+import { beginPlaceWorker } from "../shared/workerReducers";
+import { boardActions, isBoardAction } from "./boardPlacements";
 import { structureAction, structureActions } from "../structures/structureActionReducer";
-import React from "react";
-import Worker from "../../game-views/icons/Worker";
-import { Choice } from "../prompts/PromptState";
-import { visitorCards } from "../visitors/visitorCards";
 import { InternalGameAction } from "./currentTurnReducer";
-import Alea from "alea";
 
+/**
+ * Handles pre- and post-placement actions for a worker placement turn.
+ * Mostly that encapsulates checking special worker conditions and activating their powers
+ * after the main placement action has been completed.
+ */
 export const workerPlacement = (state: GameState, action: InternalGameAction): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
     const playerId = currentTurn.playerId;
@@ -70,62 +63,18 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                         return endTurn(state);
                     }
                     break;
-                case "Professore":
-                    const actionsThisSeason = boardActionsBySeason(state)[state.season];
-                    const regularWorkersThisSeason: Choice<string>[] = actionsThisSeason.map(({ type }) =>
-                        state.workerPlacements[type]
-                            .map((w, i) => w?.type === "normal" && w.playerId === playerId && {
-                                id: "PROFESSORE_RETRIEVE",
-                                data: `${type}_${i}`,
-                                label: <>
-                                    <Worker {...w} />
-                                    &nbsp;{boardActions[type].spaceAt(i, state).label}
-                                </>
-                            })
-                            .filter(p => !!p)
-                    ).flat();
-                    if (regularWorkersThisSeason.length > 0) {
-                        return promptForAction(state, {
-                            title: "Professore",
-                            description: <p>You may retrieve a regular worker from this season.</p>,
-                            choices: regularWorkersThisSeason.concat([{
-                                id: "PROFESSORE_PASS",
-                                label: <>Pass</>,
-                            }]),
-                        });
-                    }
             }
             return handlePlacementAction(placement, state, action.key, placementIdx);
         }
         case "CHOOSE_ACTION":
+            const [placement, idx] = currentTurn.placement!;
             switch (action.choice) {
                 case "MAFIOSO_ACT": {
-                    const [placement, idx] = currentTurn.placement!;
                     return handlePlacementAction(placement, state, action._key!, idx);
                 }
                 case "MERCHANT_DRAW_CARD":
                     return endTurn(drawCards(state, state.lastActionKey, { [action.data as CardType]: 1 }));
 
-                case "INNKEEPER_TAKE": {
-                    const [otherPlayerId, season] = (action.data as string).split("_");
-                    const otherPlayer = state.players[otherPlayerId];
-                    const visitorCardsOfSeason = otherPlayer.cardsInHand.filter(c =>
-                        c.type === "visitor" && visitorCards[c.id].season === season
-                    );
-                    const random = Alea(action._key);
-                    const card = visitorCardsOfSeason[Math.floor(random() * visitorCardsOfSeason.length)];
-                    state = withoutActivityLog(() => payCoins(1, gainCoins(1, state, otherPlayerId)));
-                    state = removeCardsFromHand([card], state, otherPlayerId);
-                    state = addCardsToHand([card], state, playerId)
-                    state = pushActivityLog({
-                        type: "innkeeperTake",
-                        playerId,
-                        cardType: `${season as "winter" | "summer"}Visitor`,
-                        fromPlayerId: otherPlayerId,
-                    }, state);
-                    const [placement, idx] = currentTurn.placement!;
-                    return handlePlacementAction(placement, state, action._key!, idx);
-                }
                 case "PLANNER_ACT": {
                     const { placement, idx } = action.data as { placement: BoardPlacement; idx: number };
                     state = { ...state, currentTurn: { ...currentTurn, placement: [placement, idx] } };
@@ -136,17 +85,6 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                 case "PLANNER_PASS":
                     return endTurn(state);
                 
-                case "INNKEEPER_PASS":
-                case "PROFESSORE_PASS": {
-                    const [placement, idx] = currentTurn.placement!;
-                    return handlePlacementAction(placement, state, action._key!, idx);
-                }
-                case "PROFESSORE_RETRIEVE": {
-                    const [retrievePlacement, retrieveIdx] = (action.data as string).split("_");
-                    state = retrieveWorker(retrievePlacement as WorkerPlacement, parseInt(retrieveIdx, 10), state);
-                    const [placement, idx] = currentTurn.placement!;
-                    return handlePlacementAction(placement, state, action._key!, idx);
-                }
                 default:
                     return state;
             }

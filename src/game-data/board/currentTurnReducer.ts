@@ -34,7 +34,7 @@ import { fillOrder, makeWineFromGrapes, harvestFields, discardGrapes, discardWin
 import { visitor } from "../visitors/visitorReducer";
 import { giveTour, trade } from "./boardActionReducer";
 import { influence } from "./influenceReducers";
-import { gainWorker } from "../shared/workerReducers";
+import { endTrainWorker, placeWorkerChoice } from "../shared/workerReducers";
 import { Action } from "redux";
 import { workerPlacement } from "./workerPlacementReducer";
 
@@ -336,6 +336,13 @@ const workerPlacementTurn = (state: GameState, action: InternalGameAction): Game
 
         case "trade":
             return trade(state, action);
+
+        case "placeWorker":
+            switch (action.type) {
+                case "CHOOSE_ACTION":
+                    return placeWorkerChoice(state, action, pendingAction);
+            }
+            return state;
 
         case "trainWorker":
             switch (action.type) {

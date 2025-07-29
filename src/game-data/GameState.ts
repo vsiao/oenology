@@ -111,6 +111,14 @@ export interface WorkerPlacementTurn {
     specialWorkerBonus?: "Mafioso" | "Merchant";
 }
 
+export interface PlaceWorkerPendingAction {
+    type: "placeWorker";
+    workerType: WorkerType;
+    placement: WorkerPlacement;
+    space: number;
+    fromAction: WorkerPlacementTurnPendingAction | null;
+}
+
 export interface PlayVisitorPendingAction {
     type: "playVisitor";
     visitorId?: VisitorId;
@@ -153,6 +161,7 @@ export type WorkerPlacementTurnPendingAction =
     | InfluencePendingAction
     | { type: "makeWine"; hasBonus: boolean; }
     | { type: "passToNextSeason"; nextSeason: Season | "endOfYear"; }
+    | PlaceWorkerPendingAction
     | { type: "plantVine"; vineId?: VineId; hasBonus: boolean;}
     | { type: "sellField"; hasBonus: boolean; }
     | { type: "sellGrapes"; hasBonus: boolean; }

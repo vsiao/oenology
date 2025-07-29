@@ -6,20 +6,25 @@ import GameState, {
     PlacedWorker,
     StructureState,
     BoardPlacement,
+    PlaceWorkerPendingAction,
 } from "../GameState";
 import { setPendingAction } from "./turnReducers";
 import { promptForAction } from "../prompts/promptReducers";
 import Worker from "../../game-views/icons/Worker";
 import React from "react";
 import Coins from "../../game-views/icons/Coins";
-import { gainVP, loseVP, payCoins, pushActivityLog, updatePlayer, withoutActivityLog } from "./sharedReducers";
+import { gainCoins, gainVP, loseVP, payCoins, pushActivityLog, updatePlayer, withoutActivityLog } from "./sharedReducers";
 import { currentTurn } from "../board/currentTurnReducer";
 import { moneyDisabledReason, numActionSpaces } from "./sharedSelectors";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
-import { boardActions, isBoardAction, seasonByBoardAction } from "../board/boardPlacements";
+import { boardActions, boardActionsBySeason, isBoardAction, seasonByBoardAction } from "../board/boardPlacements";
 import { Choice } from "../prompts/PromptState";
 import { visitorCards } from "../visitors/visitorCards";
 import Card from "../../game-views/icons/Card";
+import { ChooseAction } from "../prompts/promptActions";
+import Alea from "alea";
+import { PublishedGameAction } from "../gameActions";
+import { addCardsToHand, removeCardsFromHand } from "./cardReducers";
 
 export const canTrainSpecialWorker = (state: GameState, playerId = state.currentTurn.playerId) => {
     const player = state.players[playerId];
@@ -248,13 +253,16 @@ export const beginPlaceWorker = (
     if (typeof space === "string") {
         throw new Error(`Cannot place worker: ${space}`);
     }
-    state = {
-        ...state,
-        currentTurn: {
-            ...state.currentTurn as WorkerPlacementTurn,
-            placement: [placement, space],
+    state = setPendingAction(
+        {
+            type: "placeWorker",
+            fromAction: (state.currentTurn as WorkerPlacementTurn).pendingAction ?? null,
+            workerType: type,
+            placement,
+            space,
         },
-    };
+        state
+    );
     const workerName = state.specialWorkers?.[type];
     const allSeasons = ["spring", "summer", "fall", "winter"] as const;
     const isFutureMessengerPlacement =
@@ -272,6 +280,14 @@ export const beginPlaceWorker = (
     };
     if (isBoardAction(placement)) {
         const placements = state.workerPlacements[placement].slice();
+        placements[space] = placedWorker;
+        state = {
+            ...state,
+            workerPlacements: {
+                ...state.workerPlacements,
+                [placement]: placements,
+            },
+        };
         // Perform special worker placement abilities
         switch (workerName) {
             case "Chef":
@@ -330,15 +346,32 @@ export const beginPlaceWorker = (
                     state = gainVP(1, state, { playerId, source: "bonus" });
                 }
                 break;
+
+            case "Professore":
+                const actionsThisSeason = boardActionsBySeason(state)[state.season];
+                const regularWorkersThisSeason: Choice<string>[] = actionsThisSeason.map(({ type }) =>
+                    state.workerPlacements[type]
+                        .map((w, i) => w?.type === "normal" && w.playerId === playerId && {
+                            id: "PROFESSORE_RETRIEVE",
+                            data: `${type}_${i}`,
+                            label: <>
+                                <Worker {...w} />
+                                &nbsp;{boardActions[type].spaceAt(i, state).label}
+                            </>
+                        })
+                        .filter(p => !!p)
+                ).flat();
+                if (regularWorkersThisSeason.length > 0) {
+                    return promptForAction(state, {
+                        title: "Professore",
+                        description: <p>You may retrieve a regular worker from this season.</p>,
+                        choices: regularWorkersThisSeason.concat([{
+                            id: "PROFESSORE_PASS",
+                            label: <>Pass</>,
+                        }]),
+                    });
+                }
         }
-        placements[space] = placedWorker;
-        state = {
-            ...state,
-            workerPlacements: {
-                ...state.workerPlacements,
-                [placement]: placements,
-            },
-        };
     } else {
         // place worker on yoke
         state = updatePlayer(state, player.id, {
@@ -355,6 +388,45 @@ export const beginPlaceWorker = (
         idx: pendingAction.space,
         key,
     });
+};
+
+export const placeWorkerChoice = (
+    state: GameState,
+    action: ChooseAction & PublishedGameAction,
+    pendingAction: PlaceWorkerPendingAction
+): GameState => {
+    switch (action.choice) {
+        case "INNKEEPER_TAKE": {
+            const playerId = state.currentTurn.playerId;
+            const [otherPlayerId, season] = (action.data as string).split("_");
+            const otherPlayer = state.players[otherPlayerId];
+            const visitorCardsOfSeason = otherPlayer.cardsInHand.filter(c =>
+                c.type === "visitor" && visitorCards[c.id].season === season
+            );
+            const random = Alea(action._key);
+            const card = visitorCardsOfSeason[Math.floor(random() * visitorCardsOfSeason.length)];
+            state = withoutActivityLog(() => payCoins(1, gainCoins(1, state, otherPlayerId)));
+            state = removeCardsFromHand([card], state, otherPlayerId);
+            state = addCardsToHand([card], state, playerId)
+            state = pushActivityLog({
+                type: "innkeeperTake",
+                playerId,
+                cardType: `${season as "winter" | "summer"}Visitor`,
+                fromPlayerId: otherPlayerId,
+            }, state);
+            break;
+        }
+        case "INNKEEPER_PASS":
+        case "PROFESSORE_PASS":
+            break;
+
+        case "PROFESSORE_RETRIEVE": {
+            const [retrievePlacement, retrieveIdx] = (action.data as string).split("_");
+            state = retrieveWorker(retrievePlacement as WorkerPlacement, parseInt(retrieveIdx, 10), state);
+            break;
+        }
+    }
+    return endPlaceWorker(state, action._key!);
 };
 
 export const retrieveWorker = (
