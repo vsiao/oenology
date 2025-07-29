@@ -108,7 +108,7 @@ export interface WorkerPlacementTurn {
     // pendingAction will be stored here.
     managerPendingAction?: PlayVisitorPendingAction;
 
-    specialWorkerBonus?: "Mafioso" | "Merchant";
+    specialWorkerBonus?: "Mafioso" | "Merchant" | "Storyteller";
 }
 
 export interface PlaceWorkerPendingAction {

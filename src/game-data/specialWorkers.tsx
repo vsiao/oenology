@@ -12,6 +12,8 @@ export const implementedSpecialWorkers: SpecialWorkerId[] = [
     "Merchant",
     "Messenger",
     "Professore",
+    "Soldato",
+    "Storyteller",
     "Traveler",
 ];
 

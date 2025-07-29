@@ -8,6 +8,8 @@ import GameState, {
     WorkerPlacementTurn,
     WorkerPlacementTurnPendingAction,
     Season,
+    PlacedWorker,
+    BoardPlacement,
 } from "../GameState";
 import { ageAllTokens, ageCellar } from "./grapeWineReducers";
 import { buildStructure, pushActivityLog, updatePlayer, gainVP, gainCoins, loseVP } from "./sharedReducers";
@@ -510,6 +512,13 @@ const startPlannerTurn = (
         .findIndex(w => w?.playerId === playerId && w.source !== "Messenger");
     const placement = plannerAction.spaceAt(workerIdx, state);
 
+    state = {
+        ...state,
+        currentTurn: {
+            ...(state.currentTurn as WorkerPlacementTurn),
+            placement: [plannerAction.type, workerIdx]
+        }
+    };
     return promptForAction(state, {
         description: <p>
             You placed a worker with the <strong>
@@ -615,41 +624,78 @@ export const setPendingAction = <T extends WorkerPlacementTurnPendingAction | un
 
 const endWorkerPlacementTurn = (state: GameState): GameState => {
     const currentTurn = state.currentTurn as WorkerPlacementTurn;
-    if (currentTurn.specialWorkerBonus === "Mafioso") {
-        const [placement] = currentTurn.placement!;
-        state = setPendingAction(undefined, {
-            ...state,
-            currentTurn: { ...currentTurn, specialWorkerBonus: undefined },
-        });
-        return promptForAction(state, {
-            title: "Mafioso",
-            description: <p>You may take the action again.</p>,
-            choices: [
-                {
-                    id: "MAFIOSO_ACT",
-                    label: <>{
-                        isBoardAction(placement)
-                            ? boardActions[placement].label(state)
-                            : structureActions[placement].label(state)
-                    }</>
-                },
-                { id: "PASS", label: "Pass" },
-            ]
-        });
-    } else if (currentTurn.specialWorkerBonus === "Merchant") {
-        state = setPendingAction(undefined, {
-            ...state,
-            currentTurn: { ...currentTurn, specialWorkerBonus: undefined },
-        });
-        return promptForAction<CardType>(state, {
-            description: <p>You played the <strong>Merchant</strong>.</p>,
-            choices: cardTypesInPlay(state).map(cardType => ({
-                id: "MERCHANT_DRAW_CARD",
-                data: cardType,
-                label: <>Draw <Card type={cardType} /></>,
-            })),
-        });
-    } else if (currentTurn.isPlannerTurn) {
+    switch (currentTurn.specialWorkerBonus) {
+        case "Mafioso":
+            const [placement] = currentTurn.placement!;
+            const { specialWorkerBonus, ...newCurrentTurn } = currentTurn;
+            state = setPendingAction(null, { ...state, currentTurn: newCurrentTurn });
+            return promptForAction(state, {
+                title: "Mafioso",
+                description: <p>You may take the action again.</p>,
+                choices: [
+                    {
+                        id: "MAFIOSO_ACT",
+                        label: <>{
+                            isBoardAction(placement)
+                                ? boardActions[placement].label(state)
+                                : structureActions[placement].label(state)
+                        }</>
+                    },
+                    { id: "PASS", label: "Pass" },
+                ]
+            });
+        case "Merchant": {
+            const { specialWorkerBonus, ...newCurrentTurn } = currentTurn;
+            state = setPendingAction(null, { ...state, currentTurn: newCurrentTurn });
+            return promptForAction<CardType>(state, {
+                description: <p>You played the <strong>Merchant</strong>.</p>,
+                choices: cardTypesInPlay(state).map(cardType => ({
+                    id: "MERCHANT_DRAW_CARD",
+                    data: cardType,
+                    label: <>Draw <Card type={cardType} /></>,
+                })),
+            });
+        }
+        case "Storyteller":
+            const storytellerPlacement = currentTurn.placement![0] as BoardPlacement;
+            const newBoardPlacements = { ...state.workerPlacements };
+            const actions = boardActionsBySeason(state)[state.season];
+            const workersToMove: PlacedWorker[] = [];
+            for (const { type } of actions) {
+                if (type === storytellerPlacement) {
+                    continue;
+                }
+                const workers = newBoardPlacements[type].slice();
+                workers.forEach((w, i) => {
+                    if (w?.type === "normal") {
+                        // Move to the storyteller's action
+                        workersToMove.push(w);
+                        workers[i] = null;
+                    }
+                });
+                newBoardPlacements[type] = workers;
+            }
+            const placements = newBoardPlacements[storytellerPlacement];
+            const destination = [
+                // Action spaces on the board
+                ...new Array(3).fill(null).map((_, i) => placements[i] ?? null),
+                // Any grande workers that overflow
+                ...placements.slice(3),
+            ];
+            // Storyteller-moved workers do not occupy action spaces, so shift indexes by 3
+            for (const w of workersToMove) {
+                const i = destination.slice(3).findIndex(p => p === null);
+                if (i < 0) {
+                    destination.push(w); // no open slots; just append
+                } else {
+                    destination[i + 3] = w;
+                }
+            }
+            newBoardPlacements[storytellerPlacement] = destination;
+            state = { ...state, workerPlacements: newBoardPlacements };
+            break;
+    }
+    if (currentTurn.isPlannerTurn) {
         return endPlannerTurn(state);
     } else if (currentTurn.managerPendingAction) {
         // Restore Manager state; end the visitor

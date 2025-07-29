@@ -78,8 +78,7 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
                 case "PLANNER_ACT": {
                     const { placement, idx } = action.data as { placement: BoardPlacement; idx: number };
                     state = { ...state, currentTurn: { ...currentTurn, placement: [placement, idx] } };
-                    const bonus = boardActions[placement].spaceAt(idx, state).bonus;
-                    return boardAction(placement, state, action._key!, bonus);
+                    return handlePlacementAction(placement, state, action._key!, idx);
                 }
                 case "PASS":
                 case "PLANNER_PASS":
@@ -102,6 +101,16 @@ const handlePlacementAction = (
     placementIdx: number
 ): GameState => {
     if (isBoardAction(type)) {
+        const worker = state.workerPlacements[type][placementIdx];
+        if (worker && state.specialWorkers?.[worker.type] === "Storyteller") {
+            state = {
+                ...state,
+                currentTurn: {
+                    ...state.currentTurn as WorkerPlacementTurn,
+                    specialWorkerBonus: "Storyteller",
+                },
+            };
+        }
         const bonus = boardActions[type].spaceAt(placementIdx, state).bonus;
         return boardAction(type, state, key, bonus);
     } else {
