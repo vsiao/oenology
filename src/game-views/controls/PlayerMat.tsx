@@ -2,7 +2,7 @@ import "./PlayerMat.css";
 import cx from "classnames";
 import * as React from "react";
 import { connect } from "react-redux";
-import { CardId, PlacedWorker, PlayerState, StructureState, WorkerPlacement, WorkerType } from "../../game-data/GameState";
+import { CardId, PlacedWorker, PlayerColor, PlayerState, PlayerWorker, StructureState, WorkerPlacement, WorkerType } from "../../game-data/GameState";
 import { orderCards } from "../../game-data/orderCards";
 import { vineCards } from "../../game-data/vineCards";
 import { visitorCards } from "../../game-data/visitors/visitorCards";
@@ -19,6 +19,7 @@ import MamaPapaCard from "../cards/MamaPapaCard";
 import ChoiceButton from "./ChoiceButton";
 import { Dispatch } from "redux";
 import { GameAction, placeWorker, setWorkerType } from "../../game-data/gameActions";
+import { useTooltip } from "../shared/useTooltip";
 
 interface Props {
     shouldShowMamaPapas: boolean;
@@ -27,6 +28,7 @@ interface Props {
     playerStates: Record<string, PlayerState>;
     playerId: string | null;
     selectedWorkerType: WorkerType;
+    specialWorkerNames: Partial<Record<WorkerType, string>>;
     yokeState: StructureState | PlacedWorker;
     setWorkerType: (workerType: WorkerType) => void;
     placeWorker: (playerId: string, placement: WorkerPlacement | null, workerType: WorkerType) => void;
@@ -39,6 +41,7 @@ const PlayerMat: React.FunctionComponent<Props> = ({
     playerStates,
     playerId,
     selectedWorkerType,
+    specialWorkerNames,
     yokeState,
     setWorkerType,
     placeWorker,
@@ -63,26 +66,17 @@ const PlayerMat: React.FunctionComponent<Props> = ({
                                         return null;
                                     }
                                     const disabled = !shouldSelectWorkerType || workersOfType.every(w => !w.available);
-                                    return <button
+                                    const selected = shouldSelectWorkerType && workerType === selectedWorkerType;
+                                    return <WorkerTypeButton
                                         key={workerType}
-                                        className={cx({
-                                            "PlayerMat-workerTypeButton": true,
-                                            "PlayerMat-workerTypeButton--selected":
-                                                shouldSelectWorkerType && workerType === selectedWorkerType,
-                                        })}
+                                        color={playerState.color}
+                                        workerType={workerType}
+                                        workerName={specialWorkerNames[workerType] ?? null}
+                                        workersOfType={workersOfType}
                                         disabled={disabled}
-                                        onClick={disabled ? undefined : () => setWorkerType(workerType)}
-                                    >
-                                        {workersOfType.map((worker, i) =>
-                                            <Worker
-                                                key={i}
-                                                type={worker.type}
-                                                color={playerState.color}
-                                                isTemp={worker.isTemp}
-                                                disabled={!worker.available}
-                                            />
-                                        )}
-                                    </button>
+                                        selected={selected}
+                                        onClick={() => setWorkerType(workerType)}
+                                    />;
                                 })}
                             </div>
                             {shouldShowWorkerControls && <>
@@ -133,6 +127,50 @@ const PlayerMat: React.FunctionComponent<Props> = ({
                 </div>
         }
     </div>;
+};
+
+const WorkerTypeButton: React.FC<{
+    color: PlayerColor;
+    workerType: WorkerType;
+    workerName: string | null;
+    workersOfType: PlayerWorker[];
+    disabled: boolean;
+    selected: boolean;
+    onClick: React.MouseEventHandler<HTMLButtonElement>;
+}> = ({
+    color,
+    workerType,
+    workerName,
+    workersOfType,
+    disabled,
+    selected,
+    onClick,
+}) => {
+    const [ref, maybeTooltip] = useTooltip(
+        "top",
+        workerName ?? (workerType === "grande" ? "Grande" : null)
+    );
+    return <button
+        ref={ref as React.RefObject<HTMLButtonElement>}
+        key={workerType}
+        className={cx({
+            "PlayerMat-workerTypeButton": true,
+            "PlayerMat-workerTypeButton--selected": selected,
+        })}
+        disabled={disabled}
+        onClick={disabled ? undefined : onClick}
+    >
+        {workersOfType.map((worker, i) =>
+            <Worker
+                key={i}
+                type={worker.type}
+                color={color}
+                isTemp={worker.isTemp}
+                disabled={!worker.available}
+            />
+        )}
+        {maybeTooltip}
+    </button>;
 };
 
 const renderMamaPapas = ({ mamas, papas }: PlayerState) => {
@@ -188,6 +226,7 @@ const mapStateToProps = (state: AppState) => {
         shouldShowWorkerControls: game.actionPrompts[0]?.type === "placeWorker" &&
             // Administrator and Planner cannot be passed
             !isAdministratorPlacement && !isPlannerPlacement,
+        specialWorkerNames: game.specialWorkers ?? {},
         selectedWorkerType: game.selectedWorkerType,
         yokeState: !!game.playerId
             ? game.players[game.playerId].structures.yoke

@@ -7,6 +7,7 @@ import GameState, {
     StructureState,
     BoardPlacement,
     PlaceWorkerPendingAction,
+    TrainWorkerPendingAction,
 } from "../GameState";
 import { setPendingAction } from "./turnReducers";
 import { promptForAction } from "../prompts/promptReducers";
@@ -80,12 +81,23 @@ export const trainMaybeSpecialWorker = (
             ]
         });
     }
-    // Train a normal worker
-    state = gainWorker(state, [cost, costType], {
-        workerType: "normal",
-        playerId,
+    // Can't train a special worker
+    return endTrainWorker(state, "normal");
+};
+
+export const endTrainWorker = (state: GameState, workerType: WorkerType): GameState => {
+    const {
+        cost,
+        actionPlayerId: playerId,
         availableThisYear,
-    });
+        fromAction,
+    } = (state.currentTurn as WorkerPlacementTurn).pendingAction as TrainWorkerPendingAction;
+
+    state = gainWorker(state, cost, { workerType, playerId, availableThisYear });
+
+    // Return to previous action
+    state = setPendingAction(fromAction, state);
+
     return currentTurn(state, { type: "WORKER_TRAINED", playerId });
 };
 
@@ -403,6 +415,14 @@ export const beginPlaceWorker = (
             }
         });
     }
+    return endPlaceWorker(state, key);
+};
+
+const endPlaceWorker = (state: GameState, key: string): GameState => {
+    const pendingAction = (state.currentTurn as WorkerPlacementTurn).pendingAction as PlaceWorkerPendingAction;
+    // Return to previous action
+    state = setPendingAction(pendingAction.fromAction ?? null, state);
+
     return currentTurn(state, {
         type: "WORKER_PLACED",
         workerType: pendingAction.workerType,

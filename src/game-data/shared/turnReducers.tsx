@@ -609,7 +609,7 @@ const startWorkerPlacementTurn = (
     });
 };
 
-export const setPendingAction = <T extends WorkerPlacementTurnPendingAction | undefined>(
+export const setPendingAction = <T extends WorkerPlacementTurnPendingAction | null>(
     pendingAction: T,
     state: GameState
 ): GameState => {

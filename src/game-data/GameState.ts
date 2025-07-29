@@ -101,7 +101,7 @@ export interface WorkerPlacementTurn {
     // Non-null if the player has chosen to play a worker in a position
     // but is pending further action before completing their turn
     // (eg. needs to pick a visitor card to play).
-    pendingAction?: WorkerPlacementTurnPendingAction;
+    pendingAction?: WorkerPlacementTurnPendingAction | null;
 
     // The Manager visitor allows an action from a prior season.
     // While resolving the prior-season action, the Manager's
@@ -150,6 +150,14 @@ export type InfluencePendingAction = {
     hasBonus?: boolean;
 };
 
+export interface TrainWorkerPendingAction {
+    type: "trainWorker";
+    cost: [number, "coins" | "vp"];
+    actionPlayerId: string;
+    availableThisYear: boolean;
+    fromAction: WorkerPlacementTurnPendingAction | null;
+}
+
 export type WorkerPlacementTurnPendingAction =
     | PlayVisitorPendingAction
     | { type: "buildOrGiveTour"; hasBonus: boolean; }
@@ -167,12 +175,7 @@ export type WorkerPlacementTurnPendingAction =
     | { type: "sellGrapes"; hasBonus: boolean; }
     | { type: "sellWine"; hasBonus: boolean; }
     | { type: "trade"; hasBonus: boolean; }
-    | { type: "trainWorker";
-        cost: [number, "coins" | "vp"];
-        actionPlayerId?: string;
-        availableThisYear?: boolean;
-        fromAction?: WorkerPlacementTurnPendingAction;
-      }
+    | TrainWorkerPendingAction
     | { type: "uproot"; };
 
 export type BoardPlacement =
