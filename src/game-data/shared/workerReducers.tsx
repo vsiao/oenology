@@ -156,12 +156,19 @@ export const availableWorkerOfType = (state: GameState, type: WorkerType): Playe
 };
 
 const hasOpponentSoldato = (state: GameState, placement: BoardPlacement, playerId: string): boolean => {
-    const boardPlacements = state.workerPlacements[placement];
-    return boardPlacements.some(w => w &&
-        state.specialWorkers?.[w.type] === "Soldato" &&
-        w.playerId !== state.currentTurn.playerId
-    );
+    return opponentsWithSoldato(state, placement).length > 0;
 };
+
+const opponentsWithSoldato = (state: GameState, placement: BoardPlacement): string[] => {
+    const boardPlacements = state.workerPlacements[placement];
+    return state.tableOrder.filter(opponentId =>
+        opponentId !== state.currentTurn.playerId &&
+        boardPlacements.some(w => w &&
+            state.specialWorkers?.[w.type] === "Soldato" &&
+            w.playerId === opponentId
+        )
+    );
+}
 
 export const openSpaceOrDisabledReason = (
     state: GameState,
@@ -372,6 +379,21 @@ export const beginPlaceWorker = (
                     });
                 }
         }
+        const soldatoCost = opponentsWithSoldato(state, placement).length;
+        if (soldatoCost > 0) {
+            // Must pay 1 lire to each opponent with a Soldato on this action
+            return promptForAction(state, {
+                title: "Soldato",
+                description: <p>You must pay <Coins>1</Coins> to each <strong>Soldato</strong>.</p>,
+                choices: [
+                    {
+                        id: "SOLDATO_PAY",
+                        label: <>Pay <Coins>{soldatoCost}</Coins></>,
+                        disabledReason: moneyDisabledReason(state, soldatoCost, playerId),
+                    }
+                ],
+            });
+        }
     } else {
         // place worker on yoke
         state = updatePlayer(state, player.id, {
@@ -425,6 +447,12 @@ export const placeWorkerChoice = (
             state = retrieveWorker(retrievePlacement as WorkerPlacement, parseInt(retrieveIdx, 10), state);
             break;
         }
+        case "SOLDATO_PAY":
+            const soldatoOpponents = opponentsWithSoldato(state, pendingAction.placement as BoardPlacement);
+            for (const opponentId of soldatoOpponents) {
+                state = payCoins(1, gainCoins(1, state, opponentId));
+            }
+            break;
     }
     return endPlaceWorker(state, action._key!);
 };
