@@ -5,17 +5,27 @@ import GameState, {
     PlayerWorker,
     PlacedWorker,
     StructureState,
+    BoardPlacement,
+    PlaceWorkerPendingAction,
+    TrainWorkerPendingAction,
 } from "../GameState";
-import { endTurn, setPendingAction } from "./turnReducers";
+import { setPendingAction } from "./turnReducers";
 import { promptForAction } from "../prompts/promptReducers";
 import Worker from "../../game-views/icons/Worker";
 import React from "react";
 import Coins from "../../game-views/icons/Coins";
-import { loseVP, payCoins, pushActivityLog, updatePlayer, withoutActivityLog } from "./sharedReducers";
+import { gainCoins, gainVP, loseVP, payCoins, pushActivityLog, updatePlayer, withoutActivityLog } from "./sharedReducers";
 import { currentTurn } from "../board/currentTurnReducer";
 import { moneyDisabledReason, numActionSpaces } from "./sharedSelectors";
 import VictoryPoints from "../../game-views/icons/VictoryPoints";
-import { boardActions, isBoardAction, seasonByBoardAction } from "../board/boardPlacements";
+import { boardActions, boardActionsBySeason, isBoardAction, seasonByBoardAction } from "../board/boardPlacements";
+import { Choice } from "../prompts/PromptState";
+import { visitorCards } from "../visitors/visitorCards";
+import Card from "../../game-views/icons/Card";
+import { ChooseAction } from "../prompts/promptActions";
+import Alea from "alea";
+import { PublishedGameAction } from "../gameActions";
+import { addCardsToHand, removeCardsFromHand } from "./cardReducers";
 
 export const canTrainSpecialWorker = (state: GameState, playerId = state.currentTurn.playerId) => {
     const player = state.players[playerId];
@@ -29,19 +39,26 @@ export const trainMaybeSpecialWorker = (
     [cost, costType]: [number, "coins" | "vp"],
     {
         availableThisYear = false,
-        andThen,
         playerId = state.currentTurn.playerId,
     }: {
         availableThisYear?: boolean;
-        andThen?: "endTurn";
         playerId?: string;
     } = {}
 ): GameState => {
+    state = setPendingAction({
+        type: "trainWorker",
+        cost: [cost, costType],
+        actionPlayerId: playerId,
+        availableThisYear,
+        fromAction: (state.currentTurn as WorkerPlacementTurn).pendingAction ?? null,
+        hasBonus: false,
+    }, state);
+
     const player = state.players[playerId];
     const specialWorkers = state.specialWorkers;
     if (specialWorkers && canTrainSpecialWorker(state, playerId)) {
         // Prompt to train a special worker
-        state = promptForAction<WorkerType>(state, {
+        return promptForAction<WorkerType>(state, {
             playerId,
             choices: [
                 {
@@ -63,27 +80,25 @@ export const trainMaybeSpecialWorker = (
                 }))
             ]
         });
-        return setPendingAction({
-            type: "trainWorker",
-            cost: [cost, costType],
-            actionPlayerId: playerId,
-            availableThisYear,
-            fromAction: (state.currentTurn as WorkerPlacementTurn).pendingAction,
-            hasBonus: false,
-        }, state)
     }
-    // Train a normal worker
-    state = gainWorker(state, [cost, costType], {
-        workerType: "normal",
-        playerId,
+    // Can't train a special worker
+    return endTrainWorker(state, "normal");
+};
+
+export const endTrainWorker = (state: GameState, workerType: WorkerType): GameState => {
+    const {
+        cost,
+        actionPlayerId: playerId,
         availableThisYear,
-    });
-    switch (andThen) {
-        case "endTurn":
-            return endTurn(state);
-        default:
-            return currentTurn(state, { type: "WORKER_TRAINED", playerId });
-    }
+        fromAction,
+    } = (state.currentTurn as WorkerPlacementTurn).pendingAction as TrainWorkerPendingAction;
+
+    state = gainWorker(state, cost, { workerType, playerId, availableThisYear });
+
+    // Return to previous action
+    state = setPendingAction(fromAction, state);
+
+    return currentTurn(state, { type: "WORKER_TRAINED", playerId });
 };
 
 export const gainWorker = (
@@ -152,29 +167,52 @@ export const availableWorkerOfType = (state: GameState, type: WorkerType): Playe
     return player.workers[index];
 };
 
+const hasOpponentSoldato = (state: GameState, placement: BoardPlacement, playerId: string): boolean => {
+    return opponentsWithSoldato(state, placement).length > 0;
+};
+
+const opponentsWithSoldato = (state: GameState, placement: BoardPlacement): string[] => {
+    const boardPlacements = state.workerPlacements[placement];
+    return state.tableOrder.filter(opponentId =>
+        opponentId !== state.currentTurn.playerId &&
+        boardPlacements.some(w => w &&
+            state.specialWorkers?.[w.type] === "Soldato" &&
+            w.playerId === opponentId
+        )
+    );
+}
+
 export const openSpaceOrDisabledReason = (
     state: GameState,
     workerType: WorkerType,
     placement: WorkerPlacement,
     requestedSpace: number | null,
 ): number | string => {
-    if (isBoardAction(placement)) {
+    if (placement === "gainCoin") {
+        const boardPlacements = [...state.workerPlacements.gainCoin, null];
+        return boardPlacements.findIndex(p => p === null);
+    } else if (isBoardAction(placement)) {
         const allSeasons = ["spring", "summer", "fall", "winter"] as const;
-        const isUnrestrictedAction = placement === "gainCoin" ||
-            // Placement is in a future season; don't check action restrictions
-            allSeasons.indexOf(seasonByBoardAction(state, placement)) > allSeasons.indexOf(state.season);
+        const placementSeason = seasonByBoardAction(state, placement);
+        const isPastSeason = allSeasons.indexOf(placementSeason) < allSeasons.indexOf(state.season);
+        // Placement is in a future season; don't check action restrictions
+        const isUnrestrictedAction = allSeasons.indexOf(placementSeason) > allSeasons.indexOf(state.season);
+
+        const isUnrestrictedByPlayerCount = state.specialWorkers?.[workerType] === "Traveler" && isPastSeason;
+        const numAvailableSpaces = isUnrestrictedByPlayerCount ? 3 : numActionSpaces(state);
 
         const placements = state.workerPlacements[placement];
-        const numSpaces = numActionSpaces(state);
         const boardPlacements = [
             // Action spaces on the board
-            ...new Array(numSpaces).fill(null).map((_, i) => placements[i] ?? null),
+            ...new Array(3).fill(null).map((_, i) => placements[i] ?? null),
             // Any grande workers that overflow
-            ...placements.slice(numSpaces),
+            ...placements.slice(3),
             // ...and one more open slot for good measure
             null
         ];
         const isPlaceable = (w: PlacedWorker | null, i: number) =>
+            // Space must be available for current player count
+            (i < numAvailableSpaces || i >= 3) &&
             // Action must be not be restricted (or skipped due to future placement)
             (isUnrestrictedAction
                 || !boardActions[placement].spaceAt(i, state).disabledReason) &&
@@ -192,7 +230,10 @@ export const openSpaceOrDisabledReason = (
             // No space implies the action itself is not possible; return the reason
             return boardActions[placement].spaceAt(-1, state).disabledReason!;
         }
-        if (placement !== "gainCoin" && space >= numSpaces && workerType !== "grande") {
+        const canOverflow = workerType === "grande" ||
+            state.specialWorkers?.[workerType] === "Mama Grande" ||
+            hasOpponentSoldato(state, placement, state.currentTurn.playerId);
+        if (space >= 3 && !canOverflow) {
             return "All spaces are occupied. Try using a grande worker.";
         }
         return space;
@@ -211,13 +252,13 @@ export const openSpaceOrDisabledReason = (
     }
 };
 
-export const placeWorker = (
+export const beginPlaceWorker = (
     type: WorkerType,
     placement: WorkerPlacement,
     requestedSpace: number | null,
     state: GameState,
-    source: "Planner" | "Administrator" | "Messenger" | "pending" | null = null
-): [GameState, number] => {
+    key: string
+): GameState => {
     const playerId = state.currentTurn.playerId;
     const player = state.players[playerId];
     const worker = availableWorkerOfType(state, type);
@@ -231,56 +272,209 @@ export const placeWorker = (
     if (typeof space === "string") {
         throw new Error(`Cannot place worker: ${space}`);
     }
-    state = {
-        ...state,
-        currentTurn: {
-            ...state.currentTurn as WorkerPlacementTurn,
-            placement: [placement, space],
+    state = setPendingAction(
+        {
+            type: "placeWorker",
+            fromAction: (state.currentTurn as WorkerPlacementTurn).pendingAction ?? null,
+            workerType: type,
+            placement,
+            space,
         },
-    };
+        state
+    );
+    const workerName = state.specialWorkers?.[type];
+    const allSeasons = ["spring", "summer", "fall", "winter"] as const;
+    const isFutureMessengerPlacement =
+        isBoardAction(placement) &&
+            placement !== "gainCoin" &&
+            workerName === "Messenger" &&
+            allSeasons.indexOf(state.season) < allSeasons.indexOf(seasonByBoardAction(state, placement))
     const placedWorker: PlacedWorker = {
         type,
         id: worker.id,
         playerId,
         color: player.color,
         isTemp: !!worker.isTemp,
-        source,
+        source: isFutureMessengerPlacement ? "Messenger" : null,
     };
     if (isBoardAction(placement)) {
         const placements = state.workerPlacements[placement].slice();
-        if (placements[space]) {
-            // Already a worker must imply that the Chef is bumping it
-            state = pushActivityLog({
-                type: "chefBump",
-                playerId,
-                placement,
-                bumpedWorker: placements[space],
-            }, state)
-            state = retrieveWorker(placement, space, state, placements[space].playerId);
-        }
         placements[space] = placedWorker;
-        return [
-            {
-                ...state,
-                workerPlacements: {
-                    ...state.workerPlacements,
-                    [placement]: placements,
-                },
+        state = {
+            ...state,
+            workerPlacements: {
+                ...state.workerPlacements,
+                [placement]: placements,
             },
-            space 
-        ];
+        };
+        // Perform special worker placement abilities
+        switch (workerName) {
+            case "Chef":
+                // openSpaceOrDisabledReason already checks validity (i.e. not another Chef);
+                // if `space` is occupied we can directly bump that worker out
+                if (placements[space]) {
+                    state = pushActivityLog({
+                        type: "chefBump",
+                        playerId,
+                        placement,
+                        bumpedWorker: placements[space],
+                    }, state)
+                    state = retrieveWorker(placement, space, state, placements[space].playerId);
+                }
+                break;
+
+            case "Innkeeper":
+                const bonus = boardActions[placement].spaceAt(space, state).bonus;
+                const visitorsAtPlacement: Choice<string>[] = state.tableOrder.map(otherPlayerId =>
+                    (["summer", "winter"] as const).filter(season =>
+                        otherPlayerId !== playerId &&
+                        placements.some(w => w?.playerId === otherPlayerId) &&
+                            state.players[otherPlayerId].cardsInHand.some(c =>
+                                c.type === "visitor" &&
+                                visitorCards[c.id].season === season
+                            )
+                    ).map(season => ({
+                        id: "INNKEEPER_TAKE",
+                        data: `${otherPlayerId}_${season}`,
+                        label: <>
+                            <Card type={`${season}Visitor`} /> from
+                            {" "}<strong>{state.players[otherPlayerId].name}</strong>
+                        </>,
+                        disabledReason: moneyDisabledReason(
+                            state,
+                            1 + (placement === "trainWorker"
+                                ? (bonus === "gainCoin" ? 3 : 4)
+                                : 0)
+                        ),
+                    }))
+                ).flat();
+                if (visitorsAtPlacement.length > 0) {
+                    return promptForAction(state, {
+                        title: "Innkeeper",
+                        description: <p>You may pay an opponent <Coins>1</Coins> to take a visitor.</p>,
+                        choices: visitorsAtPlacement.concat({
+                            id: "INNKEEPER_PASS",
+                            label: <>Pass</>
+                        })
+                    });
+                }
+                break;
+
+            case "Mama Grande":
+                if (placements.some(w => w?.playerId === playerId && w.type === "grande")) {
+                    state = gainVP(1, state, { playerId, source: "bonus" });
+                }
+                break;
+
+            case "Professore":
+                const actionsThisSeason = boardActionsBySeason(state)[state.season];
+                const regularWorkersThisSeason: Choice<string>[] = actionsThisSeason.map(({ type }) =>
+                    state.workerPlacements[type]
+                        .map((w, i) => w?.type === "normal" && w.playerId === playerId && {
+                            id: "PROFESSORE_RETRIEVE",
+                            data: `${type}_${i}`,
+                            label: <>
+                                <Worker {...w} />
+                                &nbsp;{boardActions[type].spaceAt(i, state).label}
+                            </>
+                        })
+                        .filter(p => !!p)
+                ).flat();
+                if (regularWorkersThisSeason.length > 0) {
+                    return promptForAction(state, {
+                        title: "Professore",
+                        description: <p>You may retrieve a regular worker from this season.</p>,
+                        choices: regularWorkersThisSeason.concat([{
+                            id: "PROFESSORE_PASS",
+                            label: <>Pass</>,
+                        }]),
+                    });
+                }
+        }
+        const soldatoCost = opponentsWithSoldato(state, placement).length;
+        if (soldatoCost > 0) {
+            // Must pay 1 lire to each opponent with a Soldato on this action
+            return promptForAction(state, {
+                title: "Soldato",
+                description: <p>You must pay <Coins>1</Coins> to each <strong>Soldato</strong>.</p>,
+                choices: [
+                    {
+                        id: "SOLDATO_PAY",
+                        label: <>Pay <Coins>{soldatoCost}</Coins></>,
+                        disabledReason: moneyDisabledReason(state, soldatoCost, playerId),
+                    }
+                ],
+            });
+        }
     } else {
         // place worker on yoke
-        return [
-            updatePlayer(state, player.id, {
-                structures: {
-                    ...player.structures,
-                    yoke: placedWorker
-                }
-            }),
-            0
-        ];
+        state = updatePlayer(state, player.id, {
+            structures: {
+                ...player.structures,
+                yoke: placedWorker
+            }
+        });
     }
+    return endPlaceWorker(state, key);
+};
+
+const endPlaceWorker = (state: GameState, key: string): GameState => {
+    const pendingAction = (state.currentTurn as WorkerPlacementTurn).pendingAction as PlaceWorkerPendingAction;
+    // Return to previous action
+    state = setPendingAction(pendingAction.fromAction ?? null, state);
+
+    return currentTurn(state, {
+        type: "WORKER_PLACED",
+        workerType: pendingAction.workerType,
+        placement: pendingAction.placement,
+        idx: pendingAction.space,
+        key,
+    });
+};
+
+export const placeWorkerChoice = (
+    state: GameState,
+    action: ChooseAction & PublishedGameAction,
+    pendingAction: PlaceWorkerPendingAction
+): GameState => {
+    switch (action.choice) {
+        case "INNKEEPER_TAKE": {
+            const playerId = state.currentTurn.playerId;
+            const [otherPlayerId, season] = (action.data as string).split("_");
+            const otherPlayer = state.players[otherPlayerId];
+            const visitorCardsOfSeason = otherPlayer.cardsInHand.filter(c =>
+                c.type === "visitor" && visitorCards[c.id].season === season
+            );
+            const random = Alea(action._key);
+            const card = visitorCardsOfSeason[Math.floor(random() * visitorCardsOfSeason.length)];
+            state = withoutActivityLog(() => payCoins(1, gainCoins(1, state, otherPlayerId)));
+            state = removeCardsFromHand([card], state, otherPlayerId);
+            state = addCardsToHand([card], state, playerId)
+            state = pushActivityLog({
+                type: "innkeeperTake",
+                playerId,
+                cardType: `${season as "winter" | "summer"}Visitor`,
+                fromPlayerId: otherPlayerId,
+            }, state);
+            break;
+        }
+        case "INNKEEPER_PASS":
+        case "PROFESSORE_PASS":
+            break;
+
+        case "PROFESSORE_RETRIEVE": {
+            const [retrievePlacement, retrieveIdx] = (action.data as string).split("_");
+            state = retrieveWorker(retrievePlacement as WorkerPlacement, parseInt(retrieveIdx, 10), state);
+            break;
+        }
+        case "SOLDATO_PAY":
+            const soldatoOpponents = opponentsWithSoldato(state, pendingAction.placement as BoardPlacement);
+            for (const opponentId of soldatoOpponents) {
+                state = payCoins(1, gainCoins(1, state, opponentId));
+            }
+            break;
+    }
+    return endPlaceWorker(state, action._key!);
 };
 
 export const retrieveWorker = (

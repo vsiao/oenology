@@ -157,11 +157,9 @@ export const boardAction = (
         case "trade":
             return promptToTrade(state, hasBonus ? "bonus" : "required");
 
-        case "trainWorker": {
-            return trainMaybeSpecialWorker(state, [hasBonus ? 3 : 4, "coins"], {
-                andThen: "endTurn"
-            });
-        }
+        case "trainWorker":
+            return trainMaybeSpecialWorker(state, [hasBonus ? 3 : 4, "coins"]);
+
         default:
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const exhaustivenessCheck: never = placement;

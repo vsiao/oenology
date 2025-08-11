@@ -154,12 +154,12 @@ const renderBonusIcon = (bonus: PlacementBonus): React.ReactNode => {
 
 const mapStateToProps = (state: AppState, { placement }: { placement: PlacementAction; }) => {
     const game = state.game!;
-    const numSpots = numActionSpaces(game);
 
     const season = seasonByBoardAction(game, placement.type);
     const allSeasons = ["spring", "summer", "fall", "winter"] as const;
     const isCurrentSeason = season === game.season;
     const isFutureSeason = allSeasons.indexOf(season) > allSeasons.indexOf(game.season);
+    const isPastSeason = allSeasons.indexOf(season) < allSeasons.indexOf(game.season);
 
     const isAdministratorPlacement = game.currentTurn.type === "workerPlacement" &&
         game.currentTurn.pendingAction?.type === "playVisitor" &&
@@ -167,17 +167,25 @@ const mapStateToProps = (state: AppState, { placement }: { placement: PlacementA
     const isPlannerPlacement = game.currentTurn.type === "workerPlacement" &&
         game.currentTurn.pendingAction?.type === "playVisitor" &&
         game.currentTurn.pendingAction.visitorId === "planner";
-    const isPlaceableSeason = isCurrentSeason ||
+    const isTravelerPlacement = isPastSeason &&
+        game.actionPrompts[0]?.type === "placeWorker" &&
+        game.specialWorkers?.[game.selectedWorkerType] === "Traveler";
+    const isPlaceable = game.actionPrompts[0]?.type === "placeWorker" && (
+        isCurrentSeason ||
         (isFutureSeason && (
             isPlannerPlacement ||
             isAdministratorPlacement ||
             game.specialWorkers?.[game.selectedWorkerType] === "Messenger"
-        ));
+        )) ||
+        isTravelerPlacement
+    );
 
     const workers = game.workerPlacements[placement.type].slice();
     if (game.pendingWorker?.placement === placement.type) {
         workers[game.pendingWorker.space] = game.pendingWorker;
     }
+    const placedSpaces = workers.slice(0, 3).findLastIndex(w => !!w) + 1;
+    const numSpots = isTravelerPlacement ? 3 : Math.max(placedSpaces, numActionSpaces(game));
     const actionSpaces = new Array(numSpots).fill(null).map((_, i) => ({
         bonus: placement.spaceAt(i, game).bonus,
         worker: workers[i] ?? null,
@@ -192,10 +200,10 @@ const mapStateToProps = (state: AppState, { placement }: { placement: PlacementA
         placement: placement.type,
         title: placement.label(game),
         actionSpaces,
-        overflow: workers.slice(numSpots).filter((w): w is PlacedWorker => !!w),
+        overflow: workers.slice(3).filter((w): w is PlacedWorker => !!w),
         selectedWorkerType: game.selectedWorkerType,
         disabledReason:
-            (game.actionPrompts[0]?.type === "placeWorker" && isPlaceableSeason
+            (isPlaceable
                 ? undefined
                 : CANNOT_PLACE_WORKER) ??
             (typeof spaceOrDisabledReason === "string"

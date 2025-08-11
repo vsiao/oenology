@@ -48,12 +48,14 @@ const Lobby: React.FunctionComponent<Props> = ({
     const [copiedToClipboard, setCopiedToClipboard] = React.useState(false);
     const gameUrl = `https://make-wine.web.app/game/${gameId}`;
     const isHost = currentUser === users[0];
-    const randomizeSpecialWorker = (worker: number) => {
+    const randomizeSpecialWorker = (target: number) => {
         const chosenWorkers = gameOptions.specialWorkers!.slice();
         const otherWorkers = implementedSpecialWorkers.slice();
-        otherWorkers.splice(otherWorkers.indexOf(chosenWorkers[worker]), 1);
-        const i = Math.floor(Math.random() * otherWorkers.length);
-        chosenWorkers[worker] = otherWorkers[i];
+        for (const w of chosenWorkers) {
+            otherWorkers.splice(otherWorkers.indexOf(w), 1);
+        }
+        const j = Math.floor(Math.random() * otherWorkers.length);
+        chosenWorkers[target] = otherWorkers[j];
         setOption("specialWorkers", chosenWorkers);
     };
     return <>
@@ -219,10 +221,16 @@ const Lobby: React.FunctionComponent<Props> = ({
                                 Special Workers (BETA)
                             </label>
                             {gameOptions.specialWorkers && <p>
-                                <ChoiceButton onClick={() => randomizeSpecialWorker(0)}>
+                                <ChoiceButton
+                                    onClick={() => randomizeSpecialWorker(0)}
+                                    disabled={!isHost}
+                                >
                                     <Worker type="special1" /> {gameOptions.specialWorkers[0]}
                                 </ChoiceButton>
-                                <ChoiceButton onClick={() => randomizeSpecialWorker(1)}>
+                                <ChoiceButton
+                                    onClick={() => randomizeSpecialWorker(1)}
+                                    disabled={!isHost}
+                                >
                                     <Worker type="special2" /> {gameOptions.specialWorkers[1]}
                                 </ChoiceButton>
                             </p>}
