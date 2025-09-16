@@ -28,6 +28,10 @@ import { PublishedGameAction } from "../gameActions";
 import { addCardsToHand, removeCardsFromHand } from "./cardReducers";
 
 export const canTrainSpecialWorker = (state: GameState, playerId = state.currentTurn.playerId) => {
+    if (!state.specialWorkers?.special1 && !state.specialWorkers?.special2) {
+        // Special workers not enabled this game
+        return false;
+    }
     const player = state.players[playerId];
     const canTrainSpecial1 = player.workers.every(w => w.type !== "special1");
     const canTrainSpecial2 = player.workers.every(w => w.type !== "special2");

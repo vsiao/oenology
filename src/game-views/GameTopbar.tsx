@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { AppState } from "../store/AppState";
 import { Dispatch } from "redux";
 import { GameAction, undo, applyCheatCode } from "../game-data/gameActions";
-import { isControllingPlayer, wasLastActionByPlayer } from "../game-data/shared/sharedSelectors";
+import { isControllingPlayer } from "../game-data/shared/sharedSelectors";
 import { useTooltip } from "./shared/useTooltip";
 import UndoIcon from "./icons/UndoIcon";
 import Worker from "./icons/Worker";
@@ -70,7 +70,7 @@ const mapStateToProps = (state: AppState) => {
         playerId: game.playerId,
         undoDisabledReason: !game.undoState
             ? "Nothing to undo"
-            : wasLastActionByPlayer(game, game.playerId) || isControllingPlayer(game)
+            : isControllingPlayer(game)
                 ? undefined
                 : "Only the current player can undo the last action.",
         specialWorker1: game.specialWorkers?.special1,
