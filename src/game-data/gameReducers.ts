@@ -33,8 +33,8 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     }
     const controllingIds = controllingPlayerIds(state);
     if (
-        controllingIds.some(id => id === userId) ||
-            (wasLastActionByPlayer(state, state.playerId) && action.type === "UNDO")
+        controllingIds.every(id => id !== action.playerId) &&
+            !(wasLastActionByPlayer(state, action.playerId) && action.type === "UNDO")
     ) {
         // It's not this player's turn. Reject the action.
         return state;

@@ -316,7 +316,7 @@ export const beginPlaceWorker = (
             case "Chef":
                 // openSpaceOrDisabledReason already checks validity (i.e. not another Chef);
                 // if `space` is occupied we can directly bump that worker out
-                if (placements[space]) {
+                if (placements[space]?.playerId !== playerId) {
                     state = pushActivityLog({
                         type: "chefBump",
                         playerId,
