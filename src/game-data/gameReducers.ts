@@ -36,6 +36,7 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
         controllingIds.every(id => id !== action.playerId) &&
             !(wasLastActionByPlayer(state, action.playerId) && action.type === "UNDO")
     ) {
+        console.warn(`Skipping action ${actionKey} (${action.type}) because user ${userId} is not in control (${controllingIds.join(", ")})`);
         // It's not this player's turn. Reject the action.
         return state;
     }

@@ -303,20 +303,22 @@ export const beginPlaceWorker = (
     };
     if (isBoardAction(placement)) {
         const placements = state.workerPlacements[placement].slice();
-        placements[space] = placedWorker;
-        state = {
-            ...state,
-            workerPlacements: {
-                ...state.workerPlacements,
-                [placement]: placements,
-            },
+        const placeWorker = () => {
+            placements[space] = placedWorker;
+            state = {
+                ...state,
+                workerPlacements: {
+                    ...state.workerPlacements,
+                    [placement]: placements,
+                },
+            };
         };
         // Perform special worker placement abilities
         switch (workerName) {
             case "Chef":
                 // openSpaceOrDisabledReason already checks validity (i.e. not another Chef);
                 // if `space` is occupied we can directly bump that worker out
-                if (placements[space]?.playerId !== playerId) {
+                if (placements[space] && placements[space]?.playerId !== playerId) {
                     state = pushActivityLog({
                         type: "chefBump",
                         playerId,
@@ -325,6 +327,7 @@ export const beginPlaceWorker = (
                     }, state)
                     state = retrieveWorker(placement, space, state, placements[space].playerId);
                 }
+                placeWorker();
                 break;
 
             case "Innkeeper":
@@ -353,6 +356,7 @@ export const beginPlaceWorker = (
                     }))
                 ).flat();
                 if (visitorsAtPlacement.length > 0) {
+                    placeWorker();
                     return promptForAction(state, {
                         title: "Innkeeper",
                         description: <p>You may pay an opponent <Coins>1</Coins> to take a visitor.</p>,
@@ -385,6 +389,7 @@ export const beginPlaceWorker = (
                         .filter(p => !!p)
                 ).flat();
                 if (regularWorkersThisSeason.length > 0) {
+                    placeWorker();
                     return promptForAction(state, {
                         title: "Professore",
                         description: <p>You may retrieve a regular worker from this season.</p>,
@@ -397,6 +402,7 @@ export const beginPlaceWorker = (
         }
         const soldatoCost = opponentsWithSoldato(state, placement).length;
         if (soldatoCost > 0) {
+            placeWorker();
             // Must pay 1 lire to each opponent with a Soldato on this action
             return promptForAction(state, {
                 title: "Soldato",
@@ -410,6 +416,7 @@ export const beginPlaceWorker = (
                 ],
             });
         }
+        placeWorker();
     } else {
         // place worker on yoke
         state = updatePlayer(state, player.id, {
