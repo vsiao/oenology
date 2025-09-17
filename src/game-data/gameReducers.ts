@@ -7,7 +7,7 @@ import { CHEAT_drawCard, shuffle, unshuffledDecks } from "./shared/cardReducers"
 import { beginMamaPapaTurn } from "./shared/turnReducers";
 import { mamaCards, papaCards, MamaId, PapaId } from "./mamasAndPapas";
 import { gainWine, placeGrapes } from "./shared/grapeWineReducers";
-import { controllingPlayerIds, isControllingPlayer } from "./shared/sharedSelectors";
+import { controllingPlayerIds, wasLastActionByPlayer } from "./shared/sharedSelectors";
 import { GameOptions } from "../store/AppState";
 import { buildStructure, gainCoins, gainResiduals, updatePlayer } from "./shared/sharedReducers";
 import { StructureId } from "./structures";
@@ -31,7 +31,12 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
     if (action.type === "GAME_ACTION_CHANGED") {
         return updatePlayedTime(state, action);
     }
-    if (!isControllingPlayer(state, action.playerId)) {
+    const controllingIds = controllingPlayerIds(state);
+    if (
+        controllingIds.every(id => id !== action.playerId) &&
+            !(wasLastActionByPlayer(state, action.playerId) && action.type === "UNDO")
+    ) {
+        console.warn(`Skipping action ${actionKey} (${action.type}) because user ${userId} is not in control (${controllingIds.join(", ")})`);
         // It's not this player's turn. Reject the action.
         return state;
     }
@@ -77,7 +82,6 @@ export const game = (state: GameState, action: GameAction, userId: string): Game
             }
     }
 
-    const controllingIds = controllingPlayerIds(state);
     const actionDurationMs = action.ts! - state.actionsApplied[state.lastActionKey].ts;
     state = {
         ...state,

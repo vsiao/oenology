@@ -67,9 +67,9 @@ export const workerPlacement = (state: GameState, action: InternalGameAction): G
             return handlePlacementAction(placement, state, action.key, placementIdx);
         }
         case "CHOOSE_ACTION":
-            const [placement, idx] = currentTurn.placement!;
             switch (action.choice) {
                 case "MAFIOSO_ACT": {
+                    const [placement, idx] = currentTurn.placement!;
                     return handlePlacementAction(placement, state, action._key!, idx);
                 }
                 case "MERCHANT_DRAW_CARD":
